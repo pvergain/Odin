@@ -1,0 +1,52 @@
+from django.apps import apps
+from django.core.exceptions import ValidationError
+
+from odin.users.managers import UserManager
+from odin.users.models import BaseUser
+
+
+class BaseEducationUserManager(UserManager):
+    def create(self, **kwargs):
+        return self.create_user(**kwargs)
+
+
+class StudentManager(BaseEducationUserManager):
+    def create_from_user(self, user: BaseUser):
+        Student = apps.get_model('education', 'Student')
+
+        if user.downcastTo(Student) is not None:
+            raise ValidationError('Student already exists')
+
+        user._state.adding = False
+
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+
+        student = Student(user_id=user.id)
+        student.__dict__.update(user.__dict__)
+
+        student.save()
+
+        return Student.objects.get(id=student.id)
+
+
+class TeacherManager(BaseEducationUserManager):
+    def create_from_user(self, user: BaseUser):
+        Teacher = apps.get_model('education', 'Teacher')
+
+        if user.downcastTo(Teacher) is not None:
+            raise ValidationError('Teacher already exists')
+
+        user._state.adding = False
+
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+
+        student = Teacher(user_id=user.id)
+        student.__dict__.update(user.__dict__)
+
+        student.save()
+
+        return Teacher.objects.get(id=student.id)
