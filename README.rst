@@ -7,10 +7,6 @@ Odin is the new Loki. LMS for HackSoft Academy
      :target: https://github.com/pydanny/cookiecutter-django/
      :alt: Built with Cookiecutter Django
 
-
-:License: MIT
-
-
 Settings
 --------
 
