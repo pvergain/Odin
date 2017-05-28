@@ -35,6 +35,12 @@ class BaseUser(PermissionsMixin,
         user = BaseUser.objects.get(id=self.id)
         prop = t.__name__.lower()
 
+        relations = [f.name for f in BaseUser._meta.get_fields()
+                     if f.many_to_one or f.one_to_one]
+
+        if prop not in relations:
+            raise ValueError(f'Cannot downcast to {prop}. Choices are {relations}')
+
         if hasattr(user, prop):
             return getattr(user, prop)
 
