@@ -28,7 +28,7 @@ class StudentTests(TestCase):
         self.assertEqual(email, student.email)
         self.assertTrue(student.user.check_password(password))
 
-        self.assertIsNotNone(student.user.downcastTo(Student))
+        self.assertIsNotNone(student.user.downcast(Student))
 
     def test_creating_from_baseuser_that_is_not_teacher_and_student_works(self):
         user = BaseUserFactory()
@@ -42,7 +42,7 @@ class StudentTests(TestCase):
         self.assertEqual(user.email, student.email)
         self.assertTrue(student.user.check_password(BaseUserFactory.password))
 
-        self.assertIsNotNone(student.user.downcastTo(Student))
+        self.assertIsNotNone(student.user.downcast(Student))
 
     def test_creating_from_baseuser_for_existing_student_raises_validation_error(self):
         student = StudentFactory()
@@ -66,8 +66,8 @@ class StudentTests(TestCase):
 
         user = BaseUser.objects.first()
 
-        self.assertIsNotNone(user.downcastTo(Student))
-        self.assertIsNotNone(user.downcastTo(Teacher))
+        self.assertIsNotNone(user.downcast(Student))
+        self.assertIsNotNone(user.downcast(Teacher))
 
 
 class TeacherTests(TestCase):
@@ -84,7 +84,7 @@ class TeacherTests(TestCase):
         self.assertEqual(email, teacher.email)
         self.assertTrue(teacher.user.check_password(password))
 
-        self.assertIsNotNone(teacher.user.downcastTo(Teacher))
+        self.assertIsNotNone(teacher.user.downcast(Teacher))
 
     def test_creating_from_baseuser_that_is_not_teacher_and_student_works(self):
         user = BaseUserFactory()
@@ -98,7 +98,7 @@ class TeacherTests(TestCase):
         self.assertEqual(user.email, teacher.email)
         self.assertTrue(teacher.user.check_password(BaseUserFactory.password))
 
-        self.assertIsNotNone(teacher.user.downcastTo(Teacher))
+        self.assertIsNotNone(teacher.user.downcast(Teacher))
 
     def test_creating_from_baseuser_for_existing_teacher_raises_validation_error(self):
         teacher = TeacherFactory()
@@ -122,16 +122,16 @@ class TeacherTests(TestCase):
 
         user = BaseUser.objects.first()
 
-        self.assertIsNotNone(user.downcastTo(Student))
-        self.assertIsNotNone(user.downcastTo(Teacher))
+        self.assertIsNotNone(user.downcast(Student))
+        self.assertIsNotNone(user.downcast(Teacher))
 
 
 class BaseUserToStudentAndTeacherTests(TestCase):
     def test_create_teacher_and_student_from_baseuser_works(self):
         user = BaseUserFactory()
 
-        self.assertIsNone(user.downcastTo(Student))
-        self.assertIsNone(user.downcastTo(Teacher))
+        self.assertIsNone(user.downcast(Student))
+        self.assertIsNone(user.downcast(Teacher))
         self.assertEqual(0, Student.objects.count())
         self.assertEqual(0, Teacher.objects.count())
         self.assertEqual(1, BaseUser.objects.count())
@@ -141,8 +141,8 @@ class BaseUserToStudentAndTeacherTests(TestCase):
         """
         Student.objects.create_from_user(user)
 
-        self.assertIsNotNone(user.downcastTo(Student))
-        self.assertIsNone(user.downcastTo(Teacher))
+        self.assertIsNotNone(user.downcast(Student))
+        self.assertIsNone(user.downcast(Teacher))
 
         self.assertEqual(1, Student.objects.count())
         self.assertEqual(0, Teacher.objects.count())
@@ -153,8 +153,8 @@ class BaseUserToStudentAndTeacherTests(TestCase):
         """
         Teacher.objects.create_from_user(user)
 
-        self.assertIsNotNone(user.downcastTo(Student))
-        self.assertIsNotNone(user.downcastTo(Teacher))
+        self.assertIsNotNone(user.downcast(Student))
+        self.assertIsNotNone(user.downcast(Teacher))
 
         self.assertEqual(1, Student.objects.count())
         self.assertEqual(1, Teacher.objects.count())
@@ -180,7 +180,7 @@ class CourseTests(TestCase):
                                         teacher=teacher)
 
         self.assertEqual(1, course.teachers.count())
-        self.assertEqual(teacher, course.teachers.first().downcastTo(Teacher))
+        self.assertEqual(teacher, course.teachers.first().downcast(Teacher))
 
     def test_students_property_works(self):
         course = CourseFactory()
@@ -192,7 +192,7 @@ class CourseTests(TestCase):
                                         student=student)
 
         self.assertEqual(1, course.students.count())
-        self.assertEqual(student, course.students.first().downcastTo(Student))
+        self.assertEqual(student, course.students.first().downcast(Student))
 
     def test_students_and_teachers_properties_work_for_user_that_is_both(self):
         course = CourseFactory()
@@ -212,8 +212,8 @@ class CourseTests(TestCase):
         self.assertEqual(1, course.students.count())
         self.assertEqual(1, course.teachers.count())
 
-        self.assertEqual(student, course.students.first().downcastTo(Student))
-        self.assertEqual(teacher, course.teachers.first().downcastTo(Teacher))
+        self.assertEqual(student, course.students.first().downcast(Student))
+        self.assertEqual(teacher, course.teachers.first().downcast(Teacher))
 
     def test_course_has_started_if_start_date_is_in_the_past(self):
         start_date = (get_now() - timedelta(days=1)).date()

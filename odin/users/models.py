@@ -26,7 +26,7 @@ class BaseUser(PermissionsMixin,
         self.full_clean()
         super().save(*args, **kwargs)
 
-    def downcastTo(self, t):
+    def downcast(self, t):
         """
         Since we don't know if the given field is present,
         We cannot refresh from db with it.

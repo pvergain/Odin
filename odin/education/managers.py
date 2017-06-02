@@ -14,7 +14,7 @@ class StudentManager(BaseEducationUserManager):
     def create_from_user(self, user: BaseUser):
         Student = apps.get_model('education', 'Student')
 
-        if user.downcastTo(Student) is not None:
+        if user.downcast(Student) is not None:
             raise ValidationError('Student already exists')
 
         user._state.adding = False
@@ -35,7 +35,7 @@ class TeacherManager(BaseEducationUserManager):
     def create_from_user(self, user: BaseUser):
         Teacher = apps.get_model('education', 'Teacher')
 
-        if user.downcastTo(Teacher) is not None:
+        if user.downcast(Teacher) is not None:
             raise ValidationError('Teacher already exists')
 
         user._state.adding = False
