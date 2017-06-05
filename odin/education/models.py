@@ -50,8 +50,8 @@ class Course(models.Model):
     def duration_in_weeks(self):
         weeks = rrule.rrule(
             rrule.WEEKLY,
-            dtstart=self.start_time,
-            until=self.end_time
+            dtstart=self.start_date,
+            until=self.end_date
         )
         return weeks.count()
 
