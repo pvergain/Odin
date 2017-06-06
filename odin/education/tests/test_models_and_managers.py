@@ -10,11 +10,7 @@ from odin.common.utils import get_now
 from odin.users.models import BaseUser
 from odin.users.factories import BaseUserFactory
 
-from ..factories import (StudentFactory, TeacherFactory, CourseFactory,
-                         CourseWithStudentCourseAssignmentFactory,
-                         CourseWithTeacherCourseAssignmentFactory,
-                         CourseAssignmentStudentFactory,
-                         CourseAssignmentTeacherFactory)
+from ..factories import StudentFactory, TeacherFactory, CourseFactory
 from ..models import Student, Teacher, CourseAssignment, Course
 
 
@@ -246,50 +242,55 @@ class CourseTests(TestCase):
 
         self.assertFalse(course.has_started)
 
-    def test_creating_course_with_student_or_teacher(self):
-        for i in range(3):
-            StudentFactory()
-
-        teacher = TeacherFactory()
-        CourseAssignmentTeacherFactory(teacher=teacher)
-        CourseAssignmentStudentFactory(student=Student.objects.first())
-        self.assertEqual(2, Course.objects.count())
-
     def test_create_course_with_multiple_students(self):
-        for i in range(3):
-            StudentFactory()
+        students = StudentFactory.create_batch(3)
+        course = CourseFactory()
 
-        course = CourseWithTeacherCourseAssignmentFactory()
-        CourseAssignmentStudentFactory(course=course)
-        CourseAssignmentStudentFactory(course=course)
-        course = Course.objects.first()
-        self.assertEqual(2, course.students.count())
+        self.assertEqual(0, course.students.count())
 
-    def test_course_has_finished(self):
-        start_date = (get_now() + timedelta(days=1)).date()
-        end_date = (get_now() + timedelta(days=2)).date()
-        course = CourseFactory(start_date=start_date, end_date=end_date)
+        for student in students:
+            course.add_student(student)
+
+        self.assertEqual(3, course.students.count())
+
+    def test_course_has_finished_with_end_date_today(self):
         start_date = (get_now() - timedelta(days=1)).date()
         end_date = get_now().date()
-        course2 = CourseFactory(start_date=start_date, end_date=end_date)
-        self.assertFalse(course.has_finished)
-        self.assertTrue(course2.has_finished)
+        course = CourseFactory(start_date=start_date, end_date=end_date)
 
-    def test_can_generate_certificates(self):
+        self.assertTrue(course.has_finished)
+
+    def test_course_has_finished_with_end_date_bigger_than_today(self):
         start_date = (get_now() + timedelta(days=1)).date()
         end_date = (get_now() + timedelta(days=2)).date()
         course = CourseFactory(start_date=start_date, end_date=end_date)
+
+        self.assertFalse(course.has_finished)
+
+    def test_can_generate_certificates_with_end_date_in_time_gap(self):
+        start_date = (get_now() + timedelta(days=1)).date()
+        end_date = (get_now() + timedelta(days=2)).date()
+        course = CourseFactory(start_date=start_date, end_date=end_date)
+
+        self.assertTrue(course.can_generate_certificates)
+
+    def test_can_generate_certificates_with_end_date_outside_time_gap(self):
         start_date = (get_now() - timedelta(days=30)).date()
         end_date = (get_now() - timedelta(days=16)).date()
-        course2 = CourseFactory(start_date=start_date, end_date=end_date)
-        self.assertTrue(course.can_generate_certificates)
-        self.assertFalse(course2.can_generate_certificates)
+        course = CourseFactory(start_date=start_date, end_date=end_date)
 
-    def test_duration_in_weeks(self):
+        self.assertFalse(course.can_generate_certificates)
+
+    def test_duration_in_weeks_should_return_two(self):
         start_date = get_now().date()
         end_date = (get_now() + timedelta(days=13)).date()
         course = CourseFactory(start_date=start_date, end_date=end_date)
+
+        self.assertEqual(2, course.duration_in_weeks)
+
+    def test_duration_in_weeks_should_return_three(self):
+        start_date = get_now().date()
         end_date = (get_now() + timedelta(days=14)).date()
         course2 = CourseFactory(start_date=start_date, end_date=end_date)
-        self.assertEqual(2, course.duration_in_weeks)
+
         self.assertEqual(3, course2.duration_in_weeks)

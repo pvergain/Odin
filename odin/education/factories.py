@@ -27,35 +27,3 @@ class CourseFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Course
-
-
-class CourseAssignmentStudentFactory(factory.DjangoModelFactory):
-    student = factory.SubFactory(StudentFactory)
-    course = factory.SubFactory(CourseFactory)
-
-    class Meta:
-        model = CourseAssignment
-
-
-class CourseAssignmentTeacherFactory(factory.DjangoModelFactory):
-    teacher = factory.SubFactory(TeacherFactory)
-    course = factory.SubFactory(CourseFactory)
-
-    class Meta:
-        model = CourseAssignment
-
-
-class CourseWithStudentCourseAssignmentFactory(CourseFactory):
-    """
-    Creates a CourseAssignment as a post generation hook and
-    attaches an existing Student to the course.
-    """
-    course_assignment = factory.RelatedFactory(CourseAssignmentStudentFactory, 'course')
-
-
-class CourseWithTeacherCourseAssignmentFactory(CourseFactory):
-    """
-    Creates a CourseAssignment as a post generation hook and
-    attaches an existing Teacher to the Course.
-    """
-    course_assignment = factory.RelatedFactory(CourseAssignmentTeacherFactory, 'course')
