@@ -3,7 +3,6 @@ from django.core.management.base import BaseCommand
 from random import choice
 from queue import deque
 
-from ...models import Course, Student, Teacher
 from ...factories import StudentFactory, TeacherFactory, CourseFactory
 
 COURSE_NAMES = ("Python 101", "Ruby 101", "Java 101")

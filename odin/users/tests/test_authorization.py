@@ -1,10 +1,7 @@
 from odin.common.faker import faker
 
-from django.test.utils import override_settings
-
 from test_plus import TestCase
 from django.test import Client
-from django.core import mail
 
 from ..models import BaseUser
 
@@ -29,9 +26,6 @@ class AuthorizationTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(BaseUser.objects.count(), 1)
 
-    @override_settings(
-        ACCOUNT_EMAIL_VERIFICATION="optional"
-    )
     def test_user_registration_for_already_logged_in_user(self):
         user = BaseUserFactory(password="1234asdf")
         user.is_active = True

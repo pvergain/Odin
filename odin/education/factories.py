@@ -3,7 +3,7 @@ import factory
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from .models import Student, Teacher, Course, CourseAssignment
+from .models import Student, Teacher, Course
 
 
 class StudentFactory(BaseUserFactory):
