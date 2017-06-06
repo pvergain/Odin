@@ -29,3 +29,6 @@ awesome-slugify==1.6.5
 
 # Time and Time zones support
 pytz==2017.2
+
+# Authorization
+django-allauth==0.32.0

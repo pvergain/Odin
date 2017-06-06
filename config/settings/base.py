@@ -17,6 +17,10 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github'
 ]
 
 LOCAL_APPS = [
@@ -73,6 +77,7 @@ TEMPLATES = [
         'DIRS': [
             str(APPS_DIR.path('templates')),
         ],
+        # 'APP_DIRS': True,
         'OPTIONS': {
             'debug': DEBUG,
             'loaders': [
@@ -92,6 +97,29 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+
+SOCIALACCOUNT_PROVIDERS = {
+    'github' : {
+        'SCOPE': [
+            'user',
+            'repo'
+            'read:org'
+        ],
+    }
+}
 
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
