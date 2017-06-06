@@ -67,3 +67,4 @@ staticfiles/
 
 .cache/
 
+# Bootstrap shell script
