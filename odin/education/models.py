@@ -50,8 +50,8 @@ class Course(models.Model):
     def duration_in_weeks(self):
         weeks = rrule.rrule(
             rrule.WEEKLY,
-            dtstart=self.start_time,
-            until=self.end_time
+            dtstart=self.start_date,
+            until=self.end_date
         )
         return weeks.count()
 
@@ -72,6 +72,14 @@ class Course(models.Model):
         now = get_now()
 
         return now.date() <= self.end_date + self.generate_certificates_delta
+
+    def add_student(self, student):
+        CourseAssignment.objects.create(course=self, student=student)
+        return self
+
+    def add_teacher(self, teacher):
+        CourseAssignment.objects.create(course=self, teacher=teacher)
+        return self
 
     def __str__(self) -> str:
         return self.name
