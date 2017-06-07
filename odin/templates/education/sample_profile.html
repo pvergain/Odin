@@ -1,3 +1,4 @@
+{% load socialaccount %}
 <!DOCTYPE html>
 <html>
   <head>
@@ -7,7 +8,17 @@
   <body>
     <p>
       You are logged in as {{ object.email }}
-      <a href="{% url 'account_logout'%}"><button type="button" name="button">Sign out</button></a>
+      <p>
+        <a href="{% url 'account_logout'%}"><button type="button" name="button">Sign out</button></a>
+      </p>
+      {% if not object.socialaccount_set.count %}
+        <p>
+          <p>
+            <a href="{% provider_login_url "github" process="connect" %}">Add Github account</a>
+          </p>
+        </p>
+      {% endif %}
+
     </p>
   </body>
 </html>
