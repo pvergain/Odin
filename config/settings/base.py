@@ -1,3 +1,4 @@
+from django.urls import reverse_lazy
 import environ
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
@@ -103,7 +104,10 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+LOGIN_REDIRECT_URL = reverse_lazy('education:sample-profile')
+ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('education:sample-profile')
 
+SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
@@ -112,10 +116,10 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 
 SOCIALACCOUNT_PROVIDERS = {
-    'github' : {
+    'github': {
         'SCOPE': [
             'user',
-            'repo'
+            'repo',
             'read:org'
         ],
     }
