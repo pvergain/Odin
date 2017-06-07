@@ -21,7 +21,8 @@ THIRD_PARTY_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.github'
+    'allauth.socialaccount.providers.github',
+    'captcha',
 ]
 
 LOCAL_APPS = [
@@ -113,6 +114,7 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+ACCOUNT_SIGNUP_FORM_CLASS = 'odin.education.forms.SignUpWithReCaptchaForm'
 
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
@@ -123,6 +125,13 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
     }
 }
+
+
+# Recaptcha settings
+NOCAPTCHA = True
+RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_SECRET_KEY')
+RECAPTCHA_USE_SSL = True
 
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
