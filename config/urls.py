@@ -7,8 +7,8 @@ from django.views import defaults as default_views
 
 urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
-    url(r'^', include('education.urls', namespace='education')),
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^', include('odin.education.urls', namespace='education')),
     url(r'^users/', include('odin.users.urls', namespace='users')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

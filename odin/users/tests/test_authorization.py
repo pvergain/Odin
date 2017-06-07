@@ -34,5 +34,5 @@ class AuthorizationTests(TestCase):
         with self.login(email=user.email, password="1234asdf"):
             url = self.reverse('account_signup')
             response = self.get(url_name=url, follow=True)
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 200)
             self.assertEqual(BaseUser.objects.count(), 1)

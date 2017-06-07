@@ -78,7 +78,6 @@ TEMPLATES = [
         'DIRS': [
             str(APPS_DIR.path('templates')),
         ],
-        # 'APP_DIRS': True,
         'OPTIONS': {
             'debug': DEBUG,
             'loaders': [
