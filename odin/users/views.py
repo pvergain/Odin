@@ -1,5 +1,7 @@
 from django.urls import reverse_lazy
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 
@@ -23,7 +25,7 @@ class SignUpWrapperView(auth_views.SignupView):
 account_signup = SignUpWrapperView.as_view()
 
 
-class LogoutWrapperView(auth_views.LogoutView):
+class LogoutWrapperView(LoginRequiredMixin, auth_views.LogoutView):
     template_name = 'users/logout.html'
     success_url = reverse_lazy('account_login')
 
@@ -31,7 +33,7 @@ class LogoutWrapperView(auth_views.LogoutView):
 account_logout = LogoutWrapperView.as_view()
 
 
-class PasswordSetWrapperView(auth_views.PasswordSetView):
+class PasswordSetWrapperView(LoginRequiredMixin, auth_views.PasswordSetView):
     template_name = 'users/password_set.html'
 
     def get_success_url(self, *args, **kwargs):
@@ -41,7 +43,7 @@ class PasswordSetWrapperView(auth_views.PasswordSetView):
 password_set = PasswordSetWrapperView.as_view()
 
 
-class PasswordChangeWrapperView(auth_views.PasswordChangeView):
+class PasswordChangeWrapperView(LoginRequiredMixin, auth_views.PasswordChangeView):
     def get_success_url(self, *args, **kwargs):
         return reverse_lazy('education:sample-profile')
 
@@ -84,7 +86,7 @@ class AccountInactiveWrapperView(auth_views.AccountInactiveView):
 account_inactive = AccountInactiveWrapperView.as_view()
 
 
-class SocialConnectionsWrapperView(socialauth_views.ConnectionsView):
+class SocialConnectionsWrapperView(LoginRequiredMixin, socialauth_views.ConnectionsView):
     pass
 
 
