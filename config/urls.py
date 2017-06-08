@@ -4,12 +4,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.generic import TemplateView
 from django.views import defaults as default_views
+from allauth import urls
+from allauth.socialaccount import urls
 
 urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
-    url(r'^accounts/', include('allauth.urls')),
+    # url(r'^accounts/', include('allauth.urls')),
     url(r'^', include('odin.education.urls', namespace='education')),
-    url(r'^users/', include('odin.users.urls', namespace='users')),
+    url(r'^users/', include('odin.users.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

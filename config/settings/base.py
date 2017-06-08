@@ -105,8 +105,9 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+LOGIN_URL = reverse_lazy('account_login')
 LOGIN_REDIRECT_URL = reverse_lazy('education:sample-profile')
-ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('education:sample-profile')
+ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
 
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True

@@ -11,6 +11,14 @@
       <p>
         <a href="{% url 'account_logout'%}"><button type="button" name="button">Sign out</button></a>
       </p>
+      {% if not object.has_usable_password %}
+        <p>
+          You have not set a password yet and can not log in without a social account.
+        </p>
+        <p>
+          Set your password <a href="{% url 'account_set_password' %}">Here</a>
+        </p>
+      {% endif %}
       {% if not object.socialaccount_set.count %}
         <p>
           <p>
@@ -18,7 +26,7 @@
           </p>
         </p>
       {% endif %}
-      
+
     </p>
   </body>
 </html>
