@@ -20,10 +20,6 @@ class SignUpWrapperView(auth_views.SignupView):
     form_class = SignUpWithReCaptchaForm
     success_url = reverse_lazy('account_login')
 
-    def form_valid(self, form):
-        import ipdb; ipdb.set_trace()
-        return super().form_valid(form)
-
 
 account_signup = SignUpWrapperView.as_view()
 
