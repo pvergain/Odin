@@ -11,7 +11,7 @@ from odin.users.models import BaseUser
 from odin.users.factories import BaseUserFactory
 
 from ..factories import StudentFactory, TeacherFactory, CourseFactory
-from ..models import Student, Teacher, CourseAssignment, Course
+from ..models import Student, Teacher, CourseAssignment
 
 
 class StudentTests(TestCase):

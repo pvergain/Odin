@@ -2,7 +2,7 @@ import os
 
 from test_plus import TestCase
 
-from ..models import BaseUser, Profile
+from ..models import Profile
 from ..factories import BaseUserFactory
 
 from odin.common.faker import faker
@@ -18,7 +18,7 @@ class ProfileSignalTests(TestCase):
 
     def test_create_user_creates_profile(self):
         self.assertEqual(Profile.objects.count(), 0)
-        user = BaseUserFactory()
+        BaseUserFactory()
         self.assertEqual(Profile.objects.count(), 1)
 
     def test_sign_up_request_creates_profile(self):
