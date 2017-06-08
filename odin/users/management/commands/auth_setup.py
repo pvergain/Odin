@@ -8,7 +8,7 @@ import os
 class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
-        client_id = os.environ.get('GH_OAUTH_CLIEND_ID', None)
+        client_id = os.environ.get('GH_OAUTH_CLIENT_ID', None)
         secret_key = os.environ.get('GH_OAUTH_SECRET_KEY', None)
 
         if client_id is None or secret_key is None:
