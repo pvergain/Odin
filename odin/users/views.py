@@ -5,6 +5,8 @@ from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 from allauth.socialaccount.templatetags import socialaccount
 
+from .forms import SignUpWithReCaptchaForm
+
 
 class LoginWrapperView(auth_views.LoginView):
     success_url = reverse_lazy('education:sample-profile')
@@ -14,7 +16,13 @@ account_login = LoginWrapperView.as_view()
 
 
 class SignUpWrapperView(auth_views.SignupView):
+    template_name = "users/signup.html"
+    form_class = SignUpWithReCaptchaForm
     success_url = reverse_lazy('account_login')
+
+    def form_valid(self, form):
+        import ipdb; ipdb.set_trace()
+        return super().form_valid(form)
 
 
 account_signup = SignUpWrapperView.as_view()
