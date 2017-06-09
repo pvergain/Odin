@@ -1,8 +1,6 @@
 from django.conf.urls import url
 
 from allauth.urls import urlpatterns as allauth_urls
-from allauth.socialaccount import urls
-from allauth.account import urls
 
 from . import views
 
