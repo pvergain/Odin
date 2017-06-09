@@ -126,7 +126,6 @@ class SocialSignupWrapperView(socialauth_views.SignupView):
 
     def form_valid(self, form):
         super().form_valid(form)
-        import ipdb; ipdb.set_trace()
         user = BaseUser.objects.get(email=form.cleaned_data.get('email'))
         user.set_password(form.cleaned_data['password'])
         user.save()
