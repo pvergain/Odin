@@ -11,13 +11,6 @@ from allauth.socialaccount import views as socialauth_views
 from .forms import SignUpWithReCaptchaForm, OnboardingForm
 from .models import BaseUser
 
-from allauth.socialaccount.providers import base
-from allauth.account.adapter import DefaultAccountAdapter
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-
-from allauth.socialaccount.providers.github import views, urls, models, provider
-from allauth.socialaccount.providers.oauth2 import views, urls, provider
-
 
 class TestView(FormView):
     form_class = OnboardingForm

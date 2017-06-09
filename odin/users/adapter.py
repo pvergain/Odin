@@ -1,6 +1,4 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.shortcuts import redirect
-from .views import TestView
 
 
 class CustomAdapter(DefaultSocialAccountAdapter):

@@ -1,7 +1,6 @@
 from odin.common.faker import faker
 
 from test_plus import TestCase
-from django.test import Client
 
 from ..models import BaseUser
 
