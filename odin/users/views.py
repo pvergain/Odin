@@ -1,11 +1,31 @@
 from django.urls import reverse_lazy
+from django.views.generic import FormView
+from django.shortcuts import redirect
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
 
 from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 
-from .forms import SignUpWithReCaptchaForm
+from .forms import SignUpWithReCaptchaForm, OnboardingForm
+from .models import BaseUser
+
+from allauth.socialaccount.providers import base
+from allauth.account.adapter import DefaultAccountAdapter
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+
+from allauth.socialaccount.providers.github import views, urls, models, provider
+from allauth.socialaccount.providers.oauth2 import views, urls, provider
+
+
+class TestView(FormView):
+    form_class = OnboardingForm
+    template_name = 'users/onboarding.'
+
+    def form_valid(self, form):
+        form.instance.current_email = self.kwargs['current_email']
+        return super().form_valid(form)
 
 
 class LoginWrapperView(auth_views.LoginView):
@@ -91,3 +111,26 @@ class SocialConnectionsWrapperView(LoginRequiredMixin, socialauth_views.Connecti
 
 
 connections = SocialConnectionsWrapperView.as_view()
+
+
+class SocialSignupWrapperView(socialauth_views.SignupView):
+    form_class = OnboardingForm
+    success_url = settings.LOGIN_URL
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        socialaccount = self.request.session.get('socialaccount_sociallogin', {})
+        email_address = socialaccount.get('email_addresses', [{}])[0].get('email', '')
+        kwargs['email_address'] = email_address
+        return kwargs
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        import ipdb; ipdb.set_trace()
+        user = BaseUser.objects.get(email=form.cleaned_data.get('email'))
+        user.set_password(form.cleaned_data['password'])
+        user.save()
+        return redirect(self.success_url)
+
+
+signup = SocialSignupWrapperView.as_view()

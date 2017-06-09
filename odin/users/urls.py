@@ -1,12 +1,14 @@
 from django.conf.urls import url
 
 from allauth.urls import urlpatterns as allauth_urls
+from allauth.socialaccount import urls
 from allauth.account import urls
 
 from . import views
 
 
 urlpatterns = [
+    url(r'^social/signup/$', views.signup, name='socialaccount_signup'),
     url(r'^login/$', views.account_login, name='account_login'),
     url(r'^signup/$', views.account_signup, name='account_signup'),
     url(r'^logout/$', views.account_logout, name='account_logout'),
