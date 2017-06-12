@@ -12,7 +12,7 @@ from odin.users.factories import BaseUserFactory
 
 from ..factories import StudentFactory, TeacherFactory, CourseFactory
 from ..models import Student, Teacher, CourseAssignment
-from ..services import add_student, add_teacher
+from ..services import add_student
 
 
 class StudentTests(TestCase):
