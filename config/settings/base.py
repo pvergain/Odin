@@ -124,9 +124,7 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
         'SCOPE': [
-            'user',
-            'repo',
-            'read:org'
+            'user:email',
         ],
     }
 }
