@@ -1,3 +1,4 @@
+from django.urls import reverse_lazy
 import environ
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
@@ -17,6 +18,12 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'crispy_forms',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
+    'captcha',
 ]
 
 LOCAL_APPS = [
@@ -59,6 +66,7 @@ TIME_ZONE = 'UTC'
 
 LANGUAGE_CODE = 'en-us'
 
+
 SITE_ID = 1
 
 USE_I18N = True
@@ -92,6 +100,41 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+LOGIN_URL = reverse_lazy('account_login')
+LOGIN_REDIRECT_URL = reverse_lazy('education:profile')
+ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "odin.users.adapter.CustomAdapter"
+ACCOUNT_SIGNUP_FORM_CLASS = 'odin.education.forms.SignUpWithReCaptchaForm'
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'SCOPE': [
+            'user:email',
+        ],
+    }
+}
+
+
+# Recaptcha settings
+NOCAPTCHA = True
+RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default='')
+RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_SECRET_KEY', default='')
+RECAPTCHA_USE_SSL = True
 
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
@@ -143,3 +186,7 @@ AUTH_USER_MODEL = 'users.BaseUser'
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 ADMIN_URL = r'^admin/'
+
+# Github OAuth settings
+GH_OAUTH_CLIENT_ID = env('GH_OAUTH_CLIENT_ID', default='')
+GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY', default='')

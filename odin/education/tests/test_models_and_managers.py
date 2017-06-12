@@ -11,7 +11,8 @@ from odin.users.models import BaseUser
 from odin.users.factories import BaseUserFactory
 
 from ..factories import StudentFactory, TeacherFactory, CourseFactory
-from ..models import Student, Teacher, CourseAssignment, Course
+from ..models import Student, Teacher, CourseAssignment
+from ..services import add_student
 
 
 class StudentTests(TestCase):
@@ -249,7 +250,7 @@ class CourseTests(TestCase):
         self.assertEqual(0, course.students.count())
 
         for student in students:
-            course.add_student(student)
+            add_student(course, student)
 
         self.assertEqual(3, course.students.count())
 

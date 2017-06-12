@@ -73,14 +73,6 @@ class Course(models.Model):
 
         return now.date() <= self.end_date + self.generate_certificates_delta
 
-    def add_student(self, student):
-        CourseAssignment.objects.create(course=self, student=student)
-        return self
-
-    def add_teacher(self, teacher):
-        CourseAssignment.objects.create(course=self, teacher=teacher)
-        return self
-
     def __str__(self) -> str:
         return self.name
 

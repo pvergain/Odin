@@ -69,3 +69,6 @@ staticfiles/
 
 # Bootstrap shell script
 bootstrap.sh
+
+# Export recaptcha env variables
+captcha_env.sh

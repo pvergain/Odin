@@ -1,4 +1,5 @@
 # Wheel 0.25+ needed to install certain packages on CPython 3.5+
+
 # like Pillow and psycopg2
 # See http://bitly.com/wheel-building-fails-CPython-35
 # Verified bug on Python 3.5.1
@@ -29,3 +30,9 @@ awesome-slugify==1.6.5
 
 # Time and Time zones support
 pytz==2017.2
+
+# Authorization
+django-allauth==0.32.0
+django-recaptcha==1.3.0
+
+django-crispy-forms==1.6.1
