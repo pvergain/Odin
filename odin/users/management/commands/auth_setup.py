@@ -1,21 +1,22 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from allauth.socialaccount.models import Site, SocialApp
-
-import os
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
-        client_id = os.environ.get('GH_OAUTH_CLIENT_ID', None)
-        secret_key = os.environ.get('GH_OAUTH_SECRET_KEY', None)
+        client_id = settings.GH_OAUTH_CLIENT_ID
+        secret_key = settings.GH_OAUTH_SECRET_KEY
 
         if client_id is None or secret_key is None:
             print('Set up environment variables correctly')
             return
         site = Site.objects.first()
         site.domain = 'localhost:8000'
+        site.save()
+
         social_app = SocialApp.objects.create(provider='github',
                                               name='OdinAuthTest',
                                               client_id=client_id,

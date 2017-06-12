@@ -10,6 +10,7 @@ from allauth.socialaccount import views as socialauth_views
 
 from .forms import SignUpWithReCaptchaForm, OnboardingForm
 from .models import BaseUser
+from .services import get_gh_email_address
 
 
 class OnboardingView(FormView):
@@ -23,7 +24,7 @@ class OnboardingView(FormView):
 
 class LoginWrapperView(auth_views.LoginView):
     template_name = 'users/login.html'
-    success_url = reverse_lazy('education:sample-profile')
+    success_url = reverse_lazy('education:profile')
 
 
 class SignUpWrapperView(auth_views.SignupView):
@@ -41,12 +42,12 @@ class PasswordSetWrapperView(LoginRequiredMixin, auth_views.PasswordSetView):
     template_name = 'users/password_set.html'
 
     def get_success_url(self, *args, **kwargs):
-        return reverse_lazy('education:sample-profile')
+        return reverse_lazy('education:profile')
 
 
 class PasswordChangeWrapperView(LoginRequiredMixin, auth_views.PasswordChangeView):
     def get_success_url(self, *args, **kwargs):
-        return reverse_lazy('education:sample-profile')
+        return reverse_lazy('education:profile')
 
 
 class PasswordResetWrapperView(auth_views.PasswordResetView):
@@ -79,8 +80,7 @@ class SocialSignupWrapperView(socialauth_views.SignupView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        socialaccount = self.request.session.get('socialaccount_sociallogin', {})
-        email_address = socialaccount.get('email_addresses', [{}])[0].get('email', '')
+        email_address = get_gh_email_address(self.request)
         kwargs['email_address'] = email_address
         return kwargs
 

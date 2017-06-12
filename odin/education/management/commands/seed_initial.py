@@ -4,6 +4,7 @@ from random import choice
 from queue import deque
 
 from ...factories import StudentFactory, TeacherFactory, CourseFactory
+from ...services import add_student, add_teacher
 
 COURSE_NAMES = ("Python 101", "Ruby 101", "Java 101")
 
@@ -16,8 +17,8 @@ class Command(BaseCommand):
 
         while teachers:
             selected_course = choice(courses)
-            selected_course.add_teacher(teachers.popleft())
+            add_teacher(selected_course, teachers.popleft())
 
         while students:
             selected_course = choice(courses)
-            selected_course.add_student(students.popleft())
+            add_student(selected_course, students.popleft())

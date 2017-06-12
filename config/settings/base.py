@@ -186,3 +186,7 @@ AUTH_USER_MODEL = 'users.BaseUser'
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 ADMIN_URL = r'^admin/'
+
+# Github OAuth settings
+GH_OAUTH_CLIENT_ID = env('GH_OAUTH_CLIENT_ID')
+GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY')
