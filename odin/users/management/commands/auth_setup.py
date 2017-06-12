@@ -14,8 +14,6 @@ class Command(BaseCommand):
             print('Set up environment variables correctly')
             return
         site = Site.objects.first()
-        site.domain = 'localhost:8000'
-        site.save()
 
         social_app = SocialApp.objects.create(provider='github',
                                               name='OdinAuthTest',

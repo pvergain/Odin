@@ -107,7 +107,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_URL = reverse_lazy('account_login')
-LOGIN_REDIRECT_URL = reverse_lazy('education:sample-profile')
+LOGIN_REDIRECT_URL = reverse_lazy('education:profile')
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
 
 SOCIALACCOUNT_QUERY_EMAIL = True
