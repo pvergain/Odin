@@ -73,5 +73,5 @@ bootstrap.sh
 # Export recaptcha env variables
 captcha_env.sh
 
-bower_components/
-website_images/
+*/bower_components/*
+*/website_images/*
