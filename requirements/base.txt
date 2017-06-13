@@ -35,4 +35,6 @@ pytz==2017.2
 django-allauth==0.32.0
 django-recaptcha==1.3.0
 
+# Forms
 django-crispy-forms==1.6.1
+django-widget-tweaks==1.4.1

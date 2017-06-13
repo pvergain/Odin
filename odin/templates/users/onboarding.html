@@ -4,7 +4,7 @@
 {% load account socialaccount %}
 
 {% block title %}
-  Reset Password
+  Social Signup
 {% endblock title %}
 
 {% block body %}
@@ -15,27 +15,30 @@
       </div>
       <div class="content">
         <!-- BEGIN FORGOT PASSWORD FORM -->
-        <form class="password-reset" action="{% url 'account_reset_password' %}" method="post">
+        <form class="onboarding" action="{% url 'socialaccount_signup' %}" method="post">
             {% csrf_token %}
-            <h3 class="font-green">Forget Password ?</h3>
-            {% if not form.is_valid %}
-            {% for error in readable_errors %}
-              <div class="alert alert-warning">
-                <span>{{ error }}</span>
-              </div>
-            {% endfor %}
-            {% endif %}
-            <p> Enter your e-mail address below to reset your password. </p>
+            <h3 class="font-green">One Last Step</h3>
+            <p> Enter your e-mail address below to register or leave it as it is. </p>
             <div class="form-group">
                 {% render_field form.email class="form-control placeholder-no-fix" placeholder="Email Address" %}
-             </div>
-            <div class="form-actions">
-                <a href="{% url 'account_login' %}"><button type="button" id="back-btn" class="btn green btn-outline">Back</button></a>
-                <button type="submit" class="btn btn-success uppercase pull-right">Submit</button>
             </div>
+            <div class="form-group">
+               {% render_field form.password class="form-control placeholder-no-fix" placeholder="Password" %}
+             </div>
+             <div class="form-group">
+              {% render_field form.captcha class="form-control" %}
+             </div>
+             <div class="form-actions">
+                <button type="submit" class="btn btn-success uppercase pull-left">Submit</button>
+             </div>
         </form>
         <!-- END FORGOT PASSWORD FORM -->
       </div>
+      <!--[if lt IE 9]>
+  <script src="../assets/global/plugins/respond.min.js"></script>
+  <script src="../assets/global/plugins/excanvas.min.js"></script>
+  <script src="../assets/global/plugins/ie8.fix.min.js"></script>
+  <![endif]-->
       <!-- BEGIN CORE PLUGINS -->
       <script src="{% static "jquery/dist/jquery.min.js" %}" type="text/javascript"></script>
       <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}" type="text/javascript"> </script>

@@ -24,6 +24,7 @@ THIRD_PARTY_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'captcha',
+    'widget_tweaks'
 ]
 
 LOCAL_APPS = [
@@ -142,7 +143,11 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     str(APPS_DIR.path('static')),
+    str(ROOT_DIR.path('ui/bower_components')),
+    str(ROOT_DIR.path('ui/assets')),
+    str(ROOT_DIR.path('ui/website_images'))
 ]
+
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
