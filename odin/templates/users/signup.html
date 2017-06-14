@@ -10,10 +10,7 @@
 
 {% block body %}
 <body class="login">
-    <div class="logo">
-        <a href="index.html">
-            <img src="{% static "hackman_head.png" %}" alt="" /> </a>
-    </div>
+    {% include "partial/logo.html" %}
     <div class="content">
         <!-- BEGIN REGISTRATION FORM -->
         <form class="signup-form" action="{% url 'account_signup' %}" method="post">
