@@ -3,7 +3,6 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.conf import settings
 
 from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
