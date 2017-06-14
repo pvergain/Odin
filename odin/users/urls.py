@@ -6,7 +6,7 @@ from odin.users.views import (LoginWrapperView, SignUpWrapperView, LogoutWrapper
                               PasswordChangeWrapperView, PasswordResetWrapperView, SocialSignupWrapperView,
                               PasswordResetDoneWrapperView, AccountInactiveWrapperView,
                               PasswordResetFromKeyWrapperView, PasswordResetFromKeyDoneWrapperView,
-                              SocialConnectionsWrapperView)
+                              SocialConnectionsWrapperView, ConfirmEmailMessageView)
 
 
 urlpatterns = [
@@ -20,8 +20,9 @@ urlpatterns = [
     url(r'^social-connections/$', SocialConnectionsWrapperView.as_view(), name='socialaccount_connections'),
     url(r'^password/reset/done/$', PasswordResetDoneWrapperView.as_view(), name="account_reset_password_done"),
     url(r'^inactive/$', AccountInactiveWrapperView.as_view(), name="account_inactive"),
-    url(r"^password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$", PasswordResetFromKeyWrapperView.as_view(),
+    url(r'^password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$', PasswordResetFromKeyWrapperView.as_view(),
         name="account_reset_password_from_key"),
-    url(r"^password/reset/key/done/$", PasswordResetFromKeyDoneWrapperView.as_view(),
+    url(r'^password/reset/key/done/$', PasswordResetFromKeyDoneWrapperView.as_view(),
         name="account_reset_password_from_key_done"),
+    url(r'^confirm-email-msg/$', ConfirmEmailMessageView.as_view(), name='email_confirm_msg'),
 ] + allauth_urls

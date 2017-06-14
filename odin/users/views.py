@@ -1,5 +1,6 @@
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
+from django.views.generic import TemplateView
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.conf import settings
@@ -84,7 +85,7 @@ class SocialConnectionsWrapperView(LoginRequiredMixin, socialauth_views.Connecti
 
 class SocialSignupWrapperView(socialauth_views.SignupView):
     form_class = OnboardingForm
-    success_url = settings.LOGIN_URL
+    success_url = reverse_lazy('email_confirm_msg')
     template_name = 'users/onboarding.html'
 
     def get_form_kwargs(self):
@@ -105,3 +106,7 @@ class SocialSignupWrapperView(socialauth_views.SignupView):
         form = context.get('form')
         context['readable_errors'] = get_readeble_form_errors(form)
         return context
+
+
+class ConfirmEmailMessageView(TemplateView):
+    template_name = 'users/email_confirm_msg.html'
