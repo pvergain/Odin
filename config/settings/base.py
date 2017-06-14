@@ -117,7 +117,6 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "odin.users.adapter.CustomAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = 'odin.education.forms.SignUpWithReCaptchaForm'
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False

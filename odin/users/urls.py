@@ -6,7 +6,7 @@ from odin.users.views import (LoginWrapperView, SignUpWrapperView, LogoutWrapper
                               PasswordChangeWrapperView, PasswordResetWrapperView, SocialSignupWrapperView,
                               PasswordResetDoneWrapperView, AccountInactiveWrapperView,
                               PasswordResetFromKeyWrapperView, PasswordResetFromKeyDoneWrapperView,
-                              SocialConnectionsWrapperView, ConfirmEmailMessageView)
+                              SocialConnectionsWrapperView, EmailVerificationSentWrapperView)
 
 
 urlpatterns = [
@@ -24,5 +24,5 @@ urlpatterns = [
         name="account_reset_password_from_key"),
     url(r'^password/reset/key/done/$', PasswordResetFromKeyDoneWrapperView.as_view(),
         name="account_reset_password_from_key_done"),
-    url(r'^confirm-email-msg/$', ConfirmEmailMessageView.as_view(), name='email_confirm_msg'),
+    url(r'^confirm-email/$', EmailVerificationSentWrapperView.as_view(), name='account_email_verification_sent')
 ] + allauth_urls
