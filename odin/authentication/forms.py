@@ -1,6 +1,7 @@
 from django import forms
 
 from captcha.fields import ReCaptchaField
+
 from allauth.account.forms import SignupForm, SetPasswordField
 from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from allauth.account.adapter import get_adapter

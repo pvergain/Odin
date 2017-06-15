@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from allauth.account.signals import email_confirmed
 from allauth.socialaccount.signals import social_account_added
 
-from .models import BaseUser, Profile
+from ..users.models import BaseUser, Profile
 from .services import process_social_account
 
 

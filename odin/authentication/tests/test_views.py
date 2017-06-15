@@ -4,8 +4,8 @@ from django.core import mail
 
 from allauth.account.models import EmailAddress
 
-from ..factories import BaseUserFactory
-from ...common.faker import faker
+from odin.users.factories import BaseUserFactory
+from odin.common.faker import faker
 
 import os
 
@@ -64,7 +64,7 @@ class TestLogInView(TestCase):
         }
         response = self.post(url_name=self.url, data=data, follow=True)
 
-        self.assertRedirects(response=response, expected_url=self.reverse('education:profile'))
+        self.assertRedirects(response=response, expected_url=self.reverse('dashboard:users:profile'))
 
 
 class TestSignUpView(TestCase):
@@ -151,7 +151,7 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.email])
         body = mail.outbox[0].body
-        url = '/users' + body[body.find('/password/reset/'):].split()[0]
+        url = '/auth' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
         self.assertEqual(200, response.status_code)
         self.assertInContext('readable_errors')
@@ -167,7 +167,7 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.email])
         body = mail.outbox[0].body
-        url = '/users' + body[body.find('/password/reset/'):].split()[0]
+        url = '/auth' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
         self.assertEqual(200, response.status_code)
 
@@ -189,7 +189,7 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.email])
         body = mail.outbox[0].body
-        url = '/users' + body[body.find('/password/reset/'):].split()[0]
+        url = '/auth' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
         self.assertEqual(200, response.status_code)
 
