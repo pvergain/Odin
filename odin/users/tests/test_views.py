@@ -1,5 +1,7 @@
 from test_plus import TestCase
 
+from django.core import mail
+
 from allauth.account.models import EmailAddress
 
 from ..factories import BaseUserFactory
@@ -122,3 +124,78 @@ class TestPasswordResetView(TestCase):
         response = self.post(url_name=self.url, data=data, follow=True)
 
         self.assertRedirects(response=response, expected_url=self.reverse('account_reset_password_done'))
+
+    def test_readable_errors_are_not_empty_when_form_invalid(self):
+        data = {
+            'email': faker.email()
+        }
+        response = self.post(url_name=self.url, data=data, follow=False)
+
+        self.assertInContext('readable_errors')
+        self.assertNotEqual(0, len(response.context['readable_errors']))
+
+
+class TestPasswordResetFromKeyView(TestCase):
+
+    def setUp(self):
+        self.email = "alabala@alabala.com"
+        self.user = BaseUserFactory(email=self.email)
+
+    def test_readable_errors_are_empty_on_get(self):
+        data = {
+            'email': "alabala@alabala.com"
+        }
+
+        url = self.reverse('account_reset_password')
+        response = self.post(url_name=url, data=data, follow=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['alabala@alabala.com'])
+        body = mail.outbox[0].body
+        url = '/users' + body[body.find('/password/reset/'):].split()[0]
+        response = self.get(url)
+        self.assertEqual(200, response.status_code)
+        self.assertInContext('readable_errors')
+        self.assertEqual(0, len(response.context['readable_errors']))
+
+    def test_readable_errors_are_not_empty_when_form_invalid(self):
+        data = {
+            'email': "alabala@alabala.com"
+        }
+
+        url = self.reverse('account_reset_password')
+        response = self.post(url_name=url, data=data, follow=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['alabala@alabala.com'])
+        body = mail.outbox[0].body
+        url = '/users' + body[body.find('/password/reset/'):].split()[0]
+        response = self.get(url)
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'password1': "ivan"
+        }
+
+        response = self.post(url_name=url, data=data, follow=False)
+        self.assertInContext('readable_errors')
+        self.assertNotEqual(0, len(response.context['readable_errors']))
+
+    def test_view_redirects_to_login_prompt_upon_success(self):
+        data = {
+            'email': "alabala@alabala.com"
+        }
+
+        url = self.reverse('account_reset_password')
+        response = self.post(url_name=url, data=data, follow=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['alabala@alabala.com'])
+        body = mail.outbox[0].body
+        url = '/users' + body[body.find('/password/reset/'):].split()[0]
+        response = self.get(url)
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'password1': faker.password()
+        }
+
+        response = self.post(url_name=url, data=data, follow=True)
+        self.assertRedirects(response=response, expected_url=self.reverse('account_login'))
