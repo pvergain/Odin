@@ -107,7 +107,7 @@ class TestSignUpView(TestCase):
 class TestPasswordResetView(TestCase):
 
     def setUp(self):
-        self.email = "alabala@alabala.com"
+        self.email = faker.email()
         self.user = BaseUserFactory(email=self.email)
         self.url = self.reverse('account_reset_password')
 
@@ -119,7 +119,7 @@ class TestPasswordResetView(TestCase):
 
     def test_view_redirects_to_confirmation_prompt_upon_success(self):
         data = {
-            'email': "alabala@alabala.com"
+            'email': self.email
         }
         response = self.post(url_name=self.url, data=data, follow=True)
 
@@ -138,18 +138,18 @@ class TestPasswordResetView(TestCase):
 class TestPasswordResetFromKeyView(TestCase):
 
     def setUp(self):
-        self.email = "alabala@alabala.com"
+        self.email = faker.email()
         self.user = BaseUserFactory(email=self.email)
 
     def test_readable_errors_are_empty_on_get(self):
         data = {
-            'email': "alabala@alabala.com"
+            'email': self.email
         }
 
         url = self.reverse('account_reset_password')
         response = self.post(url_name=url, data=data, follow=True)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ['alabala@alabala.com'])
+        self.assertEqual(mail.outbox[0].to, [self.email])
         body = mail.outbox[0].body
         url = '/users' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
@@ -159,13 +159,13 @@ class TestPasswordResetFromKeyView(TestCase):
 
     def test_readable_errors_are_not_empty_when_form_invalid(self):
         data = {
-            'email': "alabala@alabala.com"
+            'email': self.email
         }
 
         url = self.reverse('account_reset_password')
         response = self.post(url_name=url, data=data, follow=True)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ['alabala@alabala.com'])
+        self.assertEqual(mail.outbox[0].to, [self.email])
         body = mail.outbox[0].body
         url = '/users' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
@@ -181,13 +181,13 @@ class TestPasswordResetFromKeyView(TestCase):
 
     def test_view_redirects_to_login_prompt_upon_success(self):
         data = {
-            'email': "alabala@alabala.com"
+            'email': self.email
         }
 
         url = self.reverse('account_reset_password')
         response = self.post(url_name=url, data=data, follow=True)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ['alabala@alabala.com'])
+        self.assertEqual(mail.outbox[0].to, [self.email])
         body = mail.outbox[0].body
         url = '/users' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
