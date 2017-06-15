@@ -11,7 +11,7 @@ import os
 class TestLogInView(TestCase):
     def setUp(self):
         os.environ['RECAPTCHA_TESTING'] = 'True'
-        self.test_password = faker.word()
+        self.test_password = faker.password()
         self.url = self.reverse('account_login')
 
     def tearDown(self):
@@ -69,7 +69,7 @@ class TestSignUpView(TestCase):
 
     def setUp(self):
         os.environ['RECAPTCHA_TESTING'] = 'True'
-        self.test_password = faker.word()
+        self.test_password = faker.password()
         self.url = self.reverse('account_signup')
 
     def tearDown(self):
