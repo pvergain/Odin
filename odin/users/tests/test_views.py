@@ -100,3 +100,25 @@ class TestSignUpView(TestCase):
         response = self.post(url_name=self.url, data=data, follow=True)
 
         self.assertRedirects(response=response, expected_url=self.reverse('account_email_verification_sent'))
+
+
+class TestPasswordResetView(TestCase):
+
+    def setUp(self):
+        self.email = "alabala@alabala.com"
+        self.user = BaseUserFactory(email=self.email)
+        self.url = self.reverse('account_reset_password')
+
+    def test_readable_errors_are_empty_on_get(self):
+        response = self.get(self.url)
+        self.assertEqual(200, response.status_code)
+        self.assertInContext('readable_errors')
+        self.assertEqual(0, len(response.context['readable_errors']))
+
+    def test_view_redirects_to_confirmation_prompt_upon_success(self):
+        data = {
+            'email': "alabala@alabala.com"
+        }
+        response = self.post(url_name=self.url, data=data, follow=True)
+
+        self.assertRedirects(response=response, expected_url=self.reverse('account_reset_password_done'))

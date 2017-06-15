@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 
-from .forms import SignUpWithReCaptchaForm, OnboardingForm
+from .forms import SignUpWithReCaptchaForm, OnboardingForm, PasswordResetForm
 from .models import BaseUser
 from .services import get_gh_email_address
 
@@ -46,11 +46,13 @@ class PasswordResetWrapperView(ReadableFormErrorsMixin, auth_views.PasswordReset
 
 
 class PasswordResetDoneWrapperView(auth_views.PasswordResetDoneView):
-    pass
+    template_name = 'users/email_confirm_msg.html'
 
 
-class PasswordResetFromKeyWrapperView(auth_views.PasswordResetFromKeyView):
-    pass
+class PasswordResetFromKeyWrapperView(ReadableFormErrorsMixin, auth_views.PasswordResetFromKeyView):
+    template_name = 'users/password_reset_from_key.html'
+    success_url = reverse_lazy('account_login')
+    form_class = PasswordResetForm
 
 
 class PasswordResetFromKeyDoneWrapperView(auth_views.PasswordResetFromKeyDoneView):
