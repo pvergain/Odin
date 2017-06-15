@@ -13,11 +13,3 @@ def process_social_account(user, profile, **kwargs):
             pair = {provider.name: acc.extra_data.get('html_url', None)}
             profile.social_accounts.update(pair)
         profile.save()
-
-
-def get_readeble_form_errors(form):
-    if not form.is_valid():
-        readable_errors = []
-        for field, error in form.errors.items():
-            readable_errors.extend(error)
-    return readable_errors

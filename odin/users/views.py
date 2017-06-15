@@ -8,30 +8,20 @@ from allauth.socialaccount import views as socialauth_views
 
 from .forms import SignUpWithReCaptchaForm, OnboardingForm
 from .models import BaseUser
-from .services import get_gh_email_address, get_readeble_form_errors
+from .services import get_gh_email_address
+
+from ..common.mixins import ReadableFormErrorsMixin
 
 
-class LoginWrapperView(auth_views.LoginView):
+class LoginWrapperView(ReadableFormErrorsMixin, auth_views.LoginView):
     template_name = 'users/login.html'
     success_url = reverse_lazy('education:profile')
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        form = context.get('form')
-        context['readable_errors'] = get_readeble_form_errors(form)
-        return context
 
-
-class SignUpWrapperView(auth_views.SignupView):
+class SignUpWrapperView(ReadableFormErrorsMixin, auth_views.SignupView):
     template_name = 'users/signup.html'
     form_class = SignUpWithReCaptchaForm
-    success_url = reverse_lazy('email_confirm_msg')
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        form = context.get('form')
-        context['readable_errors'] = get_readeble_form_errors(form)
-        return context
+    success_url = reverse_lazy('account_email_verification_sent')
 
 
 class LogoutWrapperView(LoginRequiredMixin, auth_views.LogoutView):
@@ -51,14 +41,8 @@ class PasswordChangeWrapperView(LoginRequiredMixin, auth_views.PasswordChangeVie
         return reverse_lazy('education:profile')
 
 
-class PasswordResetWrapperView(auth_views.PasswordResetView):
+class PasswordResetWrapperView(ReadableFormErrorsMixin, auth_views.PasswordResetView):
     template_name = 'users/password_reset.html'
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        form = context.get('form')
-        context['readable_errors'] = get_readeble_form_errors(form)
-        return context
 
 
 class PasswordResetDoneWrapperView(auth_views.PasswordResetDoneView):
@@ -81,7 +65,7 @@ class SocialConnectionsWrapperView(LoginRequiredMixin, socialauth_views.Connecti
     pass
 
 
-class SocialSignupWrapperView(socialauth_views.SignupView):
+class SocialSignupWrapperView(ReadableFormErrorsMixin, socialauth_views.SignupView):
     form_class = OnboardingForm
     success_url = reverse_lazy('account_email_verification_sent')
     template_name = 'users/onboarding.html'
@@ -98,12 +82,6 @@ class SocialSignupWrapperView(socialauth_views.SignupView):
         user.set_password(form.cleaned_data['password'])
         user.save()
         return redirect(self.success_url)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        form = context.get('form')
-        context['readable_errors'] = get_readeble_form_errors(form)
-        return context
 
 
 class EmailVerificationSentWrapperView(auth_views.EmailVerificationSentView):
