@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.shortcuts import reverse, redirect
 
 
 class BaseUserPassesTestMixin(UserPassesTestMixin):
