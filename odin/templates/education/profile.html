@@ -1,30 +1,89 @@
 {% extends "education/dashboard_base.html" %}
 {% load socialaccount %}
+{% load static %}
 
 {% block content_title %}
   User Profile
 {% endblock content_title %}
 
 {% block page_content %}
-  <p>
-    You are logged in as {{ object.email }}
-    <p>
-      <a href="{% url 'account_logout'%}"><button type="button" name="button">Sign out</button></a>
-    </p>
-    {% if not object.has_usable_password %}
-      <p>
-        You have not set a password yet and can not log in without a social account.
-      </p>
-      <p>
-        Set your password <a href="{% url 'account_set_password' %}">Here</a>
-      </p>
-    {% endif %}
-    {% if not object.socialaccount_set.count %}
-      <p>
-        <p>
-          <a href="{% provider_login_url "github" process="connect" %}">Add Github account</a>
-        </p>
-      </p>
-    {% endif %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN PROFILE SIDEBAR -->
+        <div class="profile-sidebar">
+            <!-- PORTLET MAIN -->
+            <div class="portlet light profile-sidebar-portlet ">
+                <!-- SIDEBAR USERPIC -->
+                <div class="profile-userpic">
+                    <img src="{% static 'hackman.png' %}" class="img-responsive" alt="">
+                </div>
+                <!-- END SIDEBAR USERPIC -->
+                <!-- SIDEBAR USER TITLE -->
+                <div class="profile-usertitle">
+                    <div class="profile-usertitle-name"> {{ profile.full_name }} </div>
+                    <div class="profile-usertitle-job"> {{ user.email }} </div>
+                </div>
+                <!-- END SIDEBAR USER TITLE -->
+                <!-- SIDEBAR MENU -->
+                <div class="profile-usermenu">
+                    <ul class="nav">
+                        <li class="active">
+                            <a href="">
+                                <i class="icon-home"></i> Overview </a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <i class="icon-settings"></i> Account Settings </a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <i class="icon-info"></i> Help </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- END MENU -->
+            </div>
+            <!-- END PORTLET MAIN -->
+            <!-- PORTLET MAIN -->
+            <div class="portlet light ">
+                <!-- STAT -->
+                <div class="row list-separated profile-stat">
+                    <div class="col-md-4 col-sm-4 col-xs-6">
+                        <div class="uppercase profile-stat-title"> 0 </div>
+                        <div class="uppercase profile-stat-text"> Courses </div>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-6">
+                        <div class="uppercase profile-stat-title"> 0 </div>
+                        <div class="uppercase profile-stat-text"> Tasks </div>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-6">
+                        <div class="uppercase profile-stat-title"> 0 </div>
+                        <div class="uppercase profile-stat-text"> Passed tasks </div>
+                    </div>
+                </div>
+                <!-- END STAT -->
+                <div>
+                    <h4 class="profile-desc-title">About {{ user.get_full_name }}</h4>
+                    <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span>
+                    <div class="margin-top-20 profile-desc-link">
+                        <i class="fa fa-github"></i>
+                        {% if not object.get_gh_profile_url %}
+                          <a href="{% provider_login_url "github" process="connect" %}">Add Github account</a>
+                        {% else %}
+                          <a href="{{ object.get_gh_profile_url }}">{{ object.get_gh_profile_url }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- END PORTLET MAIN -->
+            <div class="">
+              <a href="{% url 'account_logout'%}"><button type="button" name="button" class="btn btn-green">Sign out</button></a>
+            </div>
+        </div>
+      </div>
+    </div>
+        <!-- END BEGIN PROFILE SIDEBAR -->
+
+
   </p>
 {% endblock page_content%}
