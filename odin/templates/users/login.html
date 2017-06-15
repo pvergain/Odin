@@ -50,17 +50,13 @@
         </form>
         <!-- END LOGIN FORM -->
         </div>
-    <!-- BEGIN CORE PLUGINS -->
-    <script src="{% static "jquery/dist/jquery.min.js" %}" type="text/javascript"></script>
-    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}" type="text/javascript"> </script>
-    <script src="{% static "js/login.min.js" %}" type="text/javascript"></script>
-    <script src="{% static "js/app.min.js" %}" type="text/javascript"></script>
-    <script src="{% static "bootstrap-switch/dist/js/bootstrap-switch.min.js" %}" type="text/javascript"></script>
-    <!-- END CORE PLUGINS -->
-    <!-- BEGIN PAGE LEVEL PLUGINS -->
-    <script src="{% static "jquery-validation/dist/jquery.validate.min.js" %}" type="text/javascript"></script>
-    <script src="{% static "jquery-validation/dist/additional-methods.min.js" %}" type="text/javascript"></script>
-    <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN CORE PLUGINS -->
+        {% include "partial/core_scripts.html" %}
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        {% include "partial/authentication_scripts.html" %}
+        {% include "partial/form_validation_scripts.html" %}
+        <!-- END PAGE LEVEL PLUGINS -->
 </body>
 
 {% endblock body %}
