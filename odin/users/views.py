@@ -64,7 +64,7 @@ class AccountInactiveWrapperView(auth_views.AccountInactiveView):
 
 
 class SocialConnectionsWrapperView(LoginRequiredMixin, socialauth_views.ConnectionsView):
-    pass
+    template_name = 'users/connections.html'
 
 
 class SocialSignupWrapperView(ReadableFormErrorsMixin, socialauth_views.SignupView):
