@@ -1,21 +1,49 @@
-{% extends "users/base.html" %}
-
-{% load i18n %}
-
-{% block head_title %}{% trans "Sign Out" %}{% endblock %}
-
-{% block content %}
-<h1>{% trans "Sign Out" %}</h1>
-
-<p>{% trans 'Are you sure you want to sign out?' %}</p>
-
-<form method="post" action="{% url 'account_logout' %}">
-  {% csrf_token %}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-  {% endif %}
-  <button type="submit">{% trans 'Sign Out' %}</button>
-</form>
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load account socialaccount %}
 
 
-{% endblock %}
+{% block title %}
+  Logout
+{% endblock title %}
+
+
+{% block body %}
+<body class="login">
+    {% include "partial/logo.html" %}
+    <!-- BEGIN LOGOUT -->
+    <div class="content">
+        <!-- BEGIN LOGOUT FORM -->
+        <form class="login-form" action={% url 'account_logout' %} method="post">
+            {% csrf_token %}
+            <h3 class="form-title font-green">Sign Out</h3>
+            {% if not form.is_valid %}
+            {% for error in readable_errors %}
+              <div class="alert alert-warning">
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+            {% endif %}
+            <div class="alert alert-warning display-hide">
+                <button class="close" data-close="alert"></button>
+                <span> Enter an email address and password. </span>
+            </div>
+	    <div class="create-account">
+		<p>Are you sure you want to sign out?</p>
+		<div class="form-actions">
+		    <button type="submit" class="btn green uppercase">Sign out</button>
+            </div>
+        </form>
+        <!-- END LOGOUT FORM -->
+        </div>
+        <!-- BEGIN CORE PLUGINS -->
+        {% include "partial/core_scripts.html" %}
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        {% include "partial/authentication_scripts.html" %}
+        {% include "partial/form_validation_scripts.html" %}
+        <!-- END PAGE LEVEL PLUGINS -->
+</body>
+
+{% endblock body %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load account socialaccount %}
+
+{% block title %}
+  Social Signup
+{% endblock title %}
+
+{% block body %}
+  <body class="login">
+      {% include "partial/logo.html" %}
+      <div class="content">
+        <!-- BEGIN FORGOT PASSWORD FORM -->
+        <form class="onboarding" action="{% url 'socialaccount_signup' %}" method="post">
+            {% csrf_token %}
+            <h3 class="font-green">One Last Step</h3>
+            <p> Enter your e-mail address below to register or leave it as it is. </p>
+            <div class="form-group">
+                {% render_field form.email class="form-control placeholder-no-fix" placeholder="Email Address" %}
+            </div>
+            <div class="form-group">
+               {% render_field form.password class="form-control placeholder-no-fix" placeholder="Password" %}
+             </div>
+             <div class="form-group">
+              {% render_field form.captcha class="form-control" %}
+             </div>
+             <div class="form-actions">
+                <button type="submit" class="btn btn-success uppercase pull-left">Submit</button>
+             </div>
+        </form>
+        <!-- END FORGOT PASSWORD FORM -->
+      </div>
+      <!--[if lt IE 9]>
+  <script src="../assets/global/plugins/respond.min.js"></script>
+  <script src="../assets/global/plugins/excanvas.min.js"></script>
+  <script src="../assets/global/plugins/ie8.fix.min.js"></script>
+  <![endif]-->
+  <!-- BEGIN CORE PLUGINS -->
+  {% include "partial/core_scripts.html" %}
+  <!-- END CORE PLUGINS -->
+  <!-- BEGIN PAGE LEVEL PLUGINS -->
+  {% include "partial/authentication_scripts.html" %}
+  {% include "partial/form_validation_scripts.html" %}
+  <!-- END PAGE LEVEL PLUGINS -->
+  </body>
+{% endblock body %}

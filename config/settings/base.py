@@ -24,6 +24,7 @@ THIRD_PARTY_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'captcha',
+    'widget_tweaks'
 ]
 
 LOCAL_APPS = [
@@ -116,10 +117,10 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "odin.users.adapter.CustomAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = 'odin.education.forms.SignUpWithReCaptchaForm'
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
@@ -141,8 +142,12 @@ STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
+    str(ROOT_DIR.path('ui/images')),
     str(APPS_DIR.path('static')),
+    str(ROOT_DIR.path('ui/bower_components')),
+    str(ROOT_DIR.path('ui/assets')),
 ]
+
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',

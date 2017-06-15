@@ -6,7 +6,7 @@ from odin.users.views import (LoginWrapperView, SignUpWrapperView, LogoutWrapper
                               PasswordChangeWrapperView, PasswordResetWrapperView, SocialSignupWrapperView,
                               PasswordResetDoneWrapperView, AccountInactiveWrapperView,
                               PasswordResetFromKeyWrapperView, PasswordResetFromKeyDoneWrapperView,
-                              SocialConnectionsWrapperView)
+                              SocialConnectionsWrapperView, EmailVerificationSentWrapperView)
 
 
 urlpatterns = [
@@ -17,11 +17,12 @@ urlpatterns = [
     url(r'^password/set/$', PasswordSetWrapperView.as_view(), name='account_set_password'),
     url(r'^password/change/$', PasswordChangeWrapperView.as_view(), name='account_change_password'),
     url(r'^password/reset/$', PasswordResetWrapperView.as_view(), name='account_reset_password'),
-    url(r'^social-connections/$', SocialConnectionsWrapperView.as_view(), name='socialaccount_connections'),
+    url(r'^social/connections/$', SocialConnectionsWrapperView.as_view(), name='socialaccount_connections'),
     url(r'^password/reset/done/$', PasswordResetDoneWrapperView.as_view(), name="account_reset_password_done"),
     url(r'^inactive/$', AccountInactiveWrapperView.as_view(), name="account_inactive"),
-    url(r"^password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$", PasswordResetFromKeyWrapperView.as_view(),
+    url(r'^password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$', PasswordResetFromKeyWrapperView.as_view(),
         name="account_reset_password_from_key"),
-    url(r"^password/reset/key/done/$", PasswordResetFromKeyDoneWrapperView.as_view(),
+    url(r'^password/reset/key/done/$', PasswordResetFromKeyDoneWrapperView.as_view(),
         name="account_reset_password_from_key_done"),
+    url(r'^confirm-email/$', EmailVerificationSentWrapperView.as_view(), name='account_email_verification_sent')
 ] + allauth_urls

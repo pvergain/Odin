@@ -1,24 +1,52 @@
-{% extends "users/base.html" %}
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load account socialaccount %}
 
-{% load i18n %}
 
-{% block head_title %}{% trans "Signup" %}{% endblock %}
+{% block title %}
+  Log In
+{% endblock title %}
 
-{% block content %}
-<h1>{% trans "Sign Up" %}</h1>
+{% block body %}
+<body class="login">
+    {% include "partial/logo.html" %}
+    <div class="content">
+        <!-- BEGIN REGISTRATION FORM -->
+        <form class="signup-form" action="{% url 'account_signup' %}" method="post">
+            {% csrf_token %}
+            <h3 class="font-green">Sign Up</h3>
+            {% if not form.is_valid %}
+            {% for error in readable_errors %}
+              <div class="alert alert-warning">
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+            {% endif %}
+            <p class="hint"> Enter your account details below: </p>
+            <div class="form-group">
+                {% render_field form.email class="form-control placeholder-no-fix" placeholder="Email Address" %}
+            </div>
+            <div class="form-group">
+                {% render_field form.password1 class="form-control placeholder-no-fix" placeholder="Password" %}
+            </div>
+            <div class="form-group">
+                {% render_field form.captcha class="form-control" %}
+            </div>
+            <div class="form-actions">
+                <a href="{% url 'account_login' %}"><button type="button" id="register-back-btn" class="btn green btn-outline">Back</button></a>
+                <button type="submit" id="register-submit-btn" class="btn btn-success uppercase pull-right">Submit</button>
+            </div>
+        </form>
+        <!-- END REGISTRATION FORM -->
+    </div>
+    <!-- BEGIN CORE PLUGINS -->
+    {% include "partial/core_scripts.html" %}
+    <!-- END CORE PLUGINS -->
+    <!-- BEGIN PAGE LEVEL PLUGINS -->
+    {% include "partial/authentication_scripts.html" %}
+    {% include "partial/form_validation_scripts.html" %}
+    <!-- END PAGE LEVEL PLUGINS -->
+</body>
 
-<p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
-
-<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-  {% csrf_token %}
-  {{ form.email }} <br />
-  {{ form.password1 }} <br />
-  {{ form.password2 }} <br />
-  {{ form.captcha }}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-  <button type="submit">{% trans "Sign Up" %} &raquo;</button>
-</form>
-
-{% endblock %}
+{% endblock body %}
