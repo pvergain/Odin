@@ -2,6 +2,7 @@ from test_plus import TestCase
 from django.core.urlresolvers import reverse
 
 from odin.users.factories import BaseUserFactory
+from odin.education.models import Student, Teacher
 
 from odin.common.faker import faker
 
@@ -51,3 +52,43 @@ class TestManagementView(TestCase):
         with self.login(email=user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
+
+    def test_can_make_student_or_teacher_if_user_is_not_student_or_teacher(self):
+        user = BaseUserFactory(password=self.test_password)
+        user.is_active = True
+        user.is_superuser = True
+        user.save()
+
+        with self.login(email=user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, "Make Student")
+            self.assertContains(response, "Make Teacher")
+
+    def test_can_not_make_student_if_user_is_already_student(self):
+        user = BaseUserFactory(password=self.test_password)
+        user.is_active = True
+        user.is_superuser = True
+        user.save()
+
+        Student.objects.create_from_user(user)
+
+        with self.login(email=user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertNotContains(response, "Make Student")
+            self.assertContains(response, "Make Teacher")
+
+    def test_can_not_make_student_if_user_is_already_student(self):
+        user = BaseUserFactory(password=self.test_password)
+        user.is_active = True
+        user.is_superuser = True
+        user.save()
+
+        Teacher.objects.create_from_user(user)
+
+        with self.login(email=user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertNotContains(response, "Make Teacher")
+            self.assertContains(response, "Make Student")

@@ -1,6 +1,8 @@
-from django.views.generic import TemplateView, RedirectView, ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.views.generic import View, TemplateView, RedirectView, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .mixins import ManagementDashboardPermissionMixin
 
@@ -26,4 +28,17 @@ class DashboardManagementView(ManagementDashboardPermissionMixin, ListView):
         elif self.request.GET.get('filter', None) == 'teachers':
             return Teacher.objects.select_related('profile').all()
 
-        return BaseUser.objects.select_related('profile').all()
+        return BaseUser.objects.select_related('profile').all().prefetch_related('student', 'teacher')
+
+
+class MakeStudentOrTeacherView(ManagementDashboardPermissionMixin, View):
+    def get(self, request, *args, **kwargs):
+        if self.kwargs.get('type') == 'teacher':
+            user = BaseUser.objects.get(id=kwargs.get('id'))
+            Teacher.objects.create_from_user(user)
+        elif self.kwargs.get('type') == 'student':
+            user = BaseUser.objects.get(id=kwargs.get('id'))
+            Student.objects.create_from_user(user)
+        else:
+            return Http404
+        return redirect(reverse_lazy('dashboard:management'))
