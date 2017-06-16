@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from .views import DashboardIndexView, DashboardManagementView, MakeStudentOrTeacherView
+from .views import DashboardIndexView, DashboardManagementView, MakeStudentOrTeacherView, ManagementUserCreateView
 
 urlpatterns = [
     url(regex='^$',
@@ -15,4 +15,7 @@ urlpatterns = [
     url(regex='^management/promote/(?P<type>[A-Za-z]+)/(?P<id>[0-9]+)/$',
         view=MakeStudentOrTeacherView.as_view(),
         name='promote'),
+    url(regex='^management/add-user/$',
+        view=ManagementUserCreateView.as_view(),
+        name='add-user')
 ]

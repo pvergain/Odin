@@ -171,3 +171,16 @@ class TestManagementView(TestCase):
         with self.login(email=user.email, password=self.test_password):
             response = self.get(self.url + '?filter=teachers')
             self.assertEqual(1, len(response.context.get('object_list')))
+
+    def test_filter_all_shows_all_users(self):
+        user = BaseUserFactory(password=self.test_password)
+        user.is_active = True
+        user.is_superuser = True
+        user.save()
+
+        StudentFactory()
+        TeacherFactory()
+
+        with self.login(email=user.email, password=self.test_password):
+            response = self.get(self.url + '?filter=all')
+            self.assertEqual(3, len(response.context.get('object_list')))
