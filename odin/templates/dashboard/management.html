@@ -5,5 +5,76 @@
 {% endblock content_title %}
 
 {% block page_content %}
-
+<div class="row">
+    <div class="col-md-8">
+        <!-- BEGIN SAMPLE TABLE PORTLET-->
+        <div class="portlet box green">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-comments"></i> User management table </div>
+                <div class="tools">
+                    <a href="javascript:;" class="collapse"> </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+              <form class="" action="" method="get">
+                <div class="form-group">
+                  <select class="" name="filter">
+                    <option value="students">Students</option>
+                    <option value="teachers">Teachers</option>
+                  </select>
+                </div>
+                <div class="form-actions">
+                  <input class="btn green uppercase" type="submit" name="" value="Filter">
+                </div>
+              </form>
+                <div class="table-scrollable">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th> # </th>
+                                <th> Email </th>
+                                <th> Full Name </th>
+                                <th> GitHub </th>
+                                <th> Actions </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for obj in object_list %}
+                              <tr>
+                                <td>{{ obj.id }}</td>
+                                <td>{{ obj.email }}</td>
+                                <td>{{ obj.get_full_name }}</td>
+                                <td>{{ obj.profile.get_gh_profile_url }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default">Make Student</button>
+                                        <button type="button" class="btn btn-default">Make Teacher</button>
+                                    </div>
+                                </td>
+                              </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if is_paginated %}
+                  <div class="pagination">
+                    <span class="page-links">
+                      {% if page_obj.has_previous %}
+                          <a href="?page={{page_obj.previous_page_number}}">previous</a>
+                      {% endif %}
+                          <span class="page-current">
+                              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                          </span>
+                      {% if page_obj.has_next %}
+                          <a href="?page={{page_obj.next_page_number}}">next</a>
+                      {% endif %}
+                    </span>
+                  </div>
+                {% endif %}
+            </div>
+        </div>
+        <!-- END SAMPLE TABLE PORTLET-->
+    </div>
+  </div>
 {% endblock page_content %}
