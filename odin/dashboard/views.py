@@ -24,11 +24,11 @@ class DashboardManagementView(ManagementDashboardPermissionMixin, ListView):
 
     def get_queryset(self):
         if self.request.GET.get('filter', None) == 'students':
-            return Student.objects.select_related('profile').all()
+            return Student.objects.select_related('profile').all().order_by('-id')
         elif self.request.GET.get('filter', None) == 'teachers':
-            return Teacher.objects.select_related('profile').all()
+            return Teacher.objects.select_related('profile').all().order_by('-id')
 
-        return BaseUser.objects.select_related('profile').all().prefetch_related('student', 'teacher')
+        return BaseUser.objects.select_related('profile').all().prefetch_related('student', 'teacher').order_by('-id')
 
 
 class MakeStudentOrTeacherView(ManagementDashboardPermissionMixin, View):
