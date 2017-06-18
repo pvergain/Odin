@@ -4,7 +4,7 @@ from django.contrib.auth.models import BaseUserManager
 class UserManager(BaseUserManager):
     def __create_user(self,
                       email,
-                      password,
+                      password=None,
                       is_staff=False,
                       is_active=False,
                       is_superuser=False):
@@ -17,7 +17,11 @@ class UserManager(BaseUserManager):
                           is_active=is_active,
                           is_superuser=is_superuser)
 
-        user.set_password(password)
+        if password is not None:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+
         user.save(using=self._db)
 
         return user
