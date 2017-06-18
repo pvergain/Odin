@@ -11,6 +11,9 @@ from .services import process_social_account
 
 @receiver(post_save, sender=BaseUser)
 def create_profile_upon_user_creation(sender, instance, created, **kwargs):
+    """
+    COMMENT: This signal seems like it's not belonging here. Maybe in users app?
+    """
     if created:
         Profile.objects.create(user=instance)
 

@@ -12,18 +12,21 @@ class SignUpWithReCaptchaForm(SignupForm):
 
 
 class OnboardingForm(SocialSignupForm):
-
-    def __init__(self, *args, **kwargs):
-        email_address = kwargs.pop('email_address')
-        super().__init__(*args, **kwargs)
-        self.fields['email'].initial = email_address
-
     captcha = ReCaptchaField(label='', attrs={'theme': 'clean'})
     password = forms.CharField(widget=forms.PasswordInput())
 
+    def __init__(self, *args, **kwargs):
+        email_address = kwargs.pop('email_address')
+
+        super().__init__(*args, **kwargs)
+
+        self.fields['email'].initial = email_address
+
 
 class PasswordResetForm(forms.Form):
-
+    """
+    COMMENT: If we don't have password2, password1 can be just password
+    """
     password1 = SetPasswordField()
 
     def __init__(self, *args, **kwargs):
