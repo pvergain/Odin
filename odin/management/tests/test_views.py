@@ -55,24 +55,6 @@ class TestManagementView(TestCase):
             self.assertNotContains(response, "Make Teacher")
             self.assertContains(response, "Make Student")
 
-    def test_can_make_student_successfully(self):
-        url = reverse('dashboard:management:promote-to-student', kwargs={'id': self.user.id})
-
-        with self.login(email=self.user.email, password=self.test_password):
-            self.assertEqual(0, Student.objects.count())
-            response = self.get(url)
-            self.assertRedirects(response=response, expected_url=self.url)
-            self.assertEqual(1, Student.objects.count())
-
-    def test_can_make_teacher_successfully(self):
-        url = reverse('dashboard:management:promote-to-teacher', kwargs={'id': self.user.id})
-
-        with self.login(email=self.user.email, password=self.test_password):
-            self.assertEqual(0, Teacher.objects.count())
-            response = self.get(url)
-            self.assertRedirects(response=response, expected_url=self.url)
-            self.assertEqual(1, Teacher.objects.count())
-
     def test_filter_students_shows_students(self):
         BaseUserFactory()
         Student.objects.create_from_user(self.user)
@@ -260,3 +242,53 @@ class TestCreateTeacherView(TestCase):
             response = self.post(self.url, data=data)
             self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
             self.assertEqual(1, Teacher.objects.count())
+
+
+class TestPromoteUserToStudentView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:management:promote-to-student', kwargs={'id': self.user.id})
+
+    def test_get_is_forbidden_when_user_is_not_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_can_make_student_successfully(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.assertEqual(0, Student.objects.count())
+            self.assertEqual(1, BaseUser.objects.count())
+
+            response = self.get(self.url)
+            self.assertRedirects(response=response, expected_url=reverse('dashboard:management:management_index'))
+            self.assertEqual(1, Student.objects.count())
+            self.assertEqual(1, BaseUser.objects.count())
+
+
+class TestPromoteUserToTeacherView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:management:promote-to-teacher', kwargs={'id': self.user.id})
+
+    def test_get_is_forbidden_when_user_is_not_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_can_make_teacher_successfully(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.assertEqual(0, Teacher.objects.count())
+            self.assertEqual(1, BaseUser.objects.count())
+
+            response = self.get(self.url)
+            self.assertRedirects(response=response, expected_url=reverse('dashboard:management:management_index'))
+            self.assertEqual(1, Teacher.objects.count())
+            self.assertEqual(1, BaseUser.objects.count())
