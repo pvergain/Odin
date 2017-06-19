@@ -1,6 +1,6 @@
 from django import forms
 
-from ..users.models import BaseUser
+from odin.users.models import BaseUser
 
 
 class ManagementAddUserForm(forms.ModelForm):
