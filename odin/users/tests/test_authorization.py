@@ -10,6 +10,9 @@ import os
 
 
 class AuthorizationTests(TestCase):
+    """
+    COMMENT: This looks like a test for the authentication app?
+    """
 
     def setUp(self):
         os.environ['RECAPTCHA_TESTING'] = 'True'

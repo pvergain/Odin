@@ -6,12 +6,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 
+from odin.users.models import BaseUser
+from odin.users.services import get_gh_email_address
+
+from odin.common.mixins import ReadableFormErrorsMixin
+
 from .forms import SignUpWithReCaptchaForm, OnboardingForm, PasswordResetForm
-
-from ..users.models import BaseUser
-from ..users.services import get_gh_email_address
-
-from ..common.mixins import ReadableFormErrorsMixin
 
 
 class LoginWrapperView(ReadableFormErrorsMixin, auth_views.LoginView):

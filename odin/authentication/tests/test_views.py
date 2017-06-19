@@ -1,3 +1,5 @@
+import os
+
 from test_plus import TestCase
 
 from django.core import mail
@@ -6,8 +8,6 @@ from allauth.account.models import EmailAddress
 
 from odin.users.factories import BaseUserFactory
 from odin.common.faker import faker
-
-import os
 
 
 class TestLogInView(TestCase):
@@ -25,7 +25,7 @@ class TestLogInView(TestCase):
         self.assertInContext('readable_errors')
         self.assertEqual(0, len(response.context['readable_errors']))
 
-    def test_readable_errors_are_not_None_when_form_invalid(self):
+    def test_readable_errors_are_not_none_when_form_is_invalid(self):
         user = BaseUserFactory(password=self.test_password)
         user.is_active = True
         user.save()
@@ -38,7 +38,7 @@ class TestLogInView(TestCase):
         self.assertInContext('readable_errors')
         self.assertNotEqual(0, len(response.context['readable_errors']))
 
-    def test_view_redirects_to_confirmation_prompt_when_email_not_confirmed(self):
+    def test_view_redirects_to_confirmation_prompt_when_email_is_not_confirmed(self):
         user = BaseUserFactory(password=self.test_password)
         user.is_active = True
         user.save()
@@ -48,7 +48,8 @@ class TestLogInView(TestCase):
         }
         response = self.post(url_name=self.url, data=data, follow=True)
 
-        self.assertRedirects(response=response, expected_url=self.reverse('account_email_verification_sent'))
+        self.assertRedirects(response=response,
+                             expected_url=self.reverse('account_email_verification_sent'))
 
     def test_view_redirects_to_profile_on_post_when_email_is_confirmed(self):
         user = BaseUserFactory(password=self.test_password)
@@ -68,7 +69,6 @@ class TestLogInView(TestCase):
 
 
 class TestSignUpView(TestCase):
-
     def setUp(self):
         os.environ['RECAPTCHA_TESTING'] = 'True'
         self.test_password = faker.password()
@@ -83,7 +83,7 @@ class TestSignUpView(TestCase):
         self.assertInContext('readable_errors')
         self.assertEqual(0, len(response.context['readable_errors']))
 
-    def test_readable_errors_are_not_None_when_form_invalid(self):
+    def test_readable_errors_are_not_none_when_form_is_invalid(self):
         data = {
             'email': faker.email(),
             'password1': self.test_password
@@ -105,7 +105,6 @@ class TestSignUpView(TestCase):
 
 
 class TestPasswordResetView(TestCase):
-
     def setUp(self):
         self.email = faker.email()
         self.user = BaseUserFactory(email=self.email)
@@ -125,7 +124,7 @@ class TestPasswordResetView(TestCase):
 
         self.assertRedirects(response=response, expected_url=self.reverse('account_reset_password_done'))
 
-    def test_readable_errors_are_not_empty_when_form_invalid(self):
+    def test_readable_errors_are_not_empty_when_form_is_invalid(self):
         data = {
             'email': faker.email()
         }
@@ -136,7 +135,6 @@ class TestPasswordResetView(TestCase):
 
 
 class TestPasswordResetFromKeyView(TestCase):
-
     def setUp(self):
         self.email = faker.email()
         self.user = BaseUserFactory(email=self.email)
@@ -148,27 +146,33 @@ class TestPasswordResetFromKeyView(TestCase):
 
         url = self.reverse('account_reset_password')
         response = self.post(url_name=url, data=data, follow=True)
+
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.email])
+
         body = mail.outbox[0].body
         url = '/auth' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
+
         self.assertEqual(200, response.status_code)
         self.assertInContext('readable_errors')
         self.assertEqual(0, len(response.context['readable_errors']))
 
-    def test_readable_errors_are_not_empty_when_form_invalid(self):
+    def test_readable_errors_are_not_empty_when_form_is_invalid(self):
         data = {
             'email': self.email
         }
 
         url = self.reverse('account_reset_password')
         response = self.post(url_name=url, data=data, follow=True)
+
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.email])
+
         body = mail.outbox[0].body
         url = '/auth' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
+
         self.assertEqual(200, response.status_code)
 
         data = {
@@ -176,6 +180,7 @@ class TestPasswordResetFromKeyView(TestCase):
         }
 
         response = self.post(url_name=url, data=data, follow=False)
+
         self.assertInContext('readable_errors')
         self.assertNotEqual(0, len(response.context['readable_errors']))
 
@@ -186,11 +191,14 @@ class TestPasswordResetFromKeyView(TestCase):
 
         url = self.reverse('account_reset_password')
         response = self.post(url_name=url, data=data, follow=True)
+
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.email])
+
         body = mail.outbox[0].body
         url = '/auth' + body[body.find('/password/reset/'):].split()[0]
         response = self.get(url)
+
         self.assertEqual(200, response.status_code)
 
         data = {
@@ -198,4 +206,5 @@ class TestPasswordResetFromKeyView(TestCase):
         }
 
         response = self.post(url_name=url, data=data, follow=True)
+
         self.assertRedirects(response=response, expected_url=self.reverse('account_login'))

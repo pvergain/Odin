@@ -1,13 +1,15 @@
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import View, TemplateView, RedirectView, ListView, CreateView
+from django.views.generic import View, TemplateView, RedirectView, ListView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .mixins import ManagementDashboardPermissionMixin
 from .forms import ManagementAddUserForm
 
 from odin.users.models import BaseUser
+from odin.users.services import create_user
+
 from odin.education.models import Student, Teacher
 
 
@@ -46,14 +48,16 @@ class MakeStudentOrTeacherView(LoginRequiredMixin, ManagementDashboardPermission
         return redirect(reverse_lazy('dashboard:management'))
 
 
-class ManagementUserCreateView(LoginRequiredMixin, ManagementDashboardPermissionMixin, CreateView):
-    model = BaseUser
+class ManagementUserCreateView(LoginRequiredMixin,
+                               ManagementDashboardPermissionMixin,
+                               FormView):
     form_class = ManagementAddUserForm
     template_name = 'dashboard/add_user.html'
     success_url = reverse_lazy('dashboard:management')
 
     def form_valid(self, form):
-        instance = form.save()
+        instance = create_user(**form.cleaned_data)
+
         if self.request.GET.get('filter') == 'students':
             Student.objects.create_from_user(instance)
         elif self.request.GET.get('filter') == 'teachers':

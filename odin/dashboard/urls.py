@@ -1,6 +1,11 @@
 from django.conf.urls import url, include
 
-from .views import DashboardIndexView, DashboardManagementView, MakeStudentOrTeacherView, ManagementUserCreateView
+from .views import (
+    DashboardIndexView,
+    DashboardManagementView,
+    MakeStudentOrTeacherView,
+    ManagementUserCreateView
+)
 
 urlpatterns = [
     url(regex='^$',
@@ -10,8 +15,7 @@ urlpatterns = [
         view=DashboardManagementView.as_view(),
         name='management'),
     url(regex='^users/',
-        view=include('odin.users.urls', namespace='users')
-        ),
+        view=include('odin.users.urls', namespace='users')),
     url(regex='^management/promote/(?P<type>[A-Za-z]+)/(?P<id>[0-9]+)/$',
         view=MakeStudentOrTeacherView.as_view(),
         name='promote'),
