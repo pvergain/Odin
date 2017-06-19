@@ -176,7 +176,7 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(200, response.status_code)
 
         data = {
-            'password1': "ivan"
+            'password': "ivan"
         }
 
         response = self.post(url_name=url, data=data, follow=False)
@@ -202,7 +202,7 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(200, response.status_code)
 
         data = {
-            'password1': faker.password()
+            'password': faker.password()
         }
 
         response = self.post(url_name=url, data=data, follow=True)

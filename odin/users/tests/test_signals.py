@@ -22,9 +22,6 @@ class ProfileSignalTests(TestCase):
         self.assertEqual(Profile.objects.count(), 1)
 
     def test_sign_up_request_creates_profile(self):
-        """
-        This test case looks like it belongs to `authentication/tests/test_signals.py`
-        """
         url = self.reverse('account_signup')
         password = "1234asdf"
         data = {

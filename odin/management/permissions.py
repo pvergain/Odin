@@ -1,10 +1,5 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 
-"""
-COMMENT: This looks more like "permissions.py" then "mixins.py"
-Also - no need to add Mixin at the end of the class since it's not mixin
-"""
-
 
 class BaseUserPassesTestMixin(UserPassesTestMixin):
     def test_func(self):
