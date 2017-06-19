@@ -180,9 +180,9 @@ class TestPasswordResetFromKeyView(TestCase):
         url = reverse('account_reset_password_from_key', kwargs={'uidb36': uidb36, 'key': key})
         response = self.get(url)
         self.assertEqual(200, response.status_code)
-
+        invalid_password = self.email
         data = {
-            'password': "ivan"
+            'password': invalid_password
         }
 
         response = self.post(url_name=url, data=data, follow=False)

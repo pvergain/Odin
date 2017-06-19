@@ -58,10 +58,10 @@ class BaseUser(PermissionsMixin,
         return f'{self.email}'
 
     def is_student(self):
-        return self.student
+        return hasattr(self, 'student')
 
     def is_teacher(self):
-        return self.teacher
+        return hasattr(self, 'teacher')
 
 
 class Profile(models.Model):
