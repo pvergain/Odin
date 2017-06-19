@@ -28,9 +28,9 @@
                 <div class="form-actions">
                   <input class="btn green uppercase" type="submit" name="" value="Filter">
 		      <a href="{% url 'dashboard:management:add-user' %}?{{ request.GET.urlencode }}">
-			{% if request.GET.students == 'True' %}
+			{% if request.GET.type == 'students' %}
 			<input class="btn green uppercase" value="Add student">
-			{% elif request.GET.teachers == 'True' %}
+			{% elif request.GET.type == 'teachers' %}
 			<input class="btn green uppercase" value="Add teacher">
 			{% else %}
 			<input class="btn green uppercase" value="Add user">
