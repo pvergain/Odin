@@ -77,7 +77,11 @@ class TestManagementView(TestCase):
         Student.objects.create_from_user(self.user)
 
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url + '?filter=students')
+            data = {
+                'type': 'students'
+            }
+
+            response = self.get(self.url, data=data)
             self.assertEqual(1, len(response.context.get('object_list')))
 
     def test_filter_students_does_not_show_teachers(self):

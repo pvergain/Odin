@@ -24,7 +24,8 @@ THIRD_PARTY_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'captcha',
-    'widget_tweaks'
+    'widget_tweaks',
+    'django_filters'
 ]
 
 LOCAL_APPS = [
@@ -103,6 +104,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',

@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .permissions import DashboardManagementPermission
 from .forms import ManagementAddUserForm
+from .filters import UserFilter
 
 
 from odin.users.models import BaseUser
@@ -19,15 +20,13 @@ class DashboardManagementView(LoginRequiredMixin,
                               ListView):
     template_name = 'dashboard/management.html'
     paginate_by = 100
+    filter_class = UserFilter
+    queryset = BaseUser.objects.select_related('profile').all()\
+        .prefetch_related('student', 'teacher').order_by('-id')
 
     def get_queryset(self):
-        queryset = BaseUser.objects.select_related('profile').all()\
-            .prefetch_related('student', 'teacher').order_by('-id')
-        if self.request.GET.get('filter', None) == 'students':
-            return queryset.filter(student__isnull=False)
-        elif self.request.GET.get('filter', None) == 'teachers':
-            return queryset.filter(teacher__isnull=False)
-        return queryset
+        self.filter = self.filter_class(self.request.GET, queryset=self.queryset)
+        return self.filter.qs
 
 
 class MakeStudentOrTeacherView(LoginRequiredMixin,
@@ -55,9 +54,9 @@ class ManagementUserCreateView(LoginRequiredMixin,
     def form_valid(self, form):
         instance = create_user(**form.cleaned_data)
 
-        if self.request.GET.get('filter') == 'students':
+        if self.request.GET.get('type') == 'students':
             Student.objects.create_from_user(instance)
-        elif self.request.GET.get('filter') == 'teachers':
+        elif self.request.GET.get('type') == 'teachers':
             Teacher.objects.create_from_user(instance)
 
         return super().form_valid(form)

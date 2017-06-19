@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 from .models import BaseUser, Profile
 
 
-
 def update_user_profile(*,
                         user: BaseUser,
                         data: Dict[str, str]) -> Profile:

@@ -19,7 +19,7 @@
             <div class="portlet-body">
               <form class="" action="" method="get">
                 <div class="form-group">
-                  <select class="form-control" name="filter">
+                  <select class="form-control" name="type">
 		    <option value="all">All users</option>
                     <option value="students">Students</option>
                     <option value="teachers">Teachers</option>
@@ -28,9 +28,9 @@
                 <div class="form-actions">
                   <input class="btn green uppercase" type="submit" name="" value="Filter">
 		      <a href="{% url 'dashboard:management:add-user' %}?{{ request.GET.urlencode }}">
-			{% if request.GET.filter == 'students' %}
+			{% if request.GET.students == 'True' %}
 			<input class="btn green uppercase" value="Add student">
-			{% elif request.GET.filter == 'teachers' %}
+			{% elif request.GET.teachers == 'True' %}
 			<input class="btn green uppercase" value="Add teacher">
 			{% else %}
 			<input class="btn green uppercase" value="Add user">
