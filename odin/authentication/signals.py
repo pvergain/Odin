@@ -1,21 +1,11 @@
-from django.db.models.signals import post_save
 from django.shortcuts import get_object_or_404
 from django.dispatch import receiver
 
 from allauth.account.signals import email_confirmed
 from allauth.socialaccount.signals import social_account_added
 
-from ..users.models import BaseUser, Profile
+from ..users.models import BaseUser
 from .services import process_social_account
-
-
-@receiver(post_save, sender=BaseUser)
-def create_profile_upon_user_creation(sender, instance, created, **kwargs):
-    """
-    COMMENT: This signal seems like it's not belonging here. Maybe in users app?
-    """
-    if created:
-        Profile.objects.create(user=instance)
 
 
 @receiver(email_confirmed)
