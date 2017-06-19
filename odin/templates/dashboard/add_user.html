@@ -2,13 +2,7 @@
 {% load static %}
 
 {% block content_title %}
-    {% if request.GET.filter == 'students' %}
-        Add student
-    {% elif request.GET.filter == 'teachers' %}
-    	Add teacher
-    {% else %}
-    	Add user
-    {% endif %}
+    	Add {{ user_type }}
 {% endblock content_title %}
 
 {% block page_content %}

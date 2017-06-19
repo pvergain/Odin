@@ -56,7 +56,7 @@ class TestManagementView(TestCase):
             self.assertContains(response, "Make Student")
 
     def test_can_make_student_successfully(self):
-        url = reverse('dashboard:management:promote', kwargs={'type': 'student', 'id': self.user.id})
+        url = reverse('dashboard:management:promote-to-student', kwargs={'id': self.user.id})
 
         with self.login(email=self.user.email, password=self.test_password):
             self.assertEqual(0, Student.objects.count())
@@ -65,7 +65,7 @@ class TestManagementView(TestCase):
             self.assertEqual(1, Student.objects.count())
 
     def test_can_make_teacher_successfully(self):
-        url = reverse('dashboard:management:promote', kwargs={'type': 'teacher', 'id': self.user.id})
+        url = reverse('dashboard:management:promote-to-teacher', kwargs={'id': self.user.id})
 
         with self.login(email=self.user.email, password=self.test_password):
             self.assertEqual(0, Teacher.objects.count())
@@ -74,7 +74,7 @@ class TestManagementView(TestCase):
             self.assertEqual(1, Teacher.objects.count())
 
     def test_filter_students_shows_students(self):
-        user = BaseUserFactory()
+        BaseUserFactory()
         Student.objects.create_from_user(self.user)
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -86,7 +86,7 @@ class TestManagementView(TestCase):
             self.assertEqual(1, len(response.context.get('object_list')))
 
     def test_filter_students_does_not_show_teachers(self):
-        user = BaseUserFactory()
+        BaseUserFactory()
         TeacherFactory()
         Student.objects.create_from_user(self.user)
 
@@ -99,7 +99,7 @@ class TestManagementView(TestCase):
             self.assertEqual(1, len(response.context.get('object_list')))
 
     def test_filter_teachers_shows_teachers(self):
-        user = BaseUserFactory()
+        BaseUserFactory()
         Teacher.objects.create_from_user(self.user)
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -111,7 +111,7 @@ class TestManagementView(TestCase):
             self.assertEqual(1, len(response.context.get('object_list')))
 
     def test_filter_teachers_does_not_show_students(self):
-        user = BaseUserFactory()
+        BaseUserFactory()
         StudentFactory()
         Teacher.objects.create_from_user(self.user)
 
@@ -134,7 +134,7 @@ class TestManagementView(TestCase):
     def test_button_changes_on_no_filter(self):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
-            self.assertResponseContains(response=response, text='<input class="btn green uppercase" value="Add user">')
+            self.assertResponseContains(response=response, text="Add user")
 
     def test_button_changes_on_student_filter(self):
         with self.login(email=self.user.email, password=self.test_password):
@@ -144,12 +144,12 @@ class TestManagementView(TestCase):
 
             response = self.get(self.url, data=data)
             self.assertResponseContains(response=response,
-                                        text='<input class="btn green uppercase" value="Add student">')
+                                        text="Add student")
 
     def test_button_changes_on_all_filter(self):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
-            self.assertResponseContains(response=response, text='<input class="btn green uppercase" value="Add user">')
+            self.assertResponseContains(response=response, text="Add user")
 
     def test_button_changes_on_teacher_filter(self):
         with self.login(email=self.user.email, password=self.test_password):
@@ -159,42 +159,14 @@ class TestManagementView(TestCase):
 
             response = self.get(self.url, data=data)
             self.assertResponseContains(response=response,
-                                        text='<input class="btn green uppercase" value="Add teacher">')
+                                        text="Add teacher")
 
 
-class TestManagementCreateUserView(TestCase):
+class TestCreateUserView(TestCase):
     def setUp(self):
         self.url = self.reverse('dashboard:management:add-user')
         self.test_password = faker.password()
         self.user = SuperUserFactory(password=self.test_password)
-
-    # def test_title_changes_on_no_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         response = self.get(self.url)
-    #         self.assertResponseContains(response=response, text='Add user')
-
-    # def test_title_changes_on_all_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         response = self.get(self.url)
-    #         self.assertResponseContains(response=response, text='Add user')
-
-    # def test_title_changes_on_student_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         data = {
-    #             'type': 'students'
-    #         }
-
-    #         response = self.get(self.url, data=data)
-    #         self.assertResponseContains(response=response, text='Add student')
-
-    # def test_title_changes_on_teacher_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         data = {
-    #             'type': 'teachers'
-    #         }
-
-    #         response = self.get(self.url, data=data)
-    #         self.assertResponseContains(response=response, text='Add teacher')
 
     def test_get_is_forbidden_when_user_is_not_superuser(self):
         self.user.is_superuser = False
@@ -213,29 +185,78 @@ class TestManagementCreateUserView(TestCase):
             response = self.post(self.url, data=data)
             self.assertEqual(403, response.status_code)
 
-    # def test_post_creates_baseuser_on_no_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         data = {'email': faker.email()}
-    #         response = self.post(self.url, data=data)
-    #         self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
-    #         self.assertEqual(2, BaseUser.objects.count())
-    #         self.assertEqual(0, Student.objects.count())
-    #         self.assertEqual(0, Teacher.objects.count())
+    def test_post_creates_baseuser_when_user_is_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
 
-    # def test_post_creates_baseuser_on_students_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         data = {'email': faker.email()}
-    #         response = self.post(self.url + '?type=students', data=data)
-    #         self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
-    #         self.assertEqual(2, BaseUser.objects.count())
-    #         self.assertEqual(1, Student.objects.count())
-    #         self.assertEqual(0, Teacher.objects.count())
+            self.assertEqual(1, BaseUser.objects.count())
 
-    # def test_post_creates_baseuser_on_teachers_filter(self):
-    #     with self.login(email=self.user.email, password=self.test_password):
-    #         data = {'email': faker.email()}
-    #         response = self.post(self.url + '?type=teachers', data=data)
-    #         self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
-    #         self.assertEqual(2, BaseUser.objects.count())
-    #         self.assertEqual(0, Student.objects.count())
-    #         self.assertEqual(1, Teacher.objects.count())
+            data = {'email': faker.email()}
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
+            self.assertEqual(2, BaseUser.objects.count())
+
+
+class TestCreateStudentView(TestCase):
+    def setUp(self):
+        self.url = self.reverse('dashboard:management:add-student')
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_when_user_is_not_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_post_is_forbidden_when_user_is_not_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            data = {'email': faker.email()}
+            response = self.post(self.url, data=data)
+            self.assertEqual(403, response.status_code)
+
+    def test_post_creates_student_when_user_is_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.assertEqual(0, Student.objects.count())
+
+            data = {'email': faker.email()}
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
+            self.assertEqual(1, Student.objects.count())
+
+
+class TestCreateTeacherView(TestCase):
+    def setUp(self):
+        self.url = self.reverse('dashboard:management:add-teacher')
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_when_user_is_not_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_post_is_forbidden_when_user_is_not_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            data = {'email': faker.email()}
+            response = self.post(self.url, data=data)
+            self.assertEqual(403, response.status_code)
+
+    def test_post_creates_teacher_when_user_is_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.assertEqual(0, Teacher.objects.count())
+
+            data = {'email': faker.email()}
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response=response, expected_url=self.reverse('dashboard:management:management_index'))
+            self.assertEqual(1, Teacher.objects.count())

@@ -15,6 +15,7 @@ def create_user(*,
                 email: str,
                 password: str=None,
                 profile_data: Dict[str, str]=None) -> BaseUser:
+
     if BaseUser.objects.filter(email=email).exists():
         raise ValidationError('User already exists.')
 

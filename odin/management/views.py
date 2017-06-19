@@ -1,13 +1,10 @@
-from django.http import Http404
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
 from django.views.generic import View, ListView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .permissions import DashboardManagementPermission
-from .forms import ManagementAddUserForm
 from .filters import UserFilter
-
+from .mixins import DashboardCreateUserMixin
 
 from odin.users.models import BaseUser
 from odin.users.services import create_user
@@ -29,34 +26,57 @@ class DashboardManagementView(LoginRequiredMixin,
         return self.filter.qs
 
 
-class MakeStudentOrTeacherView(LoginRequiredMixin,
+class PromoteUserToStudentView(LoginRequiredMixin,
                                DashboardManagementPermission,
                                View):
     def get(self, request, *args, **kwargs):
-        if self.kwargs.get('type') == 'teacher':
-            user = BaseUser.objects.get(id=kwargs.get('id'))
-            Teacher.objects.create_from_user(user)
-        elif self.kwargs.get('type') == 'student':
-            user = BaseUser.objects.get(id=kwargs.get('id'))
-            Student.objects.create_from_user(user)
-        else:
-            return Http404
-        return redirect(reverse_lazy('dashboard:management:management_index'))
+        instance = BaseUser.objects.get(id=kwargs.get('id'))
+        Student.objects.create_from_user(instance)
+        return redirect('dashboard:management:management_index')
 
 
-class ManagementUserCreateView(LoginRequiredMixin,
+class PromoteUserToTeacherView(LoginRequiredMixin,
                                DashboardManagementPermission,
-                               FormView):
-    form_class = ManagementAddUserForm
-    template_name = 'dashboard/add_user.html'
-    success_url = reverse_lazy('dashboard:management:management_index')
+                               View):
+    def get(self, request, *args, **kwargs):
+        instance = BaseUser.objects.get(id=kwargs.get('id'))
+        Teacher.objects.create_from_user(instance)
+        return redirect('dashboard:management:management_index')
+
+
+class CreateUserView(DashboardCreateUserMixin, FormView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_type'] = 'user'
+        return context
+
+    def form_valid(self, form):
+        create_user(**form.cleaned_data)
+
+        return super().form_valid(form)
+
+
+class CreateStudentView(DashboardCreateUserMixin, FormView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_type'] = 'student'
+        return context
 
     def form_valid(self, form):
         instance = create_user(**form.cleaned_data)
 
-        if self.request.GET.get('type') == 'students':
-            Student.objects.create_from_user(instance)
-        elif self.request.GET.get('type') == 'teachers':
-            Teacher.objects.create_from_user(instance)
+        Student.objects.create_from_user(instance)
+        return super().form_valid(form)
 
+
+class CreateTeacherView(DashboardCreateUserMixin, FormView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_type'] = 'teacher'
+        return context
+
+    def form_valid(self, form):
+        instance = create_user(**form.cleaned_data)
+
+        Teacher.objects.create_from_user(instance)
         return super().form_valid(form)
