@@ -3,6 +3,7 @@ import os
 from test_plus import TestCase
 
 from django.core import mail
+from django.urls import reverse
 
 from allauth.account.models import EmailAddress
 
@@ -151,7 +152,10 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(mail.outbox[0].to, [self.email])
 
         body = mail.outbox[0].body
-        url = '/auth' + body[body.find('/password/reset/'):].split()[0]
+        data = body[body.find('/password/reset/'):].split()[0].split('/')[4].split('-')
+        uidb36 = data[0] + '-' + data[1]
+        key = data[2]
+        url = reverse('account_reset_password_from_key', kwargs={'uidb36': uidb36, 'key': key})
         response = self.get(url)
 
         self.assertEqual(200, response.status_code)
@@ -170,9 +174,11 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(mail.outbox[0].to, [self.email])
 
         body = mail.outbox[0].body
-        url = '/auth' + body[body.find('/password/reset/'):].split()[0]
+        data = body[body.find('/password/reset/'):].split()[0].split('/')[4].split('-')
+        uidb36 = data[0] + '-' + data[1]
+        key = data[2]
+        url = reverse('account_reset_password_from_key', kwargs={'uidb36': uidb36, 'key': key})
         response = self.get(url)
-
         self.assertEqual(200, response.status_code)
 
         data = {
@@ -196,9 +202,11 @@ class TestPasswordResetFromKeyView(TestCase):
         self.assertEqual(mail.outbox[0].to, [self.email])
 
         body = mail.outbox[0].body
-        url = '/auth' + body[body.find('/password/reset/'):].split()[0]
+        data = body[body.find('/password/reset/'):].split()[0].split('/')[4].split('-')
+        uidb36 = data[0] + '-' + data[1]
+        key = data[2]
+        url = reverse('account_reset_password_from_key', kwargs={'uidb36': uidb36, 'key': key})
         response = self.get(url)
-
         self.assertEqual(200, response.status_code)
 
         data = {
