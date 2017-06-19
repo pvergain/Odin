@@ -32,7 +32,6 @@ LOCAL_APPS = [
     'odin.authentication.apps.AuthenticationConfig',
     'odin.users.apps.UsersConfig',
     'odin.education.apps.EducationConfig',
-    'odin.management.apps.ManagementConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
