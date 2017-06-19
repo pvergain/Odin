@@ -7,7 +7,7 @@ from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 
 from odin.users.models import BaseUser
-from odin.users.services import get_gh_email_address
+from odin.common.utils import get_gh_email_address
 
 from odin.common.mixins import ReadableFormErrorsMixin
 

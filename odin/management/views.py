@@ -4,8 +4,9 @@ from django.urls import reverse_lazy
 from django.views.generic import View, ListView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from odin.management.mixins import ManagementDashboardPermissionMixin
+from .permissions import DashboardManagementPermission
 from .forms import ManagementAddUserForm
+
 
 from odin.users.models import BaseUser
 from odin.users.services import create_user
@@ -13,13 +14,15 @@ from odin.users.services import create_user
 from odin.education.models import Student, Teacher
 
 
-class DashboardManagementView(LoginRequiredMixin, ManagementDashboardPermissionMixin, ListView):
+class DashboardManagementView(LoginRequiredMixin,
+                              DashboardManagementPermission,
+                              ListView):
     template_name = 'dashboard/management.html'
     paginate_by = 100
 
     def get_queryset(self):
         queryset = BaseUser.objects.select_related('profile').all()\
-                .prefetch_related('student', 'teacher').order_by('-id')
+            .prefetch_related('student', 'teacher').order_by('-id')
         if self.request.GET.get('filter', None) == 'students':
             return queryset.filter(student__isnull=False)
         elif self.request.GET.get('filter', None) == 'teachers':
@@ -27,7 +30,9 @@ class DashboardManagementView(LoginRequiredMixin, ManagementDashboardPermissionM
         return queryset
 
 
-class MakeStudentOrTeacherView(LoginRequiredMixin, ManagementDashboardPermissionMixin, View):
+class MakeStudentOrTeacherView(LoginRequiredMixin,
+                               DashboardManagementPermission,
+                               View):
     def get(self, request, *args, **kwargs):
         if self.kwargs.get('type') == 'teacher':
             user = BaseUser.objects.get(id=kwargs.get('id'))
@@ -41,7 +46,7 @@ class MakeStudentOrTeacherView(LoginRequiredMixin, ManagementDashboardPermission
 
 
 class ManagementUserCreateView(LoginRequiredMixin,
-                               ManagementDashboardPermissionMixin,
+                               DashboardManagementPermission,
                                FormView):
     form_class = ManagementAddUserForm
     template_name = 'dashboard/add_user.html'

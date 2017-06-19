@@ -11,7 +11,7 @@ class BaseUserPassesTestMixin(UserPassesTestMixin):
         return True
 
 
-class ManagementDashboardPermissionMixin(BaseUserPassesTestMixin):
+class DashboardManagementPermission(BaseUserPassesTestMixin):
     raise_exception = True
     permission_denied_message = 'You must be a superuser to access this panel.'
 

@@ -2,11 +2,19 @@ from django.conf.urls import url
 
 from allauth.urls import urlpatterns as allauth_urls
 
-from .views import (LoginWrapperView, SignUpWrapperView, LogoutWrapperView, PasswordSetWrapperView,
-                    PasswordChangeWrapperView, PasswordResetWrapperView, SocialSignupWrapperView,
-                    PasswordResetDoneWrapperView, AccountInactiveWrapperView,
-                    PasswordResetFromKeyWrapperView, PasswordResetFromKeyDoneWrapperView,
-                    SocialConnectionsWrapperView, EmailVerificationSentWrapperView)
+from .views import (LoginWrapperView,
+                    SignUpWrapperView,
+                    LogoutWrapperView,
+                    PasswordSetWrapperView,
+                    PasswordChangeWrapperView,
+                    PasswordResetWrapperView,
+                    SocialSignupWrapperView,
+                    PasswordResetDoneWrapperView,
+                    AccountInactiveWrapperView,
+                    PasswordResetFromKeyWrapperView,
+                    PasswordResetFromKeyDoneWrapperView,
+                    SocialConnectionsWrapperView,
+                    EmailVerificationSentWrapperView)
 
 
 urlpatterns = [
