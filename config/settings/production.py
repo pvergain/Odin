@@ -64,11 +64,11 @@ INSTALLED_APPS += ['gunicorn', ]
 # stored files.
 
 #  See:http://stackoverflow.com/questions/10390244/
-MEDIA_URL = '/media'
+MEDIA_URL = '/media/'
 
 # Static Assets
 # ------------------------
-STATIC_URL = '/static'
+STATIC_URL = '/static/'
 
 # EMAIL
 # ------------------------------------------------------------------------------
