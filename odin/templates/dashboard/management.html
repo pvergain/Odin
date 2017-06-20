@@ -20,11 +20,21 @@
             <div class="portlet-body">
               <form class="" action="" method="get">
                 <div class="form-group">
-                  <input class="form-control" type="text" placeholder="Search..." name="search" value="" id="search-field">
+                  <input class="form-control" type="text" placeholder="Search..." name="search_field" value="" id="search-field">
                   <select class="form-control" name="type">
-                    <option id="students-option" value="students">Students</option>
-                    <option id="teachers-option" value="teachers">Teachers</option>
-                    <option id="all-option" value="all">All users</option>
+                    {% if request.GET.type == 'students' %}
+                      <option id="all-option" value="all">All users</option>
+                      <option selected="true" id="students-option" value="students">Students</option>
+                      <option id="teachers-option" value="teachers">Teachers</option>
+                    {% elif request.GET.type == 'teachers'%}
+                      <option id="all-option" value="all">All users</option>
+                      <option id="students-option" value="students">Students</option>
+                      <option selected="true" id="teachers-option" value="teachers">Teachers</option>
+                    {% else %}
+                      <option selected="true" id="all-option" value="all">All users</option>
+                      <option id="students-option" value="students">Students</option>
+                      <option id="teachers-option" value="teachers">Teachers</option>
+                    {% endif %}
                   </select>
                 </div>
                 <div class="form-actions">
@@ -49,7 +59,7 @@
                             {% for obj in object_list %}
                               <tr>
                                 <td>{{ obj.id }}</td>
-                                <td><a href="">{{ obj.email }}</a></td>
+                                <td><a href="{% url 'dashboard:users:profile-by-email' user_email=obj.email %}">{{ obj.email }}</a></td>
                                 <td>{{ obj.get_full_name }}</td>
                                 <td>{{ obj.profile.get_gh_profile_url }}</td>
                                 <td>
@@ -92,19 +102,3 @@
     </div>
   </div>
 {% endblock page_content %}
-
-{% block extra_scripts %}
-  <script src="{% static 'purl/purl.js' %}" charset="utf-8"></script>
-  <script type="text/javascript">
-    (function parseGet() {
-      var type = $.url().param('type');
-      if (type === "students") {
-        $('#students-option')[0].selected = true;
-      }else if (type === "teachers"){
-        $('#teachers-option')[0].selected = true;
-      }else {
-        $('#all-option')[0].selected = true;
-      }
-    }());
-  </script>
-{% endblock extra_scripts %}

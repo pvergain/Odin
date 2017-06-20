@@ -20,8 +20,8 @@
                 <!-- END SIDEBAR USERPIC -->
                 <!-- SIDEBAR USER TITLE -->
                 <div class="profile-usertitle">
-                    <div class="profile-usertitle-name"> {{ profile.full_name }} </div>
-                    <div class="profile-usertitle-job"> {{ user.email }} </div>
+                    <div class="profile-usertitle-name"> {{ object.full_name }} </div>
+                    <div class="profile-usertitle-job"> {{ object.user.email }} </div>
                 </div>
                 <!-- END SIDEBAR USER TITLE -->
                 <!-- SIDEBAR MENU -->
@@ -63,15 +63,17 @@
                 </div>
                 <!-- END STAT -->
                 <div>
-                    <h4 class="profile-desc-title">About {{ user.get_full_name }}</h4>
+                    <h4 class="profile-desc-title">About {{ object.full_name }}</h4>
                     <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span>
                     <div class="margin-top-20 profile-desc-link">
+                      {% if object.user == request.user %}
                         <i class="fa fa-github"></i>
                         {% if not object.get_gh_profile_url %}
                           <a href="{% provider_login_url "github" process="connect" %}">Add Github account</a>
                         {% else %}
                           <a href="{{ object.get_gh_profile_url }}">{{ object.get_gh_profile_url }}</a>
                         {% endif %}
+                      {% endif %}
                     </div>
                 </div>
             </div>
