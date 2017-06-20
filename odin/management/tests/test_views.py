@@ -113,36 +113,6 @@ class TestManagementView(TestCase):
             response = self.get(self.url)
             self.assertEqual(3, len(response.context.get('object_list')))
 
-    def test_button_changes_on_no_filter(self):
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertResponseContains(response=response, text="Add user")
-
-    def test_button_changes_on_student_filter(self):
-        with self.login(email=self.user.email, password=self.test_password):
-            data = {
-                'type': 'students'
-            }
-
-            response = self.get(self.url, data=data)
-            self.assertResponseContains(response=response,
-                                        text="Add student")
-
-    def test_button_changes_on_all_filter(self):
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertResponseContains(response=response, text="Add user")
-
-    def test_button_changes_on_teacher_filter(self):
-        with self.login(email=self.user.email, password=self.test_password):
-            data = {
-                'type': 'teachers'
-            }
-
-            response = self.get(self.url, data=data)
-            self.assertResponseContains(response=response,
-                                        text="Add teacher")
-
 
 class TestCreateUserView(TestCase):
     def setUp(self):

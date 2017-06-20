@@ -16,7 +16,7 @@ class DashboardManagementView(LoginRequiredMixin,
                               DashboardManagementPermission,
                               ListView):
     template_name = 'dashboard/management.html'
-    paginate_by = 100
+    paginate_by = 101
     filter_class = UserFilter
     queryset = BaseUser.objects.select_related('profile').all()\
         .prefetch_related('student', 'teacher').order_by('-id')

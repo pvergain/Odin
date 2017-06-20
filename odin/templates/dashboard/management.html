@@ -1,4 +1,5 @@
 {% extends "dashboard/dashboard_base.html" %}
+{% load static %}
 
 {% block content_title %}
   Management
@@ -19,23 +20,18 @@
             <div class="portlet-body">
               <form class="" action="" method="get">
                 <div class="form-group">
+                  <input class="form-control" type="text" placeholder="Search..." name="search" value="" id="search-field">
                   <select class="form-control" name="type">
-		    <option value="all">All users</option>
-                    <option value="students">Students</option>
-                    <option value="teachers">Teachers</option>
+                    <option id="students-option" value="students">Students</option>
+                    <option id="teachers-option" value="teachers">Teachers</option>
+                    <option id="all-option" value="all">All users</option>
                   </select>
                 </div>
                 <div class="form-actions">
                   <input class="btn green uppercase" type="submit" name="" value="Filter">
-		      <a href="{% url 'dashboard:management:add-user' %}?{{ request.GET.urlencode }}">
-			{% if request.GET.type == 'students' %}
-      <a href="{% url 'dashboard:management:add-student' %}"><button class="btn green uppercase" type="button" name="button">Add student</button></a>
-			{% elif request.GET.type == 'teachers' %}
-      <a href="{% url 'dashboard:management:add-teacher' %}"><button class="btn green uppercase" type="button" name="button">Add teacher</button></a>
-			{% else %}
-      <a href="{% url 'dashboard:management:add-user' %}"><button class="btn green uppercase" type="button" name="button">Add user</button></a>
-      {% endif %}
-		      </a>
+                  <a href="{% url 'dashboard:management:add-student' %}"><button class="btn green uppercase" type="button" name="button">Add student</button></a>
+                  <a href="{% url 'dashboard:management:add-teacher' %}"><button class="btn green uppercase" type="button" name="button">Add teacher</button></a>
+                  <a href="{% url 'dashboard:management:add-user' %}"><button class="btn green uppercase" type="button" name="button">Add user</button></a>
                 </div>
               </form>
                 <div class="table-scrollable">
@@ -96,3 +92,19 @@
     </div>
   </div>
 {% endblock page_content %}
+
+{% block extra_scripts %}
+  <script src="{% static 'purl/purl.js' %}" charset="utf-8"></script>
+  <script type="text/javascript">
+    (function parseGet() {
+      var type = $.url().param('type');
+      if (type === "students") {
+        $('#students-option')[0].selected = true;
+      }else if (type === "teachers"){
+        $('#teachers-option')[0].selected = true;
+      }else {
+        $('#all-option')[0].selected = true;
+      }
+    }());
+  </script>
+{% endblock extra_scripts %}
