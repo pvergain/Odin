@@ -147,7 +147,6 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     str(ROOT_DIR.path('ui/images')),
-    str(APPS_DIR.path('static')),
     str(ROOT_DIR.path('ui/bower_components')),
     str(ROOT_DIR.path('ui/assets')),
 ]

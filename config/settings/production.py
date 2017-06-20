@@ -69,6 +69,7 @@ MEDIA_URL = '/media/'
 # Static Assets
 # ------------------------
 STATIC_URL = '/static/'
+STATIC_ROOT = 'staticfiles/'
 
 # EMAIL
 # ------------------------------------------------------------------------------
