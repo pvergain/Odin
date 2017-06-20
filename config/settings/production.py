@@ -60,14 +60,6 @@ ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['academy.hacksoft.io',
 
 INSTALLED_APPS += ['gunicorn', ]
 
-
-# STORAGE CONFIGURATION
-# ------------------------------------------------------------------------------
-# Uploaded Media Files
-# ------------------------
-# See: http://django-storages.readthedocs.io/en/latest/index.html
-INSTALLED_APPS += ['storages', ]
-
 # URL that handles the media served from MEDIA_ROOT, used for managing
 # stored files.
 
