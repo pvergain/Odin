@@ -1,15 +1,26 @@
+from typing import Dict
 
-def get_gh_email_address(request):
-    socialaccount = request.session.get('socialaccount_sociallogin', {})
-    email_address = socialaccount.get('email_addresses', None)
-    if email_address is not None:
-        return email_address[0].get('email', '')
+from django.core.exceptions import ValidationError
+
+from .models import BaseUser, Profile
 
 
-def process_social_account(user, profile, **kwargs):
-    if any(user.socialaccount_set.all()):
-        for acc in user.socialaccount_set.all():
-            provider = acc.get_provider()
-            pair = {provider.name: acc.extra_data.get('html_url', None)}
-            profile.social_accounts.update(pair)
-        profile.save()
+def update_user_profile(*,
+                        user: BaseUser,
+                        data: Dict[str, str]) -> Profile:
+    pass
+
+
+def create_user(*,
+                email: str,
+                password: str=None,
+                profile_data: Dict[str, str]=None) -> BaseUser:
+
+    if BaseUser.objects.filter(email=email).exists():
+        raise ValidationError('User already exists.')
+
+    user = BaseUser.objects.create(email=email, password=password)
+
+    update_user_profile(user=user, data=profile_data)
+
+    return user

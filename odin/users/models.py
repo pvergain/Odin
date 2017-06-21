@@ -57,6 +57,12 @@ class BaseUser(PermissionsMixin,
     def __str__(self):
         return f'{self.email}'
 
+    def is_student(self):
+        return hasattr(self, 'student')
+
+    def is_teacher(self):
+        return hasattr(self, 'teacher')
+
 
 class Profile(models.Model):
     user = models.OneToOneField(BaseUser)

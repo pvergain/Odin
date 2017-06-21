@@ -22,6 +22,10 @@
     "bootstrap-switch": "^3.3.4",
     "bootstrap-daterangepicker": "^2.1.25",
     "jquery-validation": "^1.16.0",
-    "morris.js": "morrisjs#^0.5.1"
+    "morris.js": "morrisjs#^0.5.1",
+    "purl": "^2.3.1"
+  },
+  "resolutions": {
+    "jquery": "^3.2.1"
   }
 }

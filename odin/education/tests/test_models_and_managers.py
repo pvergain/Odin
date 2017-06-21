@@ -12,7 +12,7 @@ from odin.users.factories import BaseUserFactory
 
 from ..factories import StudentFactory, TeacherFactory, CourseFactory
 from ..models import Student, Teacher, CourseAssignment
-from ..services import add_student
+from ..services import add_student, add_teacher
 
 
 class StudentTests(TestCase):
@@ -253,6 +253,17 @@ class CourseTests(TestCase):
             add_student(course, student)
 
         self.assertEqual(3, course.students.count())
+
+    def test_create_course_with_multiple_teachers(self):
+        teachers = TeacherFactory.create_batch(3)
+        course = CourseFactory()
+
+        self.assertEqual(0, course.teachers.count())
+
+        for teacher in teachers:
+            add_teacher(course, teacher)
+
+        self.assertEqual(3, course.teachers.count())
 
     def test_course_has_finished_with_end_date_today(self):
         start_date = (get_now() - timedelta(days=1)).date()

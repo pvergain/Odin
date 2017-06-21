@@ -6,12 +6,13 @@ from django.views.generic import TemplateView
 from django.views import defaults as default_views
 from allauth import urls
 from allauth.socialaccount import urls
+from odin.dashboard.views import RedirectToDashboardIndexView
 
 urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
-    # url(r'^accounts/', include('allauth.urls')),
-    url(r'^', include('odin.education.urls', namespace='education')),
-    url(r'^users/', include('odin.users.urls')),
+    url(r'^$', RedirectToDashboardIndexView.as_view()),
+    url(r'^auth/', include('odin.authentication.urls')),
+    url(r'^dashboard/', include('odin.dashboard.urls', namespace='dashboard')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

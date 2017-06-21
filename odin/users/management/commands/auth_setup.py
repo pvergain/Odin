@@ -5,7 +5,6 @@ from allauth.socialaccount.models import Site, SocialApp
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **kwargs):
         client_id = settings.GH_OAUTH_CLIENT_ID
         secret_key = settings.GH_OAUTH_SECRET_KEY

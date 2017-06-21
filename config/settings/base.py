@@ -24,12 +24,16 @@ THIRD_PARTY_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'captcha',
-    'widget_tweaks'
+    'widget_tweaks',
+    'django_filters'
 ]
 
 LOCAL_APPS = [
+    'odin.dashboard.apps.DashboardConfig',
+    'odin.authentication.apps.AuthenticationConfig',
     'odin.users.apps.UsersConfig',
     'odin.education.apps.EducationConfig',
+    'odin.management.apps.ManagementConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -102,23 +106,23 @@ TEMPLATES = [
     },
 ]
 
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 LOGIN_URL = reverse_lazy('account_login')
-LOGIN_REDIRECT_URL = reverse_lazy('education:profile')
+LOGIN_REDIRECT_URL = reverse_lazy('dashboard:users:profile')
 ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
-
+ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-SOCIALACCOUNT_ADAPTER = "odin.users.adapter.CustomAdapter"
-ACCOUNT_SIGNUP_FORM_CLASS = 'odin.education.forms.SignUpWithReCaptchaForm'
+SOCIALACCOUNT_ADAPTER = "odin.authentication.adapter.CustomAdapter"
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
@@ -143,7 +147,6 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     str(ROOT_DIR.path('ui/images')),
-    str(APPS_DIR.path('static')),
     str(ROOT_DIR.path('ui/bower_components')),
     str(ROOT_DIR.path('ui/assets')),
 ]

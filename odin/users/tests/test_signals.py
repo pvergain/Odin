@@ -30,6 +30,9 @@ class ProfileSignalTests(TestCase):
             'password2': password,
             'g-recaptcha-response': 'PASSED'
         }
+        self.assertEqual(Profile.objects.count(), 0)
+
         response = self.post(url_name=url, data=data, follow=False)
+
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Profile.objects.count(), 1)

@@ -1,0 +1,29 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+
+{% block content_title %}
+    	Add {{ user_type }}
+{% endblock content_title %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-8">
+        <form action="" method="POST">
+	    {% csrf_token %}
+	    {% if not form.is_valid %}
+            {% for error in readable_errors %}
+              <div class="alert alert-warning">
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+            {% endif %}
+	    <div class="form-group">
+	        {{ form.as_p }}
+	    </div>
+	    <div class="form-actions">
+	        <button class="btn green uppercase" type="submit">Submit</button>
+	    </div>
+        </form>
+    </div>
+</div>
+{% endblock page_content %}
