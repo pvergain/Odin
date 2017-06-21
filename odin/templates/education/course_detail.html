@@ -1,9 +1,23 @@
 {% extends 'dashboard/dashboard_base.html' %}
 
 {% block content_title %}
-   Course detail 
+   Course detail
 {% endblock content_title %}
 
 {% block page_content %}
-    Example content
+<div class="portlet light portlet-fit full-height-content full-height-content-scrollable ">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class=" icon-layers font-green"></i>
+            <span class="caption-subject font-green bold uppercase">{{ course.name }}</span>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div class="full-height-content-body">
+          <p>
+            {{ object.description }}
+          </p>
+        </div>
+    </div>
+</div>
 {% endblock page_content %}
