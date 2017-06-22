@@ -26,7 +26,8 @@ class SuperUserFactory(BaseUserFactory):
 
 
 class ProfileFactory(factory.DjangoModelFactory):
-    full_name = factory.LazyAttribute(lambda _: factory.name())
+    full_name = factory.LazyAttribute(lambda _: faker.name())
+    description = factory.LazyAttribute(lambda _: faker.text())
 
     class Meta:
         model = Profile

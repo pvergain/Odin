@@ -50,6 +50,9 @@ class BaseUser(PermissionsMixin,
     def get_short_name(self):
         return self.get_full_name()
 
+    def get_description(self):
+        return self.profile.description
+
     @property
     def name(self):
         return self.get_full_name()
@@ -68,6 +71,7 @@ class Profile(models.Model):
     user = models.OneToOneField(BaseUser)
 
     full_name = models.CharField(blank=True, max_length=255)
+    description = models.TextField(blank=True, null=True)
 
     social_accounts = JSONField(default=json_field_default)
 

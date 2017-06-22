@@ -9,7 +9,7 @@ from ..models import Student
 from odin.common.faker import faker
 
 
-class UserCoursesViewTests(TestCase):
+class TestUserCoursesView(TestCase):
 
     def setUp(self):
         self.test_password = faker.password()
@@ -71,7 +71,7 @@ class UserCoursesViewTests(TestCase):
             self.assertContains(response, course.name)
 
 
-class CourseDetailView(TestCase):
+class TestCourseDetailView(TestCase):
 
     def setUp(self):
         self.test_password = faker.password()
