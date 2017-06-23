@@ -35,3 +35,8 @@
     .row-profile.edit-profile .editable-user-avatar:hover .glyphicon {
       transition: all 1s ease;
       opacity: 1; }
+
+#id_cropping-image{
+  width: 300px;
+  height: 300px;
+}

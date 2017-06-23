@@ -41,7 +41,7 @@
       <div class="form-group">
         <div id="div_id_full_image">
           <input type="file" name="full_image" style="display: none" id="id_full_image" class="crop-thumb"
-          data-thumbnail-url="/media/avatars/11206889_846568592075040_7051584525685134222_o.jpg.300x300_q85_detail_upscale.jpg"
+          data-thumbnail-url="{{ MEDIA_URL }}{{ object.full_image.name }}"
           data-field-name="full_image" data-org-width="1153" data-org-height="1153" data-max-width="1153" data-max-height="1153">
         </div>
       </div>
