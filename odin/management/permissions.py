@@ -1,9 +1,4 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
-
-
-class BaseUserPassesTestMixin(UserPassesTestMixin):
-    def test_func(self):
-        return True
+from odin.common.mixins import BaseUserPassesTestMixin
 
 
 class DashboardManagementPermission(BaseUserPassesTestMixin):

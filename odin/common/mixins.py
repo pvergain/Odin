@@ -1,4 +1,10 @@
+from django.contrib.auth.mixins import UserPassesTestMixin
 from .utils import get_readable_form_errors
+
+
+class BaseUserPassesTestMixin(UserPassesTestMixin):
+    def test_func(self):
+        return True
 
 
 class ReadableFormErrorsMixin:

@@ -1,4 +1,4 @@
-from odin.management.permissions import BaseUserPassesTestMixin
+from odin.common.mixins import BaseUserPassesTestMixin
 
 
 class CourseDetailPermission(BaseUserPassesTestMixin):
