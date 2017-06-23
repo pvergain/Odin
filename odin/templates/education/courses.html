@@ -5,12 +5,48 @@
 {% endblock content_title %}
 
 {% block page_content %}
-  {% if user_is_teacher_for %}
-    {% include "education/partial/courses_table.html" with courses=user_is_teacher_for role="teacher" %}
-  {% endif %}
+<div class="row">
+  {% for course in object_list %}
+    {% if request.user.student in course.students.all %}
+      <div class="col-md-6">
+          <div class="portlet green-sharp box">
+              <div class="portlet-title">
+                  <div class="caption">
+                      <i class="fa fa-cogs"></i>{{ course.name }} </div>
+                  <div class="tools">
+                      <a href="javascript:;" class="collapse"> </a>
+                  </div>
+              </div>
+              <div class="portlet-body">
+                <p>{{ course.description }}</p>
+                <a href="{% url 'dashboard:education:user-course-detail' course.id %}"><button type="button" class="btn btn-success uppercase">View Course</button></a>
+              </div>
+          </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+  {% for course in object_list %}
+    {% if request.user.teacher in course.teachers.all %}
+      <div class="col-md-6">
+          <div class="portlet red-mint box">
+              <div class="portlet-title">
+                  <div class="caption">
+                      <i class="fa fa-cogs"></i>{{ course.name }}</div>
+                  <div class="tools">
+                      <a href="javascript:;" class="collapse"> </a>
+                  </div>
+              </div>
+              <div class="portlet-body">
+                <p>{{ course.description }}</p>
+                <div>
+                  <a href="{% url 'dashboard:education:user-course-detail' course.id %}"><button type="button" class="btn btn-success uppercase">View Course</button></a>
+                </div>
+              </div>
+          </div>
+      </div>
+    {% endif %}
+  {% endfor %}
 
-  {% if user_is_student_for %}
-    {% include "education/partial/courses_table.html" with courses=user_is_student_for role="student" %}
-  {% endif %}
+</div>
 
 {% endblock page_content %}

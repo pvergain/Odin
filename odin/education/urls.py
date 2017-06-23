@@ -6,7 +6,7 @@ urlpatterns = [
     url(regex='^my-courses/$',
         view=UserCoursesView.as_view(),
         name='user-courses'),
-    url(regex='^my-courses/(?P<course_id>[0-9]+)/$',
+    url(regex='^my-courses/(?P<pk>[0-9]+)/$',
         view=CourseDetailView.as_view(),
         name='user-course-detail'),
 

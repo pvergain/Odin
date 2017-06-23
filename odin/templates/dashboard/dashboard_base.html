@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static %}
-{% load cropping thumbnail %}
 
 {% block body %}
     <body class="page-header-fixed page-sidebar-closed-hide-logo page-container-bg-solid">
@@ -48,7 +47,7 @@
                             <!-- BEGIN USER LOGIN DROPDOWN -->
                             <li class="dropdown dropdown-user">
                                 <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                                    <img src="{% cropped_thumbnail user.profile 'cropping' %}" alt="" class="img-circle" src="" />
+                                    <img src="{{ MEDIA_URL }}{{ request.user.profile.avatar.name }}" alt="" class="img-circle" src="" />
                                     <span class="username username-hide-on-mobile"></span>
                                     <i class="fa fa-angle-down"></i>
                                 </a>

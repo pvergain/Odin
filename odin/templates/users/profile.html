@@ -1,7 +1,6 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load socialaccount %}
 {% load static %}
-{% load cropping thumbnail %}
 
 {% block content_title %}
   User Profile
@@ -16,7 +15,7 @@
             <div class="portlet light profile-sidebar-portlet ">
                 <!-- SIDEBAR USERPIC -->
                 <div class="profile-userpic">
-                    <img src="{% cropped_thumbnail object 'cropping' %}" alt="{% static 'hackman.png' %}" class="img-responsive" alt="">
+                    <img src="{{MEDIA_URL}}{{object.avatar.name}}" alt="{% static 'hackman.png' %}" class="img-responsive" alt="">
                 </div>
                 <!-- END SIDEBAR USERPIC -->
                 <!-- SIDEBAR USER TITLE -->

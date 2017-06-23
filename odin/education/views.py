@@ -1,41 +1,20 @@
-from django.views.generic import TemplateView
+from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Course, Teacher, Student
-from .permissions import IsStudentOrTeacherForCoursePermission
-from .mixins import CourseViewMixin
+from .models import Course
+from .permissions import CourseDetailPermission
 
 
-class UserCoursesView(LoginRequiredMixin, TemplateView):
+class UserCoursesView(LoginRequiredMixin, ListView):
     template_name = 'education/courses.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        user = self.request.user
-
-        select = ['description']
-        prefetch = ['students', 'teachers']
-        qs = Course.objects.select_related(*select).prefetch_related(*prefetch)
-
-        context['user_is_teacher_for'] = []
-        context['user_is_student_for'] = []
-
-        teacher = user.downcast(Teacher)
-        student = user.downcast(Student)
-
-        if teacher:
-            context['user_is_teacher_for'] = qs.filter(teachers=teacher)
-
-        if student:
-            context['user_is_student_for'] = qs.filter(students=student)
-
-        return context
+    def get_queryset(self, *args, **kwargs):
+        return Course.objects.select_related('description').all().\
+            prefetch_related('students', 'teachers')
 
 
-class CourseDetailView(CourseViewMixin,
-                       LoginRequiredMixin,
-                       IsStudentOrTeacherForCoursePermission,
-                       TemplateView):
-
+class CourseDetailView(LoginRequiredMixin, CourseDetailPermission, DetailView):
+    model = Course
     template_name = 'education/course_detail.html'
+    slug_field = 'id'
+    slug_url_kwarg = 'pk'

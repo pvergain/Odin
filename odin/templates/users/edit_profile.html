@@ -1,35 +1,14 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
-{% load static %}
-{% load cropping thumbnail %}
-
-{% block extra_head_content %}
-  {{ form.media }}
-{% endblock extra_head_content %}
 
 {% block content_title %}
   Profile settings
 {% endblock content_title %}
 
 {% block page_content %}
-  <div class="row-profile edit-profile">
-    <div class="col-md-5">
-      <div class="editable-user-avatar ease1s">
-          <div class="glyphicon glyphicon-camera"></div>
-        {% if not object.full_image %}
-        <img id="user-avatar" src="{% static 'hackman.png' %} ">
-        {% else %}
-        <img id="user-avatar" src="{% cropped_thumbnail object 'cropping' %}" />
-        {% endif %}
-      </div>
-    </div>
-  </div>
   <form class="edit-profile-form" action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="col-md-6">
-      <div class="form-group">
-
-      </div>
       <div class="form-group">
         {{ form.full_name.label }}
         {% render_field form.full_name class="form-control form-control-solid"%}
@@ -39,14 +18,8 @@
         {% render_field form.description class="form-control form-control-solid"%}
       </div>
       <div class="form-group">
-        <div id="div_id_full_image">
-          <input type="file" name="full_image" style="display: none" id="id_full_image" class="crop-thumb"
-          data-thumbnail-url="{{ MEDIA_URL }}{{ object.full_image.name }}"
-          data-field-name="full_image" data-org-width="1153" data-org-height="1153" data-max-width="1153" data-max-height="1153">
-        </div>
-      </div>
-      <div class="form-group">
-        {{ form.cropping }}
+        {{ form.avatar.label }}
+        {% render_field form.avatar class="form-control form-control-solid" %}
       </div>
       <div class="form-actions">
         <input type="submit" class="btn green uppercase" name="" value="Update">
@@ -59,7 +32,3 @@
     </div>
   </form>
 {% endblock page_content %}
-
-{% block extra_scripts %}
-  <script src="{% static "js/users/image_upload.js" %}" charset="utf-8"></script>
-{% endblock extra_scripts %}
