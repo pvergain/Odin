@@ -15,7 +15,7 @@
             <div class="portlet light profile-sidebar-portlet ">
                 <!-- SIDEBAR USERPIC -->
                 <div class="profile-userpic">
-                    <img src="{% static 'hackman.png' %}" class="img-responsive" alt="">
+                    <img src="{{MEDIA_URL}}{{object.avatar.name}}" alt="{% static 'hackman.png' %}" class="img-responsive" alt="">
                 </div>
                 <!-- END SIDEBAR USERPIC -->
                 <!-- SIDEBAR USER TITLE -->
@@ -32,7 +32,7 @@
                                 <i class="icon-home"></i> Overview </a>
                         </li>
                         <li>
-                            <a href="">
+                            <a href="{% url 'dashboard:users:edit-profile' %}">
                                 <i class="icon-settings"></i> Account Settings </a>
                         </li>
                         <li>
@@ -64,7 +64,7 @@
                 <!-- END STAT -->
                 <div>
                     <h4 class="profile-desc-title">About {{ object.full_name }}</h4>
-                    <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span>
+                    <span class="profile-desc-text"> {{ object.description }} </span>
                     <div class="margin-top-20 profile-desc-link">
                       {% if object.user == request.user %}
                         <i class="fa fa-github"></i>
