@@ -9,5 +9,4 @@ urlpatterns = [
     url(regex='^my-courses/(?P<course_id>[0-9]+)/$',
         view=CourseDetailView.as_view(),
         name='user-course-detail'),
-
 ]

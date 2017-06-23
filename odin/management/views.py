@@ -9,7 +9,7 @@ from .mixins import DashboardCreateUserMixin
 from odin.users.models import BaseUser
 from odin.users.services import create_user
 
-from odin.education.models import Student, Teacher
+from odin.education.models import Student, Teacher, Course
 
 
 class DashboardManagementView(LoginRequiredMixin,
@@ -24,6 +24,11 @@ class DashboardManagementView(LoginRequiredMixin,
     def get_queryset(self):
         self.filter = self.filter_class(self.request.GET, queryset=self.queryset)
         return self.filter.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['courses'] = Course.objects.prefetch_related('students', 'teachers')
+        return context
 
 
 class PromoteUserToStudentView(LoginRequiredMixin,
