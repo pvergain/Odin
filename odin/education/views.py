@@ -2,7 +2,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Course, Teacher, Student
-from .permissions import CourseDetailPermission
+from .permissions import IsStudentOrTeacherForCoursePermission
 from .mixins import CourseViewMixin
 
 
@@ -35,7 +35,7 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
 
 class CourseDetailView(CourseViewMixin,
                        LoginRequiredMixin,
-                       CourseDetailPermission,
+                       IsStudentOrTeacherForCoursePermission,
                        TemplateView):
 
     template_name = 'education/course_detail.html'
