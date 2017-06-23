@@ -1,4 +1,7 @@
 from django.urls import reverse_lazy
+
+from easy_thumbnails.conf import Settings as thumbnail_settings
+
 import environ
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
@@ -26,7 +29,8 @@ THIRD_PARTY_APPS = [
     'captcha',
     'widget_tweaks',
     'django_filters',
-    'easy_thumbnails'
+    'easy_thumbnails',
+    'image_cropping'
 ]
 
 LOCAL_APPS = [
@@ -199,3 +203,8 @@ ADMIN_URL = r'^admin/'
 # Github OAuth settings
 GH_OAUTH_CLIENT_ID = env('GH_OAUTH_CLIENT_ID', default='')
 GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY', default='')
+
+
+THUMBNAIL_PROCESSORS = (
+    'image_cropping.thumbnail_processors.crop_corners',
+) + thumbnail_settings.THUMBNAIL_PROCESSORS
