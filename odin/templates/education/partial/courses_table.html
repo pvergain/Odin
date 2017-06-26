@@ -25,11 +25,11 @@
                             {% for course in courses %}
                                 <tr>
                                     <td>{{ course.id }}</td>
-                                    <td>{{ course.name }}</td>
+                                    <td><a href="{% url 'dashboard:education:user-course-detail' course.id %}">{{ course.name }}</a></td>
                                     <td>{{ course.repository }}</td>
                                     <td>{{ course.students.count }}</td>
                                     <td>{{ course.teachers.count }}</td>
-                                </tr> 
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>

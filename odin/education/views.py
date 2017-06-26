@@ -9,10 +9,6 @@ from .mixins import CourseViewMixin
 class UserCoursesView(LoginRequiredMixin, TemplateView):
     template_name = 'education/courses.html'
 
-    def get_queryset(self, *args, **kwargs):
-        return Course.objects.select_related('description').all().\
-            prefetch_related('students', 'teachers')
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
