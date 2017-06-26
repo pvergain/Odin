@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
-from odin.education.models import Student, Teacher, BaseUser
+from odin.education.models import Student, Teacher, BaseUser, Course
 
 from odin.common.faker import faker
 
@@ -285,3 +285,36 @@ class TestPromoteUserToTeacherView(TestCase):
             self.assertRedirects(response=response, expected_url=reverse('dashboard:management:management_index'))
             self.assertEqual(2, Teacher.objects.count())
             self.assertEqual(2, BaseUser.objects.count())
+
+
+class TestCreateCourseView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:management:add-course')
+
+    def test_get_is_allowed_when_user_is_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_get_is_forbidden_for_regular_user(self):
+        user = BaseUserFactory(password=self.test_password)
+        with self.login(email=user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_course_is_created_successfully_on_post(self):
+        self.assertEqual(0, Course.objects.count())
+        data = {
+            'name': faker.word(),
+            'start_date': faker.date(),
+            'end_date': faker.date(),
+            'repository': faker.url(),
+            'video_channel': faker.url(),
+            'facebook_group': faker.url(),
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:management:management_index'))
+            self.assertEqual(1, Course.objects.count())
