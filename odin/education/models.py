@@ -22,6 +22,7 @@ class Student(BaseUser):
 
 class Teacher(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
+    hidden = models.BooleanField(default=False)
 
     objects = TeacherManager()
 
