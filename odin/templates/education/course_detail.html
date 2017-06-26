@@ -3,6 +3,9 @@
 
 {% block content_title %}
    Course detail
+   <p><a href="{% url 'dashboard:education:manage-course' course.pk %}">
+       <button type="button" class="btn green uppercase">Manage course</button>
+   </a></p>
 {% endblock content_title %}
 
 {% block page_content %}

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Course
+from .models import Course, Topic
 
 
 class DateInput(forms.DateInput):
@@ -15,3 +15,9 @@ class ManagementAddCourseForm(forms.ModelForm):
             'start_date': DateInput(),
             'end_date': DateInput(),
         }
+
+
+class TopicModelForm(forms.ModelForm):
+    class Meta:
+        model = Topic
+        fields = ('name', 'week')
