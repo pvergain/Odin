@@ -136,6 +136,11 @@ class Week(models.Model):
     end_date = models.DateField()
 
     number = models.PositiveIntegerField(default=1)
+    course = models.ForeignKey(Course,
+                               on_delete=models.CASCADE,
+                               related_name='weeks',
+                               blank=True,
+                               null=True)
 
 
 class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
