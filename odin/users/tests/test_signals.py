@@ -49,7 +49,7 @@ class SuperUserSignalTest(TestCase):
         self.assertEqual(1, Teacher.objects.count())
 
     def test_create_superuser_adds_teacher_to_old_courses(self):
-        CourseFactory.create_batch(5)
+        CourseFactory.build_batch(5)
         user = BaseUser.objects.create_superuser(email=faker.email(), password=faker.password())
         user = user.teacher
         courses = Course.objects.all()
