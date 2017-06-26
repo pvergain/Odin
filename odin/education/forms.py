@@ -10,7 +10,7 @@ class DateInput(forms.DateInput):
 class ManagementAddCourseForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ('name', 'start_date', 'end_date', 'repository', 'video_channel', 'facebook_group')
+        fields = ('name', 'start_date', 'end_date', 'repository', 'video_channel', 'facebook_group', 'slug_url')
         widgets = {
             'start_date': DateInput(),
             'end_date': DateInput(),

@@ -313,6 +313,7 @@ class TestCreateCourseView(TestCase):
             'repository': faker.url(),
             'video_channel': faker.url(),
             'facebook_group': faker.url(),
+            'slug_url': faker.slug(),
         }
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)

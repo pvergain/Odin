@@ -25,7 +25,8 @@ def create_course(*,
                   end_date: datetime,
                   repository: str,
                   facebook_group: str,
-                  video_channel: str):
+                  video_channel: str,
+                  slug_url: str=None):
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -36,7 +37,8 @@ def create_course(*,
         end_date=end_date,
         repository=repository,
         facebook_group=facebook_group,
-        video_channel=video_channel
+        video_channel=video_channel,
+        slug_url=slug_url
     )
 
     weeks = course.duration_in_weeks
