@@ -145,6 +145,9 @@ class Week(models.Model):
                                blank=True,
                                null=True)
 
+    def __str__(self):
+        return f'Week {self.number}'
+
 
 class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
     name = models.CharField(max_length=255)

@@ -7,7 +7,8 @@ from .models import (
     CourseAssignment,
     Student,
     Teacher,
-    Week
+    Week,
+    Topic
 )
 
 
@@ -47,8 +48,21 @@ def create_course(*,
 
     for i in range(1, weeks + 1):
         Week.objects.create(course=course,
+                            number=i,
                             start_date=start_date,
                             end_date=start_date + timedelta(days=7))
         start_date = start_date + timedelta(days=7)
 
     return course
+
+
+def create_topic(*,
+                 name: str,
+                 week: Week,
+                 course: Course):
+    if Topic.objects.filter(course=course).exists():
+        raise ValidationError('Topic already exists for this course')
+
+    topic = Topic.objects.create(name=name, course=course, week=week)
+
+    return topic

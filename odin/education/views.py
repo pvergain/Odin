@@ -1,11 +1,13 @@
 from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
 
 from .models import Course, Teacher, Student
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin
 from .forms import TopicModelForm
+from .services import create_topic
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -66,3 +68,14 @@ class AddTopicToCourseView(CourseViewMixin,
                            FormView):
     template_name = 'education/add_topic.html'
     form_class = TopicModelForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def form_valid(self, form):
+        create_topic(name=form.cleaned_data.get('name'),
+                     week=form.cleaned_data.get('week'),
+                     course=self.course)
+
+        return super().form_valid(form)
