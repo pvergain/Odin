@@ -2,8 +2,11 @@ import os
 
 from test_plus import TestCase
 
-from ..models import Profile
+from ..models import Profile, BaseUser
 from ..factories import BaseUserFactory
+
+from odin.education.models import Teacher, Course
+from odin.education.factories import CourseFactory
 
 from odin.common.faker import faker
 
@@ -36,3 +39,19 @@ class ProfileSignalTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Profile.objects.count(), 1)
+
+
+class SuperUserSignalTest(TestCase):
+
+    def test_create_superuser_creates_teacher(self):
+        self.assertEqual(0, Teacher.objects.count())
+        BaseUser.objects.create_superuser(email=faker.email(), password=faker.password())
+        self.assertEqual(1, Teacher.objects.count())
+
+    def test_create_superuser_adds_teacher_to_old_courses(self):
+        CourseFactory.create_batch(5)
+        user = BaseUser.objects.create_superuser(email=faker.email(), password=faker.password())
+        user = user.teacher
+        courses = Course.objects.all()
+        for course in courses:
+            self.assertIn(member=user, container=course.teachers.all())
