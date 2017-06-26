@@ -1,6 +1,11 @@
 from django.conf.urls import url
 
-from .views import UserCoursesView, CourseDetailView, PublicCourseListView, PublicCourseDetailView, AddTopicToCourseView
+from .views import (UserCoursesView,
+                    CourseDetailView,
+                    PublicCourseListView,
+                    PublicCourseDetailView,
+                    AddTopicToCourseView,
+                    AddMaterialToCourseView)
 
 urlpatterns = [
     url(regex='^my-courses/$',
@@ -11,7 +16,10 @@ urlpatterns = [
         name='user-course-detail'),
     url(regex='^manage-course/(?P<course_id>[0-9]+)/add-topic/$',
         view=AddTopicToCourseView.as_view(),
-        name='manage-course-topics')
+        name='manage-course-topics'),
+    url(regex='^manage-course/(?P<course_id>[0-9]+)/add-material/$',
+        view=AddMaterialToCourseView.as_view(),
+        name='manage-course-materials')
 ]
 
 

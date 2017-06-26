@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Course, Topic
+from .models import Course, Topic, IncludedMaterial
 
 
 class DateInput(forms.DateInput):
@@ -21,3 +21,9 @@ class TopicModelForm(forms.ModelForm):
     class Meta:
         model = Topic
         fields = ('name', 'week')
+
+
+class IncludedMaterialModelForm(forms.ModelForm):
+    class Meta:
+        model = IncludedMaterial
+        fields = ('identifier', 'url', 'content', 'topic')

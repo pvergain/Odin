@@ -158,6 +158,9 @@ class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
                              on_delete=models.CASCADE,
                              related_name='topics')
 
+    def __str__(self):
+        return f'{self.name}'
+
 
 class Lecture(models.Model):
     date = models.DateField()

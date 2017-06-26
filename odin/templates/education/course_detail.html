@@ -6,6 +6,9 @@
    <p><a href="{% url 'dashboard:education:manage-course-topics' course.pk %}">
        <button type="button" class="btn green uppercase">Add topic</button>
    </a></p>
+   <p><a href="{% url 'dashboard:education:manage-course-materials' course.pk %}">
+       <button type="button" class="btn green uppercase">Add material</button>
+   </a></p>
 {% endblock content_title %}
 
 {% block page_content %}

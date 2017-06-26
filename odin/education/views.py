@@ -6,8 +6,8 @@ from django.urls import reverse_lazy
 from .models import Course, Teacher, Student
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin
-from .forms import TopicModelForm
-from .services import create_topic
+from .forms import TopicModelForm, IncludedMaterialModelForm
+from .services import create_topic, create_included_material
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -77,5 +77,24 @@ class AddTopicToCourseView(CourseViewMixin,
         create_topic(name=form.cleaned_data.get('name'),
                      week=form.cleaned_data.get('week'),
                      course=self.course)
+
+        return super().form_valid(form)
+
+
+class AddMaterialToCourseView(CourseViewMixin,
+                              LoginRequiredMixin,
+                              IsTeacherInCoursePermission,
+                              FormView):
+    template_name = 'education/add_material.html'
+    form_class = IncludedMaterialModelForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def form_valid(self, form):
+        create_included_material(identifier=form.cleaned_data.get('identifier'),
+                                 url=form.cleaned_data.get('url'),
+                                 topic=form.cleaned_data.get('topic'))
 
         return super().form_valid(form)

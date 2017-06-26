@@ -8,7 +8,9 @@ from .models import (
     Student,
     Teacher,
     Week,
-    Topic
+    Topic,
+    IncludedMaterial,
+    Material
 )
 
 
@@ -60,9 +62,20 @@ def create_topic(*,
                  name: str,
                  week: Week,
                  course: Course):
-    if Topic.objects.filter(course=course).exists():
-        raise ValidationError('Topic already exists for this course')
+    if Topic.objects.filter(course=course, name=name).exists():
+        raise ValidationError('Topic with this name already exists for this course')
 
     topic = Topic.objects.create(name=name, course=course, week=week)
 
     return topic
+
+
+# TODO check what to validate here
+def create_included_material(*,
+                             identifier: str,
+                             url: str,
+                             topic: Topic):
+    material = Material.objects.create(identifier=identifier, url=url)
+    included_material = IncludedMaterial.objects.create(material=material, topic=topic)
+
+    return included_material
