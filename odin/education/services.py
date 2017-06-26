@@ -43,6 +43,7 @@ def create_course(*,
 
     weeks = course.duration_in_weeks
     start_date = course.start_date
+    start_date = start_date - timedelta(days=start_date.weekday())
 
     for i in range(1, weeks + 1):
         Week.objects.create(course=course,
