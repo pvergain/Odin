@@ -33,6 +33,12 @@ class TestUserCoursesView(TestCase):
         response = self.get(self.url)
         self.assertEqual(302, response.status_code)
 
+    def test_course_is_not_shown_if_student_is_not_in_it(self):
+        with self.login(email=self.student.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertNotContains(response, self.course.name)
+
     def test_user_courses_are_shown_for_student_in_course(self):
         with self.login(email=self.student.email, password=self.test_password):
             add_student(self.course, self.student)
@@ -40,8 +46,8 @@ class TestUserCoursesView(TestCase):
             self.assertEqual(200, response.status_code)
             self.assertContains(response, self.course.name)
 
-    def test_course_is_not_shown_if_student_is_not_in_it(self):
-        with self.login(email=self.student.email, password=self.test_password):
+    def test_course_is_not_shown_if_teacher_is_not_in_it(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
             self.assertNotContains(response, self.course.name)
@@ -52,12 +58,6 @@ class TestUserCoursesView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
             self.assertContains(response, self.course.name)
-
-    def test_course_is_not_shown_if_teacher_is_not_in_it(self):
-        with self.login(email=self.teacher.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertEqual(200, response.status_code)
-            self.assertNotContains(response, self.course.name)
 
     def test_course_is_shown_if_user_is_teacher_and_student_in_different_courses(self):
         course = CourseFactory()
