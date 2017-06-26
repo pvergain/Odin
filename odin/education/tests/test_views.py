@@ -53,8 +53,6 @@ class TestUserCoursesView(TestCase):
             self.assertEqual(200, response.status_code)
             self.assertContains(response, self.course.name)
 
-<<<<<<< ceef9e838cea5d893e6e8356bbed937d74969154
-=======
     def test_course_is_not_shown_if_teacher_is_not_in_it(self):
         course = CourseFactory()
         with self.login(email=self.teacher.email, password=self.test_password):
@@ -62,7 +60,6 @@ class TestUserCoursesView(TestCase):
             self.assertEqual(200, response.status_code)
             self.assertNotContains(response, course.name)
 
->>>>>>> Add hidden field to Teacher, add signals, fix tests
     def test_user_courses_are_shown_for_teacher_in_course(self):
         course = CourseFactory()
         with self.login(email=self.teacher.email, password=self.test_password):
