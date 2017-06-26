@@ -21,6 +21,8 @@ class CourseFactory(factory.DjangoModelFactory):
     start_date = factory.LazyAttribute(lambda _: faker.date())
     end_date = factory.LazyAttribute(lambda _: faker.date())
 
+    slug_url = factory.LazyAttribute(lambda _: faker.word())
+
     repository = factory.LazyAttribute(lambda _: faker.url())
     video_channel = factory.LazyAttribute(lambda _: faker.url())
     facebook_group = factory.LazyAttribute(lambda _: faker.url())
