@@ -1,5 +1,6 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
 
 from .models import Course, Teacher, Student
 from .permissions import IsStudentOrTeacherInCoursePermission
@@ -39,3 +40,20 @@ class CourseDetailView(CourseViewMixin,
                        TemplateView):
 
     template_name = 'education/course_detail.html'
+
+
+class PublicCourseListView(ListView):
+
+    template_name = 'education/all_courses.html'
+
+    def get_queryset(self):
+        return Course.objects.select_related('description')
+
+
+class PublicCourseDetailView(DetailView):
+    template_name = 'education/course_detail.html'
+
+    def get_object(self):
+
+        course_url = self.kwargs.get('course_slug')
+        return get_object_or_404(Course, slug_url=course_url)

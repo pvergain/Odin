@@ -1,0 +1,11 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block content_title %}
+  All courses
+{% endblock content_title %}
+
+{% block page_content %}
+  {% for course in object_list %}
+    {% include "education/partial/course_box.html" with course=course %}
+  {% endfor %}
+{% endblock %}

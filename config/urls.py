@@ -7,10 +7,12 @@ from django.views import defaults as default_views
 from allauth import urls
 from allauth.socialaccount import urls
 from odin.dashboard.views import RedirectToDashboardIndexView
+from odin.education.urls import courses_public_urlpatterns
 
 urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
     url(r'^$', RedirectToDashboardIndexView.as_view()),
+    url(r'^public/', include(courses_public_urlpatterns, namespace='public')),
     url(r'^auth/', include('odin.authentication.urls')),
     url(r'^dashboard/', include('odin.dashboard.urls', namespace='dashboard')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
