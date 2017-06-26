@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 
-from odin.education.factories import TeacherFactory, StudentFactory
+from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
 from odin.education.models import Student, Teacher, BaseUser
 
 from odin.common.faker import faker
@@ -112,6 +112,19 @@ class TestManagementView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(3, len(response.context.get('object_list')))
+
+    def test_courses_are_shown_if_there_are_any(self):
+        course = CourseFactory()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(1, len(response.context.get('courses')))
+            self.assertContains(response, course.name)
+
+    def test_courses_are_not_shown_if_there_are_none(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(0, len(response.context.get('courses')))
 
 
 class TestCreateUserView(TestCase):
