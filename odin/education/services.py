@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from django.core.exceptions import ValidationError
+
 from .models import (
     Course,
     CourseAssignment,

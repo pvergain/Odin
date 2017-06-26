@@ -98,6 +98,6 @@ class CreateCourseView(LoginRequiredMixin,
     success_url = reverse_lazy('dashboard:management:management_index')
 
     def form_valid(self, form):
-        instance = create_course(**form.cleaned_data)
+        create_course(**form.cleaned_data)
 
         return super().form_valid(form)
