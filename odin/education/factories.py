@@ -37,7 +37,7 @@ class WeekFactory(factory.DjangoModelFactory):
     start_date = factory.LazyAttribute(lambda _: faker.date())
     end_date = factory.LazyAttribute(lambda _: faker.date())
 
-    course = factory.RelatedFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory)
 
     class Meta:
         model = Week
@@ -45,9 +45,8 @@ class WeekFactory(factory.DjangoModelFactory):
 
 class TopicFactory(factory.DjangoModelFactory):
     name = factory.LazyAttribute(lambda _: faker.name())
-
-    course = factory.RelatedFactory(CourseFactory)
-    week = factory.RelatedFactory(WeekFactory)
+    course = factory.SubFactory(CourseFactory)
+    week = factory.SubFactory(WeekFactory)
 
     class Meta:
         model = Topic

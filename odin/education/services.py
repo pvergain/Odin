@@ -74,16 +74,18 @@ def create_included_material(*,
                              identifier: str=None,
                              url: str=None,
                              topic: Topic=None,
+                             content: str=None,
                              material: Material=None):
-
-    if IncludedMaterial.objects.filter(identifier=material.identifier).exists():
-        raise ValidationError('Material already exists')
 
     included_material = IncludedMaterial(topic=topic)
 
     if material is None:
-        material = Material.objects.create(identifier=identifier, url=url)
+        if Material.objects.filter(identifier=identifier).exists():
+            raise ValidationError("Material already exists")
+        material = Material.objects.create(identifier=identifier, url=url, content=content)
     else:
+        if IncludedMaterial.objects.filter(identifier=material.identifier).exists():
+            raise ValidationError("Material already exists")
         included_material.__dict__.update(material.__dict__)
 
     included_material.material = material

@@ -5,9 +5,9 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 
-from ..services import create_course, create_topic
-from ..models import Course, Week, Topic
-from ..factories import CourseFactory, WeekFactory
+from ..services import create_course, create_topic, create_included_material
+from ..models import Course, Week, Topic, Material, IncludedMaterial
+from ..factories import CourseFactory, WeekFactory, TopicFactory
 
 from odin.common.faker import faker
 
@@ -103,3 +103,34 @@ class TestCreateTopic(TestCase):
 
         self.assertEqual(1, Topic.objects.count())
         self.assertEqual(1, Topic.objects.filter(course=course).count())
+
+
+class TestCreateIncludedMaterial(TestCase):
+    def setUp(self):
+        self.topic = TopicFactory()
+        self.material = Material.objects.create(identifier="TestMaterial",
+                                                url=faker.url(),
+                                                content=faker.text())
+
+    def test_create_included_material_raises_validation_error_if_material_already_exists(self):
+        with self.assertRaises(ValidationError):
+            create_included_material(identifier=self.material.identifier,
+                                     url=faker.url(),
+                                     topic=self.topic)
+
+    def test_create_included_material_creates_only_included_material_when_existing_is_provided(self):
+        current_material_count = Material.objects.count()
+        current_included_material_count = IncludedMaterial.objects.count()
+        create_included_material(material=self.material, topic=self.topic)
+        self.assertEqual(current_material_count, Material.objects.count())
+        self.assertEqual(current_included_material_count + 1, IncludedMaterial.objects.count())
+
+    def test_create_included_material_creates_material_and_included_material_when_no_existing_is_provided(self):
+        current_material_count = Material.objects.count()
+        current_included_material_count = IncludedMaterial.objects.count()
+        create_included_material(identifier=faker.word(),
+                                 url=faker.url(),
+                                 content=faker.text(),
+                                 topic=self.topic)
+        self.assertEqual(current_material_count + 1, Material.objects.count())
+        self.assertEqual(current_included_material_count + 1, IncludedMaterial.objects.count())
