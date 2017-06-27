@@ -3,7 +3,7 @@ from test_plus import TestCase
 from django.urls import reverse
 
 from ..services import add_student, add_teacher
-from ..factories import CourseFactory, StudentFactory, TeacherFactory, WeekFactory
+from ..factories import CourseFactory, StudentFactory, TeacherFactory, WeekFactory, TopicFactory
 from ..models import Student, Teacher, Topic
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
@@ -164,7 +164,7 @@ class TestAddNewIncludedMaterialView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
         self.week = WeekFactory(course=self.course)
-        self.topic = create_topic(name=faker.name(), course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course, week=self.week)
         self.url = reverse('dashboard:education:course-management:add-new-included-material',
                            kwargs={'course_id': self.course.id,
                                    'topic_id': self.topic.id})
@@ -186,6 +186,7 @@ class TestAddNewIncludedMaterialView(TestCase):
     def test_can_create_new_material_for_topic_on_post(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
+        import ipdb; ipdb.set_trace()
         data = {
             'identifier': faker.name(),
             'url': faker.url(),

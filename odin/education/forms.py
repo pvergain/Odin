@@ -25,7 +25,11 @@ class TopicModelForm(forms.ModelForm):
 
 
 class IncludedMaterialModelForm(forms.ModelForm):
-    topic = forms.ChoiceField()
+    def __init__(self, course, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['topic'] = forms.ModelChoiceField(
+            queryset=Topic.objects.filter(course=course)
+        )
 
     class Meta:
         model = IncludedMaterial

@@ -123,11 +123,10 @@ class AddNewIncludedMaterialView(CourseViewMixin,
         self.initial['topic'] = self.kwargs.get('topic_id')
         return self.initial.copy()
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        topic = form.fields.get('topic')
-        topic.choices = [(topic.name, topic) for topic in Topic.objects.filter(course=self.course)]
-        return form
+    def get_form_kwargs(self):
+        form_kwgs = super().get_form_kwargs()
+        form_kwgs['course'] = self.course
+        return form_kwgs
 
     def form_valid(self, form):
         create_included_material(identifier=form.cleaned_data.get('identifier'),
