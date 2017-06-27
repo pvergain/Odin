@@ -1,12 +1,12 @@
 from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 
-from .models import Course, Teacher, Student
+from .models import Course, Teacher, Student, Material, Topic
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin
-from .forms import TopicModelForm, IncludedMaterialModelForm
+from .forms import TopicModelForm, IncludedMaterialModelForm, IncludedMaterialFromExistingForm
 from .services import create_topic, create_included_material
 
 
@@ -81,16 +81,47 @@ class AddTopicToCourseView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class AddMaterialToCourseView(CourseViewMixin,
-                              LoginRequiredMixin,
-                              IsTeacherInCoursePermission,
-                              FormView):
+class AddIncludedMaterialFromExistingView(CourseViewMixin,
+                                          LoginRequiredMixin,
+                                          IsTeacherInCoursePermission,
+                                          ListView):
+    template_name = 'education/existing_material_list.html'
+    queryset = Material.objects.all()
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['topic_id'] = self.kwargs.get('topic_id')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        topic = get_object_or_404(Topic, id=self.kwargs.get('topic_id'))
+        material = get_object_or_404(Material, identifier=request.POST.get('material_identifier'))
+
+        data = {}
+        data['topic'] = topic.id
+        data['material'] = material.id
+
+        form = IncludedMaterialFromExistingForm(data)
+        if form.is_valid():
+            create_included_material(material=material, topic=topic)
+        return redirect('dashboard:education:user-course-detail', course_id=self.course.id)
+
+
+class AddNewIncludedMaterialView(CourseViewMixin,
+                                 LoginRequiredMixin,
+                                 IsTeacherInCoursePermission,
+                                 FormView):
     template_name = 'education/add_material.html'
     form_class = IncludedMaterialModelForm
 
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course.id})
+
+    def get_initial(self):
+        self.initial = super().get_initial()
+        self.initial['topic'] = self.kwargs.get('topic_id')
+        return self.initial.copy()
 
     def form_valid(self, form):
         create_included_material(identifier=form.cleaned_data.get('identifier'),

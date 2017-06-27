@@ -72,10 +72,19 @@ def create_topic(*,
 
 # TODO check what to validate here
 def create_included_material(*,
-                             identifier: str,
-                             url: str,
-                             topic: Topic):
-    material = Material.objects.create(identifier=identifier, url=url)
-    included_material = IncludedMaterial.objects.create(material=material, topic=topic)
+                             identifier: str=None,
+                             url: str=None,
+                             topic: Topic=None,
+                             material: Material=None):
+
+    included_material = IncludedMaterial(topic=topic)
+
+    if material is None:
+        material = Material.objects.create(identifier=identifier, url=url)
+    else:
+        included_material.__dict__.update(material.__dict__)
+
+    included_material.material = material
+    included_material.save()
 
     return included_material

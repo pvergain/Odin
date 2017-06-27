@@ -3,12 +3,6 @@
 
 {% block content_title %}
    Course detail
-   <p><a href="{% url 'dashboard:education:manage-course-topics' course.pk %}">
-       <button type="button" class="btn green uppercase">Add topic</button>
-   </a></p>
-   <p><a href="{% url 'dashboard:education:manage-course-materials' course.pk %}">
-       <button type="button" class="btn green uppercase">Add material</button>
-   </a></p>
 {% endblock content_title %}
 
 {% block page_content %}
@@ -20,6 +14,7 @@
 </div>
 <div class="row margin-bottom-20 stories-cont">
   {% for teacher in course.teachers.all %}
+  {% if not teacher.hidden %}
     <div class="col-lg-3 col-md-6">
         <div class="portlet light">
             <div class="photo">
@@ -32,6 +27,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% endfor %}
 </div>
 <div class="row margin-bottom-40 stories-header" data-auto-height="true">
@@ -49,8 +45,17 @@
             <div class="desc">
                 <span>{{ topic.week }}</span>
             </div>
+            <a href="{% url 'dashboard:education:course-management:add-included-material-from-existing' course.pk topic.pk %}">
+                <button type="button" class="btn green uppercase">Add material</button></a>
         </div>
     </div>
     {% endfor %}
 </div>
+{% if request.user.is_teacher %}
+<div class="row margin-bottom-40 stories-header" data-auto-height="true">
+  <p><a href="{% url 'dashboard:education:course-management:manage-course-topics' course.pk %}">
+      <button type="button" class="btn green uppercase">Add topic</button>
+  </a></p>
+</div>
+{% endif %}
 {% endblock page_content %}

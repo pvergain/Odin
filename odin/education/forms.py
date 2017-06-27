@@ -27,3 +27,9 @@ class IncludedMaterialModelForm(forms.ModelForm):
     class Meta:
         model = IncludedMaterial
         fields = ('identifier', 'url', 'content', 'topic')
+
+
+class IncludedMaterialFromExistingForm(forms.ModelForm):
+    class Meta:
+        model = IncludedMaterial
+        fields = ('topic', 'material')
