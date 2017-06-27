@@ -155,4 +155,4 @@ class TestAddTopicToCourseView(TestCase):
                                  expected_url=reverse('dashboard:education:user-course-detail',
                                                       kwargs={'course_id': self.course.id}))
             self.assertEqual(1, Topic.objects.count())
-            self.assertEqual(1, Topic.objects.filter(course=self.course))
+            self.assertEqual(1, Topic.objects.filter(course=self.course).count())
