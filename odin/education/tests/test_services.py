@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 
 from ..services import create_course, create_topic
-from ..models import Course, Week, Topic, Teacher
+from ..models import Course, Week, Topic
 from ..factories import CourseFactory, WeekFactory
 
 from odin.common.faker import faker
