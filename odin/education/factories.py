@@ -3,7 +3,7 @@ import factory
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from .models import Student, Teacher, Course
+from .models import Student, Teacher, Course, Week, Topic
 
 
 class StudentFactory(BaseUserFactory):
@@ -29,3 +29,25 @@ class CourseFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Course
+
+
+class WeekFactory(factory.DjangoModelFactory):
+    number = factory.LazyAttribute(lambda _: faker.pyint())
+
+    start_date = factory.LazyAttribute(lambda _: faker.date())
+    end_date = factory.LazyAttribute(lambda _: faker.date())
+
+    course = factory.RelatedFactory(CourseFactory)
+
+    class Meta:
+        model = Week
+
+
+class TopicFactory(factory.DjangoModelFactory):
+    name = factory.LazyAttribute(lambda _: faker.name())
+
+    course = factory.RelatedFactory(CourseFactory)
+    week = factory.RelatedFactory(WeekFactory)
+
+    class Meta:
+        model = Topic

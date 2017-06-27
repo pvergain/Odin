@@ -70,12 +70,14 @@ def create_topic(*,
     return topic
 
 
-# TODO check what to validate here
 def create_included_material(*,
                              identifier: str=None,
                              url: str=None,
                              topic: Topic=None,
                              material: Material=None):
+
+    if IncludedMaterial.objects.filter(identifier=material.identifier).exists():
+        raise ValidationError('Material already exists')
 
     included_material = IncludedMaterial(topic=topic)
 

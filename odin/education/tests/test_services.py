@@ -5,9 +5,9 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 
-from ..services import create_course
-from ..models import Course, Week
-from ..factories import CourseFactory
+from ..services import create_course, create_topic
+from ..models import Course, Week, Topic, Teacher
+from ..factories import CourseFactory, WeekFactory
 
 from odin.common.faker import faker
 
@@ -76,3 +76,30 @@ class TestCreateCourse(TestCase):
         self.assertEqual(weeks, Week.objects.count())
         week_one = Week.objects.first()
         self.assertEqual(0, week_one.start_date.weekday())
+
+
+class TestCreateTopic(TestCase):
+
+    def test_create_topic_adds_topic_to_course_successfully(self):
+        course = CourseFactory()
+        week = WeekFactory(course=course)
+        self.assertEqual(0, Topic.objects.count())
+        self.assertEqual(0, Topic.objects.filter(course=course).count())
+
+        create_topic(name=faker.name(), course=course, week=week)
+
+        self.assertEqual(1, Topic.objects.count())
+        self.assertEqual(1, Topic.objects.filter(course=course).count())
+
+    def test_create_topic_raises_validation_error_on_existing_topic(self):
+        course = CourseFactory()
+        week = WeekFactory(course=course)
+        topic = create_topic(name=faker.name(), course=course, week=week)
+        self.assertEqual(1, Topic.objects.count())
+        self.assertEqual(1, Topic.objects.filter(course=course).count())
+
+        with self.assertRaises(ValidationError):
+            create_topic(name=topic.name, course=course, week=week)
+
+        self.assertEqual(1, Topic.objects.count())
+        self.assertEqual(1, Topic.objects.filter(course=course).count())

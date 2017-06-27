@@ -3,10 +3,10 @@ from test_plus import TestCase
 from django.urls import reverse
 
 from ..services import add_student, add_teacher
-from ..factories import CourseFactory, StudentFactory, TeacherFactory
-from ..models import Student
+from ..factories import CourseFactory, StudentFactory, TeacherFactory, WeekFactory
+from ..models import Student, Teacher, Topic
 
-from odin.users.factories import ProfileFactory
+from odin.users.factories import ProfileFactory, BaseUserFactory
 
 from odin.common.faker import faker
 
@@ -117,3 +117,42 @@ class TestCourseDetailView(TestCase):
             self.assertEqual(200, response.status_code)
             self.assertNotContains(response, self.teacher.get_full_name())
             self.assertNotContains(response, self.teacher.profile.description)
+
+
+class TestAddTopicToCourseView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.url = reverse('dashboard:education:course-management:manage-course-topics',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_can_create_topic_for_course_on_post(self):
+        data = {
+            'name': faker.name(),
+            'week': self.week.id
+        }
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response,
+                                 expected_url=reverse('dashboard:education:user-course-detail',
+                                                      kwargs={'course_id': self.course.id}))
+            self.assertEqual(1, Topic.objects.count())
+            self.assertEqual(1, Topic.objects.filter(course=self.course))
