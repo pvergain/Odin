@@ -4,10 +4,9 @@ from django.urls import reverse
 
 from ..services import add_student, add_teacher
 from ..factories import CourseFactory, StudentFactory, TeacherFactory, WeekFactory, TopicFactory
-from ..models import Student, Teacher, Topic
+from ..models import Student, Teacher, Topic, IncludedMaterial
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
-from odin.education.services import create_topic
 
 from odin.common.faker import faker
 
@@ -186,12 +185,11 @@ class TestAddNewIncludedMaterialView(TestCase):
     def test_can_create_new_material_for_topic_on_post(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
-        import ipdb; ipdb.set_trace()
         data = {
             'identifier': faker.name(),
             'url': faker.url(),
             'content': faker.text(),
-            'topic': self.topic
+            'topic': self.topic.id,
         }
 
         with self.login(email=self.user.email, password=self.test_password):
