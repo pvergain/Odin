@@ -126,6 +126,7 @@ class AddNewIncludedMaterialView(CourseViewMixin,
     def form_valid(self, form):
         create_included_material(identifier=form.cleaned_data.get('identifier'),
                                  url=form.cleaned_data.get('url'),
-                                 topic=form.cleaned_data.get('topic'))
+                                 topic=form.cleaned_data.get('topic'),
+                                 content=form.cleaned_data.get('content'))
 
         return super().form_valid(form)
