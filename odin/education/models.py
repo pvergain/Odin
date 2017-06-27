@@ -139,6 +139,14 @@ class Week(models.Model):
     end_date = models.DateField()
 
     number = models.PositiveIntegerField(default=1)
+    course = models.ForeignKey(Course,
+                               on_delete=models.CASCADE,
+                               related_name='weeks',
+                               blank=True,
+                               null=True)
+
+    def __str__(self):
+        return f'Week {self.number}'
 
 
 class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
@@ -149,6 +157,9 @@ class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
     week = models.ForeignKey(Week,
                              on_delete=models.CASCADE,
                              related_name='topics')
+
+    def __str__(self):
+        return f'{self.name}'
 
 
 class Lecture(models.Model):

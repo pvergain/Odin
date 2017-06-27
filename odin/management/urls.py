@@ -5,7 +5,8 @@ from .views import (PromoteUserToStudentView,
                     DashboardManagementView,
                     CreateUserView,
                     CreateStudentView,
-                    CreateTeacherView)
+                    CreateTeacherView,
+                    CreateCourseView)
 
 urlpatterns = [
     url(regex='^$',
@@ -26,4 +27,7 @@ urlpatterns = [
     url(regex='^add-teacher/$',
         view=CreateTeacherView.as_view(),
         name='add-teacher'),
+    url(regex='^add-course/$',
+        view=CreateCourseView.as_view(),
+        name='add-course'),
 ]

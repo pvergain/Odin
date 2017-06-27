@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from django.views.generic import View, ListView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 
 from .permissions import DashboardManagementPermission
 from .filters import UserFilter
@@ -10,6 +11,8 @@ from odin.users.models import BaseUser
 from odin.users.services import create_user
 
 from odin.education.models import Student, Teacher, Course
+from odin.education.forms import ManagementAddCourseForm
+from odin.education.services import create_course
 
 
 class DashboardManagementView(LoginRequiredMixin,
@@ -84,4 +87,17 @@ class CreateTeacherView(DashboardCreateUserMixin, FormView):
         instance = create_user(**form.cleaned_data)
 
         Teacher.objects.create_from_user(instance)
+        return super().form_valid(form)
+
+
+class CreateCourseView(LoginRequiredMixin,
+                       DashboardManagementPermission,
+                       FormView):
+    template_name = 'dashboard/add_course.html'
+    form_class = ManagementAddCourseForm
+    success_url = reverse_lazy('dashboard:management:management_index')
+
+    def form_valid(self, form):
+        create_course(**form.cleaned_data)
+
         return super().form_valid(form)
