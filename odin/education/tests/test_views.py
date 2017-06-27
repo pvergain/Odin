@@ -7,6 +7,7 @@ from ..factories import CourseFactory, StudentFactory, TeacherFactory, WeekFacto
 from ..models import Student, Teacher, Topic
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
+from odin.education.services import create_topic
 
 from odin.common.faker import faker
 
@@ -156,3 +157,47 @@ class TestAddTopicToCourseView(TestCase):
                                                       kwargs={'course_id': self.course.id}))
             self.assertEqual(1, Topic.objects.count())
             self.assertEqual(1, Topic.objects.filter(course=self.course).count())
+
+
+class TestAddNewIncludedMaterialView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.topic = create_topic(name=faker.name(), course=self.course, week=self.week)
+        self.url = reverse('dashboard:education:course-management:add-new-included-material',
+                           kwargs={'course_id': self.course.id,
+                                   'topic_id': self.topic.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_can_create_new_material_for_topic_on_post(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        data = {
+            'identifier': faker.name(),
+            'url': faker.url(),
+            'content': faker.text(),
+            'topic': self.topic
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}
+            ))
+            self.assertEqual(1, IncludedMaterial.objects.count())
+            self.assertEqual(1, self.topic.materials.count())

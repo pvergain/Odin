@@ -1,4 +1,5 @@
 from django import forms
+from django.shortcuts import get_object_or_404
 
 from .models import Course, Topic, IncludedMaterial
 
@@ -24,9 +25,11 @@ class TopicModelForm(forms.ModelForm):
 
 
 class IncludedMaterialModelForm(forms.ModelForm):
+    topic = forms.ChoiceField()
+
     class Meta:
         model = IncludedMaterial
-        fields = ('identifier', 'url', 'content', 'topic')
+        fields = ('identifier', 'url', 'content')
 
 
 class IncludedMaterialFromExistingForm(forms.ModelForm):
