@@ -4,6 +4,7 @@ from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
 from .models import Student, Teacher, Course, Week, Topic, Material, IncludedMaterial
+from .services import create_course
 
 
 class StudentFactory(BaseUserFactory):
@@ -18,8 +19,8 @@ class TeacherFactory(BaseUserFactory):
 
 class CourseFactory(factory.DjangoModelFactory):
     name = factory.LazyAttribute(lambda _: faker.word())
-    start_date = factory.LazyAttribute(lambda _: faker.date())
-    end_date = factory.LazyAttribute(lambda _: faker.date())
+    start_date = factory.LazyAttribute(lambda _: faker.date_object())
+    end_date = factory.LazyAttribute(lambda _: faker.date_object())
 
     slug_url = factory.LazyAttribute(lambda _: faker.slug())
 
@@ -29,6 +30,10 @@ class CourseFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Course
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        return create_course(*args, **kwargs)
 
 
 class WeekFactory(factory.DjangoModelFactory):
