@@ -90,7 +90,7 @@ def create_included_material(*,
             raise ValidationError("Material already exists")
         material = Material.objects.create(identifier=identifier, url=url, content=content)
     else:
-        if IncludedMaterial.objects.filter(identifier=material.identifier).exists():
+        if IncludedMaterial.objects.filter(identifier=material.identifier, topic=topic).exists():
             raise ValidationError("Material already exists")
     included_material.__dict__.update(material.__dict__)
 

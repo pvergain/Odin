@@ -3,7 +3,7 @@ import factory
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from .models import Student, Teacher, Course, Week, Topic, Material
+from .models import Student, Teacher, Course, Week, Topic, Material, IncludedMaterial
 
 
 class StudentFactory(BaseUserFactory):
@@ -21,7 +21,7 @@ class CourseFactory(factory.DjangoModelFactory):
     start_date = factory.LazyAttribute(lambda _: faker.date())
     end_date = factory.LazyAttribute(lambda _: faker.date())
 
-    slug_url = factory.LazyAttribute(lambda _: faker.word())
+    slug_url = factory.LazyAttribute(lambda _: faker.slug())
 
     repository = factory.LazyAttribute(lambda _: faker.url())
     video_channel = factory.LazyAttribute(lambda _: faker.url())
@@ -59,3 +59,11 @@ class MaterialFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Material
+
+
+class IncludedMaterialFactory(factory.DjangoModelFactory):
+    material = factory.SubFactory(MaterialFactory)
+    topic = factory.SubFactory(TopicFactory)
+
+    class Meta:
+        model = IncludedMaterial

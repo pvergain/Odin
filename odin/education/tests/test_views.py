@@ -10,8 +10,9 @@ from ..factories import (
     WeekFactory,
     TopicFactory,
     MaterialFactory,
+    IncludedMaterialFactory,
 )
-from ..models import Student, Teacher, Topic, IncludedMaterial
+from ..models import Student, Teacher, Topic, IncludedMaterial, Material
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
 
@@ -254,3 +255,19 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
             self.assertEqual(1, IncludedMaterial.objects.count())
             included_material = IncludedMaterial.objects.filter(material=material)
             self.assertEqual(1, Topic.objects.filter(materials__in=included_material).count())
+
+    def test_can_add_included_material_from_existing_included_materials(self):
+        course = CourseFactory()
+        topic = TopicFactory(course=course)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        included_material = IncludedMaterialFactory(topic=topic)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            response = self.post(self.url, data={'material_identifier': included_material.material.identifier})
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}))
+            self.assertEqual(2, IncludedMaterial.objects.count())
+            self.assertEqual(1, Material.objects.count())

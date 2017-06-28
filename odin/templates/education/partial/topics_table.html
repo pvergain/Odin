@@ -47,6 +47,7 @@
                                               {% for material in topic.materials.all %}
                                                   <tr>
                                                       <td>{{ material.id }}</td>
+                                                      <td>{{ material.identifier }}</td>
                                                       <td>{{ material.url }}</td>
                                                   </tr>
                                               {% endfor %}
