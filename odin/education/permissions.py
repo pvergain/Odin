@@ -16,11 +16,12 @@ class IsStudentOrTeacherInCoursePermission(BaseUserPassesTestMixin):
         return False
 
 
-class IsTeacherInCoursePermission(IsStudentOrTeacherInCoursePermission):
+class IsTeacherInCoursePermission(BaseUserPassesTestMixin):
     raise_exception = True
 
     def test_func(self):
-        super().test_func()
+        email = self.request.user.email
+        self.is_teacher = self.course.teachers.filter(email=email).exists()
         if self.is_teacher:
             return True
 

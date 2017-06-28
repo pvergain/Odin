@@ -79,30 +79,29 @@ class TestCreateCourse(TestCase):
 
 
 class TestCreateTopic(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
 
     def test_create_topic_adds_topic_to_course_successfully(self):
-        course = CourseFactory()
-        week = WeekFactory(course=course)
         self.assertEqual(0, Topic.objects.count())
-        self.assertEqual(0, Topic.objects.filter(course=course).count())
+        self.assertEqual(0, Topic.objects.filter(course=self.course).count())
 
-        create_topic(name=faker.name(), course=course, week=week)
+        create_topic(name=faker.name(), course=self.course, week=self.week)
 
         self.assertEqual(1, Topic.objects.count())
-        self.assertEqual(1, Topic.objects.filter(course=course).count())
+        self.assertEqual(1, Topic.objects.filter(course=self.course).count())
 
     def test_create_topic_raises_validation_error_on_existing_topic(self):
-        course = CourseFactory()
-        week = WeekFactory(course=course)
-        topic = create_topic(name=faker.name(), course=course, week=week)
+        topic = create_topic(name=faker.name(), course=self.course, week=self.week)
         self.assertEqual(1, Topic.objects.count())
-        self.assertEqual(1, Topic.objects.filter(course=course).count())
+        self.assertEqual(1, Topic.objects.filter(course=self.course).count())
 
         with self.assertRaises(ValidationError):
-            create_topic(name=topic.name, course=course, week=week)
+            create_topic(name=topic.name, course=self.course, week=self.week)
 
         self.assertEqual(1, Topic.objects.count())
-        self.assertEqual(1, Topic.objects.filter(course=course).count())
+        self.assertEqual(1, Topic.objects.filter(course=self.course).count())
 
 
 class TestCreateIncludedMaterial(TestCase):
