@@ -102,8 +102,10 @@ class AddIncludedMaterialFromExistingView(CourseViewMixin,
         data['material'] = material.id
 
         form = IncludedMaterialFromExistingForm(data)
+
         if form.is_valid():
-            create_included_material(material=material, topic=topic)
+            create_included_material(existing_material=material, topic=topic)
+
         return redirect('dashboard:education:user-course-detail', course_id=self.course.id)
 
 

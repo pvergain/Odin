@@ -278,6 +278,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
         included_material = IncludedMaterialFactory(topic=topic)
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)

@@ -124,7 +124,9 @@ class TestCreateIncludedMaterial(TestCase):
     def test_create_included_material_creates_only_included_material_when_existing_is_provided(self):
         current_material_count = Material.objects.count()
         current_included_material_count = IncludedMaterial.objects.count()
-        create_included_material(material=self.material, topic=self.topic)
+
+        create_included_material(existing_material=self.material, topic=self.topic)
+
         self.assertEqual(current_material_count, Material.objects.count())
         self.assertEqual(current_included_material_count + 1, IncludedMaterial.objects.count())
 
