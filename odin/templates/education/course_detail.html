@@ -6,56 +6,10 @@
 {% endblock content_title %}
 
 {% block page_content %}
-<div class="row margin-bottom-40 stories-header" data-auto-height="true">
-    <div class="col-md-12">
-        <h1>Teachers for course</h1>
-        <h2>{{ course.name }}</h2>
-    </div>
-</div>
-<div class="row margin-bottom-20 stories-cont">
-  {% for teacher in course.teachers.all %}
-  {% if not teacher.hidden %}
-    <div class="col-lg-3 col-md-6">
-        <div class="portlet light">
-            <div class="photo">
-                <img src="{% static "hackman.png" %}" alt="" class="img-responsive" /> </div>
-            <div class="title">
-                <span> {{ teacher.get_full_name }} </span>
-            </div>
-            <div class="desc">
-                <span>{{ teacher.get_description }}</span>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
-</div>
-<div class="row margin-bottom-40 stories-header" data-auto-height="true">
-    <div class="col-md-12">
-        <h1>Topics for course</h1>
-    </div>
-</div>
-<div class="row margin-bottom-20 stories-cont">
-  {% for topic in course.topics.all %}
-    <div class="col-lg-3 col-md-6">
-        <div class="portlet light">
-            <div class="title">
-                <span> {{ topic.name }} </span>
-            </div>
-            <div class="desc">
-                <span>{{ topic.week }}</span>
-            </div>
-            <a href="{% url 'dashboard:education:course-management:add-included-material-from-existing' course.pk topic.pk %}">
-                <button type="button" class="btn green uppercase">Add material</button></a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-{% if request.user.is_teacher %}
-<div class="row margin-bottom-40 stories-header" data-auto-height="true">
-  <p><a href="{% url 'dashboard:education:course-management:manage-course-topics' course.pk %}">
-      <button type="button" class="btn green uppercase">Add topic</button>
-  </a></p>
-</div>
-{% endif %}
+  <div class="col-md-7">
+    {% include "education/partial/teachers_table.html" with course=course teachers=course.teachers.all %}
+  </div>
+  <div class="col-md-7">
+    {% include "education/partial/topics_table.html" with course=course topics=course.topics.all %}
+  </div>
 {% endblock page_content %}

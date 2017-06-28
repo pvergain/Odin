@@ -17,7 +17,7 @@
                     <a href="javascript:;" class="expand"> </a>
                 </div>
             </div>
-            <div class="portlet-body" style="display:none;">
+            <div class="portlet-body default-collapsed">
               <form class="" action="" method="get">
                 <div class="form-group">
                   <input class="form-control" type="text" placeholder="Search..." name="search_field" value="" id="search-field">
@@ -107,7 +107,7 @@
                     <a href="javascript:;" class="expand"> </a>
                 </div>
             </div>
-            <div class="portlet-body" style="display:none;">
+            <div class="portlet-body default-collapsed">
                 <div class="form-actions">
                     <a href="{% url 'dashboard:management:add-course' %}"><button class="btn green uppercase" type="button" name="button">Add course</button></a>
                 </div>
@@ -117,7 +117,12 @@
                             <tr>
                                 <th> # </th>
                                 <th> Name </th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
                                 <th> GitHub </th>
+                                <th>Video Channel</th>
+                                <th>Facebook Group</th>
+                                <th>Duration</th>
                                 <th> Students </th>
                                 <th> Teachers </th>
                             </tr>
@@ -127,7 +132,12 @@
                                 <tr>
                                     <td>{{ course.id }}</td>
                                     <td><a href="{% url 'dashboard:education:user-course-detail' course.id %}">{{ course.name }}</a></td>
-                                    <td>{{ course.repository }}</td>
+                                    <td>{{ course.start_date }}</td>
+                                    <td>{{ course.end_date }}</td>
+                                    <td><a href="{{ course.repository }}">{{ course.repository }}</a></td>
+                                    <td><a href="{{ course.video_channel }}">{{ course.video_channel }}</a></td>
+                                    <td><a href="{{ course.facebook_group }}">{{ course.facebook_group }}</a></td>
+                                    <td>{{ course.duration_in_weeks }}</td>
                                     <td>{{ course.students.count }}</td>
                                     <td>{{ course.teachers.count }}</td>
                                 </tr>
