@@ -54,6 +54,13 @@
                                           </tbody>
                                       </table>
                                   </div>
+                                  {% if not public_page %}
+                                    {% if request.user.teacher in course.teachers.all %}
+                                      <a href="{% url 'dashboard:education:course-management:add-included-material-from-existing' course.pk topic.pk%}">
+                                        <button type="button" name="button" class="btn green uppercase" >Add new material</button>
+                                      </a>
+                                    {% endif %}
+                                  {% endif %}
                               </div>
                           </div>
                         </td>
@@ -64,9 +71,11 @@
             </table>
         </div>
     </div>
-    {% if request.user.teacher in course.teachers.all %}
-      <a href="{% url 'dashboard:education:course-management:manage-course-topics' course.pk %}">
-        <button type="button" name="button" class="btn green uppercase" >Add new topic</button>
-      </a>
+    {% if not public_page %}
+      {% if request.user.teacher in course.teachers.all %}
+        <a href="{% url 'dashboard:education:course-management:manage-course-topics' course.pk %}">
+          <button type="button" name="button" class="btn green uppercase" >Add new topic</button>
+        </a>
+      {% endif %}
     {% endif %}
 </div>

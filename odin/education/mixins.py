@@ -17,3 +17,10 @@ class CourseViewMixin:
         context['course'] = self.course
 
         return context
+
+
+class PublicViewContextMixin:
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['public_page'] = True
+        return context

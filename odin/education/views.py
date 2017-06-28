@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 
 from .models import Course, Teacher, Student, Material, Topic
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
-from .mixins import CourseViewMixin
+from .mixins import CourseViewMixin, PublicViewContextMixin
 from .forms import TopicModelForm, IncludedMaterialModelForm, IncludedMaterialFromExistingForm
 from .services import create_topic, create_included_material
 
@@ -45,7 +45,7 @@ class CourseDetailView(CourseViewMixin,
     template_name = 'education/course_detail.html'
 
 
-class PublicCourseListView(ListView):
+class PublicCourseListView(PublicViewContextMixin, ListView):
 
     template_name = 'education/all_courses.html'
 
@@ -53,7 +53,7 @@ class PublicCourseListView(ListView):
         return Course.objects.select_related('description')
 
 
-class PublicCourseDetailView(DetailView):
+class PublicCourseDetailView(PublicViewContextMixin, DetailView):
     template_name = 'education/course_detail.html'
 
     def get_object(self):

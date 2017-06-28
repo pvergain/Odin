@@ -10,6 +10,6 @@
     {% include "education/partial/teachers_table.html" with course=course teachers=course.teachers.all %}
   </div>
   <div class="col-md-7">
-    {% include "education/partial/topics_table.html" with course=course topics=course.topics.all %}
+    {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page%}
   </div>
 {% endblock page_content %}
