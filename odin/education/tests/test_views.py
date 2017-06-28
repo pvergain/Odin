@@ -11,7 +11,7 @@ from ..factories import (
     TopicFactory,
     MaterialFactory,
 )
-from ..models import Student, Teacher, Topic, IncludedMaterial, Material
+from ..models import Student, Teacher, Topic, IncludedMaterial
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
 
