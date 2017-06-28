@@ -127,6 +127,22 @@ class TestCourseDetailView(TestCase):
             self.assertNotContains(response, self.teacher.profile.description)
 
 
+class TestPublicCourseDetailView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.url = reverse('public:course_detail', kwargs={'course_slug': self.course.slug_url})
+
+    def test_cannot_add_topic_or_material_on_public_detail_page(self):
+        response = self.get(self.url)
+        self.assertEqual(200, response.status_code)
+        content = response.content.decode('utf-8')
+        self.assertNotIn(content,
+                         "<button type='button' name='button' class='btn green uppercase' >Add new topic</button>")
+        self.assertNotIn(content,
+                         "<button type='button' name='button' class='btn green uppercase' >Add new material</button>")
+
+
 class TestAddTopicToCourseView(TestCase):
 
     def setUp(self):
