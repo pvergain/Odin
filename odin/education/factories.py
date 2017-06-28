@@ -3,7 +3,7 @@ import factory
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from .models import Student, Teacher, Course, Week, Topic
+from .models import Student, Teacher, Course, Week, Topic, Material
 
 
 class StudentFactory(BaseUserFactory):
@@ -50,3 +50,12 @@ class TopicFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Topic
+
+
+class MaterialFactory(factory.DjangoModelFactory):
+    identifier = factory.LazyAttribute(lambda _: faker.word())
+    url = factory.LazyAttribute(lambda _: faker.url())
+    content = factory.LazyAttribute(lambda _: faker.text())
+
+    class Meta:
+        model = Material

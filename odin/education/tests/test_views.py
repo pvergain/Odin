@@ -3,8 +3,15 @@ from test_plus import TestCase
 from django.urls import reverse
 
 from ..services import add_student, add_teacher
-from ..factories import CourseFactory, StudentFactory, TeacherFactory, WeekFactory, TopicFactory
-from ..models import Student, Teacher, Topic, IncludedMaterial
+from ..factories import (
+    CourseFactory,
+    StudentFactory,
+    TeacherFactory,
+    WeekFactory,
+    TopicFactory,
+    MaterialFactory,
+)
+from ..models import Student, Teacher, Topic, IncludedMaterial, Material
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
 
@@ -200,3 +207,50 @@ class TestAddNewIncludedMaterialView(TestCase):
             ))
             self.assertEqual(1, IncludedMaterial.objects.count())
             self.assertEqual(1, self.topic.materials.count())
+
+
+class TestAddIncludedMaterialFromExistingView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.url = reverse('dashboard:education:course-management:add-included-material-from-existing',
+                           kwargs={'course_id': self.course.id,
+                                   'topic_id': self.topic.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_existing_ordinary_material_is_shown_on_page(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        material = MaterialFactory()
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, material.identifier)
+
+    def test_can_add_ordinary_material_to_course(self):
+        self.assertEqual(0, IncludedMaterial.objects.count())
+        teacher = Teacher.objects.create_from_user(self.user)
+        material = MaterialFactory()
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            response = self.post(self.url, data={'material_identifier': material.identifier})
+            self.assertEqual(1, IncludedMaterial.objects.count())
+            included_material = IncludedMaterial.objects.filter(material=material)
+            self.assertEqual(1, Topic.objects.filter(materials__in=included_material).count())
