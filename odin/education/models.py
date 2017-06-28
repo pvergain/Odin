@@ -141,9 +141,7 @@ class Week(models.Model):
     number = models.PositiveIntegerField(default=1)
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
-                               related_name='weeks',
-                               blank=True,
-                               null=True)
+                               related_name='weeks')
 
     def __str__(self):
         return f'Week {self.number}'
