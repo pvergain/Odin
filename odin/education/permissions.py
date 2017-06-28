@@ -23,6 +23,6 @@ class IsTeacherInCoursePermission(BaseUserPassesTestMixin):
         email = self.request.user.email
         self.is_teacher = self.course.teachers.filter(email=email).exists()
         if self.is_teacher:
-            return True
+            return True and super().test_func()
 
         return False
