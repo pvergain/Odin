@@ -1,13 +1,14 @@
 from django.conf.urls import url, include
 
-
-from .views import (UserCoursesView,
-                    CourseDetailView,
-                    PublicCourseListView,
-                    PublicCourseDetailView,
-                    AddTopicToCourseView,
-                    AddNewIncludedMaterialView,
-                    AddIncludedMaterialFromExistingView)
+from .views import (
+    UserCoursesView,
+    CourseDetailView,
+    PublicCourseListView,
+    PublicCourseDetailView,
+    AddTopicToCourseView,
+    AddNewIncludedMaterialView,
+    AddIncludedMaterialFromExistingView
+)
 
 
 courses_public_urlpatterns = [

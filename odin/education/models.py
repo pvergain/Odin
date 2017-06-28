@@ -41,7 +41,7 @@ class Course(models.Model):
                                       through='CourseAssignment',
                                       through_fields=('course', 'teacher'))
 
-    slug_url = models.SlugField(null=True, unique=True)
+    slug_url = models.SlugField(unique=True)
 
     repository = models.URLField(blank=True)
     video_channel = models.URLField(blank=True)

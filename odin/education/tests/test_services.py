@@ -24,6 +24,7 @@ class TestCreateCourse(TestCase):
             'repository': faker.url(),
             'video_channel': faker.url(),
             'facebook_group': faker.url(),
+            'slug_url': faker.slug(),
         }
         create_course(**data)
         self.assertEqual(1, Course.objects.count())
@@ -39,6 +40,7 @@ class TestCreateCourse(TestCase):
             'repository': faker.url(),
             'video_channel': faker.url(),
             'facebook_group': faker.url(),
+            'slug_url': faker.slug(),
         }
         with self.assertRaises(ValidationError):
             create_course(**data)
@@ -54,6 +56,7 @@ class TestCreateCourse(TestCase):
             'repository': faker.url(),
             'video_channel': faker.url(),
             'facebook_group': faker.url(),
+            'slug_url': faker.slug(),
         }
         course = create_course(**data)
         weeks = course.duration_in_weeks
@@ -69,6 +72,7 @@ class TestCreateCourse(TestCase):
             'repository': faker.url(),
             'video_channel': faker.url(),
             'facebook_group': faker.url(),
+            'slug_url': faker.slug(),
         }
         course = create_course(**data)
         weeks = course.duration_in_weeks

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from .models import (
@@ -22,6 +23,7 @@ def add_teacher(course: Course, teacher: Teacher) -> CourseAssignment:
     return CourseAssignment.objects.create(course=course, teacher=teacher)
 
 
+@transaction.atomic
 def create_course(*,
                   name: str,
                   start_date: datetime,
@@ -29,7 +31,7 @@ def create_course(*,
                   repository: str,
                   facebook_group: str,
                   video_channel: str,
-                  slug_url: str=None):
+                  slug_url: str=None) -> Course:
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -48,12 +50,16 @@ def create_course(*,
     start_date = course.start_date
     start_date = start_date - timedelta(days=start_date.weekday())
 
+    week_instances = []
     for i in range(1, weeks + 1):
-        Week.objects.create(course=course,
-                            number=i,
-                            start_date=start_date,
-                            end_date=start_date + timedelta(days=7))
-        start_date = start_date + timedelta(days=7)
+        current = Week(course=course,
+                       number=i,
+                       start_date=start_date,
+                       end_date=start_date + timedelta(days=7))
+        start_date = current.end_date
+        week_instances.append(current)
+
+    Week.objects.bulk_create(week_instances)
 
     return course
 
@@ -61,7 +67,7 @@ def create_course(*,
 def create_topic(*,
                  name: str,
                  week: Week,
-                 course: Course):
+                 course: Course) -> Topic:
     if Topic.objects.filter(course=course, name=name).exists():
         raise ValidationError('Topic with this name already exists for this course')
 
@@ -75,7 +81,7 @@ def create_included_material(*,
                              url: str=None,
                              topic: Topic=None,
                              content: str=None,
-                             material: Material=None):
+                             material: Material=None) -> IncludedMaterial:
 
     included_material = IncludedMaterial(topic=topic)
 
