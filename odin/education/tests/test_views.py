@@ -250,15 +250,6 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    def test_existing_ordinary_material_is_shown_on_page(self):
-        teacher = Teacher.objects.create_from_user(self.user)
-        add_teacher(self.course, teacher)
-        material = MaterialFactory()
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, material.identifier)
-
     def test_can_add_ordinary_material_to_course(self):
         self.assertEqual(0, IncludedMaterial.objects.count())
         teacher = Teacher.objects.create_from_user(self.user)
@@ -267,7 +258,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
-            response = self.post(self.url, data={'material_identifier': material.identifier})
+            response = self.post(self.url, data={'material': material.id})
             self.assertEqual(1, IncludedMaterial.objects.count())
             included_material = IncludedMaterial.objects.filter(material=material)
             self.assertEqual(1, Topic.objects.filter(materials__in=included_material).count())
@@ -280,9 +271,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         included_material = IncludedMaterialFactory(topic=topic)
 
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertEqual(200, response.status_code)
-            response = self.post(self.url, data={'material_identifier': included_material.material.identifier})
+            response = self.post(self.url, data={'material': included_material.material.id})
             self.assertRedirects(response, expected_url=reverse(
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}))

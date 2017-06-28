@@ -7,7 +7,8 @@ from .views import (
     PublicCourseDetailView,
     AddTopicToCourseView,
     AddNewIncludedMaterialView,
-    AddIncludedMaterialFromExistingView
+    AddIncludedMaterialFromExistingView,
+    ExistingMaterialListView
 )
 
 
@@ -24,7 +25,10 @@ course_management_urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/add-topic/$',
         view=AddTopicToCourseView.as_view(),
         name='manage-course-topics'),
-    url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-material/$',
+    url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/existing-materials/$',
+        view=ExistingMaterialListView.as_view(),
+        name='existing-materials'),
+    url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-material/existing$',
         view=AddIncludedMaterialFromExistingView.as_view(),
         name='add-included-material-from-existing'),
     url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-material/new$',

@@ -56,7 +56,7 @@
                                   </div>
                                   {% if not public_page %}
                                     {% if request.user.teacher in course.teachers.all %}
-                                      <a href="{% url 'dashboard:education:course-management:add-included-material-from-existing' course.pk topic.pk%}">
+                                      <a href="{% url 'dashboard:education:course-management:existing-materials' course.pk topic.pk %}">
                                         <button type="button" name="button" class="btn green uppercase" >Add new material</button>
                                       </a>
                                     {% endif %}

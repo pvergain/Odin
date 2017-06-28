@@ -219,12 +219,8 @@ class TestCreateTeacherView(TestCase):
             self.assertEqual(403, response.status_code)
 
     def test_post_creates_teacher_when_user_is_superuser(self):
-        user = BaseUserFactory(password=self.test_password)
-        user.is_superuser = True
-        user.is_active = True
-        user.save()
 
-        with self.login(email=user.email, password=self.test_password):
+        with self.login(email=self.user.email, password=self.test_password):
             self.assertEqual(1, Teacher.objects.count())
 
             data = {'email': faker.email()}
