@@ -39,8 +39,8 @@ class CourseFactory(factory.DjangoModelFactory):
 class WeekFactory(factory.DjangoModelFactory):
     number = factory.LazyAttribute(lambda _: faker.pyint())
 
-    start_date = factory.LazyAttribute(lambda _: faker.date())
-    end_date = factory.LazyAttribute(lambda _: faker.date())
+    start_date = factory.LazyAttribute(lambda _: faker.date_object())
+    end_date = factory.LazyAttribute(lambda _: faker.date_object())
 
     course = factory.SubFactory(CourseFactory)
 
