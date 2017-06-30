@@ -75,8 +75,8 @@ class Profile(models.Model):
 
     social_accounts = JSONField(default=json_field_default)
 
-    works_at = models.CharField(blank=True, max_length=255)
-    studies_at = models.CharField(blank=True, max_length=255)
+    works_at = models.CharField(blank=True, null=True, max_length=255)
+    studies_at = models.CharField(blank=True, null=True, max_length=255)
 
     avatar = ImageCropField(blank=True, null=True)
     full_image = ImageCropField(upload_to='avatars/', blank=True, null=True)
