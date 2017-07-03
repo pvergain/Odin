@@ -15,7 +15,6 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         user = self.request.user
 
         select = ['description']
@@ -72,6 +71,11 @@ class AddTopicToCourseView(CourseViewMixin,
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course.id})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs
 
     def form_valid(self, form):
         create_topic(name=form.cleaned_data.get('name'),

@@ -29,8 +29,8 @@ def create_course(*,
                   start_date: datetime,
                   end_date: datetime,
                   repository: str,
-                  facebook_group: str,
-                  video_channel: str,
+                  facebook_group: str=None,
+                  video_channel: str=None,
                   slug_url: str=None) -> Course:
 
     if Course.objects.filter(name=name).exists():

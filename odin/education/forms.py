@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Course, Topic, IncludedMaterial
+from .models import Course, Topic, IncludedMaterial, Week
 
 
 class DateInput(forms.DateInput):
@@ -18,9 +18,15 @@ class ManagementAddCourseForm(forms.ModelForm):
 
 
 class TopicModelForm(forms.ModelForm):
+    def __init__(self, course, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['week'] = forms.ModelChoiceField(
+            queryset=Week.objects.filter(course=course)
+        )
+
     class Meta:
         model = Topic
-        fields = ('name', 'week')
+        fields = ('name', )
 
 
 class IncludedMaterialModelForm(forms.ModelForm):
