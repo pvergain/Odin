@@ -87,6 +87,7 @@ class CourseDescription(models.Model):
     def __str__(self):
         return self.verbose
 
+
 class CourseAssignment(models.Model):
     student = models.ForeignKey(Student,
                                 on_delete=models.CASCADE,
