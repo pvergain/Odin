@@ -13,9 +13,9 @@ class BaseUserTests(TestCase):
         self.test_password = faker.password()
 
     def test_create_user_creates_single_user(self):
-        self.assertEqual(0, BaseUser.objects.count())
+        user_count = BaseUser.objects.count()
         BaseUser.objects.create_user(email=self.email, password=self.test_password)
-        self.assertEqual(1, BaseUser.objects.count())
+        self.assertEqual(user_count + 1, BaseUser.objects.count())
 
     def test_create_user_raises_validation_error_when_email_invalid(self):
         with self.assertRaises(ValidationError):
@@ -38,8 +38,8 @@ class ProfileTests(TestCase):
         self.test_password = faker.password()
 
     def test_there_is_no_github_url_if_not_signed_up_with_github(self):
-        self.assertEqual(0, Profile.objects.count())
+        profile_count = Profile.objects.count()
         user = BaseUser.objects.create(email=self.email, password=self.test_password)
-        self.assertEqual(1, Profile.objects.count())
+        self.assertEqual(profile_count + 1, Profile.objects.count())
         profile = user.profile
         self.assertIsNone(profile.get_gh_profile_url())

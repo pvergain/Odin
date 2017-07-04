@@ -17,12 +17,12 @@ from ..services import add_student, add_teacher
 
 class StudentTests(TestCase):
     def test_creating_single_student_works(self):
-        self.assertEqual(0, Student.objects.count())
+        count = Student.objects.count()
 
         email, password = faker.email(), faker.password()
         Student.objects.create(email=email, password=password)
 
-        self.assertEqual(1, Student.objects.count())
+        self.assertEqual(count + 1, Student.objects.count())
 
         student = Student.objects.first()
 
@@ -34,11 +34,11 @@ class StudentTests(TestCase):
     def test_creating_from_baseuser_that_is_not_teacher_and_student_works(self):
         user = BaseUserFactory()
 
-        self.assertEqual(0, Student.objects.count())
+        count = Student.objects.count()
 
         student = Student.objects.create_from_user(user)
 
-        self.assertEqual(1, Student.objects.count())
+        self.assertEqual(count + 1, Student.objects.count())
 
         self.assertEqual(user.email, student.email)
         self.assertTrue(student.user.check_password(BaseUserFactory.password))
@@ -54,13 +54,15 @@ class StudentTests(TestCase):
     def test_creating_from_baseuser_that_is_teacher_works(self):
         teacher = TeacherFactory()
 
-        self.assertEqual(0, Student.objects.count())
+        teacher_count = Teacher.objects.count()
+        user_count = BaseUser.objects.count()
+        student_count = Student.objects.count()
 
         student = Student.objects.create_from_user(teacher.user)
 
-        self.assertEqual(1, Student.objects.count())
-        self.assertEqual(1, Teacher.objects.count())
-        self.assertEqual(1, BaseUser.objects.count())
+        self.assertEqual(student_count + 1, Student.objects.count())
+        self.assertEqual(teacher_count, Teacher.objects.count())
+        self.assertEqual(user_count, BaseUser.objects.count())
 
         self.assertEqual(teacher.user.email, student.email)
         self.assertTrue(student.user.check_password(TeacherFactory.password))
@@ -73,12 +75,12 @@ class StudentTests(TestCase):
 
 class TeacherTests(TestCase):
     def test_creating_single_teacher_works(self):
-        self.assertEqual(0, Teacher.objects.count())
+        count = Teacher.objects.count()
 
         email, password = faker.email(), faker.password()
         Teacher.objects.create(email=email, password=password)
 
-        self.assertEqual(1, Teacher.objects.count())
+        self.assertEqual(count + 1, Teacher.objects.count())
 
         teacher = Teacher.objects.first()
 
@@ -90,11 +92,11 @@ class TeacherTests(TestCase):
     def test_creating_from_baseuser_that_is_not_teacher_and_student_works(self):
         user = BaseUserFactory()
 
-        self.assertEqual(0, Teacher.objects.count())
+        count = Teacher.objects.count()
 
         teacher = Teacher.objects.create_from_user(user)
 
-        self.assertEqual(1, Teacher.objects.count())
+        self.assertEqual(count + 1, Teacher.objects.count())
 
         self.assertEqual(user.email, teacher.email)
         self.assertTrue(teacher.user.check_password(BaseUserFactory.password))
@@ -110,13 +112,15 @@ class TeacherTests(TestCase):
     def test_creating_from_baseuser_that_is_student_works(self):
         student = StudentFactory()
 
-        self.assertEqual(0, Teacher.objects.count())
+        teacher_count = Teacher.objects.count()
+        student_count = Student.objects.count()
+        user_count = BaseUser.objects.count()
 
         teacher = Teacher.objects.create_from_user(student.user)
 
-        self.assertEqual(1, Student.objects.count())
-        self.assertEqual(1, Teacher.objects.count())
-        self.assertEqual(1, BaseUser.objects.count())
+        self.assertEqual(student_count, Student.objects.count())
+        self.assertEqual(teacher_count + 1, Teacher.objects.count())
+        self.assertEqual(user_count, BaseUser.objects.count())
 
         self.assertEqual(student.user.email, teacher.email)
         self.assertTrue(teacher.user.check_password(StudentFactory.password))
@@ -131,11 +135,12 @@ class BaseUserToStudentAndTeacherTests(TestCase):
     def test_create_teacher_and_student_from_baseuser_works(self):
         user = BaseUserFactory()
 
+        teacher_count = Teacher.objects.count()
+        student_count = Student.objects.count()
+        user_count = BaseUser.objects.count()
+
         self.assertIsNone(user.downcast(Student))
         self.assertIsNone(user.downcast(Teacher))
-        self.assertEqual(0, Student.objects.count())
-        self.assertEqual(0, Teacher.objects.count())
-        self.assertEqual(1, BaseUser.objects.count())
 
         """
         First, create a student
@@ -145,9 +150,9 @@ class BaseUserToStudentAndTeacherTests(TestCase):
         self.assertIsNotNone(user.downcast(Student))
         self.assertIsNone(user.downcast(Teacher))
 
-        self.assertEqual(1, Student.objects.count())
-        self.assertEqual(0, Teacher.objects.count())
-        self.assertEqual(1, BaseUser.objects.count())
+        self.assertEqual(student_count + 1, Student.objects.count())
+        self.assertEqual(teacher_count, Teacher.objects.count())
+        self.assertEqual(user_count, BaseUser.objects.count())
 
         """
         Second, create a teacher
@@ -157,9 +162,9 @@ class BaseUserToStudentAndTeacherTests(TestCase):
         self.assertIsNotNone(user.downcast(Student))
         self.assertIsNotNone(user.downcast(Teacher))
 
-        self.assertEqual(1, Student.objects.count())
-        self.assertEqual(1, Teacher.objects.count())
-        self.assertEqual(1, BaseUser.objects.count())
+        self.assertEqual(student_count + 1, Student.objects.count())
+        self.assertEqual(teacher_count + 1, Teacher.objects.count())
+        self.assertEqual(user_count, BaseUser.objects.count())
 
 
 class CourseAssignmentTests(TestCase):
@@ -175,24 +180,24 @@ class CourseTests(TestCase):
         course = CourseFactory()
         teacher = TeacherFactory()
 
-        self.assertEqual(0, course.teachers.count())
+        count = course.teachers.count()
 
         CourseAssignment.objects.create(course=course,
                                         teacher=teacher)
 
-        self.assertEqual(1, course.teachers.count())
+        self.assertEqual(count + 1, course.teachers.count())
         self.assertEqual(teacher, course.teachers.first().downcast(Teacher))
 
     def test_students_property_works(self):
         course = CourseFactory()
         student = StudentFactory()
 
-        self.assertEqual(0, course.students.count())
+        count = course.students.count()
 
         CourseAssignment.objects.create(course=course,
                                         student=student)
 
-        self.assertEqual(1, course.students.count())
+        self.assertEqual(count + 1, course.students.count())
         self.assertEqual(student, course.students.first().downcast(Student))
 
     def test_students_and_teachers_properties_work_for_user_that_is_both(self):
@@ -201,8 +206,8 @@ class CourseTests(TestCase):
         student = StudentFactory()
         teacher = Teacher.objects.create_from_user(student.user)
 
-        self.assertEqual(0, course.students.count())
-        self.assertEqual(0, course.teachers.count())
+        student_count = course.students.count()
+        teacher_count = course.teachers.count()
 
         CourseAssignment.objects.create(course=course,
                                         student=student)
@@ -210,8 +215,8 @@ class CourseTests(TestCase):
         CourseAssignment.objects.create(course=course,
                                         teacher=teacher)
 
-        self.assertEqual(1, course.students.count())
-        self.assertEqual(1, course.teachers.count())
+        self.assertEqual(student_count + 1, course.students.count())
+        self.assertEqual(teacher_count + 1, course.teachers.count())
 
         self.assertEqual(student, course.students.first().downcast(Student))
         self.assertEqual(teacher, course.teachers.first().downcast(Teacher))
@@ -247,23 +252,23 @@ class CourseTests(TestCase):
         students = StudentFactory.create_batch(3)
         course = CourseFactory()
 
-        self.assertEqual(0, course.students.count())
+        count = course.students.count()
 
         for student in students:
             add_student(course, student)
 
-        self.assertEqual(3, course.students.count())
+        self.assertEqual(count + 3, course.students.count())
 
     def test_create_course_with_multiple_teachers(self):
         teachers = TeacherFactory.create_batch(3)
         course = CourseFactory()
 
-        self.assertEqual(0, course.teachers.count())
+        count = course.teachers.count()
 
         for teacher in teachers:
             add_teacher(course, teacher)
 
-        self.assertEqual(3, course.teachers.count())
+        self.assertEqual(count + 3, course.teachers.count())
 
     def test_course_has_finished_with_end_date_today(self):
         start_date = (get_now() - timedelta(days=1)).date()
