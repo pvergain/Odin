@@ -6,6 +6,8 @@ urlpatterns = [
     url(regex='^$',
         view=DashboardIndexView.as_view(),
         name='index'),
+    url(regex='^education/',
+        view=include('odin.education.urls', namespace='education')),
     url(regex='^management/',
         view=include('odin.management.urls', namespace='management')),
     url(regex='^users/',

@@ -22,6 +22,7 @@ class Student(BaseUser):
 
 class Teacher(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
+    hidden = models.BooleanField(default=False)
 
     objects = TeacherManager()
 
@@ -40,9 +41,11 @@ class Course(models.Model):
                                       through='CourseAssignment',
                                       through_fields=('course', 'teacher'))
 
+    slug_url = models.SlugField(unique=True)
+
     repository = models.URLField(blank=True)
-    video_channel = models.URLField(blank=True)
-    facebook_group = models.URLField(blank=True)
+    video_channel = models.URLField(blank=True, null=True)
+    facebook_group = models.URLField(blank=True, null=True)
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
 
@@ -111,7 +114,7 @@ class CourseAssignment(models.Model):
 
 class BaseMaterial(UpdatedAtCreatedAtModelMixin, models.Model):
     identifier = models.CharField(unique=True, max_length=255)
-    url = models.URLField(blank=True)
+    url = models.URLField(blank=True, null=True)
     content = models.TextField(blank=True)
 
     class Meta:
@@ -136,6 +139,12 @@ class Week(models.Model):
     end_date = models.DateField()
 
     number = models.PositiveIntegerField(default=1)
+    course = models.ForeignKey(Course,
+                               on_delete=models.CASCADE,
+                               related_name='weeks')
+
+    def __str__(self):
+        return f'Week {self.number}'
 
 
 class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
@@ -146,6 +155,9 @@ class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
     week = models.ForeignKey(Week,
                              on_delete=models.CASCADE,
                              related_name='topics')
+
+    def __str__(self):
+        return f'{self.name}'
 
 
 class Lecture(models.Model):

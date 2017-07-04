@@ -9,7 +9,7 @@
             <div class="page-header-inner ">
                 <!-- BEGIN LOGO -->
                 <div class="page-logo">
-                    <a href="#">
+                    <a href="{% url 'public:courses' %}">
                         <img src="{% static "hackbulgaria_logo.png" %}" alt="logo" class="logo-default" />
                      </a>
                     <div class="menu-toggler sidebar-toggler">
@@ -47,7 +47,7 @@
                             <!-- BEGIN USER LOGIN DROPDOWN -->
                             <li class="dropdown dropdown-user">
                                 <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                                    <img alt="" class="img-circle" src="" />
+                                    <img src="{{ MEDIA_URL }}{{ request.user.profile.avatar.name }}" alt="" class="img-circle" src="" />
                                     <span class="username username-hide-on-mobile"></span>
                                     <i class="fa fa-angle-down"></i>
                                 </a>
@@ -93,7 +93,7 @@
                     <!-- BEGIN SIDEBAR MENU -->
                     <ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-hover-submenu " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200">
                         <li class="nav-item start active open">
-                            <a href="javascript:;" class="nav-link nav-toggle">
+                            <a href="{% url 'dashboard:education:user-courses' %}" class="nav-link nav-toggle">
                                 <i class="icon-briefcase"></i>
                                 <span class="title">Courses</span>
                             </a>

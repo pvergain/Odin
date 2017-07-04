@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import PersonalProfileView, UserProfileView
+from .views import PersonalProfileView, UserProfileView, EditProfileView
 
 urlpatterns = [
     url(
@@ -11,4 +11,7 @@ urlpatterns = [
         regex='^profile/$',
         view=PersonalProfileView.as_view(),
         name='profile'),
+    url(regex='^settings/$',
+        view=EditProfileView.as_view(),
+        name='edit-profile'),
 ]

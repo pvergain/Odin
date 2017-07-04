@@ -71,6 +71,7 @@ class Migration(migrations.Migration):
                 ('start_date', models.DateField()),
                 ('end_date', models.DateField()),
                 ('number', models.PositiveIntegerField(default=1)),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='weeks', to='education.Course')),
             ],
         ),
         migrations.AddField(

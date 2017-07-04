@@ -3,6 +3,8 @@ from django.core.management.base import BaseCommand
 from random import choice
 from queue import deque
 
+from odin.users.factories import SuperUserFactory
+
 from ...factories import StudentFactory, TeacherFactory, CourseFactory
 from ...services import add_student, add_teacher
 
@@ -22,3 +24,10 @@ class Command(BaseCommand):
         while students:
             selected_course = choice(courses)
             add_student(selected_course, students.popleft())
+
+        email = 'testadmin@hacksoft.io'
+        password = 'asdf'
+
+        SuperUserFactory(email=email, password=password)
+
+        print(f'Superuser created: {email}/{password}')

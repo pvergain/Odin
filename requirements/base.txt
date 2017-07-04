@@ -18,6 +18,8 @@ django-model-utils==3.0.0
 # Images
 Pillow==4.1.1
 django-image-cropping==1.0.4
+easy-thumbnails==2.4.1
+
 
 # Password storage
 argon2-cffi==16.3.0

@@ -50,6 +50,9 @@ class BaseUser(PermissionsMixin,
     def get_short_name(self):
         return self.get_full_name()
 
+    def get_description(self):
+        return self.profile.description
+
     @property
     def name(self):
         return self.get_full_name()
@@ -68,11 +71,12 @@ class Profile(models.Model):
     user = models.OneToOneField(BaseUser)
 
     full_name = models.CharField(blank=True, max_length=255)
+    description = models.TextField(blank=True, null=True)
 
     social_accounts = JSONField(default=json_field_default)
 
-    works_at = models.CharField(blank=True, max_length=255)
-    studies_at = models.CharField(blank=True, max_length=255)
+    works_at = models.CharField(blank=True, null=True, max_length=255)
+    studies_at = models.CharField(blank=True, null=True, max_length=255)
 
     avatar = ImageCropField(blank=True, null=True)
     full_image = ImageCropField(upload_to='avatars/', blank=True, null=True)

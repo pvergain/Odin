@@ -14,10 +14,10 @@
                 <div class="caption">
                     <i class="fa fa-comments"></i> User management table </div>
                 <div class="tools">
-                    <a href="javascript:;" class="collapse"> </a>
+                    <a href="javascript:;" class="expand"> </a>
                 </div>
             </div>
-            <div class="portlet-body">
+            <div class="portlet-body default-collapsed">
               <form class="" action="" method="get">
                 <div class="form-group">
                   <input class="form-control" type="text" placeholder="Search..." name="search_field" value="" id="search-field">
@@ -64,16 +64,16 @@
                                 <td>{{ obj.profile.get_gh_profile_url }}</td>
                                 <td>
                                     <div class="btn-group">
-                            					{% if not obj.is_student %}
-                            					<a href="{% url 'dashboard:management:promote-to-student' id=obj.id %}">
-                            					    <button type="button" class="btn btn-default">Make Student</button>
-                            					</a>
-                            					{% endif %}
-                            					{% if not obj.is_teacher %}
-                            					<a href="{% url 'dashboard:management:promote-to-teacher' id=obj.id %}">
-                            					    <button type="button" class="btn btn-default">Make Teacher</button>
-                            					</a>
-                            				  {% endif %}
+                                        {% if not obj.is_student %}
+                                          <a href="{% url 'dashboard:management:promote-to-student' id=obj.id %}">
+                                              <button type="button" class="btn btn-default">Make Student</button>
+                                          </a>
+                                        {% endif %}
+                                        {% if not obj.is_teacher %}
+                                          <a href="{% url 'dashboard:management:promote-to-teacher' id=obj.id %}">
+                                              <button type="button" class="btn btn-default">Make Teacher</button>
+                                          </a>
+                            		        {% endif %}
                                     </div>
                                 </td>
                               </tr>
@@ -85,13 +85,13 @@
                   <div class="pagination">
                     <span class="page-links">
                       {% if page_obj.has_previous %}
-                          <a href="?page={{page_obj.previous_page_number}}">previous</a>
+                          <a href="?page={{page_obj.previous_page_number}}&search_field={{ request.GET.search_field }}&type={{ request.GET.type }}">previous</a>
                       {% endif %}
                           <span class="page-current">
                               Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
                           </span>
                       {% if page_obj.has_next %}
-                          <a href="?page={{page_obj.next_page_number}}">next</a>
+                          <a href="?page={{page_obj.next_page_number}}&search_field={{ request.GET.search_field }}&type={{ request.GET.type }}">next</a>
                       {% endif %}
                     </span>
                   </div>
@@ -99,6 +99,54 @@
             </div>
         </div>
         <!-- END SAMPLE TABLE PORTLET-->
+        <div class="portlet box green">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-comments"></i> Courses table </div>
+                <div class="tools">
+                    <a href="javascript:;" class="expand"> </a>
+                </div>
+            </div>
+            <div class="portlet-body default-collapsed">
+                <div class="form-actions">
+                    <a href="{% url 'dashboard:management:add-course' %}"><button class="btn green uppercase" type="button" name="button">Add course</button></a>
+                </div>
+               <div class="table-scrollable">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th> # </th>
+                                <th> Name </th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th> GitHub </th>
+                                <th>Video Channel</th>
+                                <th>Facebook Group</th>
+                                <th>Duration</th>
+                                <th> Students </th>
+                                <th> Teachers </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                                <tr>
+                                    <td>{{ course.id }}</td>
+                                    <td><a href="{% url 'dashboard:education:user-course-detail' course.id %}">{{ course.name }}</a></td>
+                                    <td>{{ course.start_date }}</td>
+                                    <td>{{ course.end_date }}</td>
+                                    <td><a href="{{ course.repository }}">{{ course.repository }}</a></td>
+                                    <td><a href="{{ course.video_channel }}">{{ course.video_channel }}</a></td>
+                                    <td><a href="{{ course.facebook_group }}">{{ course.facebook_group }}</a></td>
+                                    <td>{{ course.duration_in_weeks }}</td>
+                                    <td>{{ course.students.count }}</td>
+                                    <td>{{ course.teachers.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
   </div>
 {% endblock page_content %}

@@ -1,9 +1,4 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
-
-
-class BaseUserPassesTestMixin(UserPassesTestMixin):
-    def test_func(self):
-        return True
+from odin.common.mixins import BaseUserPassesTestMixin
 
 
 class DashboardManagementPermission(BaseUserPassesTestMixin):
@@ -11,7 +6,6 @@ class DashboardManagementPermission(BaseUserPassesTestMixin):
     permission_denied_message = 'You must be a superuser to access this panel.'
 
     def test_func(self):
-        if not self.request.user.is_superuser:
-            return False
-
-        return True and super().test_func()
+        if self.request.user.is_superuser:
+            return True and super().test_func()
+        return False

@@ -25,7 +25,8 @@ THIRD_PARTY_APPS = [
     'allauth.socialaccount.providers.github',
     'captcha',
     'widget_tweaks',
-    'django_filters'
+    'django_filters',
+    'easy_thumbnails'
 ]
 
 LOCAL_APPS = [

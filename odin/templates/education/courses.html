@@ -1,0 +1,16 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block content_title %}
+  My courses
+{% endblock content_title %}
+
+{% block page_content %}
+  {% if user_is_teacher_for %}
+    {% include "education/partial/courses_table.html" with courses=user_is_teacher_for role="teacher" %}
+  {% endif %}
+
+  {% if user_is_student_for %}
+    {% include "education/partial/courses_table.html" with courses=user_is_student_for role="student" %}
+  {% endif %}
+
+{% endblock page_content %}

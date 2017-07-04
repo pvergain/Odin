@@ -1,0 +1,40 @@
+<div class="row">
+    <!-- BEGIN SAMPLE TABLE PORTLET-->
+        <div class="portlet box green">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-comments"></i> Courses that you are a {{ role }} in
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="collapse"> </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+               <div class="table-scrollable">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th> # </th>
+                                <th> Name </th>
+                                <th> Github </th>
+                                <th> Students </th>
+                                <th> Teachers </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                                <tr>
+                                    <td>{{ course.id }}</td>
+                                    <td><a href="{% url 'dashboard:education:user-course-detail' course.id %}">{{ course.name }}</a></td>
+                                    <td>{{ course.repository }}</td>
+                                    <td>{{ course.students.count }}</td>
+                                    <td>{{ course.teachers.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+              </div>
+        </div>
+        <!-- END SAMPLE TABLE PORTLET-->
+</div>
