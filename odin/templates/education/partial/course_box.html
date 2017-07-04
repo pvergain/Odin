@@ -11,7 +11,9 @@
             </div>
             <div class="portlet-body">
               <p>
-                {{ course.description }}
+                {% autoescape off %}
+                  {{ course.description }}
+                {% endautoescape %}
                 <a href="{% url 'public:course_detail' course_slug=course.slug_url %}"><button type="button" class="btn green uppercase">Details</button></a>
               </p>
             </div>
