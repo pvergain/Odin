@@ -84,6 +84,9 @@ class CourseDescription(models.Model):
     course = models.OneToOneField(Course, related_name='description')
     verbose = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.verbose
+
 
 class CourseAssignment(models.Model):
     student = models.ForeignKey(Student,
