@@ -43,3 +43,9 @@ django-widget-tweaks==1.4.1
 
 # Querying
 django-filter==1.0.4
+
+# Celery
+celery==4.0.2
+
+# Email services
+mandrill==1.0.57
