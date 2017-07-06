@@ -251,7 +251,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
             self.assertEqual(200, response.status_code)
 
     def test_can_add_ordinary_material_to_course(self):
-        self.assertEqual(0, IncludedMaterial.objects.count())
+        material_count = IncludedMaterial.objects.count()
         teacher = Teacher.objects.create_from_user(self.user)
         material = MaterialFactory()
         add_teacher(self.course, teacher)
@@ -259,7 +259,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
             response = self.post(self.url, data={'material': material.id})
-            self.assertEqual(1, IncludedMaterial.objects.count())
+            self.assertEqual(material_count + 1, IncludedMaterial.objects.count())
             included_material = IncludedMaterial.objects.filter(material=material)
             self.assertEqual(1, Topic.objects.filter(materials__in=included_material).count())
 
@@ -270,10 +270,16 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         add_teacher(self.course, teacher)
         included_material = IncludedMaterialFactory(topic=topic)
 
+        included_material_count = IncludedMaterial.objects.count()
+        material_count = Material.objects.count()
+
+        self.assertEqual(1, included_material_count)
+        self.assertEqual(1, material_count)
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data={'material': included_material.material.id})
             self.assertRedirects(response, expected_url=reverse(
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}))
-            self.assertEqual(2, IncludedMaterial.objects.count())
-            self.assertEqual(1, Material.objects.count())
+            self.assertEqual(included_material_count + 1, IncludedMaterial.objects.count())
+            self.assertEqual(material_count, Material.objects.count())

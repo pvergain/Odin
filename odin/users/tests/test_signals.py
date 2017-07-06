@@ -20,9 +20,9 @@ class ProfileSignalTests(TestCase):
         del os.environ['RECAPTCHA_TESTING']
 
     def test_create_user_creates_profile(self):
-        self.assertEqual(Profile.objects.count(), 0)
+        profile_count = Profile.objects.count()
         BaseUserFactory()
-        self.assertEqual(Profile.objects.count(), 1)
+        self.assertEqual(profile_count + 1, Profile.objects.count())
 
     def test_sign_up_request_creates_profile(self):
         url = self.reverse('account_signup')
@@ -33,20 +33,20 @@ class ProfileSignalTests(TestCase):
             'password2': password,
             'g-recaptcha-response': 'PASSED'
         }
-        self.assertEqual(Profile.objects.count(), 0)
+        profile_count = Profile.objects.count()
 
         response = self.post(url_name=url, data=data, follow=False)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(Profile.objects.count(), 1)
+        self.assertEqual(profile_count + 1, Profile.objects.count())
 
 
 class SuperUserSignalTest(TestCase):
 
     def test_create_superuser_creates_teacher(self):
-        self.assertEqual(0, Teacher.objects.count())
+        teacher_count = Teacher.objects.count()
         BaseUser.objects.create_superuser(email=faker.email(), password=faker.password())
-        self.assertEqual(1, Teacher.objects.count())
+        self.assertEqual(teacher_count + 1, Teacher.objects.count())
 
     def test_create_superuser_adds_teacher_to_old_courses(self):
         CourseFactory.build_batch(5)

@@ -16,7 +16,7 @@ class TestCreateCourse(TestCase):
 
     def test_course_is_created_successfully_with_valid_data(self):
         start_date = parser.parse(faker.date())
-        self.assertEqual(0, Course.objects.count())
+        count = Course.objects.count()
         data = {
             'name': faker.word(),
             'start_date': start_date,
@@ -27,12 +27,12 @@ class TestCreateCourse(TestCase):
             'slug_url': faker.slug(),
         }
         create_course(**data)
-        self.assertEqual(1, Course.objects.count())
+        self.assertEqual(count + 1, Course.objects.count())
 
     def test_create_course_raises_error_on_duplicate_name(self):
         start_date = parser.parse(faker.date())
         course = CourseFactory()
-        self.assertEqual(1, Course.objects.count())
+        count = Course.objects.count()
         data = {
             'name': course.name,
             'start_date': start_date,
@@ -44,11 +44,11 @@ class TestCreateCourse(TestCase):
         }
         with self.assertRaises(ValidationError):
             create_course(**data)
-        self.assertEqual(1, Course.objects.count())
+        self.assertEqual(count, Course.objects.count())
 
     def test_create_course_creates_weeks_for_course_successfully(self):
         start_date = parser.parse(faker.date())
-        self.assertEqual(0, Course.objects.count())
+        count = Course.objects.count()
         data = {
             'name': faker.word(),
             'start_date': start_date,
@@ -60,7 +60,7 @@ class TestCreateCourse(TestCase):
         }
         course = create_course(**data)
         weeks = course.duration_in_weeks
-        self.assertEqual(1, Course.objects.count())
+        self.assertEqual(count + 1, Course.objects.count())
         self.assertEqual(weeks, Week.objects.count())
 
     def test_create_course_starts_week_from_monday(self):
@@ -88,24 +88,24 @@ class TestCreateTopic(TestCase):
         self.week = WeekFactory(course=self.course)
 
     def test_create_topic_adds_topic_to_course_successfully(self):
-        self.assertEqual(0, Topic.objects.count())
-        self.assertEqual(0, Topic.objects.filter(course=self.course).count())
+        topic_count = Topic.objects.count()
+        course_topics_count = Topic.objects.filter(course=self.course).count()
 
         create_topic(name=faker.name(), course=self.course, week=self.week)
 
-        self.assertEqual(1, Topic.objects.count())
-        self.assertEqual(1, Topic.objects.filter(course=self.course).count())
+        self.assertEqual(topic_count + 1, Topic.objects.count())
+        self.assertEqual(course_topics_count + 1, Topic.objects.filter(course=self.course).count())
 
     def test_create_topic_raises_validation_error_on_existing_topic(self):
         topic = create_topic(name=faker.name(), course=self.course, week=self.week)
-        self.assertEqual(1, Topic.objects.count())
-        self.assertEqual(1, Topic.objects.filter(course=self.course).count())
+        topic_count = Topic.objects.count()
+        course_topics_count = Topic.objects.filter(course=self.course).count()
 
         with self.assertRaises(ValidationError):
             create_topic(name=topic.name, course=self.course, week=self.week)
 
-        self.assertEqual(1, Topic.objects.count())
-        self.assertEqual(1, Topic.objects.filter(course=self.course).count())
+        self.assertEqual(topic_count, Topic.objects.count())
+        self.assertEqual(course_topics_count, Topic.objects.filter(course=self.course).count())
 
 
 class TestCreateIncludedMaterial(TestCase):
