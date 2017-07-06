@@ -4,6 +4,7 @@ from django.conf import settings
 
 from odin.common.services import send_email
 
+
 class CustomAdapter(DefaultSocialAccountAdapter):
 
     def populate_user(self, request, sociallogin, data):
