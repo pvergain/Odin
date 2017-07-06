@@ -55,7 +55,7 @@ class AuthorizationTests(TestCase):
             url = self.reverse('account_signup')
             response = self.get(url_name=url, follow=True)
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(BaseUser.objects.count(), 1)
+            self.assertEqual(user_count, BaseUser.objects.count())
 
 
 class EmailBackendTests(TestCase):
@@ -101,4 +101,3 @@ class EmailBackendTests(TestCase):
         self.assertEqual(mock_send_mail.called, True)
         (template_name, recipients, context), kwargs = mock_send_mail.call_args
         self.assertEqual([user.email], recipients)
-        self.assertEqual(user_count, BaseUser.objects.count())
