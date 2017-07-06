@@ -30,6 +30,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    'odin.common.apps.CommonConfig',
     'odin.dashboard.apps.DashboardConfig',
     'odin.authentication.apps.AuthenticationConfig',
     'odin.users.apps.UsersConfig',
@@ -123,6 +124,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_ADAPTER = 'odin.authentication.adapter.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = "odin.authentication.adapter.CustomAdapter"
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
@@ -199,3 +201,23 @@ ADMIN_URL = r'^admin/'
 # Github OAuth settings
 GH_OAUTH_CLIENT_ID = env('GH_OAUTH_CLIENT_ID', default='')
 GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY', default='')
+
+
+# Celery settings
+
+# Mandrill settings
+USE_DJANGO_EMAIL_BACKEND = True
+
+MANDRILL_API_KEY = env('MANDRILL_API_KEY', default='')
+
+templates = {
+    'account_email_email_confirmation_signup': lambda **env_kwargs: env('MANDRILL_SIGNUP_CONFIRM', **env_kwargs),
+    'account_email_email_confirmation': lambda **env_kwargs: env('MANDRILL_CONFIRMATION', **env_kwargs),
+    'account_email_password_reset_key': lambda **env_kwargs: env('MANDRILL_PASSWORD_RESET', **env_kwargs),
+
+}
+
+EMAIL_TEMPLATES = {
+    key: f(default='')
+    for key, f in templates.items()
+}

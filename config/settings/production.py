@@ -173,3 +173,9 @@ ADMIN_URL = env('DJANGO_ADMIN_URL')
 
 # Your production stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+
+# Mandrill settings for templates are required in production
+EMAIL_TEMPLATES = {
+    key: f()
+    for key, f in templates.items()
+}

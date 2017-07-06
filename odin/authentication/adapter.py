@@ -1,5 +1,8 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.account.adapter import DefaultAccountAdapter
+from django.conf import settings
 
+from odin.common.services import send_email
 
 class CustomAdapter(DefaultSocialAccountAdapter):
 
@@ -14,3 +17,15 @@ class CustomAdapter(DefaultSocialAccountAdapter):
         Required to bypass automatic initial form data override
         """
         pass
+
+
+class CustomAccountAdapter(DefaultAccountAdapter):
+    def send_mail(self, template_prefix, email, context):
+        template_prefix = template_prefix.replace('/', '_')
+        context['current_site'] = context['current_site'].name
+        context['user'] = context['user'].email
+        send_email(
+            template_name=settings.EMAIL_TEMPLATES[template_prefix],
+            recipients=[email],
+            context=context
+        )
