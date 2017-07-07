@@ -11,7 +11,9 @@ from .models import (
     Week,
     Topic,
     IncludedMaterial,
-    Material
+    Material,
+    IncludedTask,
+    Task,
 )
 
 
@@ -96,3 +98,25 @@ def create_included_material(*,
     included_material.save()
 
     return included_material
+
+
+def create_included_task(*,
+                         name: str=None,
+                         description: str=None,
+                         gradable: bool=False,
+                         existing_task: Task=None,
+                         topic: Topic=None) -> IncludedTask:
+    included_task = IncludedTask(topic=topic)
+
+    if existing_task is None:
+        existing_task = Task(name=name, description=description, gradable=gradable)
+        existing_task.full_clean()
+        existing_task.save()
+
+    included_task.__dict__.update(existing_task.__dict__)
+
+    included_task.task = existing_task
+    included_task.full_clean()
+    included_task.save()
+
+    return included_task

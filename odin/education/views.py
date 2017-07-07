@@ -3,11 +3,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
-from .models import Course, Teacher, Student, Material
+from .models import Course, Teacher, Student, Material, Task
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin, PublicViewContextMixin
-from .forms import TopicModelForm, IncludedMaterialModelForm, IncludedMaterialFromExistingForm
-from .services import create_topic, create_included_material
+from .forms import (
+    TopicModelForm,
+    IncludedMaterialModelForm,
+    IncludedMaterialFromExistingForm,
+    IncludedTaskModelForm,
+    IncludedTaskFromExistingForm,
+)
+from .services import create_topic, create_included_material, create_included_task
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -165,4 +171,87 @@ class AddNewIncludedMaterialView(CourseViewMixin,
                                  topic=form.cleaned_data.get('topic'),
                                  content=form.cleaned_data.get('content'))
 
+        return super().form_valid(form)
+
+
+class ExistingTaskListView(CourseViewMixin,
+                           LoginRequiredMixin,
+                           IsTeacherInCoursePermission,
+                           ListView):
+    template_name = 'education/existing_task_list.html'
+    queryset = Task.objects.all()
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        context['topic_id'] = self.kwargs.get('topic_id')
+        return context
+
+
+class AddNewIncludedTaskView(CourseViewMixin,
+                             LoginRequiredMixin,
+                             IsTeacherInCoursePermission,
+                             FormView):
+    template_name = 'education/add_task.html'
+    form_class = IncludedTaskModelForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_initial(self):
+        self.initial = super().get_initial()
+        self.initial['topic'] = self.kwargs.get('topic_id')
+        return self.initial.copy()
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_included_task(name=form.cleaned_data.get('name'),
+                             description=form.cleaned_data.get('description'),
+                             gradable=form.cleaned_data.get('gradable'),
+                             topic=form.cleaned_data.get('topic'))
+
+        return super().form_valid(form)
+
+
+class AddIncludedTaskFromExistingView(CourseViewMixin,
+                                      LoginRequiredMixin,
+                                      IsTeacherInCoursePermission,
+                                      FormView):
+    template_name = 'education/existing_task_list.html'
+    form_class = IncludedTaskFromExistingForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        context['topic_id'] = self.kwargs.get('topic_id')
+
+        context['task_list'] = Material.objects.all()
+
+        return context
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        data = {}
+        data['topic'] = self.kwargs.get('topic_id')
+        data['task'] = self.request.POST.get('task')
+        form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        data = {}
+        data['existing_task'] = form.cleaned_data.get('task')
+        data['topic'] = form.cleaned_data.get('topic')
+
+        create_included_task(**data)
         return super().form_valid(form)
