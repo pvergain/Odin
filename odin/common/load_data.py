@@ -155,8 +155,8 @@ class StudentLoader(BaseLoader):
 class BaseUserLoader(BaseLoader):
     json_model = 'base_app.baseuser'
     django_model = apps.get_model('users.BaseUser')
-    model_fields = ['email', 'is_active', 'is_staff', 'password']
-    json_fields = ['email', 'is_active', 'is_staff', 'password']
+    model_fields = ['email', 'is_active', 'is_staff', 'is_superuser', 'password']
+    json_fields = ['email', 'is_active', 'is_staff', 'is_superuser', 'password']
 
     def generate_orm_objects(self):
         users = super().generate_orm_objects()

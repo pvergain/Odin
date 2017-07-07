@@ -25,3 +25,18 @@ def get_gh_email_address(request):
     email_address = socialaccount.get('email_addresses', None)
     if email_address is not None:
         return email_address[0].get('email', '')
+
+
+def build_message(recipients, context):
+    message = {
+        'to': [],
+        'global_merge_vars': [],
+    }
+
+    for mail in recipients:
+        message['to'].append({'email': mail})
+
+    for k, v in context.items():
+        message['global_merge_vars'].append({'name': k, 'content': v})
+
+    return message
