@@ -188,7 +188,7 @@ class ExistingTasksView(CourseViewMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['object_list'] = Task.objects.all()
+        context['task_list'] = Task.objects.all()
         return context
 
 
@@ -266,6 +266,6 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         data = {}
         data['existing_task'] = form.cleaned_data.get('task')
         data['topic'] = form.cleaned_data.get('topic')
-
         create_included_task(**data)
+
         return super().form_valid(form)
