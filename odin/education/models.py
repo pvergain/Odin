@@ -206,7 +206,7 @@ class StudentNote(UpdatedAtCreatedAtModelMixin, models.Model):
 
 
 class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(unique=True, max_length=128)
     description = models.TextField(blank=True, null=True)
     gradable = models.BooleanField(default=False)
 

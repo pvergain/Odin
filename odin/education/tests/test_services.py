@@ -5,8 +5,8 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 
-from ..services import create_course, create_topic, create_included_material
-from ..models import Course, Week, Topic, Material, IncludedMaterial
+from ..services import create_course, create_topic, create_included_material, create_included_task
+from ..models import Course, Week, Topic, Material, IncludedMaterial, Task, IncludedTask
 from ..factories import CourseFactory, WeekFactory, TopicFactory
 
 from odin.common.faker import faker
@@ -139,3 +139,37 @@ class TestCreateIncludedMaterial(TestCase):
                                  topic=self.topic)
         self.assertEqual(current_material_count + 1, Material.objects.count())
         self.assertEqual(current_included_material_count + 1, IncludedMaterial.objects.count())
+
+
+class TestCreateIncludedTask(TestCase):
+    def setUp(self):
+        self.topic = TopicFactory()
+        self.task = Task.objects.create(name="Test task",
+                                        description=faker.text(),
+                                        gradable=faker.boolean())
+
+    def test_create_included_task_raises_validation_error_if_task_already_exists(self):
+        with self.assertRaises(ValidationError):
+            create_included_task(name=self.task.name,
+                                 description=self.task.description,
+                                 gradable=self.task.gradable,
+                                 topic=self.topic)
+
+    def test_create_included_task_creates_only_included_task_when_existing_is_provided(self):
+        current_task_count = Task.objects.count()
+        current_included_task_count = IncludedTask.objects.count()
+
+        create_included_task(existing_task=self.task, topic=self.topic)
+
+        self.assertEqual(current_task_count, Task.objects.count())
+        self.assertEqual(current_included_task_count + 1, IncludedTask.objects.count())
+
+    def test_create_included_task_creates_task_and_included_task_when_no_existing_is_provided(self):
+        current_task_count = Task.objects.count()
+        current_included_task_count = IncludedTask.objects.count()
+        create_included_task(name=faker.name(),
+                             description=faker.text(),
+                             gradable=faker.boolean(),
+                             topic=self.topic)
+        self.assertEqual(current_task_count + 1, Task.objects.count())
+        self.assertEqual(current_included_task_count + 1, IncludedTask.objects.count())

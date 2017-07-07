@@ -3,7 +3,17 @@ import factory
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from .models import Student, Teacher, Course, Week, Topic, Material, IncludedMaterial
+from .models import (
+    Student,
+    Teacher,
+    Course,
+    Week,
+    Topic,
+    Material,
+    IncludedMaterial,
+    Task,
+    IncludedTask,
+)
 from .services import create_course
 
 
@@ -72,3 +82,20 @@ class IncludedMaterialFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = IncludedMaterial
+
+
+class TaskFactory(factory.DjangoModelFactory):
+    name = factory.LazyAttribute(lambda _: faker.word())
+    description = factory.LazyAttribute(lambda _: faker.text())
+    gradable = factory.LazyAttribute(lambda _: faker.boolean())
+
+    class Meta:
+        model = Task
+
+
+class IncludedTaskFactory(factory.DjangoModelFactory):
+    task = factory.SubFactory(TaskFactory)
+    topic = factory.SubFactory(TopicFactory)
+
+    class Meta:
+        model = IncludedTask
