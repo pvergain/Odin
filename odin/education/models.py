@@ -203,3 +203,25 @@ class StudentNote(UpdatedAtCreatedAtModelMixin, models.Model):
 
     def __str__(self):
         return f'Note for {self.assignment.student}'
+
+
+class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField(blank=True, null=True)
+    gradable = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+
+class Task(BaseTask, models.Model):
+    pass
+
+
+class IncludedTask(BaseTask, models.Model):
+    task = models.ForeignKey(Task,
+                             on_delete=models.CASCADE,
+                             related_name='included_tasks')
+    topic = models.ForeignKey(Topic,
+                              on_delete=models.CASCADE,
+                              related_name='tasks')
