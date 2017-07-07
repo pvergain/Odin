@@ -60,6 +60,13 @@ class IncludedTaskModelForm(forms.ModelForm):
 
 
 class IncludedTaskFromExistingForm(forms.ModelForm):
+    def __init__(self, course=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if course:
+            self.fields['topic'] = forms.ModelChoiceField(
+                queryset=Topic.objects.filter(course=course)
+            )
+
     class Meta:
         model = IncludedTask
         fields = ('topic', 'task')

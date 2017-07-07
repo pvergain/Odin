@@ -174,12 +174,22 @@ class AddNewIncludedMaterialView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class ExistingTaskListView(CourseViewMixin,
-                           LoginRequiredMixin,
-                           IsTeacherInCoursePermission,
-                           ListView):
+class ExistingTasksView(CourseViewMixin,
+                        LoginRequiredMixin,
+                        IsTeacherInCoursePermission,
+                        FormView):
     template_name = 'education/existing_task_list.html'
-    queryset = Task.objects.all()
+    form_class = IncludedTaskFromExistingForm
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_list'] = Task.objects.all()
+        return context
 
 
 class CourseIncludedTasksListView(CourseViewMixin,
@@ -203,6 +213,11 @@ class AddNewIncludedTaskView(CourseViewMixin,
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course.id})
+
+    def get_initial(self):
+        self.initial = super().get_initial()
+        self.initial['topic'] = self.kwargs.get('topic_id')
+        return self.initial.copy()
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -230,6 +245,7 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
                             kwargs={'course_id': self.course.id})
 
     def get_context_data(self, *args, **kwargs):
+
         context = super().get_context_data(*args, **kwargs)
 
         context['task_list'] = Task.objects.all()
@@ -240,7 +256,7 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         form_kwargs = super().get_form_kwargs()
 
         data = {}
-        data['topic'] = self.kwargs.get('topic_id')
+        data['topic'] = self.request.POST.get('topic')
         data['task'] = self.request.POST.get('task')
         form_kwargs['data'] = data
 
