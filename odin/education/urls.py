@@ -11,7 +11,8 @@ from .views import (
     ExistingMaterialListView,
     AddNewIncludedTaskView,
     AddIncludedTaskFromExistingView,
-    ExistingTaskListView
+    ExistingTaskListView,
+    CourseIncludedTasksListView
 )
 
 
@@ -37,13 +38,16 @@ course_management_urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-material/new$',
         view=AddNewIncludedMaterialView.as_view(),
         name='add-new-included-material'),
-    url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/existing-tasks/$',
+    url(regex='^(?P<course_id>[0-9]+)/existing-tasks/$',
         view=ExistingTaskListView.as_view(),
         name='existing-tasks'),
-    url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-task/existing$',
+    url(regex='^(?P<course_id>[0-9]+)/tasks/$',
+        view=CourseIncludedTasksListView.as_view(),
+        name='included-tasks'),
+    url(regex='^(?P<course_id>[0-9]+)/add-task/existing$',
         view=AddIncludedTaskFromExistingView.as_view(),
-        name='add-included-material-from-task'),
-    url(regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-task/new$',
+        name='add-included-task-from-existing'),
+    url(regex='^(?P<course_id>[0-9]+)/add-task/new$',
         view=AddNewIncludedTaskView.as_view(),
         name='add-new-included-task'),
 ]

@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
-from .models import Course, Teacher, Student, Material, Task
+from .models import Course, Teacher, Student, Material, Task, IncludedTask
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin, PublicViewContextMixin
 from .forms import (
@@ -181,11 +181,16 @@ class ExistingTaskListView(CourseViewMixin,
     template_name = 'education/existing_task_list.html'
     queryset = Task.objects.all()
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
 
-        context['topic_id'] = self.kwargs.get('topic_id')
-        return context
+class CourseIncludedTasksListView(CourseViewMixin,
+                                  LoginRequiredMixin,
+                                  IsTeacherInCoursePermission,
+                                  ListView):
+    template_name = 'education/included_task_list.html'
+
+    def get_queryset(self):
+        queryset = IncludedTask.objects.filter(topic__course=self.course)
+        return queryset
 
 
 class AddNewIncludedTaskView(CourseViewMixin,
@@ -198,11 +203,6 @@ class AddNewIncludedTaskView(CourseViewMixin,
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course.id})
-
-    def get_initial(self):
-        self.initial = super().get_initial()
-        self.initial['topic'] = self.kwargs.get('topic_id')
-        return self.initial.copy()
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -232,9 +232,7 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
-        context['topic_id'] = self.kwargs.get('topic_id')
-
-        context['task_list'] = Material.objects.all()
+        context['task_list'] = Task.objects.all()
 
         return context
 
