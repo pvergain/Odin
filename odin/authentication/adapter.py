@@ -3,6 +3,8 @@ from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
 
 from odin.common.services import send_email
+from .helpers import get_email_template_context
+
 
 class CustomAdapter(DefaultSocialAccountAdapter):
 
@@ -22,10 +24,11 @@ class CustomAdapter(DefaultSocialAccountAdapter):
 class CustomAccountAdapter(DefaultAccountAdapter):
     def send_mail(self, template_prefix, email, context):
         template_prefix = template_prefix.replace('/', '_')
-        context['current_site'] = context['current_site'].name
-        context['user'] = context['user'].email
+
+        template_context = get_email_template_context(context=context)
+
         send_email(
             template_name=settings.EMAIL_TEMPLATES[template_prefix],
             recipients=[email],
-            context=context
+            context=template_context
         )
