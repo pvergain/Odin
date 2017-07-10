@@ -5,13 +5,15 @@ from dateutil import rrule
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import JSONField
 
 from odin.common.models import UpdatedAtCreatedAtModelMixin
-from odin.common.utils import get_now
+from odin.common.utils import get_now, json_field_default
 
 from odin.users.models import BaseUser
 
 from .managers import StudentManager, TeacherManager
+from .query import TaskQuerySet
 
 
 class Student(BaseUser):
@@ -210,12 +212,21 @@ class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
     description = models.TextField(blank=True, null=True)
     gradable = models.BooleanField(default=False)
 
+    objects = TaskQuerySet.as_manager()
+
     class Meta:
         abstract = True
 
 
 class Task(BaseTask, models.Model):
     pass
+
+
+class ProgrammingLanguage(models.Model):
+    name = models.CharField(max_length=110)
+
+    def __str__(self):
+        return self.name
 
 
 class IncludedTask(BaseTask, models.Model):
@@ -225,3 +236,38 @@ class IncludedTask(BaseTask, models.Model):
     topic = models.ForeignKey(Topic,
                               on_delete=models.CASCADE,
                               related_name='tasks')
+
+
+class Test(models.Model):
+    task = models.ForeignKey(Task)
+    language = models.ForeignKey(ProgrammingLanguage)
+    extra_options = JSONField(blank=True, null=True, default=json_field_default())
+
+    def __str__(self):
+        return f"{self.task}/{self.language}"
+
+    def is_binary(self):
+        if hasattr(self, 'binaryfiletest'):
+            return True
+
+        return False
+
+    def is_source(self):
+        if hasattr(self, 'sourcecodetest'):
+            return True
+
+        return False
+
+    def test_mode(self):
+        if self.is_binary():
+            return "binary"
+
+        return "source"
+
+
+class SourceCodeTest(Test):
+    code = models.TextField(blank=True, null=True)
+
+
+class BinaryFileTest(Test):
+    file = models.FileField(upload_to="tests")
