@@ -481,7 +481,7 @@ class TestAddSourceCodeTestToTaskView(TestCase):
         self.url = reverse('dashboard:education:course-management:add-source-test',
                            kwargs={
                                'course_id': self.course.id,
-                               'task_id': self.included_task.task.id,
+                               'task_id': self.included_task.id,
                            })
 
     def test_get_is_forbidden_if_not_teacher_for_course(self):
@@ -500,7 +500,7 @@ class TestAddSourceCodeTestToTaskView(TestCase):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
         source_test_count = SourceCodeTest.objects.count()
-        task_tests = self.included_task.task.tests.count()
+        task_tests = self.included_task.tests.count()
         data = {
             'language': self.language.id,
             'code': faker.text()
@@ -512,4 +512,4 @@ class TestAddSourceCodeTestToTaskView(TestCase):
                 kwargs={'course_id': self.course.id})
             )
             self.assertEqual(source_test_count + 1, SourceCodeTest.objects.count())
-            self.assertEqual(task_tests + 1, self.included_task.task.tests.count())
+            self.assertEqual(task_tests + 1, self.included_task.tests.count())
