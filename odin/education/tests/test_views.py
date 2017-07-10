@@ -16,7 +16,7 @@ from ..factories import (
 )
 from ..models import Student, Teacher, Topic, IncludedMaterial, Material, IncludedTask, Task
 
-from odin.users.factories import ProfileFactory, BaseUserFactory
+from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
 
 from odin.common.faker import faker
 
@@ -429,3 +429,39 @@ class TestEditIncludedTaskView(TestCase):
             )
             self.included_task.refresh_from_db()
             self.assertEquals(new_name, self.included_task.name)
+
+
+class TestEditTaskView(TestCase):
+
+    def setUp(self):
+        self.task = TaskFactory()
+        self.url = reverse('dashboard:education:edit-task',
+                           kwargs={
+                               'task_id': self.task.id
+                           })
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_superuser(self):
+        response = self.get(self.url)
+        self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_task_is_edited_successfully_on_post(self):
+        new_name = faker.name()
+        data = {
+            'name': new_name,
+            'description': self.task.description,
+            'gradable': self.task.gradable
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-courses',
+            ))
+            self.task.refresh_from_db()
+            self.assertEquals(new_name, self.task.name)

@@ -9,6 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
+from odin.management.permissions import DashboardManagementPermission
+
 from .models import Course, Teacher, Student, Material, Task, IncludedTask
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin, PublicViewContextMixin
@@ -281,17 +283,16 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
 
 class EditTaskView(CourseViewMixin,
                    LoginRequiredMixin,
-                   IsTeacherInCoursePermission,
+                   DashboardManagementPermission,
                    UpdateView):
 
     model = Task
     fields = ('name', 'description', 'gradable')
     pk_url_kwarg = 'task_id'
-    template_name = "edit_task.html"
+    template_name = "education/edit_task.html"
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:user-course-detail',
-                            kwargs={'course_id': self.course.id})
+        return reverse_lazy('dashboard:education:user-courses')
 
 
 class EditIncludedTaskView(CourseViewMixin,
