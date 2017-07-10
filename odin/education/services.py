@@ -127,7 +127,7 @@ def create_included_task(*,
 
 
 def create_test_for_task(*,
-                         task: Task,
+                         task: IncludedTask,
                          language: ProgrammingLanguage,
                          extra_options: Dict={},
                          code: str=None,

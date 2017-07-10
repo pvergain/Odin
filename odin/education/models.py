@@ -239,7 +239,7 @@ class IncludedTask(BaseTask, models.Model):
 
 
 class Test(models.Model):
-    task = models.ForeignKey(Task, related_name='tests')
+    task = models.ForeignKey(IncludedTask, related_name='tests')
     language = models.ForeignKey(ProgrammingLanguage)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
 
