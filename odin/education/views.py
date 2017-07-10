@@ -1,4 +1,10 @@
-from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.views.generic import (
+    TemplateView,
+    ListView,
+    DetailView,
+    FormView,
+    UpdateView
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -269,3 +275,30 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         create_included_task(**data)
 
         return super().form_valid(form)
+
+
+class EditTaskView(CourseViewMixin,
+                   LoginRequiredMixin,
+                   IsTeacherInCoursePermission,
+                   UpdateView):
+
+    model = Task
+    fields = ('name', 'description', 'gradable')
+    pk_url_kwarg = 'task_id'
+    template_name = "edit_task.html"
+
+
+class EditIncludedTaskView(CourseViewMixin,
+                           LoginRequiredMixin,
+                           IsTeacherInCoursePermission,
+                           UpdateView):
+
+    model = IncludedTask
+    form_class = IncludedTaskModelForm
+    pk_url_kwarg = 'task_id'
+    template_name = "education/edit_included_task.html"
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs

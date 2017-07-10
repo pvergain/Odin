@@ -25,6 +25,7 @@
                                 <th> # </th>
                                 <th> Name </th>
                                 <th> </th>
+                                <th> </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,6 +34,11 @@
                                     <td>{{ task.id }}</td>
                                     <td>{{ task.name }}</td>
                                     <td><a href="#"><button class="btn green uppercase" name="button">View</button></a> </td>
+                                    <td>
+                                      <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
+                                        <button class="btn green uppercase" type="button" name="button">Edit</button>
+                                      </a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
