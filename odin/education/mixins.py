@@ -7,7 +7,13 @@ class CourseViewMixin:
     def dispatch(self, request, *args, **kwargs):
         course_id = self.kwargs.get('course_id')
 
-        self.course = get_object_or_404(Course, id=course_id)
+        prefetch = (
+            'students__profile',
+            'teachers__profile',
+            'topics__week',
+            'topics__materials'
+        )
+        self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch).first()
 
         return super().dispatch(request, *args, **kwargs)
 
