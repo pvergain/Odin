@@ -11,8 +11,10 @@ from ..factories import (
     TopicFactory,
     MaterialFactory,
     IncludedMaterialFactory,
+    TaskFactory,
+    IncludedTaskFactory,
 )
-from ..models import Student, Teacher, Topic, IncludedMaterial, Material
+from ..models import Student, Teacher, Topic, IncludedMaterial, Material, IncludedTask, Task
 
 from odin.users.factories import ProfileFactory, BaseUserFactory
 
@@ -209,6 +211,8 @@ class TestAddNewIncludedMaterialView(TestCase):
     def test_can_create_new_material_for_topic_on_post(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
+        material_count = IncludedMaterial.objects.count()
+        topic_material_count = self.topic.materials.count()
         data = {
             'identifier': faker.name(),
             'url': faker.url(),
@@ -222,8 +226,8 @@ class TestAddNewIncludedMaterialView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}
             ))
-            self.assertEqual(1, IncludedMaterial.objects.count())
-            self.assertEqual(1, self.topic.materials.count())
+            self.assertEqual(material_count + 1, IncludedMaterial.objects.count())
+            self.assertEqual(topic_material_count + 1, self.topic.materials.count())
 
 
 class TestAddIncludedMaterialFromExistingView(TestCase):
@@ -273,9 +277,6 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         included_material_count = IncludedMaterial.objects.count()
         material_count = Material.objects.count()
 
-        self.assertEqual(1, included_material_count)
-        self.assertEqual(1, material_count)
-
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data={'material': included_material.material.id})
             self.assertRedirects(response, expected_url=reverse(
@@ -283,3 +284,102 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
                 kwargs={'course_id': self.course.id}))
             self.assertEqual(included_material_count + 1, IncludedMaterial.objects.count())
             self.assertEqual(material_count, Material.objects.count())
+
+
+class TestAddNewIncludedTaskView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.url = reverse('dashboard:education:course-management:add-new-included-task',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_can_create_new_task_for_topic_on_post(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        task_count = IncludedTask.objects.count()
+        topic_task_count = self.topic.tasks.count()
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'topic': self.topic.id,
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}
+            ))
+            self.assertEqual(task_count + 1, IncludedTask.objects.count())
+            self.assertEqual(topic_task_count + 1, self.topic.tasks.count())
+
+
+class TestAddIncludedTaskFromExistingView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.url = reverse('dashboard:education:course-management:add-included-task-from-existing',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_can_add_ordinary_task_that_has_not_yet_been_included_to_course(self):
+        task_count = IncludedTask.objects.count()
+        teacher = Teacher.objects.create_from_user(self.user)
+        task = TaskFactory()
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            response = self.post(self.url, data={'task': task.id, 'topic': self.topic.id})
+            self.assertEqual(task_count + 1, IncludedTask.objects.count())
+            included_task = IncludedTask.objects.filter(task=task)
+            self.assertEqual(1, Topic.objects.filter(tasks__in=included_task).count())
+
+    def test_can_add_included_task_from_existing_already_included_tasks(self):
+        course = CourseFactory()
+        topic = TopicFactory(course=course)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        included_task = IncludedTaskFactory(topic=topic)
+
+        included_task_count = IncludedTask.objects.count()
+        task_count = Task.objects.count()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data={'task': included_task.task.id, 'topic': self.topic.id})
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}))
+            self.assertEqual(included_task_count + 1, IncludedTask.objects.count())
+            self.assertEqual(task_count, Task.objects.count())
