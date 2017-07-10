@@ -302,3 +302,13 @@ class EditIncludedTaskView(CourseViewMixin,
         form_kwargs = super().get_form_kwargs()
         form_kwargs['course'] = self.course
         return form_kwargs
+
+    def get_initial(self):
+        instance = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        self.initial = super().get_initial()
+        self.initial['topic'] = instance.topic.id
+        return self.initial.copy()
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
