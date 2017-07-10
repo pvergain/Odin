@@ -4,10 +4,11 @@ from dateutil import parser
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ..services import create_course, create_topic, create_included_material, create_included_task
-from ..models import Course, Week, Topic, Material, IncludedMaterial, Task, IncludedTask
-from ..factories import CourseFactory, WeekFactory, TopicFactory
+from ..services import create_course, create_topic, create_included_material, create_included_task, create_test_for_task
+from ..models import Course, Week, Topic, Material, IncludedMaterial, Task, IncludedTask, SourceCodeTest, BinaryFileTest
+from ..factories import CourseFactory, WeekFactory, TopicFactory, IncludedTaskFactory, ProgrammingLanguageFactory
 
 from odin.common.faker import faker
 
@@ -173,3 +174,40 @@ class TestCreateIncludedTask(TestCase):
                              topic=self.topic)
         self.assertEqual(current_task_count + 1, Task.objects.count())
         self.assertEqual(current_included_task_count + 1, IncludedTask.objects.count())
+
+
+class TestCreateTestForTask(TestCase):
+
+    def setUp(self):
+        self.included_task = IncludedTaskFactory()
+        self.language = ProgrammingLanguageFactory()
+
+    def test_create_test_for_task_raises_validation_error_when_no_resource_is_provided(self):
+        with self.assertRaises(ValidationError):
+            create_test_for_task(task=self.included_task,
+                                 language=self.language)
+
+    def test_create_test_for_task_raises_validation_error_when_both_resources_are_provided(self):
+        with self.assertRaises(ValidationError):
+            create_test_for_task(task=self.included_task,
+                                 language=self.language,
+                                 code=faker.text(),
+                                 file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
+
+    def test_create_test_for_task_creates_source_code_test_when_code_is_provided(self):
+        current_source_code_test_count = SourceCodeTest.objects.count()
+
+        create_test_for_task(task=self.included_task,
+                             language=self.language,
+                             code=faker.text())
+
+        self.assertEqual(current_source_code_test_count + 1, SourceCodeTest.objects.count())
+
+    def test_create_test_for_task_creates_binary_file_test_when_code_is_provided(self):
+        current_binary_file_test_count = BinaryFileTest.objects.count()
+
+        create_test_for_task(task=self.included_task,
+                             language=self.language,
+                             file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
+
+        self.assertEqual(current_binary_file_test_count + 1, BinaryFileTest.objects.count())
