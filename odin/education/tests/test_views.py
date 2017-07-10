@@ -13,8 +13,9 @@ from ..factories import (
     IncludedMaterialFactory,
     TaskFactory,
     IncludedTaskFactory,
+    ProgrammingLanguageFactory,
 )
-from ..models import Student, Teacher, Topic, IncludedMaterial, Material, IncludedTask, Task
+from ..models import Student, Teacher, Topic, IncludedMaterial, Material, IncludedTask, Task, SourceCodeTest
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
 
@@ -465,3 +466,50 @@ class TestEditTaskView(TestCase):
             ))
             self.task.refresh_from_db()
             self.assertEquals(new_name, self.task.name)
+
+
+class TestAddSourceCodeTestToTaskView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.included_task = IncludedTaskFactory(topic=self.topic)
+        self.test_password = faker.password()
+        self.language = ProgrammingLanguageFactory()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:education:course-management:add-source-test',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'task_id': self.included_task.task.id,
+                           })
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_source_test_is_added_to_task_on_post(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        source_test_count = SourceCodeTest.objects.count()
+        task_tests = self.included_task.task.tests.count()
+        data = {
+            'language': self.language.id,
+            'code': faker.text()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(source_test_count + 1, SourceCodeTest.objects.count())
+            self.assertEqual(task_tests + 1, self.included_task.task.tests.count())

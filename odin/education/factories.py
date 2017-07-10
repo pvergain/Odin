@@ -13,6 +13,7 @@ from .models import (
     IncludedMaterial,
     Task,
     IncludedTask,
+    ProgrammingLanguage,
 )
 from .services import create_course
 
@@ -99,3 +100,10 @@ class IncludedTaskFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = IncludedTask
+
+
+class ProgrammingLanguageFactory(factory.DjangoModelFactory):
+    name = factory.LazyAttribute(lambda _: faker.name())
+
+    class Meta:
+        model = ProgrammingLanguage
