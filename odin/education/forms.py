@@ -92,4 +92,4 @@ class SourceCodeTestForm(forms.ModelForm):
 class BinaryFileTestForm(forms.ModelForm):
     class Meta:
         model = BinaryFileTest
-        exclude = ('language', 'task', 'file')
+        fields = ('language', 'task', 'file')

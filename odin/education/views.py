@@ -366,7 +366,8 @@ class AddBinaryFileTestToTaskView(CourseViewMixin,
 
         data = {}
         data['task'] = self.kwargs.get('task_id')
-        data.update(self.request.POST)
+        data['language'] = self.request.POST.get('language')
+        data['file'] = self.request.FILES.get('file')
 
         form_kwargs['data'] = data
         return form_kwargs

@@ -7,7 +7,7 @@
 
 {% block page_content %}
   <div class="row">
-    <form class="col-md-6" action="" method="post">
+    <form class="col-md-6" action="" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="form-group">
         {{ form.language.label }}
