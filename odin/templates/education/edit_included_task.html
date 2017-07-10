@@ -23,6 +23,12 @@
       </div>
       <div class="form-actions">
         <button class="btn green uppercase" type="submit" name="button">Update</button>
+        <a href="{% url 'dashboard:education:course-management:add-source-test' course.id request.resolver_match.kwargs.task_id %}">
+          <button class="btn green uppercase" type="button" name="button">Add source code test</button>
+        </a>
+        <a href="{% url 'dashboard:education:course-management:add-binary-test' course.id request.resolver_match.kwargs.task_id %}">
+          <button class="btn green uppercase" type="button" name="button">Add binary test</button>
+        </a>
       </div>
     </form>
   </div>

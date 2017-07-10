@@ -14,7 +14,9 @@ from .views import (
     ExistingTasksView,
     CourseIncludedTasksListView,
     EditTaskView,
-    EditIncludedTaskView
+    EditIncludedTaskView,
+    AddBinaryFileTestToTaskView,
+    AddSourceCodeTestToTaskView
 )
 
 
@@ -55,10 +57,15 @@ course_management_urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/edit-task/(?P<task_id>[0-9]+)$',
         view=EditTaskView.as_view(),
         name='edit-task'),
-    url(regex='^(?P<course_id>[0-9]+)/edit-included-task/(?P<task_id>[0-9]+)',
+    url(regex='^(?P<course_id>[0-9]+)/edit-included-task/(?P<task_id>[0-9]+)$',
         view=EditIncludedTaskView.as_view(),
         name='edit-included-task'),
-
+    url(regex='^(?P<course_id>[0-9]+)/add-source-test/(?P<task_id>[0-9]+)$',
+        view=AddSourceCodeTestToTaskView.as_view(),
+        name='add-source-test'),
+    url(regex='^(?P<course_id>[0-9]+)/add-binary-test/(?P<task_id>[0-9]+)$',
+        view=AddBinaryFileTestToTaskView.as_view(),
+        name='add-binary-test'),
 ]
 
 urlpatterns = [

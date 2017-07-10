@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+from typing import Dict, BinaryIO
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
@@ -14,6 +14,10 @@ from .models import (
     Material,
     IncludedTask,
     Task,
+    ProgrammingLanguage,
+    SourceCodeTest,
+    BinaryFileTest,
+    Test
 )
 
 
@@ -120,3 +124,26 @@ def create_included_task(*,
     included_task.save()
 
     return included_task
+
+
+def create_test_for_task(*,
+                         task: Task,
+                         language: ProgrammingLanguage,
+                         extra_options: Dict={},
+                         code: str=None,
+                         file: BinaryIO=None):
+
+    base_test = Test.objects.create(task=task, language=language, extra_options=extra_options)
+
+    if file is None and code is not None:
+        new_test = SourceCodeTest(code=code)
+    elif code is None and file is not None:
+        new_test = BinaryFileTest(file=file)
+    else:
+        raise ValidationError("A binary file or source code must be provided!")
+
+    new_test.__dict__.update(base_test.__dict__)
+    new_test.full_clean()
+    new_test.save()
+
+    return new_test

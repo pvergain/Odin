@@ -1,6 +1,14 @@
 from django import forms
 
-from .models import Course, Topic, IncludedMaterial, Week, IncludedTask
+from .models import (
+    Course,
+    Topic,
+    IncludedMaterial,
+    Week,
+    IncludedTask,
+    SourceCodeTest,
+    BinaryFileTest
+)
 
 
 class DateInput(forms.DateInput):
@@ -70,3 +78,15 @@ class IncludedTaskFromExistingForm(forms.ModelForm):
     class Meta:
         model = IncludedTask
         fields = ('topic', 'task')
+
+
+class SourceCodeTestForm(forms.ModelForm):
+    class Meta:
+        model = SourceCodeTest
+        fields = ('language', 'task', 'code')
+
+
+class BinaryFileTestForm(forms.ModelForm):
+    class Meta:
+        model = BinaryFileTest
+        exclude = ('language', 'task', 'file')

@@ -1,0 +1,25 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load widget_tweaks %}
+
+{% block content_title %}
+  Add source test
+{% endblock content_title%}
+
+{% block page_content %}
+  <div class="row">
+    <form class="col-md-6" action="" method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.language.label }}
+        {% render_field form.language class="form-control form-control-solid" %}
+      </div>
+      <div class="form-group">
+        {{ form.code.label }}
+        {% render_field form.code class="form-control form-control-solid"%}
+      </div>
+      <div class="form-actions">
+        <button class="btn green uppercase" type="submit" name="button">Add</button>
+      </div>
+    </form>
+  </div>
+{% endblock page_content %}

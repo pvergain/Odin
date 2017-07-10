@@ -18,8 +18,10 @@ from .forms import (
     IncludedMaterialFromExistingForm,
     IncludedTaskModelForm,
     IncludedTaskFromExistingForm,
+    SourceCodeTestForm,
+    BinaryFileTestForm
 )
-from .services import create_topic, create_included_material, create_included_task
+from .services import create_topic, create_included_material, create_included_task, create_test_for_task
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -309,6 +311,57 @@ class EditIncludedTaskView(CourseViewMixin,
         self.initial['topic'] = instance.topic.id
         return self.initial.copy()
 
+
+class AddSourceCodeTestToTaskView(CourseViewMixin,
+                                  LoginRequiredMixin,
+                                  IsTeacherInCoursePermission,
+                                  FormView):
+
+    form_class = SourceCodeTestForm
+    template_name = 'education/add_source_test.html'
+
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course.id})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        data = {}
+        data['task'] = self.kwargs.get('task_id')
+        data['language'] = self.request.POST.get('language')
+        data['code'] = self.request.POST.get('code')
+
+        form_kwargs['data'] = data
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_test_for_task(**form.cleaned_data)
+        return super().form_valid(form)
+
+
+class AddBinaryFileTestToTaskView(CourseViewMixin,
+                                  LoginRequiredMixin,
+                                  IsTeacherInCoursePermission,
+                                  FormView):
+
+    form_class = BinaryFileTestForm
+    template_name = 'education/add_binary_test.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        data = {}
+        data['task'] = self.kwargs.get('task_id')
+        data.update(self.request.POST)
+
+        form_kwargs['data'] = data
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_test_for_task(**form.cleaned_data)
+        return super().form_valid(form)
