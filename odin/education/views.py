@@ -289,6 +289,10 @@ class EditTaskView(CourseViewMixin,
     pk_url_kwarg = 'task_id'
     template_name = "edit_task.html"
 
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
 
 class EditIncludedTaskView(CourseViewMixin,
                            LoginRequiredMixin,
@@ -310,6 +314,10 @@ class EditIncludedTaskView(CourseViewMixin,
         self.initial = super().get_initial()
         self.initial['topic'] = instance.topic.id
         return self.initial.copy()
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
 
 
 class AddSourceCodeTestToTaskView(CourseViewMixin,

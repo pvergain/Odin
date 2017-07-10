@@ -65,6 +65,9 @@ class IncludedTaskModelForm(forms.ModelForm):
     class Meta:
         model = IncludedTask
         fields = ('name', 'description', 'gradable')
+        widgets = {
+            'gradable': forms.RadioSelect(choices=[(True, "is gradable"), (False, "is not gradable")])
+        }
 
 
 class IncludedTaskFromExistingForm(forms.ModelForm):
