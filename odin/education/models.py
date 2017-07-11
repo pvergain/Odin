@@ -271,3 +271,33 @@ class SourceCodeTest(Test):
 
 class BinaryFileTest(Test):
     file = models.FileField(upload_to="tests")
+
+
+class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
+    PENDING = 0
+    RUNNING = 1
+    OK = 2
+    NOT_OK = 3
+    SUBMITTED = 4
+    MISSING = 5
+    SUBMITTED_WITHOUT_GRADING = 6
+
+    STATUS_CHOICE = (
+        (PENDING, 'pending'),
+        (RUNNING, 'running'),
+        (OK, 'ok'),
+        (NOT_OK, 'not_ok'),
+        (SUBMITTED, 'submitted'),
+        (MISSING, 'missing'),
+        (SUBMITTED_WITHOUT_GRADING, 'submitted_without_grading'),
+    )
+
+    test = models.ForeignKey(Test, related_name='solutions')
+    student = models.ForeignKey(Student, related_name='solutions')
+    url = models.URLField(blank=True, null=True)
+    code = models.TextField(blank=True, null=True)
+    check_status_location = models.CharField(max_length=128, null=True, blank=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
+    test_output = models.TextField(blank=True, null=True)
+    return_code = models.IntegerField(blank=True, null=True)
+    # file = models.FileField(upload_to="solutions", blank=True, null=True)
