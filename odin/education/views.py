@@ -14,7 +14,7 @@ from odin.management.permissions import DashboardManagementPermission
 
 from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
-from .mixins import CourseViewMixin, PublicViewContextMixin
+from .mixins import CourseViewMixin, PublicViewContextMixin, SubmitSolutionMixin
 from .forms import (
     TopicModelForm,
     IncludedMaterialModelForm,
@@ -22,7 +22,9 @@ from .forms import (
     IncludedTaskModelForm,
     IncludedTaskFromExistingForm,
     SourceCodeTestForm,
-    BinaryFileTestForm
+    BinaryFileTestForm,
+    SubmitGradableSolutionForm,
+    SubmitNotGradableSolutionForm,
 )
 from .services import create_topic, create_included_material, create_included_task, create_test_for_task
 
@@ -390,3 +392,19 @@ class StudentSolutionListView(CourseViewMixin,
             return Solution.objects.get_solutions_for(user.student, task)
         else:
             raise Http404
+
+
+class SubmitGradableSolutionView(CourseViewMixin,
+                                 SubmitSolutionMixin,
+                                 LoginRequiredMixin,
+                                 IsStudentOrTeacherInCoursePermission,
+                                 FormView):
+    form_class = SubmitGradableSolutionForm
+
+
+class SubmitNotGradableSolutionView(CourseViewMixin,
+                                    SubmitSolutionMixin,
+                                    LoginRequiredMixin,
+                                    IsStudentOrTeacherInCoursePermission,
+                                    FormView):
+    form_class = SubmitNotGradableSolutionForm

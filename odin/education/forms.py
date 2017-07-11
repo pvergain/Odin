@@ -7,7 +7,8 @@ from .models import (
     Week,
     IncludedTask,
     SourceCodeTest,
-    BinaryFileTest
+    BinaryFileTest,
+    Solution
 )
 
 

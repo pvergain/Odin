@@ -18,6 +18,8 @@ from .views import (
     AddBinaryFileTestToTaskView,
     AddSourceCodeTestToTaskView,
     StudentSolutionListView,
+    SubmitGradableSolutionView,
+    SubmitNotGradableSolutionView,
 )
 
 
@@ -82,4 +84,10 @@ urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions$',
         view=StudentSolutionListView.as_view(),
         name='user-task-solutions'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/add-gradable-solution$',
+        view=SubmitGradableSolutionView.as_view(),
+        name='add-gradable-solution'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/add-not-gradable-solution$',
+        view=SubmitNotGradableSolutionView.as_view(),
+        name='add-not-gradable-solution'),
 ]
