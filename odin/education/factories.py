@@ -13,7 +13,8 @@ from .models import (
     IncludedMaterial,
     Task,
     IncludedTask,
-    ProgrammingLanguage
+    ProgrammingLanguage,
+    Test
 )
 from .services import create_course
 
@@ -107,3 +108,11 @@ class ProgrammingLanguageFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = ProgrammingLanguage
+
+
+class TaskTestFactory(factory.DjangoModelFactory):
+    task = factory.SubFactory(IncludedTaskFactory)
+    language = factory.SubFactory(ProgrammingLanguageFactory)
+
+    class Meta:
+        model = Test

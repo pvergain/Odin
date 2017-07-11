@@ -150,7 +150,7 @@ def create_test_for_task(*,
     return new_test
 
 
-def create_solution(*
+def create_solution(*,
                     test: Test,
                     student: Student,
                     url: str=None,

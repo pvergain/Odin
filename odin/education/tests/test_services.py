@@ -6,9 +6,35 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ..services import create_course, create_topic, create_included_material, create_included_task, create_test_for_task
-from ..models import Course, Week, Topic, Material, IncludedMaterial, Task, IncludedTask, SourceCodeTest, BinaryFileTest
-from ..factories import CourseFactory, WeekFactory, TopicFactory, IncludedTaskFactory, ProgrammingLanguageFactory
+from ..services import (
+    create_course,
+    create_topic,
+    create_included_material,
+    create_included_task,
+    create_test_for_task,
+    create_solution
+)
+from ..models import (
+    Course,
+    Week,
+    Topic,
+    Material,
+    IncludedMaterial,
+    Task,
+    IncludedTask,
+    SourceCodeTest,
+    BinaryFileTest,
+    Solution
+)
+from ..factories import (
+    CourseFactory,
+    WeekFactory,
+    TopicFactory,
+    IncludedTaskFactory,
+    ProgrammingLanguageFactory,
+    TaskTestFactory,
+    StudentFactory
+)
 
 from odin.common.faker import faker
 
@@ -211,3 +237,70 @@ class TestCreateTestForTask(TestCase):
                              file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
         self.assertEqual(current_binary_file_test_count + 1, BinaryFileTest.objects.count())
+
+
+class TestCreateSolution(TestCase):
+    def setUp(self):
+        self.test = TaskTestFactory()
+        self.task = self.test.task
+        self.task.gradable = True
+        self.task.save
+        self.student = StudentFactory()
+
+    def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_gradable_task(self):
+        with self.assertRaises(ValidationError):
+            create_solution(student=self.student,
+                            test=self.test,
+                            url=faker.url())
+
+    def test_create_solution_raises_validation_error_when_both_resources_are_provided_for_gradable_task(self):
+        with self.assertRaises(ValidationError):
+            create_solution(student=self.student,
+                            test=self.test,
+                            code=faker.text(),
+                            file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
+
+    def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_not_gradable_task(self):
+        self.task.gradable = False
+        self.task.save()
+        with self.assertRaises(ValidationError):
+            create_solution(student=self.student,
+                            test=self.test)
+
+    def test_create_solution_creates_solution_with_code_when_code_is_provided_for_gradable_solution(self):
+        current_solution_count = Solution.objects.count()
+
+        solution = create_solution(test=self.test,
+                                   student=self.student,
+                                   code=faker.text())
+
+        self.assertEqual(current_solution_count + 1, Solution.objects.count())
+        self.assertIsNotNone(solution.code)
+        self.assertIsNone(solution.file.name)
+        self.assertIsNone(solution.url)
+
+    def test_create_solution_creates_solution_with_file_when_file_is_provided_for_gradable_solution(self):
+        current_solution_count = Solution.objects.count()
+
+        solution = create_solution(test=self.test,
+                                   student=self.student,
+                                   file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
+
+        self.assertEqual(current_solution_count + 1, Solution.objects.count())
+        self.assertIsNotNone(solution.file.name)
+        self.assertIsNone(solution.code)
+        self.assertIsNone(solution.url)
+
+    def test_create_solution_creates_solution_with_url_when_url_is_provided_for_not_gradable_solution(self):
+        self.task.gradable = False
+        self.task.save()
+        current_solution_count = Solution.objects.count()
+
+        solution = create_solution(test=self.test,
+                                   student=self.student,
+                                   url=faker.url())
+
+        self.assertEqual(current_solution_count + 1, Solution.objects.count())
+        self.assertIsNotNone(solution.url)
+        self.assertIsNone(solution.file.name)
+        self.assertIsNone(solution.code)
