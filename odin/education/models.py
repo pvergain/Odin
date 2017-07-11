@@ -13,7 +13,7 @@ from odin.common.utils import get_now, json_field_default
 from odin.users.models import BaseUser
 
 from .managers import StudentManager, TeacherManager
-from .query import TaskQuerySet
+from .query import TaskQuerySet, SolutionQuerySet
 
 
 class Student(BaseUser):
@@ -300,4 +300,6 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
     test_output = models.TextField(blank=True, null=True)
     return_code = models.IntegerField(blank=True, null=True)
-    # file = models.FileField(upload_to="solutions", blank=True, null=True)
+    file = models.FileField(upload_to="solutions", blank=True, null=True)
+
+    objects = SolutionQuerySet.as_manager()

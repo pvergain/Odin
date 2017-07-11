@@ -8,10 +8,11 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.http import Http404
 
 from odin.management.permissions import DashboardManagementPermission
 
-from .models import Course, Teacher, Student, Material, Task, IncludedTask
+from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
 from .mixins import CourseViewMixin, PublicViewContextMixin
 from .forms import (
@@ -374,3 +375,18 @@ class AddBinaryFileTestToTaskView(CourseViewMixin,
     def form_valid(self, form):
         create_test_for_task(**form.cleaned_data)
         return super().form_valid(form)
+
+
+class StudentSolutionListView(CourseViewMixin,
+                              LoginRequiredMixin,
+                              IsStudentOrTeacherInCoursePermission,
+                              ListView):
+    template_name = 'education/included_task_list.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_student():
+            task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+            return Solution.objects.get_solutions_for(user.student, task)
+        else:
+            raise Http404

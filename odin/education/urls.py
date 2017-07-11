@@ -16,7 +16,8 @@ from .views import (
     EditTaskView,
     EditIncludedTaskView,
     AddBinaryFileTestToTaskView,
-    AddSourceCodeTestToTaskView
+    AddSourceCodeTestToTaskView,
+    StudentSolutionListView,
 )
 
 
@@ -78,5 +79,7 @@ urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/tasks/$',
         view=CourseIncludedTasksListView.as_view(),
         name='included-tasks'),
-
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions$',
+        view=StudentSolutionListView.as_view(),
+        name='user-task-solutions'),
 ]

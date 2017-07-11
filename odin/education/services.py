@@ -17,7 +17,8 @@ from .models import (
     ProgrammingLanguage,
     SourceCodeTest,
     BinaryFileTest,
-    Test
+    Test,
+    Solution,
 )
 
 
@@ -147,3 +148,43 @@ def create_test_for_task(*,
     new_test.save()
 
     return new_test
+
+
+def create_solution(*
+                    test: Test,
+                    student: Student,
+                    url: str=None,
+                    code: str=None,
+                    file: BinaryIO=None) -> Solution:
+
+    task_is_gradable = test.task.gradable
+    if task_is_gradable:
+        if code is not None and file is not None:
+            raise ValidationError("Provide either code or a file, not both!")
+        if code is None and file is None:
+            raise ValidationError("Provide either code or a file!")
+        if code is not None and file is None:
+            new_solution = Solution.objects.create(
+                test=test,
+                student=student,
+                code=code,
+                status=4
+            )
+        if code is None and file is not None:
+            new_solution = Solution.objects.create(
+                test=test,
+                student=student,
+                file=file,
+                status=4
+            )
+    else:
+        if url is None:
+            raise ValidationError("Provide a url!")
+        new_solution = Solution.objects.create(
+            test=test,
+            student=student,
+            url=url,
+            status=6
+        )
+
+    return new_solution
