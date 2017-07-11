@@ -15,6 +15,7 @@ from ..factories import (
     TaskFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
+    TaskTestFactory
 )
 from ..models import (
     Student,
@@ -572,3 +573,31 @@ class TestAddBinaryFileTestToTaskView(TestCase):
             )
             self.assertEqual(binary_test_count + 1, BinaryFileTest.objects.count())
             self.assertEqual(task_tests + 1, self.included_task.tests.count())
+
+
+class TestStudentSolutionListView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.task = IncludedTaskFactory()
+        self.url = reverse('dashboard:education:user-task-solutions',
+                           kwargs={'course_id': self.course.id,
+                                   'task_id': self.task.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.test = TaskTestFactory(task=self.task)
+
+    def test_get_returns_404_when_user_is_not_student_in_course(self):
+        teacher = Teacher.objects.create_from_user(user=self.user)
+        add_teacher(self.course, teacher)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_404(response=response)
+
+    def test_get_returns_200_when_user_is_student_in_course(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response=response)
