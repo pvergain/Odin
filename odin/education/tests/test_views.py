@@ -3,7 +3,7 @@ from test_plus import TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ..services import add_student, add_teacher, create_test_for_task
+from ..services import add_student, add_teacher
 from ..factories import (
     CourseFactory,
     StudentFactory,
