@@ -204,7 +204,6 @@ class ExistingTasksView(CourseViewMixin,
 
 class CourseIncludedTasksListView(CourseViewMixin,
                                   LoginRequiredMixin,
-                                  IsTeacherInCoursePermission,
                                   ListView):
     template_name = 'education/included_task_list.html'
 

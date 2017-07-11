@@ -34,18 +34,24 @@
                                     <td>{{ task.id }}</td>
                                     <td>{{ task.name }}</td>
                                     <td><a href="#"><button class="btn green uppercase" name="button">View</button></a> </td>
-                                    <td>
-                                      <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
-                                        <button class="btn green uppercase" type="button" name="button">Edit</button>
-                                      </a>
-                                    </td>
+                                    {% if request.user.is_teacher %}
+                                      <td>
+                                        <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
+                                          <button class="btn green uppercase" type="button" name="button">Edit</button>
+                                        </a>
+                                      </td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
               </div>
-              <a href="{% url 'dashboard:education:course-management:existing-tasks' course.pk %}"><button type="button" name="button" class="btn green uppercase" >Add a task to this course</button></a>
+              {% if request.user.is_teacher %}
+                <a href="{% url 'dashboard:education:course-management:existing-tasks' course.pk %}">
+                  <button type="button" name="button" class="btn green uppercase" >Add a task to this course</button>
+                </a>
+              {% endif %}
         </div>
         <!-- END SAMPLE TABLE PORTLET-->
 </div>

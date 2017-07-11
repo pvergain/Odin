@@ -45,9 +45,6 @@ course_management_urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/existing-tasks/$',
         view=ExistingTasksView.as_view(),
         name='existing-tasks'),
-    url(regex='^(?P<course_id>[0-9]+)/tasks/$',
-        view=CourseIncludedTasksListView.as_view(),
-        name='included-tasks'),
     url(regex='^(?P<course_id>[0-9]+)/add-task/existing$',
         view=AddIncludedTaskFromExistingView.as_view(),
         name='add-included-task-from-existing'),
@@ -78,4 +75,8 @@ urlpatterns = [
     url(regex='^tasks/edit-task/(?P<task_id>[0-9]+)/$',
         view=EditTaskView.as_view(),
         name='edit-task'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/$',
+        view=CourseIncludedTasksListView.as_view(),
+        name='included-tasks'),
+
 ]
