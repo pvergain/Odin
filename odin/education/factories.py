@@ -1,7 +1,12 @@
 import factory
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
+
+from odin.education.services import create_test_for_task
+
 
 from .models import (
     Student,
@@ -116,3 +121,17 @@ class TaskTestFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Test
+
+
+class SourceCodeTestFactory(TaskTestFactory):
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        kwargs['code'] = faker.text()
+        return create_test_for_task(*args, **kwargs)
+
+
+class BinaryFileTestFactory(TaskTestFactory):
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        kwargs['file'] = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        return create_test_for_task(*args, **kwargs)

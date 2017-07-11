@@ -3,7 +3,7 @@ from test_plus import TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ..services import add_student, add_teacher
+from ..services import add_student, add_teacher, create_test_for_task
 from ..factories import (
     CourseFactory,
     StudentFactory,
@@ -15,6 +15,8 @@ from ..factories import (
     TaskFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
+    SourceCodeTestFactory,
+    BinaryFileTestFactory,
 )
 from ..models import (
     Student,
@@ -26,6 +28,7 @@ from ..models import (
     Task,
     SourceCodeTest,
     BinaryFileTest,
+    Solution,
 )
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
@@ -599,3 +602,100 @@ class TestStudentSolutionListView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.response_200(response=response)
+
+
+class TestSubmitGradableSolutionView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.task = IncludedTaskFactory(gradable=True, topic=self.topic)
+        self.url = reverse('dashboard:education:add-gradable-solution',
+                           kwargs={'course_id': self.course.id,
+                                   'task_id': self.task.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_when_not_student_or_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_student_for_course(self):
+        BinaryFileTestFactory(task=self.task)
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(self):
+        SourceCodeTestFactory(task=self.task)
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        task_solution_count = self.task.solutions.count()
+        data = {'code': faker.text()}
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(solution_count + 1, Solution.objects.count())
+            self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(self):
+        BinaryFileTestFactory(task=self.task)
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        task_solution_count = self.task.solutions.count()
+        file = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        data = {'file': file}
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(solution_count + 1, Solution.objects.count())
+            self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+
+class TestSubmitNotGradableSolutionView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.task = IncludedTaskFactory(gradable=False, topic=self.topic)
+        self.url = reverse('dashboard:education:add-not-gradable-solution',
+                           kwargs={'course_id': self.course.id,
+                                   'task_id': self.task.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_when_not_student_or_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_student_for_course(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        task_solution_count = self.task.solutions.count()
+        data = {'url': faker.url()}
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(solution_count + 1, Solution.objects.count())
+            self.assertEqual(task_solution_count + 1, self.task.solutions.count())
