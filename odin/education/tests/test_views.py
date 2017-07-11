@@ -580,7 +580,8 @@ class TestAddBinaryFileTestToTaskView(TestCase):
 class TestStudentSolutionListView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.task = IncludedTaskFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.task = IncludedTaskFactory(topic=self.topic)
         self.url = reverse('dashboard:education:user-task-solutions',
                            kwargs={'course_id': self.course.id,
                                    'task_id': self.task.id})
