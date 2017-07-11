@@ -93,3 +93,15 @@ class BinaryFileTestForm(forms.ModelForm):
     class Meta:
         model = BinaryFileTest
         fields = ('language', 'task', 'file')
+
+
+class SubmitGradableSolutionForm(forms.ModelForm):
+    class Meta:
+        model = Solution
+        fields = ('code', 'file')
+
+
+class SubmitNotGradableSolutionForm(forms.ModelForm):
+    class Meta:
+        model = Solution
+        fields = ('url', )
