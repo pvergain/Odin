@@ -33,7 +33,13 @@
                                 <tr>
                                     <td>{{ task.id }}</td>
                                     <td>{{ task.name }}</td>
-                                    <td><a href="#"><button class="btn green uppercase" name="button">View</button></a> </td>
+                                    <td>
+                                      {% if request.user.student in course.students.all %}
+                                        <a href="{% url 'dashboard:education:user-task-solutions' course.id task.id%}">
+                                          <button class="btn green uppercase" type="button" name="button">View your solutions</button>
+                                        </a>
+                                      {% endif %}
+                                     </td>
                                     {% if request.user.is_teacher %}
                                       <td>
                                         <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
@@ -49,7 +55,7 @@
               </div>
               {% if request.user.is_teacher %}
                 <a href="{% url 'dashboard:education:course-management:existing-tasks' course.pk %}">
-                  <button type="button" name="button" class="btn green uppercase" >Add a task to this course</button>
+                  <button class="btn green uppercase" type="button" name="button">Add a task to this course</button>
                 </a>
               {% endif %}
         </div>

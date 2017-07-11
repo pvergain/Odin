@@ -381,7 +381,7 @@ class StudentSolutionListView(CourseViewMixin,
                               LoginRequiredMixin,
                               IsStudentOrTeacherInCoursePermission,
                               ListView):
-    template_name = 'education/included_task_list.html'
+    template_name = 'education/student_solution_list.html'
 
     def get_queryset(self):
         user = self.request.user
