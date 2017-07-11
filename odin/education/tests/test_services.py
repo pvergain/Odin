@@ -32,7 +32,6 @@ from ..factories import (
     TopicFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
-    TaskTestFactory,
     StudentFactory
 )
 
@@ -241,22 +240,19 @@ class TestCreateTestForTask(TestCase):
 
 class TestCreateSolution(TestCase):
     def setUp(self):
-        self.test = TaskTestFactory()
-        self.task = self.test.task
-        self.task.gradable = True
-        self.task.save
+        self.task = IncludedTaskFactory(gradable=True)
         self.student = StudentFactory()
 
     def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_gradable_task(self):
         with self.assertRaises(ValidationError):
             create_solution(student=self.student,
-                            test=self.test,
+                            task=self.task,
                             url=faker.url())
 
     def test_create_solution_raises_validation_error_when_both_resources_are_provided_for_gradable_task(self):
         with self.assertRaises(ValidationError):
             create_solution(student=self.student,
-                            test=self.test,
+                            task=self.task,
                             code=faker.text(),
                             file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
@@ -265,12 +261,12 @@ class TestCreateSolution(TestCase):
         self.task.save()
         with self.assertRaises(ValidationError):
             create_solution(student=self.student,
-                            test=self.test)
+                            task=self.task)
 
     def test_create_solution_creates_solution_with_code_when_code_is_provided_for_gradable_solution(self):
         current_solution_count = Solution.objects.count()
 
-        solution = create_solution(test=self.test,
+        solution = create_solution(task=self.task,
                                    student=self.student,
                                    code=faker.text())
 
@@ -282,7 +278,7 @@ class TestCreateSolution(TestCase):
     def test_create_solution_creates_solution_with_file_when_file_is_provided_for_gradable_solution(self):
         current_solution_count = Solution.objects.count()
 
-        solution = create_solution(test=self.test,
+        solution = create_solution(task=self.task,
                                    student=self.student,
                                    file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
@@ -296,7 +292,7 @@ class TestCreateSolution(TestCase):
         self.task.save()
         current_solution_count = Solution.objects.count()
 
-        solution = create_solution(test=self.test,
+        solution = create_solution(task=self.task,
                                    student=self.student,
                                    url=faker.url())
 

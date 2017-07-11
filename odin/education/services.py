@@ -151,28 +151,27 @@ def create_test_for_task(*,
 
 
 def create_solution(*,
-                    test: Test,
+                    task: IncludedTask,
                     student: Student,
                     url: str=None,
                     code: str=None,
                     file: BinaryIO=None) -> Solution:
 
-    task_is_gradable = test.task.gradable
-    if task_is_gradable:
+    if task.gradable:
         if code is not None and file is not None:
             raise ValidationError("Provide either code or a file, not both!")
         if code is None and file is None:
             raise ValidationError("Provide either code or a file!")
         if code is not None and file is None:
             new_solution = Solution.objects.create(
-                test=test,
+                task=task,
                 student=student,
                 code=code,
                 status=4
             )
         if code is None and file is not None:
             new_solution = Solution.objects.create(
-                test=test,
+                task=task,
                 student=student,
                 file=file,
                 status=4
@@ -181,7 +180,7 @@ def create_solution(*,
         if url is None:
             raise ValidationError("Provide a url!")
         new_solution = Solution.objects.create(
-            test=test,
+            task=task,
             student=student,
             url=url,
             status=6

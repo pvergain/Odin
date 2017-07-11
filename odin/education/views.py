@@ -14,7 +14,7 @@ from odin.management.permissions import DashboardManagementPermission
 
 from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
-from .mixins import CourseViewMixin, PublicViewContextMixin, SubmitSolutionMixin
+from .mixins import CourseViewMixin, PublicViewContextMixin, SubmitSolutionMixin, TaskViewMixin
 from .forms import (
     TopicModelForm,
     IncludedMaterialModelForm,
@@ -380,6 +380,7 @@ class AddBinaryFileTestToTaskView(CourseViewMixin,
 
 
 class StudentSolutionListView(CourseViewMixin,
+                              TaskViewMixin,
                               LoginRequiredMixin,
                               IsStudentOrTeacherInCoursePermission,
                               ListView):
@@ -395,14 +396,25 @@ class StudentSolutionListView(CourseViewMixin,
 
 
 class SubmitGradableSolutionView(CourseViewMixin,
+                                 TaskViewMixin,
                                  SubmitSolutionMixin,
                                  LoginRequiredMixin,
                                  IsStudentOrTeacherInCoursePermission,
                                  FormView):
     form_class = SubmitGradableSolutionForm
 
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        test = task.tests.first()
+
+        form_kwargs['is_test_source'] = test.is_source()
+        return form_kwargs
+
 
 class SubmitNotGradableSolutionView(CourseViewMixin,
+                                    TaskViewMixin,
                                     SubmitSolutionMixin,
                                     LoginRequiredMixin,
                                     IsStudentOrTeacherInCoursePermission,

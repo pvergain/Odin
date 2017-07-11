@@ -11,4 +11,4 @@ class TaskQuerySet(models.QuerySet):
 class SolutionQuerySet(models.QuerySet):
 
     def get_solutions_for(self, user, task):
-        return self.filter(student=user, test__task=task)
+        return self.filter(student=user, task=task)

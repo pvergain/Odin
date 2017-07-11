@@ -42,9 +42,15 @@
                 </table>
             </div>
           </div>
-            <a href="#">
+          {% if task.gradable %}
+            <a href="{% url 'dashboard:education:add-gradable-solution' course.id task.id %}">
               <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
             </a>
+          {% else %}
+            <a href="{% url 'dashboard:education:add-not-gradable-solution' course.id task.id %}">
+              <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
+            </a>
+          {% endif %}
     </div>
   </div>
 {% endblock page_content %}

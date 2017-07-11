@@ -15,7 +15,6 @@ from ..factories import (
     TaskFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
-    TaskTestFactory
 )
 from ..models import (
     Student,
@@ -584,7 +583,6 @@ class TestStudentSolutionListView(TestCase):
                                    'task_id': self.task.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.test = TaskTestFactory(task=self.task)
 
     def test_get_returns_404_when_user_is_not_student_in_course(self):
         teacher = Teacher.objects.create_from_user(user=self.user)

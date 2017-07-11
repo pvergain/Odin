@@ -37,7 +37,7 @@ class PublicViewContextMixin:
 
 
 class SubmitSolutionMixin:
-    template_name = 'education/add_solution.html'
+    template_name = 'education/submit_solution.html'
 
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
@@ -48,3 +48,10 @@ class SubmitSolutionMixin:
         task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
         create_solution(student=student, task=task, **form.cleaned_data)
         return super().form_valid(form)
+
+
+class TaskViewMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task'] = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        return context

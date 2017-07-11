@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('return_code', models.IntegerField(blank=True, null=True)),
                 ('file', models.FileField(blank=True, null=True, upload_to='solutions')),
                 ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solutions', to='education.Student')),
-                ('test', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solutions', to='education.Test')),
+                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solutions', to='education.IncludedTask')),
             ],
             options={
                 'abstract': False,

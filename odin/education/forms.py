@@ -97,9 +97,16 @@ class BinaryFileTestForm(forms.ModelForm):
 
 
 class SubmitGradableSolutionForm(forms.ModelForm):
+    def __init__(self, is_test_source=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if is_test_source:
+            self.fields['code'] = forms.CharField(widget=forms.Textarea)
+        else:
+            self.fields['file'] = forms.FileField()
+
     class Meta:
         model = Solution
-        fields = ('code', 'file')
+        fields = []
 
 
 class SubmitNotGradableSolutionForm(forms.ModelForm):

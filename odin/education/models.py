@@ -292,7 +292,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
         (SUBMITTED_WITHOUT_GRADING, 'submitted_without_grading'),
     )
 
-    test = models.ForeignKey(Test, related_name='solutions')
+    task = models.ForeignKey(IncludedTask, related_name='solutions')
     student = models.ForeignKey(Student, related_name='solutions')
     url = models.URLField(blank=True, null=True)
     code = models.TextField(blank=True, null=True)
