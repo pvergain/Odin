@@ -534,6 +534,7 @@ class TestAddSourceCodeTestToTaskView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id})
             )
+
             self.assertEqual(source_test_count + 1, IncludedTest.objects.filter(**filters).count())
             self.assertEqual(task_tests + 1, IncludedTest.objects.filter(task=self.included_task).count())
 

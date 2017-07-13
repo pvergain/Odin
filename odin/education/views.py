@@ -9,6 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.http import Http404
+from django.apps import apps
+from django.conf import settings
 
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
