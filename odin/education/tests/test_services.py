@@ -32,7 +32,8 @@ from ..factories import (
     TopicFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
-    StudentFactory
+    StudentFactory,
+    TaskFactory,
 )
 
 from odin.common.faker import faker
@@ -204,7 +205,10 @@ class TestCreateIncludedTask(TestCase):
 class TestCreateTestForTask(TestCase):
 
     def setUp(self):
-        self.included_task = IncludedTaskFactory()
+        self.task = TaskFactory()
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.included_task = IncludedTaskFactory(task=self.task, topic=self.topic)
         self.language = ProgrammingLanguageFactory()
 
     def test_create_test_for_task_raises_validation_error_when_no_resource_is_provided(self):
