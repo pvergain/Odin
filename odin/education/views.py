@@ -1,5 +1,3 @@
-import requests
-
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -9,12 +7,11 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.http import Http404
-from django.apps import apps
-from django.conf import settings
 
 from odin.management.permissions import DashboardManagementPermission
+from odin.grading.services import start_grader_communication
 
 from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
 from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
@@ -429,10 +426,9 @@ class SubmitGradableSolutionView(CourseViewMixin,
         student = self.request.user.student
         task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
         solution = create_solution(student=student, task=task, **form.cleaned_data)
-        settings.GRADER_SOLUTION_MODEL = apps.get_model('education.Solution')
 
-        url = self.request.build_absolute_uri(reverse('grading:grade-solution'))
-        requests.post(url, data={'solution_id': solution.id})
+        start_grader_communication(solution.id)
+
         return super().form_valid(form)
 
 

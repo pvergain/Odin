@@ -2,6 +2,7 @@ from typing import Dict, BinaryIO
 
 from .models import GraderBinaryProblem, GraderPlainProblem
 from .validators import create_problem_service_validation
+from .tasks import submit_solution
 
 
 def create_plain_problem(*,
@@ -42,3 +43,7 @@ def create_binary_problem(*,
             test=test,
             extra_options=extra_options
         )
+
+
+def start_grader_communication(solution_id):
+    submit_solution.delay(solution_id)

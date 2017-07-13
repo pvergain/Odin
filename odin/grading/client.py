@@ -8,8 +8,6 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from .models import GraderRequest
-from .tasks import poll_solution as polling_task
-from .tasks import submit_solution as submitting_task
 
 
 class DjangoGraderClient:
@@ -63,11 +61,9 @@ class DjangoGraderClient:
         grader_request.nonce = nonce
         grader_request.save()
 
-    def submit_solution(self, solution):
-        submitting_task.delay(self, solution)
-
-    def submit_request_to_grader(self, solution):
-        url = self.settings.GRADER_ADDRESS + self.settings.GRADER_PATH
+    def submit_request_to_grader(self, solution_id, polling_task):
+        solution = self.solution_model.objects.get(id=solution_id)
+        url = self.settings.GRADER_ADDRESS + self.settings.GRADER_GRADE_PATH
         body = json.dumps(self.data)
         headers = self._generate_grader_headers(body, self.req_and_resource['POST'])
 
@@ -118,3 +114,6 @@ class DjangoGraderClient:
                 break
 
             time.sleep(self.settings.POLLING_SLEEP_TIME)
+
+    def __str__(self):
+        return self.data
