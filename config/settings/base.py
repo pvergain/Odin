@@ -36,6 +36,7 @@ LOCAL_APPS = [
     'odin.users.apps.UsersConfig',
     'odin.education.apps.EducationConfig',
     'odin.management.apps.ManagementConfig',
+    'odin.grading.apps.GradingConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

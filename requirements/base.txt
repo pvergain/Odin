@@ -49,3 +49,6 @@ celery==4.0.2
 
 # Email services
 mandrill==1.0.57
+
+# rest_framework
+djangorestframework-3.6.3
