@@ -1,3 +1,4 @@
+<<<<<<< 6161530b27843013485e39efdd8cfd0bb95c5c65
 
 import base64
 
@@ -5,11 +6,15 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 
 from odin.common.utils import json_field_default
+=======
+from django.db import models
+>>>>>>> Create app for grading
 
 
 class GraderRequest(models.Model):
     request_info = models.CharField(max_length=140)
     nonce = models.BigIntegerField(db_index=True)
+<<<<<<< 6161530b27843013485e39efdd8cfd0bb95c5c65
 
 
 class GraderPlainProblem(models.Model):
@@ -40,3 +45,5 @@ class GraderBinaryProblem(models.Model):
             encoded = base64.b64encode(f.read())
 
         return encoded.decode('ascii')
+=======
+>>>>>>> Create app for grading
