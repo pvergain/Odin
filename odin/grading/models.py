@@ -28,14 +28,14 @@ class GraderBinaryProblem(models.Model):
     test = models.FileField(upload_to="solutions", null=True, blank=True)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
 
-    def read_binary_file():
-        with open(code.file.path, 'rb') as f:
+    def read_binary_file(self):
+        with open(self.code.file.path, 'rb') as f:
             encoded = base64.b64encode(f.read())
 
         return encoded.decode('ascii')
 
-    def read_binary_test():
-        with open(test.file.path, 'rb') as f:
+    def read_binary_test(self):
+        with open(self.test.file.path, 'rb') as f:
             encoded = base64.b64encode(f.read())
 
         return encoded.decode('ascii')

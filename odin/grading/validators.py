@@ -1,4 +1,5 @@
 from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 
 def validate_url(url):

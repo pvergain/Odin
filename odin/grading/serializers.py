@@ -2,8 +2,6 @@ from rest_framework import serializers
 
 from .models import GraderPlainProblem, GraderBinaryProblem
 
-from .validators import validate_github_url
-
 
 class GraderPlainProblemSerializer(serializers.ModelSerializer):
     class Meta:
