@@ -9,6 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.http import Http404
+from django.apps import apps
+from django.conf import settings
 
 from odin.management.permissions import DashboardManagementPermission
 
@@ -414,6 +416,10 @@ class SubmitGradableSolutionView(CourseViewMixin,
 
         form_kwargs['is_test_source'] = test.is_source()
         return form_kwargs
+
+    def form_valid(self, form):
+        settings.GRADER_SOLUTION_MODEL = apps.get_model('education.Solution')
+        return super().form_valid(form)
 
 
 class SubmitNotGradableSolutionView(CourseViewMixin,

@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+from django.apps import apps
 import environ
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
@@ -223,3 +224,5 @@ EMAIL_TEMPLATES = {
     key: f(default='')
     for key, f in templates.items()
 }
+
+GRADER_SOLUTION_MODEL = ''
