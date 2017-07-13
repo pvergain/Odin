@@ -51,4 +51,4 @@ celery==4.0.2
 mandrill==1.0.57
 
 # rest_framework
-djangorestframework-3.6.3
+djangorestframework==3.6.3
