@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^$', RedirectToDashboardIndexView.as_view()),
     url(r'^public/', include(courses_public_urlpatterns, namespace='public')),
     url(r'^auth/', include('odin.authentication.urls')),
+    url(r'^grading/', include('odin.grading.urls', namespace='grading')),
     url(r'^dashboard/', include('odin.dashboard.urls', namespace='dashboard')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

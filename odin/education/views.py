@@ -1,3 +1,5 @@
+import requests
+
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -7,7 +9,7 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.http import Http404
 from django.apps import apps
 from django.conf import settings
@@ -28,7 +30,13 @@ from .forms import (
     SubmitGradableSolutionForm,
     SubmitNotGradableSolutionForm,
 )
-from .services import create_topic, create_included_material, create_included_task, create_test_for_task
+from .services import (
+    create_topic,
+    create_included_material,
+    create_included_task,
+    create_test_for_task,
+    create_solution
+)
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -418,7 +426,13 @@ class SubmitGradableSolutionView(CourseViewMixin,
         return form_kwargs
 
     def form_valid(self, form):
+        student = self.request.user.student
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        solution = create_solution(student=student, task=task, **form.cleaned_data)
         settings.GRADER_SOLUTION_MODEL = apps.get_model('education.Solution')
+
+        url = self.request.build_absolute_uri(reverse('grading:grade-solution'))
+        requests.post(url, data={'solution_id': solution.id})
         return super().form_valid(form)
 
 
@@ -429,3 +443,9 @@ class SubmitNotGradableSolutionView(CourseViewMixin,
                                     IsStudentOrTeacherInCoursePermission,
                                     FormView):
     form_class = SubmitNotGradableSolutionForm
+
+    def form_valid(self, form):
+        student = self.request.user.student
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        create_solution(student=student, task=task, **form.cleaned_data)
+        return super().form_valid(form)

@@ -1,10 +1,7 @@
-from .models import Course
+from .models import Course, IncludedTask
 
-from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-
-from .services import create_solution
-from .models import IncludedTask
+from django.urls import reverse_lazy
 
 
 class CourseViewMixin:
@@ -42,12 +39,6 @@ class SubmitSolutionMixin:
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course.id})
-
-    def form_valid(self, form):
-        student = self.request.user.student
-        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
-        create_solution(student=student, task=task, **form.cleaned_data)
-        return super().form_valid(form)
 
 
 class TaskViewMixin:
