@@ -1,20 +1,31 @@
-from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 
 
-def validate_url(url):
-    validator = URLValidator()
-    try:
-        validator(url)
-    except ValidationError:
-        raise ValidationError(f'{url} is not a valid url.')
+GRADER_SUPPORTED_LANGUAGES = [
+    'python',
+    'ruby',
+    'java',
+    'javascript'
+]
+
+GRADER_SUPPORTED_FILE_TYPES = [
+    'plain',
+    'binary'
+]
 
 
-def validate_github_url(url):
-    validate_url(url)
+def create_problem_service_validation(*,
+                                      language: str="",
+                                      test_type: str="unittest",
+                                      file_type: str="plain") -> bool:
 
-    github_domain = "github.com"
-    split_url = url.split('/')
+    if language not in GRADER_SUPPORTED_LANGUAGES:
+        raise ValidationError("Programming language not supported")
 
-    if github_domain not in split_url:
-        raise ValidationError(f'{url} is not a valid url.')
+    if test_type != 'unittest':
+        raise ValidationError('Test type not supported')
+
+    if file_type not in GRADER_SUPPORTED_FILE_TYPES:
+        raise ValidationError("File type is not supported")
+
+    return True

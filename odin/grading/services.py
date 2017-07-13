@@ -1,6 +1,7 @@
 from typing import Dict, BinaryIO
 
 from .models import GraderBinaryProblem, GraderPlainProblem
+from .validators import create_problem_service_validation
 
 
 def create_plain_problem(*,
@@ -10,14 +11,17 @@ def create_plain_problem(*,
                          code: str=None,
                          test: str=None,
                          extra_options: Dict={}) -> GraderPlainProblem:
-    return GraderPlainProblem.objects.create(
-        language=language,
-        test_type=test_type,
-        file_type=file_type,
-        code=code,
-        test=test,
-        extra_options=extra_options
-    )
+    if create_problem_service_validation(language=language,
+                                         test_type=test_type,
+                                         file_type=file_type):
+        return GraderPlainProblem.objects.create(
+            language=language,
+            test_type=test_type,
+            file_type=file_type,
+            code=code,
+            test=test,
+            extra_options=extra_options
+        )
 
 
 def create_binary_problem(*,
@@ -27,11 +31,14 @@ def create_binary_problem(*,
                           code: BinaryIO=None,
                           test: BinaryIO=None,
                           extra_options: Dict={}) -> GraderBinaryProblem:
-    return GraderBinaryProblem.objects.create(
-        language=language,
-        test_type=test_type,
-        file_type=file_type,
-        code=code,
-        test=test,
-        extra_options=extra_options
-    )
+    if create_problem_service_validation(language=language,
+                                         test_type=test_type,
+                                         file_type=file_type):
+        return GraderBinaryProblem.objects.create(
+            language=language,
+            test_type=test_type,
+            file_type=file_type,
+            code=code,
+            test=test,
+            extra_options=extra_options
+        )
