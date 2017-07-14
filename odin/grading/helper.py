@@ -5,7 +5,6 @@ from . import services
 def get_grader_ready_data(solution_id, solution_model):
     solution = solution_model.objects.get(id=solution_id)
     test = solution.task.test
-
     if solution.code:
         file_type = 'plain'
         test_resource = test.sourcecodetest.code
