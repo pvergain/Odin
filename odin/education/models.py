@@ -307,6 +307,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     url = models.URLField(blank=True, null=True)
     code = models.TextField(blank=True, null=True)
     check_status_location = models.CharField(max_length=128, null=True, blank=True)
+    build_id = models.IntegerField(blank=True, null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
     test_output = models.TextField(blank=True, null=True)
     return_code = models.IntegerField(blank=True, null=True)

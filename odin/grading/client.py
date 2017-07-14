@@ -75,7 +75,7 @@ class DjangoGraderClient:
             solution.check_status_location = response.headers['Location']
             solution.save()
 
-            polling_task.delay(self, solution.id)
+            polling_task.delay(solution.id)
         else:
             raise Exception(response.text)
 

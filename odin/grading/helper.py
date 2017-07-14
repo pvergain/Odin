@@ -14,7 +14,7 @@ def get_grader_ready_data(solution_id, solution_model):
         'language': test.language.name,
         'test_type': 'unittest',
         'file_type': file_type,
-        'test': test,
+        'test': test.sourcecodetest.code,
         'extra_options': test.extra_options
     }
 
