@@ -3,18 +3,19 @@ from . import services
 
 
 def get_grader_ready_data(solution_id, solution_model):
-    print(solution_model)
     solution = solution_model.objects.get(id=solution_id)
+    test = solution.task.test
     if solution.code:
         file_type = 'plain'
+        test_resource = test.sourcecodetest.code
     if solution.file:
         file_type = 'binary'
-    test = solution.task.test
+        test_resource = test.binaryfiletest.file
     data = {
         'language': test.language.name,
         'test_type': 'unittest',
         'file_type': file_type,
-        'test': test.sourcecodetest.code,
+        'test': test_resource,
         'extra_options': test.extra_options
     }
 
