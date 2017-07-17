@@ -66,7 +66,7 @@ class IncludedTaskModelForm(forms.ModelForm):
         model = IncludedTask
         fields = ('name', 'description', 'gradable')
         widgets = {
-            'gradable': forms.RadioSelect(choices=[(True, "is gradable"), (False, "is not gradable")])
+            'gradable': forms.CheckboxInput()
         }
 
 
