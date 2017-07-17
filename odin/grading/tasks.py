@@ -20,6 +20,8 @@ def poll_solution(self, solution_id):
 
 @shared_task(bind=True)
 def submit_solution(self, solution_id):
+    import ipdb
+    ipdb.set_trace()
     solution_model = apps.get_model(settings.GRADER_SOLUTION_MODEL)
     grader_ready_data = get_grader_ready_data(solution_id, solution_model)
     grader_client = DjangoGraderClient(solution_model=solution_model,

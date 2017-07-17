@@ -1,10 +1,11 @@
-from unittest import skip
+from unittest.mock import patch
 
 from test_plus import TestCase
 
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -643,8 +644,10 @@ class TestSubmitGradableSolutionView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    @skip("Don't want to test")
-    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(self):
+    @patch('odin.grading.tasks.submit_solution.delay')
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(
+        self, mock_submit_solution
+    ):
         SourceCodeTestFactory(task=self.task)
         student = Student.objects.create_from_user(user=self.user)
         add_student(self.course, student)
@@ -659,9 +662,15 @@ class TestSubmitGradableSolutionView(TestCase):
             )
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+            self.assertEqual(mock_submit_solution.called, True)
+            solution_id = mock_submit_solution.call_args[0][0]
+            solution = get_object_or_404(Solution, id=solution_id)
+            self.assertEqual(4, solution.status)
 
-    @skip("Dont want to test")
-    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(self):
+    @patch('odin.grading.tasks.submit_solution.delay')
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(
+        self, mock_submit_solution
+    ):
         BinaryFileTestFactory(task=self.task)
         student = Student.objects.create_from_user(user=self.user)
         add_student(self.course, student)
@@ -677,6 +686,10 @@ class TestSubmitGradableSolutionView(TestCase):
             )
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+            self.assertEqual(mock_submit_solution.called, True)
+            solution_id = mock_submit_solution.call_args[0][0]
+            solution = get_object_or_404(Solution, id=solution_id)
+            self.assertEqual(4, solution.status)
 
 
 class TestSubmitNotGradableSolutionView(TestCase):
