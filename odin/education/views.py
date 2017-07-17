@@ -338,12 +338,13 @@ class AddSourceCodeTestToTaskView(CourseViewMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = {}
-        data['task'] = self.kwargs.get('task_id')
-        data['language'] = self.request.POST.get('language')
-        data['code'] = self.request.POST.get('code')
+        if self.request.method in ('POST', 'PUT'):
+            data = {}
+            data['task'] = self.kwargs.get('task_id')
+            data['language'] = self.request.POST.get('language')
+            data['code'] = self.request.POST.get('code')
 
-        form_kwargs['data'] = data
+            form_kwargs['data'] = data
         return form_kwargs
 
     def form_valid(self, form):
@@ -366,12 +367,13 @@ class AddBinaryFileTestToTaskView(CourseViewMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = {}
-        data['task'] = self.kwargs.get('task_id')
-        data['language'] = self.request.POST.get('language')
-        data['file'] = self.request.FILES.get('file')
+        if self.request.method in ('POST', 'PUT'):
+            data = {}
+            data['task'] = self.kwargs.get('task_id')
+            data['language'] = self.request.POST.get('language')
+            data['file'] = self.request.FILES.get('file')
 
-        form_kwargs['data'] = data
+            form_kwargs['data'] = data
         return form_kwargs
 
     def form_valid(self, form):
@@ -404,10 +406,11 @@ class SubmitGradableSolutionView(CourseViewMixin,
     form_class = SubmitGradableSolutionForm
 
     def get_form_kwargs(self):
+
         form_kwargs = super().get_form_kwargs()
 
         task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
-        test = task.tests.first()
+        test = task.test
 
         form_kwargs['is_test_source'] = test.is_source()
         return form_kwargs

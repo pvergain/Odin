@@ -6,8 +6,7 @@ from .models import (
     IncludedMaterial,
     Week,
     IncludedTask,
-    SourceCodeTest,
-    BinaryFileTest,
+    IncludedTest,
     Solution
 )
 
@@ -86,13 +85,13 @@ class IncludedTaskFromExistingForm(forms.ModelForm):
 
 class SourceCodeTestForm(forms.ModelForm):
     class Meta:
-        model = SourceCodeTest
+        model = IncludedTest
         fields = ('language', 'task', 'code')
 
 
 class BinaryFileTestForm(forms.ModelForm):
     class Meta:
-        model = BinaryFileTest
+        model = IncludedTest
         fields = ('language', 'task', 'file')
 
 

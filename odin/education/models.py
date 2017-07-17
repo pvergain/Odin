@@ -238,39 +238,38 @@ class IncludedTask(BaseTask, models.Model):
                               related_name='tasks')
 
 
-class Test(models.Model):
-    task = models.ForeignKey(IncludedTask, related_name='tests')
+class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     language = models.ForeignKey(ProgrammingLanguage)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
+    code = models.TextField(blank=True, null=True)
+    file = models.FileField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.task}/{self.language}"
+    class Meta:
+        abstract = True
 
-    def is_binary(self):
-        if hasattr(self, 'binaryfiletest'):
-            return True
 
-        return False
+class Test(BaseTest, models.Model):
+    pass
+
+
+class IncludedTest(BaseTest, models.Model):
+    task = models.OneToOneField(IncludedTask,
+                                on_delete=models.CASCADE,
+                                related_name='test')
+    test = models.ForeignKey(Test,
+                             on_delete=models.CASCADE,
+                             related_name='included_tests')
 
     def is_source(self):
-        if hasattr(self, 'sourcecodetest'):
-            return True
+        return getattr(self, 'code', None) is not None
 
-        return False
+    def is_binary(self):
+        return getattr(self, 'file', None) is not None
 
     def test_mode(self):
-        if self.is_binary():
-            return "binary"
-
-        return "source"
-
-
-class SourceCodeTest(Test):
-    code = models.TextField(blank=True, null=True)
-
-
-class BinaryFileTest(Test):
-    file = models.FileField(upload_to="tests")
+        if self.is_binary:
+            return 'binary'
+        return 'plain'
 
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):

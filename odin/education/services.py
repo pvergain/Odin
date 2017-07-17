@@ -15,10 +15,9 @@ from .models import (
     IncludedTask,
     Task,
     ProgrammingLanguage,
-    SourceCodeTest,
-    BinaryFileTest,
-    Test,
     Solution,
+    Test,
+    IncludedTest
 )
 
 
@@ -128,22 +127,28 @@ def create_included_task(*,
 
 
 def create_test_for_task(*,
+                         existing_test: Test=None,
                          task: IncludedTask,
                          language: ProgrammingLanguage,
                          extra_options: Dict={},
                          code: str=None,
                          file: BinaryIO=None):
 
-    base_test = Test.objects.create(task=task, language=language, extra_options=extra_options)
-
-    if file is None and code is not None:
-        new_test = SourceCodeTest(code=code)
-    elif code is None and file is not None:
-        new_test = BinaryFileTest(file=file)
-    else:
+    if code is None and file is None:
         raise ValidationError("A binary file or source code must be provided!")
 
-    new_test.__dict__.update(base_test.__dict__)
+    if code is not None and file is not None:
+        raise ValidationError("Either a binary file or source code must be provided")
+
+    new_test = IncludedTest(task=task)
+    if existing_test is None:
+        existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
+        existing_test.full_clean()
+        existing_test.save()
+
+    new_test.__dict__.update(existing_test.__dict__)
+
+    new_test.test = existing_test
     new_test.full_clean()
     new_test.save()
 

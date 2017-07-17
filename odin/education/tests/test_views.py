@@ -2,6 +2,7 @@ from test_plus import TestCase
 
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import Q
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -26,9 +27,8 @@ from ..models import (
     Material,
     IncludedTask,
     Task,
-    SourceCodeTest,
-    BinaryFileTest,
     Solution,
+    IncludedTest
 )
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
@@ -511,22 +511,29 @@ class TestAddSourceCodeTestToTaskView(TestCase):
             self.assertEqual(200, response.status_code)
 
     def test_source_test_is_added_to_task_on_post(self):
+        filters = {
+            'code__isnull': False,
+            'file': ''
+        }
+
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
-        source_test_count = SourceCodeTest.objects.count()
-        task_tests = self.included_task.tests.count()
+        source_test_count = IncludedTest.objects.filter(**filters).count()
+        task_tests = IncludedTest.objects.filter(task=self.included_task).count()
+
         data = {
             'language': self.language.id,
             'code': faker.text()
         }
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
             self.assertRedirects(response, expected_url=reverse(
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id})
             )
-            self.assertEqual(source_test_count + 1, SourceCodeTest.objects.count())
-            self.assertEqual(task_tests + 1, self.included_task.tests.count())
+            self.assertEqual(source_test_count + 1, IncludedTest.objects.filter(**filters).count())
+            self.assertEqual(task_tests + 1, IncludedTest.objects.filter(task=self.included_task).count())
 
 
 class TestAddBinaryFileTestToTaskView(TestCase):
@@ -558,10 +565,14 @@ class TestAddBinaryFileTestToTaskView(TestCase):
             self.assertEqual(200, response.status_code)
 
     def test_binary_test_is_added_to_task_on_post(self):
+        filters = {
+            'code__isnull': True,
+        }
+
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
-        binary_test_count = BinaryFileTest.objects.count()
-        task_tests = self.included_task.tests.count()
+        binary_test_count = IncludedTest.objects.filter(**filters).count()
+        task_tests = IncludedTest.objects.filter(task=self.included_task).count()
         file = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
         data = {
             'language': self.language.id,
@@ -573,8 +584,8 @@ class TestAddBinaryFileTestToTaskView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id})
             )
-            self.assertEqual(binary_test_count + 1, BinaryFileTest.objects.count())
-            self.assertEqual(task_tests + 1, self.included_task.tests.count())
+            self.assertEqual(binary_test_count + 1, IncludedTest.objects.filter(~Q(file=''), **filters).count())
+            self.assertEqual(task_tests + 1, IncludedTest.objects.filter(task=self.included_task).count())
 
 
 class TestStudentSolutionListView(TestCase):

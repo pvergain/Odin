@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import Q
 
 from ..services import (
     create_course,
@@ -22,9 +23,8 @@ from ..models import (
     IncludedMaterial,
     Task,
     IncludedTask,
-    SourceCodeTest,
-    BinaryFileTest,
-    Solution
+    Solution,
+    IncludedTest
 )
 from ..factories import (
     CourseFactory,
@@ -220,22 +220,31 @@ class TestCreateTestForTask(TestCase):
                                  file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
     def test_create_test_for_task_creates_source_code_test_when_code_is_provided(self):
-        current_source_code_test_count = SourceCodeTest.objects.count()
+        filters = {
+            'code__isnull': False,
+            'file': ''
+        }
+
+        current_source_code_test_count = IncludedTest.objects.filter(**filters).count()
 
         create_test_for_task(task=self.included_task,
                              language=self.language,
                              code=faker.text())
 
-        self.assertEqual(current_source_code_test_count + 1, SourceCodeTest.objects.count())
+        self.assertEqual(current_source_code_test_count + 1, IncludedTest.objects.filter(**filters).count())
 
     def test_create_test_for_task_creates_binary_file_test_when_code_is_provided(self):
-        current_binary_file_test_count = BinaryFileTest.objects.count()
+        filters = {
+            'code__isnull': True,
+        }
+
+        current_binary_file_test_count = IncludedTest.objects.filter(~Q(file=''), **filters).count()
 
         create_test_for_task(task=self.included_task,
                              language=self.language,
                              file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
-        self.assertEqual(current_binary_file_test_count + 1, BinaryFileTest.objects.count())
+        self.assertEqual(current_binary_file_test_count + 1, IncludedTest.objects.filter(**filters).count())
 
 
 class TestCreateSolution(TestCase):

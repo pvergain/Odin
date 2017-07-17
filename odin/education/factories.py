@@ -116,7 +116,6 @@ class ProgrammingLanguageFactory(factory.DjangoModelFactory):
 
 
 class TaskTestFactory(factory.DjangoModelFactory):
-    task = factory.SubFactory(IncludedTaskFactory)
     language = factory.SubFactory(ProgrammingLanguageFactory)
 
     class Meta:

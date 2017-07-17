@@ -9,6 +9,14 @@
   <div class="row">
     <form class="col-md-6" action="" method="post" enctype="multipart/form-data">
       {% csrf_token %}
+
+      {% if form.errors %}
+      {% for error_key, error_value  in form.errors.items %}
+        <div class="alert alert-warning">
+          <span>{{ error_value }}</span>
+        </div>
+      {% endfor %}
+      {% endif %}
       <div class="form-group">
         {{ form.language.label }}
         {% render_field form.language class="form-control form-control-solid" %}
