@@ -163,14 +163,14 @@ def create_gradable_solution(*,
         raise ValidationError("Provide either code or a file, not both!")
     if code is None and file is None:
         raise ValidationError("Provide either code or a file!")
-    if code is not None and file is None:
+    if code is not None:
         new_solution = Solution.objects.create(
             task=task,
             student=student,
             code=code,
             status=6
         )
-    if code is None and file is not None:
+    if file is not None:
         new_solution = Solution.objects.create(
             task=task,
             student=student,
