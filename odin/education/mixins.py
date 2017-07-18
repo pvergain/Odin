@@ -2,6 +2,7 @@ from .models import Course
 
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 from .services import create_solution
 from .models import IncludedTask
@@ -18,6 +19,8 @@ class CourseViewMixin:
             'topics__materials'
         )
         self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch).first()
+        if self.course is None:
+            return Http404
 
         return super().dispatch(request, *args, **kwargs)
 

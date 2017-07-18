@@ -282,8 +282,7 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class EditTaskView(CourseViewMixin,
-                   LoginRequiredMixin,
+class EditTaskView(LoginRequiredMixin,
                    DashboardManagementPermission,
                    UpdateView):
 
