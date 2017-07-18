@@ -19,9 +19,7 @@ eval "$(pyenv virtualenv-init -)"
 ```
 * Do `pyenv install 3.6.1`
 
-* Create virtualenv with pyenv: `pyenv virtualenv -p python3.6 odin`
-
-* Source into your venv: `pyenv activate odin`
+* Create virtualenv with python3.6.1: `virtualenv -p ~/.pyenv/versions/3.6.1/bin/python3 odin`
 
 ### Install requirements
 
