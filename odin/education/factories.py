@@ -75,7 +75,7 @@ class TopicFactory(factory.DjangoModelFactory):
 
 class MaterialFactory(factory.DjangoModelFactory):
     identifier = factory.Sequence(lambda n: f'{n}{faker.word()}')
-    url = factory.LazyAttribute(lambda _: faker.url())
+    url = factory.Sequence(lambda n: f'{faker.url()}{n}')
     content = factory.LazyAttribute(lambda _: faker.text())
 
     class Meta:
