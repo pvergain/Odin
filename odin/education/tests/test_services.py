@@ -204,7 +204,8 @@ class TestCreateIncludedTask(TestCase):
 class TestCreateTestForTask(TestCase):
 
     def setUp(self):
-        self.included_task = IncludedTaskFactory()
+        self.topic = TopicFactory()
+        self.included_task = IncludedTaskFactory(topic=self.topic)
         self.language = ProgrammingLanguageFactory()
 
     def test_create_test_for_task_raises_validation_error_when_no_resource_is_provided(self):
@@ -249,7 +250,8 @@ class TestCreateTestForTask(TestCase):
 
 class TestCreateSolution(TestCase):
     def setUp(self):
-        self.task = IncludedTaskFactory(gradable=True)
+        self.topic = TopicFactory()
+        self.task = IncludedTaskFactory(topic=self.topic, gradable=True)
         self.student = StudentFactory()
 
     def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_gradable_task(self):

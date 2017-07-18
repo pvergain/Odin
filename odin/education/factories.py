@@ -5,7 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from odin.education.services import create_test_for_task
+from odin.education.services import create_test_for_task, create_included_task
 
 
 from .models import (
@@ -17,7 +17,6 @@ from .models import (
     Material,
     IncludedMaterial,
     Task,
-    IncludedTask,
     ProgrammingLanguage,
     Test
 )
@@ -35,7 +34,7 @@ class TeacherFactory(BaseUserFactory):
 
 
 class CourseFactory(factory.DjangoModelFactory):
-    name = factory.LazyAttribute(lambda _: faker.word())
+    name = factory.Sequence(lambda n: f'{n}{faker.word()}')
     start_date = factory.LazyAttribute(lambda _: faker.date_object())
     end_date = factory.LazyAttribute(lambda _: faker.date_object())
 
@@ -75,7 +74,7 @@ class TopicFactory(factory.DjangoModelFactory):
 
 
 class MaterialFactory(factory.DjangoModelFactory):
-    identifier = factory.LazyAttribute(lambda _: faker.word())
+    identifier = factory.Sequence(lambda n: f'{n}{faker.word()}')
     url = factory.LazyAttribute(lambda _: faker.url())
     content = factory.LazyAttribute(lambda _: faker.text())
 
@@ -92,7 +91,7 @@ class IncludedMaterialFactory(factory.DjangoModelFactory):
 
 
 class TaskFactory(factory.DjangoModelFactory):
-    name = factory.LazyAttribute(lambda _: faker.word())
+    name = factory.Sequence(lambda n: f'{n}{faker.word()}')
     description = factory.LazyAttribute(lambda _: faker.text())
     gradable = factory.LazyAttribute(lambda _: faker.boolean())
 
@@ -100,12 +99,10 @@ class TaskFactory(factory.DjangoModelFactory):
         model = Task
 
 
-class IncludedTaskFactory(factory.DjangoModelFactory):
-    task = factory.SubFactory(TaskFactory)
-    topic = factory.SubFactory(TopicFactory)
-
-    class Meta:
-        model = IncludedTask
+class IncludedTaskFactory(TaskFactory):
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        return create_included_task(*args, **kwargs)
 
 
 class ProgrammingLanguageFactory(factory.DjangoModelFactory):
