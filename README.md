@@ -32,6 +32,14 @@ pip install -r requirements/test.txt
 2. Create a shell script as utility/bootstrap.sh.sample with your username
 3. Run bootstrap.sh
 
+### Install JS requirements
+
+```
+cd ui
+
+bower install
+```
+
 ## Tests
 
 To run tests:
