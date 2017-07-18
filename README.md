@@ -40,6 +40,10 @@ cd ui
 bower install
 ```
 
+## Celery
+
+* Run celery with the following command `celery -A odin worker -l info`
+
 ## Tests
 
 To run tests:
