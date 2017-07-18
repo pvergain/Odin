@@ -6,7 +6,24 @@ Odin is the new Loki. LMS for HackSoft Academy
 [![Build Status](https://travis-ci.org/HackSoftware/Odin.svg?branch=master)](https://travis-ci.org/HackSoftware/Odin)
 
 ## Setup
-Virtual environment with python 3.6.1
+
+### Virtual environment with python 3.6.1
+
+* Install from here https://github.com/pyenv/pyenv-installer
+
+* Export:
+```
+export PATH="/path.to.user/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
+* Do `pyenv install 3.6.1`
+
+* Create virtualenv with pyenv: `pyenv virtualenv -p python3.6 odin`
+
+* Source into your venv: `pyenv activate odin`
+
+### Install requirements
 
 ```bash
 pip install -r requirements/local.txt
