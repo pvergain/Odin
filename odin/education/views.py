@@ -24,7 +24,7 @@ from .forms import (
     SourceCodeTestForm,
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
-    SubmitNotGradableSolutionForm,
+    SubmitNonGradableSolutionForm,
 )
 from .services import create_topic, create_included_material, create_included_task, create_test_for_task
 
@@ -416,10 +416,10 @@ class SubmitGradableSolutionView(CourseViewMixin,
         return form_kwargs
 
 
-class SubmitNotGradableSolutionView(CourseViewMixin,
+class SubmitNonGradableSolutionView(CourseViewMixin,
                                     TaskViewMixin,
                                     SubmitSolutionMixin,
                                     LoginRequiredMixin,
                                     IsStudentOrTeacherInCoursePermission,
                                     FormView):
-    form_class = SubmitNotGradableSolutionForm
+    form_class = SubmitNonGradableSolutionForm
