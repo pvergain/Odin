@@ -257,7 +257,6 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
                             kwargs={'course_id': self.course.id})
 
     def get_context_data(self, *args, **kwargs):
-
         context = super().get_context_data(*args, **kwargs)
 
         context['task_list'] = Task.objects.all()
