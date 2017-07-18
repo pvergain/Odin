@@ -26,7 +26,14 @@ from .forms import (
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
 )
-from .services import create_topic, create_included_material, create_included_task, create_test_for_task
+from .services import (
+    create_topic,
+    create_included_material,
+    create_included_task,
+    create_test_for_task,
+    create_gradable_solution,
+    create_non_gradable_solution
+)
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -413,6 +420,12 @@ class SubmitGradableSolutionView(CourseViewMixin,
         form_kwargs['is_test_source'] = test.is_source()
         return form_kwargs
 
+    def form_valid(self, form):
+        student = self.request.user.student
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        create_gradable_solution(student=student, task=task, **form.cleaned_data)
+        return super().form_valid(form)
+
 
 class SubmitNonGradableSolutionView(CourseViewMixin,
                                     TaskViewMixin,
@@ -421,3 +434,9 @@ class SubmitNonGradableSolutionView(CourseViewMixin,
                                     IsStudentOrTeacherInCoursePermission,
                                     FormView):
     form_class = SubmitNonGradableSolutionForm
+
+    def form_valid(self, form):
+        student = self.request.user.student
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        create_non_gradable_solution(student=student, task=task, **form.cleaned_data)
+        return super().form_valid(form)
