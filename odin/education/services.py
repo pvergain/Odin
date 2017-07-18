@@ -171,14 +171,14 @@ def create_solution(*,
                 task=task,
                 student=student,
                 code=code,
-                status=4
+                status=6
             )
         if code is None and file is not None:
             new_solution = Solution.objects.create(
                 task=task,
                 student=student,
                 file=file,
-                status=4
+                status=6
             )
     else:
         if url is None:
@@ -189,5 +189,48 @@ def create_solution(*,
             url=url,
             status=6
         )
+
+    return new_solution
+
+
+def create_gradable_solution(*,
+                             task: IncludedTask,
+                             student: Student,
+                             code: str=None,
+                             file: BinaryIO=None) -> Solution:
+    if code is not None and file is not None:
+        raise ValidationError("Provide either code or a file, not both!")
+    if code is None and file is None:
+        raise ValidationError("Provide either code or a file!")
+    if code is not None and file is None:
+        new_solution = Solution.objects.create(
+            task=task,
+            student=student,
+            code=code,
+            status=6
+        )
+    if code is None and file is not None:
+        new_solution = Solution.objects.create(
+            task=task,
+            student=student,
+            file=file,
+            status=6
+        )
+
+    return new_solution
+
+
+def create_non_gradable_solution(*,
+                                 task: IncludedTask,
+                                 student: Student,
+                                 url: str=None) -> Solution:
+    if url is None:
+            raise ValidationError("Provide a url!")
+    new_solution = Solution.objects.create(
+        task=task,
+        student=student,
+        url=url,
+        status=6
+    )
 
     return new_solution
