@@ -280,10 +280,9 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         return form_kwargs
 
     def form_valid(self, form):
-        data = {}
-        data['existing_task'] = form.cleaned_data.get('task')
-        data['topic'] = form.cleaned_data.get('topic')
-        create_included_task(**data)
+        existing_task = form.cleaned_data.get('task')
+        topic = form.cleaned_data.get('topic')
+        create_included_task(existing_task=existing_task, topic=topic)
 
         return super().form_valid(form)
 
