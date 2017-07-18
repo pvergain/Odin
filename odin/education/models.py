@@ -271,6 +271,17 @@ class IncludedTest(BaseTest, models.Model):
             return 'binary'
         return 'plain'
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.code is None and str(self.file) is '':
+            raise ValidationError("A binary file or source code must be provided!")
+
+        if self.code is not None and str(self.file) is not '':
+            raise ValidationError("Either a binary file or source code must be provided")
+
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     PENDING = 0

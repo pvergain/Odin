@@ -134,12 +134,6 @@ def create_test_for_task(*,
                          code: str=None,
                          file: BinaryIO=None):
 
-    if code is None and file is None:
-        raise ValidationError("A binary file or source code must be provided!")
-
-    if code is not None and file is not None:
-        raise ValidationError("Either a binary file or source code must be provided")
-
     new_test = IncludedTest(task=task)
     if existing_test is None:
         existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
@@ -149,7 +143,6 @@ def create_test_for_task(*,
     new_test.__dict__.update(existing_test.__dict__)
 
     new_test.test = existing_test
-    new_test.full_clean()
     new_test.save()
 
     return new_test
