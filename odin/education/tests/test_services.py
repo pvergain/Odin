@@ -174,13 +174,6 @@ class TestCreateIncludedTask(TestCase):
                                         description=faker.text(),
                                         gradable=faker.boolean())
 
-    def test_create_included_task_raises_validation_error_if_task_already_exists(self):
-        with self.assertRaises(ValidationError):
-            create_included_task(name=self.task.name,
-                                 description=self.task.description,
-                                 gradable=self.task.gradable,
-                                 topic=self.topic)
-
     def test_create_included_task_creates_only_included_task_when_existing_is_provided(self):
         current_task_count = Task.objects.count()
         current_included_task_count = IncludedTask.objects.count()
