@@ -242,32 +242,25 @@ class TestCreateTestForTask(TestCase):
         self.assertEqual(current_binary_file_test_count + 1, IncludedTest.objects.filter(**filters).count())
 
 
-class TestCreateSolution(TestCase):
+class TestCreateGradableSolution(TestCase):
     def setUp(self):
         self.topic = TopicFactory()
         self.task = IncludedTaskFactory(topic=self.topic, gradable=True)
         self.student = StudentFactory()
 
-    def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_gradable_task(self):
+    def test_create_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
         with self.assertRaises(ValidationError):
             create_gradable_solution(student=self.student,
                                      task=self.task)
 
-    def test_create_solution_raises_validation_error_when_both_resources_are_provided_for_gradable_task(self):
+    def test_create_gradable_solution_raises_validation_error_when_both_resources_are_provided(self):
         with self.assertRaises(ValidationError):
             create_gradable_solution(student=self.student,
                                      task=self.task,
                                      code=faker.text(),
                                      file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
-    def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_not_gradable_task(self):
-        self.task.gradable = False
-        self.task.save()
-        with self.assertRaises(ValidationError):
-            create_non_gradable_solution(student=self.student,
-                                         task=self.task)
-
-    def test_create_solution_creates_solution_with_code_when_code_is_provided_for_gradable_solution(self):
+    def test_create_gradable_solution_creates_solution_with_code_when_code_is_provided(self):
         current_solution_count = Solution.objects.count()
 
         solution = create_gradable_solution(task=self.task,
@@ -279,7 +272,7 @@ class TestCreateSolution(TestCase):
         self.assertIsNone(solution.file.name)
         self.assertIsNone(solution.url)
 
-    def test_create_solution_creates_solution_with_file_when_file_is_provided_for_gradable_solution(self):
+    def test_create_gradable_solution_creates_solution_with_file_when_file_is_provided(self):
         current_solution_count = Solution.objects.count()
 
         solution = create_gradable_solution(task=self.task,
@@ -292,7 +285,19 @@ class TestCreateSolution(TestCase):
         self.assertIsNone(solution.code)
         self.assertIsNone(solution.url)
 
-    def test_create_solution_creates_solution_with_url_when_url_is_provided_for_not_gradable_solution(self):
+
+class TestCreateNonGradableSolution(TestCase):
+    def setUp(self):
+        self.topic = TopicFactory()
+        self.task = IncludedTaskFactory(topic=self.topic, gradable=False)
+        self.student = StudentFactory()
+
+    def test_create_non_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
+        with self.assertRaises(ValidationError):
+            create_non_gradable_solution(student=self.student,
+                                         task=self.task)
+
+    def test_create_non_gradable_solution_creates_non_gradable_solution_with_url_when_url_is_provided(self):
         self.task.gradable = False
         self.task.save()
         current_solution_count = Solution.objects.count()
