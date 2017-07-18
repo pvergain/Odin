@@ -599,13 +599,13 @@ class TestStudentSolutionListView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
 
-    def test_get_returns_404_when_user_is_not_student_in_course(self):
+    def test_get_returns_403_when_user_is_not_student_in_course(self):
         teacher = Teacher.objects.create_from_user(user=self.user)
         add_teacher(self.course, teacher)
 
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
-            self.response_404(response=response)
+            self.response_403(response=response)
 
     def test_get_returns_200_when_user_is_student_in_course(self):
         student = Student.objects.create_from_user(user=self.user)
