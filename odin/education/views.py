@@ -337,7 +337,7 @@ class EditIncludedTaskView(CourseViewMixin,
         return form_kwargs
 
     def get_initial(self):
-        instance = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        instance = self.get_object()
         self.initial = super().get_initial()
         self.initial['topic'] = instance.topic.id
         return self.initial
