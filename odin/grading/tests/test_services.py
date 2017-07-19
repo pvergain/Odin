@@ -22,7 +22,7 @@ class TestCreatePlainProblem(TestCase):
             create_plain_problem(language='',
                                  test_type=self.test_type,
                                  file_type=self.file_type,
-                                 code=self.code,
+                                 solution=self.code,
                                  test=self.test)
 
     def test_create_plain_problem_raises_validation_error_when_test_type_not_in_supported_test_types(self):
@@ -30,7 +30,7 @@ class TestCreatePlainProblem(TestCase):
             create_plain_problem(language=self.language,
                                  test_type='',
                                  file_type=self.file_type,
-                                 code=self.code,
+                                 solution=self.code,
                                  test=self.test)
 
     def test_create_plain_problem_raises_validation_error_when_file_type_not_in_supported_file_types(self):
@@ -38,7 +38,7 @@ class TestCreatePlainProblem(TestCase):
             create_plain_problem(language=self.language,
                                  test_type=self.test_type,
                                  file_type='',
-                                 code=self.code,
+                                 solution=self.code,
                                  test=self.test)
 
     def test_create_plain_problem_creates_plain_problem_when_data_is_valid(self):
@@ -47,7 +47,7 @@ class TestCreatePlainProblem(TestCase):
         create_plain_problem(language=self.language,
                              test_type=self.test_type,
                              file_type=self.file_type,
-                             code=self.code,
+                             solution=self.code,
                              test=self.test)
 
         self.assertEqual(current_count + 1, GraderPlainProblem.objects.count())
@@ -66,7 +66,7 @@ class TestCreateBinaryProblem(TestCase):
             create_binary_problem(language='',
                                   test_type=self.test_type,
                                   file_type=self.file_type,
-                                  code=self.code,
+                                  solution=self.code,
                                   test=self.test)
 
     def test_create_binary_problem_raises_validation_error_when_test_type_not_in_supported_test_types(self):
@@ -74,7 +74,7 @@ class TestCreateBinaryProblem(TestCase):
             create_binary_problem(language=self.language,
                                   test_type='',
                                   file_type=self.file_type,
-                                  code=self.code,
+                                  solution=self.code,
                                   test=self.test)
 
     def test_create_binary_problem_raises_validation_error_when_file_type_not_in_supported_file_types(self):
@@ -82,7 +82,7 @@ class TestCreateBinaryProblem(TestCase):
             create_binary_problem(language=self.language,
                                   test_type=self.test_type,
                                   file_type='',
-                                  code=self.code,
+                                  solution=self.code,
                                   test=self.test)
 
     def test_create_binary_problem_creates_bina_problem_when_data_is_valid(self):
@@ -91,7 +91,7 @@ class TestCreateBinaryProblem(TestCase):
         create_binary_problem(language=self.language,
                               test_type=self.test_type,
                               file_type=self.file_type,
-                              code=self.code,
+                              solution=self.code,
                               test=self.test)
 
         self.assertEqual(current_count + 1, GraderBinaryProblem.objects.count())
