@@ -7,10 +7,10 @@ def get_grader_ready_data(solution_id, solution_model):
     test = solution.task.test
     if solution.code:
         file_type = 'plain'
-        test_resource = test.sourcecodetest.code
+        test_resource = test.code
     if solution.file:
         file_type = 'binary'
-        test_resource = test.binaryfiletest.file
+        test_resource = test.file
     data = {
         'language': test.language.name,
         'test_type': 'unittest',
@@ -20,11 +20,11 @@ def get_grader_ready_data(solution_id, solution_model):
     }
 
     if test.is_source():
-        data['code'] = solution.code
+        data['solution'] = solution.code
         problem = services.create_plain_problem(**data)
         grader_ready_data = GraderPlainProblemSerializer(problem).data
     else:
-        data['code'] = solution.file
+        data['solution'] = solution.file
         problem = services.create_binary_problem(**data)
         grader_ready_data = GraderBinaryProblemSerializer(problem).data
 

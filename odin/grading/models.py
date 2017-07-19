@@ -16,16 +16,22 @@ class GraderPlainProblem(models.Model):
     test_type = models.CharField(max_length=255, default="unittest")
     language = models.CharField(max_length=255)
     file_type = models.CharField(max_length=255, default='plain')
-    code = models.TextField(null=True, blank=True)
+    solution = models.TextField(null=True, blank=True)
     test = models.TextField(null=True, blank=True)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
+
+    def encode_solution_text(self):
+        return base64.b64encode(self.solution.encode('utf-8')).decode('ascii')
+
+    def encode_test_text(self):
+        return base64.b64encode(self.test.encode('utf-8')).decode('ascii')
 
 
 class GraderBinaryProblem(models.Model):
     test_type = models.CharField(max_length=255, default="unittest")
     language = models.CharField(max_length=255)
     file_type = models.CharField(max_length=255, default='binary')
-    code = models.FileField(upload_to="solutions", null=True, blank=True)
+    solution = models.FileField(upload_to="solutions", null=True, blank=True)
     test = models.FileField(upload_to="solutions", null=True, blank=True)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
 

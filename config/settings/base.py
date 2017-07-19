@@ -231,8 +231,8 @@ GRADER_SOLUTION_MODEL = 'education.Solution'
 GRADER_GRADE_PATH = "/grade"
 GRADER_CHECK_PATH = "/check_result/{buildID}/"
 GRADER_GET_NONCE_PATH = "/nonce"
-GRADER_ADDRESS = env('GRADER_ADDRESS', default='https://grader.hackbulgaria.com')
-GRADER_API_KEY = env('GRADER_API_KEY', default='')
-GRADER_API_SECRET = env('GRADER_API_SECRET', default='')
+GRADER_ADDRESS = env('GRADER_ADDRESS', default='http://192.168.0.69:8000')
+GRADER_API_KEY = env('GRADER_API_KEY', default='c277492800b5fd0f756a88d8992131580f0df638356cf625ee8103839014f2e2')
+GRADER_API_SECRET = env('GRADER_API_SECRET', default='72ffdd7fd4e59caa95058236cb3403af2d9aa2b568c580ef92336b526b40ccfb')
 
 POLLING_SLEEP_TIME = env.int('POLLING_SLEEP_TIME', default=1)  # seconds
