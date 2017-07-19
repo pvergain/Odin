@@ -199,6 +199,38 @@ class TestAddTopicToCourseView(TestCase):
             self.assertEqual(1, Topic.objects.filter(course=self.course).count())
 
 
+class TestExistingMaterialsView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.url = reverse('dashboard:education:course-management:existing-materials',
+                           kwargs={'course_id': self.course.id, 'topic_id': self.topic.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_materials_are_shown_correctly_when_included_or_regular(self):
+        material = MaterialFactory()
+        included_material = IncludedMaterialFactory(topic=self.topic)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertContains(response, material.identifier)
+            self.assertContains(response, included_material.identifier)
+
+
 class TestAddNewIncludedMaterialView(TestCase):
 
     def setUp(self):
@@ -299,6 +331,38 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
                 kwargs={'course_id': self.course.id}))
             self.assertEqual(included_material_count + 1, IncludedMaterial.objects.count())
             self.assertEqual(material_count, Material.objects.count())
+
+
+class TestExistingTasksView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.url = reverse('dashboard:education:course-management:existing-tasks',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_tasks_are_shown_correctly_when_included_or_regular(self):
+        task = TaskFactory()
+        included_task = IncludedTaskFactory(topic=self.topic)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertContains(response, task.name)
+            self.assertContains(response, included_task.name)
 
 
 class TestAddNewIncludedTaskView(TestCase):
