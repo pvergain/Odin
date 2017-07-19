@@ -32,3 +32,11 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             recipients=[email],
             context=template_context
         )
+
+    def add_message(self, request, level, message_template,
+                    message_context=None, extra_tags=''):
+        """
+        Required to disable django-allauth's default messaging feedback
+        upon email confirmation, user creation, and login
+        """
+        pass
