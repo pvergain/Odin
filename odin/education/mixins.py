@@ -6,7 +6,7 @@ from django.http import Http404
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 
-from .models import Course, IncludedTask
+from .models import IncludedTask, Course
 
 
 class CourseViewMixin:
