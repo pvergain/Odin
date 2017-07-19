@@ -13,7 +13,8 @@ from ..services import (
     create_included_material,
     create_included_task,
     create_test_for_task,
-    create_solution
+    create_gradable_solution,
+    create_non_gradable_solution,
 )
 from ..models import (
     Course,
@@ -33,7 +34,6 @@ from ..factories import (
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
     StudentFactory,
-    TaskFactory,
 )
 
 from odin.common.faker import faker
@@ -176,13 +176,6 @@ class TestCreateIncludedTask(TestCase):
                                         description=faker.text(),
                                         gradable=faker.boolean())
 
-    def test_create_included_task_raises_validation_error_if_task_already_exists(self):
-        with self.assertRaises(ValidationError):
-            create_included_task(name=self.task.name,
-                                 description=self.task.description,
-                                 gradable=self.task.gradable,
-                                 topic=self.topic)
-
     def test_create_included_task_creates_only_included_task_when_existing_is_provided(self):
         current_task_count = Task.objects.count()
         current_included_task_count = IncludedTask.objects.count()
@@ -206,10 +199,8 @@ class TestCreateIncludedTask(TestCase):
 class TestCreateTestForTask(TestCase):
 
     def setUp(self):
-        self.task = TaskFactory()
-        self.course = CourseFactory()
-        self.topic = TopicFactory(course=self.course)
-        self.included_task = IncludedTaskFactory(task=self.task, topic=self.topic)
+        self.topic = TopicFactory()
+        self.included_task = IncludedTaskFactory(topic=self.topic)
         self.language = ProgrammingLanguageFactory()
 
     def test_create_test_for_task_raises_validation_error_when_no_resource_is_provided(self):
@@ -252,63 +243,69 @@ class TestCreateTestForTask(TestCase):
         self.assertEqual(current_binary_file_test_count + 1, IncludedTest.objects.filter(**filters).count())
 
 
-class TestCreateSolution(TestCase):
+class TestCreateGradableSolution(TestCase):
     def setUp(self):
-        self.task = IncludedTaskFactory(gradable=True)
+        self.topic = TopicFactory()
+        self.task = IncludedTaskFactory(topic=self.topic, gradable=True)
         self.student = StudentFactory()
 
-    def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_gradable_task(self):
+    def test_create_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
         with self.assertRaises(ValidationError):
-            create_solution(student=self.student,
-                            task=self.task,
-                            url=faker.url())
+            create_gradable_solution(student=self.student,
+                                     task=self.task)
 
-    def test_create_solution_raises_validation_error_when_both_resources_are_provided_for_gradable_task(self):
+    def test_create_gradable_solution_raises_validation_error_when_both_resources_are_provided(self):
         with self.assertRaises(ValidationError):
-            create_solution(student=self.student,
-                            task=self.task,
-                            code=faker.text(),
-                            file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
+            create_gradable_solution(student=self.student,
+                                     task=self.task,
+                                     code=faker.text(),
+                                     file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
-    def test_create_solution_raises_validation_error_when_no_resource_is_provided_for_not_gradable_task(self):
-        self.task.gradable = False
-        self.task.save()
-        with self.assertRaises(ValidationError):
-            create_solution(student=self.student,
-                            task=self.task)
-
-    def test_create_solution_creates_solution_with_code_when_code_is_provided_for_gradable_solution(self):
+    def test_create_gradable_solution_creates_solution_with_code_when_code_is_provided(self):
         current_solution_count = Solution.objects.count()
 
-        solution = create_solution(task=self.task,
-                                   student=self.student,
-                                   code=faker.text())
+        solution = create_gradable_solution(task=self.task,
+                                            student=self.student,
+                                            code=faker.text())
 
         self.assertEqual(current_solution_count + 1, Solution.objects.count())
         self.assertIsNotNone(solution.code)
         self.assertIsNone(solution.file.name)
         self.assertIsNone(solution.url)
 
-    def test_create_solution_creates_solution_with_file_when_file_is_provided_for_gradable_solution(self):
+    def test_create_gradable_solution_creates_solution_with_file_when_file_is_provided(self):
         current_solution_count = Solution.objects.count()
 
-        solution = create_solution(task=self.task,
-                                   student=self.student,
-                                   file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
+        solution = create_gradable_solution(task=self.task,
+                                            student=self.student,
+                                            file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'
+                                                                    .encode('utf-8'))))
 
         self.assertEqual(current_solution_count + 1, Solution.objects.count())
         self.assertIsNotNone(solution.file.name)
         self.assertIsNone(solution.code)
         self.assertIsNone(solution.url)
 
-    def test_create_solution_creates_solution_with_url_when_url_is_provided_for_not_gradable_solution(self):
+
+class TestCreateNonGradableSolution(TestCase):
+    def setUp(self):
+        self.topic = TopicFactory()
+        self.task = IncludedTaskFactory(topic=self.topic, gradable=False)
+        self.student = StudentFactory()
+
+    def test_create_non_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
+        with self.assertRaises(ValidationError):
+            create_non_gradable_solution(student=self.student,
+                                         task=self.task)
+
+    def test_create_non_gradable_solution_creates_non_gradable_solution_with_url_when_url_is_provided(self):
         self.task.gradable = False
         self.task.save()
         current_solution_count = Solution.objects.count()
 
-        solution = create_solution(task=self.task,
-                                   student=self.student,
-                                   url=faker.url())
+        solution = create_non_gradable_solution(task=self.task,
+                                                student=self.student,
+                                                url=faker.url())
 
         self.assertEqual(current_solution_count + 1, Solution.objects.count())
         self.assertIsNotNone(solution.url)

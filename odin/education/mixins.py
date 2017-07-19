@@ -1,7 +1,12 @@
-from .models import Course, IncludedTask
+from typing import Callable, Dict
 
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.http import Http404
+from django.core.exceptions import ValidationError
+from django.contrib import messages
+
+from .models import Course, IncludedTask
 
 
 class CourseViewMixin:
@@ -15,6 +20,8 @@ class CourseViewMixin:
             'topics__materials'
         )
         self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch).first()
+        if self.course is None:
+            return Http404
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -46,3 +53,14 @@ class TaskViewMixin:
         context = super().get_context_data(**kwargs)
         context['task'] = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
         return context
+
+
+class CallServiceMixin:
+    def call_service(self,
+                     *,
+                     service: Callable=None,
+                     service_kwargs: Dict=None):
+        try:
+            return service(**service_kwargs)
+        except ValidationError as e:
+            messages.warning(request=self.request, message=str(e))

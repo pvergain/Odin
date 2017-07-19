@@ -5,8 +5,19 @@ from queue import deque
 
 from odin.users.factories import SuperUserFactory
 
-from ...factories import StudentFactory, TeacherFactory, CourseFactory
-from ...services import add_student, add_teacher
+from odin.education.factories import (
+    StudentFactory,
+    TeacherFactory,
+    CourseFactory,
+    TopicFactory,
+    WeekFactory,
+    TaskFactory,
+    IncludedTaskFactory,
+    ProgrammingLanguageFactory,
+    SourceCodeTestFactory
+)
+from odin.education.services import add_student, add_teacher
+
 
 COURSE_NAMES = ("Python 101", "Ruby 101", "Java 101")
 
@@ -24,6 +35,29 @@ class Command(BaseCommand):
         while students:
             selected_course = choice(courses)
             add_student(selected_course, students.popleft())
+
+        weeks = deque()
+
+        for course in courses:
+            for i in range(10):
+                weeks.appendleft(WeekFactory(course=course))
+
+        topics = deque()
+        while weeks:
+            week = weeks.popleft()
+            topics.appendleft(TopicFactory(week=week, course=week.course))
+
+        tasks = deque()
+        while topics:
+            topic = topics.popleft()
+            task = TaskFactory()
+            tasks.appendleft(IncludedTaskFactory(existing_task=task, topic=topic))
+
+        language = ProgrammingLanguageFactory(name='python')
+
+        while tasks:
+            task = tasks.popleft()
+            SourceCodeTestFactory(task=task, language=language)
 
         email = 'testadmin@hacksoft.io'
         password = 'asdf'

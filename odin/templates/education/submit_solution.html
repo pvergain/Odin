@@ -8,6 +8,7 @@
 {% block page_content %}
 <div class="row">
   <div class="col-md-5">
+    {% include "education/partial/message_box.html" %}
      <form action="" method="POST" enctype="multipart/form-data">
          {% csrf_token %}
           {% if task.test.is_source %}

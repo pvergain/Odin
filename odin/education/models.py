@@ -126,11 +126,11 @@ class BaseMaterial(UpdatedAtCreatedAtModelMixin, models.Model):
         abstract = True
 
 
-class Material(BaseMaterial, models.Model):
+class Material(BaseMaterial):
     pass
 
 
-class IncludedMaterial(BaseMaterial, models.Model):
+class IncludedMaterial(BaseMaterial):
     material = models.ForeignKey(Material,
                                  on_delete=models.CASCADE,
                                  related_name='included_materials')
@@ -208,7 +208,7 @@ class StudentNote(UpdatedAtCreatedAtModelMixin, models.Model):
 
 
 class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
-    name = models.CharField(unique=True, max_length=128)
+    name = models.CharField(max_length=128)
     description = models.TextField(blank=True, null=True)
     gradable = models.BooleanField(default=False)
 
@@ -218,7 +218,7 @@ class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
         abstract = True
 
 
-class Task(BaseTask, models.Model):
+class Task(BaseTask):
     pass
 
 
@@ -229,7 +229,7 @@ class ProgrammingLanguage(models.Model):
         return self.name
 
 
-class IncludedTask(BaseTask, models.Model):
+class IncludedTask(BaseTask):
     task = models.ForeignKey(Task,
                              on_delete=models.CASCADE,
                              related_name='included_tasks')
@@ -248,11 +248,11 @@ class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
         abstract = True
 
 
-class Test(BaseTest, models.Model):
+class Test(BaseTest):
     pass
 
 
-class IncludedTest(BaseTest, models.Model):
+class IncludedTest(BaseTest):
     task = models.OneToOneField(IncludedTask,
                                 on_delete=models.CASCADE,
                                 related_name='test')

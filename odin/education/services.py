@@ -95,7 +95,9 @@ def create_included_material(*,
         existing_material.full_clean()
         existing_material.save()
 
-    included_material.__dict__.update(existing_material.__dict__)
+    included_material.identifier = existing_material.identifier
+    included_material.url = existing_material.url
+    included_material.content = existing_material.content
 
     included_material.material = existing_material
     included_material.full_clean()
@@ -111,13 +113,14 @@ def create_included_task(*,
                          existing_task: Task=None,
                          topic: Topic=None) -> IncludedTask:
     included_task = IncludedTask(topic=topic)
-
     if existing_task is None:
         existing_task = Task(name=name, description=description, gradable=gradable)
         existing_task.full_clean()
         existing_task.save()
 
-    included_task.__dict__.update(existing_task.__dict__)
+    included_task.name = existing_task.name
+    included_task.description = existing_task.description
+    included_task.gradable = existing_task.gradable
 
     included_task.task = existing_task
     included_task.full_clean()
@@ -140,7 +143,10 @@ def create_test_for_task(*,
         existing_test.full_clean()
         existing_test.save()
 
-    new_test.__dict__.update(existing_test.__dict__)
+    new_test.language = existing_test.language
+    new_test.extra_options = existing_test.extra_options
+    new_test.code = existing_test.code
+    new_test.file = existing_test.file
 
     new_test.test = existing_test
     new_test.save()
@@ -148,40 +154,44 @@ def create_test_for_task(*,
     return new_test
 
 
-def create_solution(*,
-                    task: IncludedTask,
-                    student: Student,
-                    url: str=None,
-                    code: str=None,
-                    file: BinaryIO=None) -> Solution:
-
-    if task.gradable:
-        if code is not None and file is not None:
-            raise ValidationError("Provide either code or a file, not both!")
-        if code is None and file is None:
-            raise ValidationError("Provide either code or a file!")
-        if code is not None and file is None:
-            new_solution = Solution.objects.create(
-                task=task,
-                student=student,
-                code=code,
-                status=4
-            )
-        if code is None and file is not None:
-            new_solution = Solution.objects.create(
-                task=task,
-                student=student,
-                file=file,
-                status=4
-            )
-    else:
-        if url is None:
-            raise ValidationError("Provide a url!")
+def create_gradable_solution(*,
+                             task: IncludedTask,
+                             student: Student,
+                             code: str=None,
+                             file: BinaryIO=None) -> Solution:
+    if code is not None and file is not None:
+        raise ValidationError("Provide either code or a file, not both!")
+    if code is None and file is None:
+        raise ValidationError("Provide either code or a file!")
+    if code is not None:
         new_solution = Solution.objects.create(
             task=task,
             student=student,
-            url=url,
+            code=code,
             status=6
         )
+    if file is not None:
+        new_solution = Solution.objects.create(
+            task=task,
+            student=student,
+            file=file,
+            status=6
+        )
+
+    return new_solution
+
+
+def create_non_gradable_solution(*,
+                                 task: IncludedTask,
+                                 student: Student,
+                                 url: str=None) -> Solution:
+    if url is None:
+            raise ValidationError("Provide a url!")
+    new_solution = Solution.objects.create(
+        task=task,
+        student=student,
+        url=url,
+        status=6
+    )
 
     return new_solution
