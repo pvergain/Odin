@@ -420,6 +420,17 @@ class StudentSolutionListView(CourseViewMixin,
         return Solution.objects.get_solutions_for(user.student, task)
 
 
+class StudentSolutionDetailView(CourseViewMixin,
+                                TaskViewMixin,
+                                LoginRequiredMixin,
+                                IsStudentInCoursePermission,
+                                DetailView):
+    template_name = 'education/student_solution_detail.html'
+
+    def get_object(self):
+        return get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
+
+
 class SubmitGradableSolutionView(CourseViewMixin,
                                  TaskViewMixin,
                                  CallServiceMixin,
