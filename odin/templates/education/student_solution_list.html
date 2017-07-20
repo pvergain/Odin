@@ -32,9 +32,9 @@
                                 <td>{{ solution.status }}</td>
                                 <td><a href="{% url 'dashboard:education:student-solution-detail' course.id task.id solution.id %}"><button class="btn green uppercase" name="button">View</button></a> </td>
                                   <td>
-                                    <a href="#">
-                                      <button class="btn green uppercase" type="button" name="button">Edit</button>
-                                    </a>
+                                      <a href="{% url 'dashboard:education:edit-student-solution' course.id task.id solution.id %}">
+                                        <button class="btn green uppercase" type="button" name="button">Edit</button>
+                                      </a>
                                   </td>
                             </tr>
                         {% endfor %}

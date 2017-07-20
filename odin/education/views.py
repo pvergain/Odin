@@ -425,10 +425,24 @@ class StudentSolutionDetailView(CourseViewMixin,
                                 LoginRequiredMixin,
                                 IsStudentInCoursePermission,
                                 DetailView):
+    model = Solution
+    pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
 
-    def get_object(self):
-        return get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
+
+class EditStudentSolutionView(CourseViewMixin,
+                              TaskViewMixin,
+                              LoginRequiredMixin,
+                              IsStudentInCoursePermission,
+                              UpdateView):
+    model = Solution
+    fields = ('code', 'file', 'url')
+    pk_url_kwarg = 'solution_id'
+    template_name = 'education/edit_student_solution.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
 
 
 class SubmitGradableSolutionView(CourseViewMixin,

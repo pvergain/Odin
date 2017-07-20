@@ -21,6 +21,7 @@ from .views import (
     SubmitGradableSolutionView,
     SubmitNonGradableSolutionView,
     StudentSolutionDetailView,
+    EditStudentSolutionView,
 )
 
 
@@ -93,5 +94,8 @@ urlpatterns = [
         name='add-not-gradable-solution'),
     url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/$',
         view=StudentSolutionDetailView.as_view(),
-        name='student-solution-detail')
+        name='student-solution-detail'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/edit$',
+        view=EditStudentSolutionView.as_view(),
+        name='edit-student-solution')
 ]
