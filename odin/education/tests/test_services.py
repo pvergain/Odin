@@ -298,8 +298,6 @@ class TestCreateNonGradableSolution(TestCase):
                                          task=self.task)
 
     def test_create_non_gradable_solution_creates_non_gradable_solution_with_url_when_url_is_provided(self):
-        self.task.gradable = False
-        self.task.save()
         current_solution_count = Solution.objects.count()
 
         solution = create_non_gradable_solution(task=self.task,
