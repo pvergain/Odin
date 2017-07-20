@@ -235,8 +235,7 @@ class TestAddNewIncludedMaterialView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-new-included-material',
                            kwargs={'course_id': self.course.id,
                                    'topic_id': self.topic.id})
@@ -281,8 +280,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-included-material-from-existing',
                            kwargs={'course_id': self.course.id,
                                    'topic_id': self.topic.id})
@@ -336,7 +334,6 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
 class TestExistingTasksView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:existing-tasks',
                            kwargs={'course_id': self.course.id})
         self.test_password = faker.password()
@@ -356,7 +353,7 @@ class TestExistingTasksView(TestCase):
 
     def test_tasks_are_shown_correctly_when_included_or_regular(self):
         task = TaskFactory()
-        included_task = IncludedTaskFactory(topic=self.topic)
+        included_task = IncludedTaskFactory(topic__course=self.course)
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
         with self.login(email=self.user.email, password=self.test_password):
@@ -369,8 +366,7 @@ class TestAddNewIncludedTaskView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-new-included-task',
                            kwargs={'course_id': self.course.id})
         self.test_password = faker.password()
@@ -413,8 +409,7 @@ class TestAddIncludedTaskFromExistingView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-included-task-from-existing',
                            kwargs={'course_id': self.course.id})
         self.test_password = faker.password()
@@ -468,9 +463,7 @@ class TestEditIncludedTaskView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
-        self.included_task = IncludedTaskFactory(topic=self.topic)
+        self.included_task = IncludedTaskFactory(topic__course=self.course)
         self.url = reverse('dashboard:education:course-management:edit-included-task',
                            kwargs={
                                'course_id': self.course.id,
@@ -550,9 +543,7 @@ class TestAddSourceCodeTestToTaskView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
-        self.included_task = IncludedTaskFactory(topic=self.topic)
+        self.included_task = IncludedTaskFactory(topic__course=self.course)
         self.test_password = faker.password()
         self.language = ProgrammingLanguageFactory()
         self.user = BaseUserFactory(password=self.test_password)
@@ -604,9 +595,7 @@ class TestAddBinaryFileTestToTaskView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
-        self.included_task = IncludedTaskFactory(topic=self.topic)
+        self.included_task = IncludedTaskFactory(topic__course=self.course)
         self.test_password = faker.password()
         self.language = ProgrammingLanguageFactory()
         self.user = BaseUserFactory(password=self.test_password)
@@ -655,8 +644,7 @@ class TestAddBinaryFileTestToTaskView(TestCase):
 class TestStudentSolutionListView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.topic = TopicFactory(course=self.course)
-        self.task = IncludedTaskFactory(topic=self.topic)
+        self.task = IncludedTaskFactory(topic__course=self.course)
         self.url = reverse('dashboard:education:user-task-solutions',
                            kwargs={'course_id': self.course.id,
                                    'task_id': self.task.id})
@@ -683,8 +671,7 @@ class TestStudentSolutionListView(TestCase):
 class TestSubmitGradableSolutionView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.topic = TopicFactory(course=self.course)
-        self.task = IncludedTaskFactory(gradable=True, topic=self.topic)
+        self.task = IncludedTaskFactory(task__gradable=True, topic__course=self.course)
         self.url = reverse('dashboard:education:add-gradable-solution',
                            kwargs={'course_id': self.course.id,
                                    'task_id': self.task.id})
@@ -741,8 +728,7 @@ class TestSubmitGradableSolutionView(TestCase):
 class TestSubmitNotGradableSolutionView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.topic = TopicFactory(course=self.course)
-        self.task = IncludedTaskFactory(gradable=False, topic=self.topic)
+        self.task = IncludedTaskFactory(gradable=False, topic__course=self.course)
         self.url = reverse('dashboard:education:add-not-gradable-solution',
                            kwargs={'course_id': self.course.id,
                                    'task_id': self.task.id})

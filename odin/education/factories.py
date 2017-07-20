@@ -5,7 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from odin.education.services import create_test_for_task, create_included_task
+from odin.education.services import create_test_for_task
 
 
 from .models import (
@@ -17,6 +17,7 @@ from .models import (
     Material,
     IncludedMaterial,
     Task,
+    IncludedTask,
     ProgrammingLanguage,
     Test
 )
@@ -99,10 +100,12 @@ class TaskFactory(factory.DjangoModelFactory):
         model = Task
 
 
-class IncludedTaskFactory(TaskFactory):
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        return create_included_task(*args, **kwargs)
+class IncludedTaskFactory(factory.DjangoModelFactory):
+    topic = factory.SubFactory(TopicFactory)
+    task = factory.SubFactory(TaskFactory)
+
+    class Meta:
+        model = IncludedTask
 
 
 class ProgrammingLanguageFactory(factory.DjangoModelFactory):
