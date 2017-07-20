@@ -229,8 +229,7 @@ class CourseIncludedTasksListView(CourseViewMixin,
     template_name = 'education/included_task_list.html'
 
     def get_queryset(self):
-        queryset = IncludedTask.objects.filter(topic__course=self.course)
-        return queryset
+        return IncludedTask.objects.filter(topic__course=self.course)
 
 
 class AddNewIncludedTaskView(CourseViewMixin,

@@ -19,9 +19,11 @@ class CourseViewMixin:
             'topics__week',
             'topics__materials'
         )
-        self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch).first()
-        if self.course is None:
+        self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch)
+        if not self.course.exists():
             return Http404
+
+        self.course = self.course.first()
 
         return super().dispatch(request, *args, **kwargs)
 
