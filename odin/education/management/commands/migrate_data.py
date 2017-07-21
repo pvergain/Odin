@@ -14,6 +14,8 @@ from odin.common.load_data import (
     TopicLoader,
     IncludedMaterialLoader,
     ProgrammingLanguageLoader,
+    IncludedTaskLoader,
+    IncludedTestLoader
 )
 
 
@@ -28,10 +30,13 @@ class Command(BaseCommand):
             CourseAssignmentLoader(),
             TopicLoader(),
             IncludedMaterialLoader(),
-            ProgrammingLanguageLoader()
+            ProgrammingLanguageLoader(),
+            IncludedTaskLoader(),
+            IncludedTestLoader()
         ]
 
         for loader in loaders:
+            print(f'Generating {loader.__class__.__name__}')
             loader.generate_orm_objects()
 
         for app in settings.LOCAL_APPS:

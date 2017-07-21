@@ -9,7 +9,19 @@ from django.apps import apps
 from allauth.account.models import EmailAddress
 
 from odin.users.models import BaseUser
-from odin.education.models import Course, Student, Teacher, Week, Material, Topic
+from odin.education.models import (
+    Course,
+    Student,
+    Teacher,
+    Week,
+    Material,
+    Topic,
+    Task,
+    IncludedTask,
+    IncludedTest,
+    ProgrammingLanguage,
+    Test
+)
 from odin.education.services import add_student, add_teacher
 
 
@@ -293,3 +305,56 @@ class ProgrammingLanguageLoader(BaseLoader):
     django_model = apps.get_model('education.ProgrammingLanguage')
     model_fields = ['name']
     json_fields = ['name']
+
+
+class IncludedTaskLoader(BaseLoader):
+    json_model = 'education.task'
+    django_model = apps.get_model('education.IncludedTask')
+    model_fields = ['name', 'description', 'gradable']
+    json_fields = ['name', 'description', 'gradable']
+
+    def generate_orm_objects(self):
+        instance_list = []
+        for kwargs in self.get_field_mapping():
+            id = kwargs.pop('id')
+            task = Task.objects.create(**kwargs)
+            instance = self.django_model(id=id, task=task, **kwargs)
+            instance_list.append(instance)
+        self.django_model.objects.bulk_create(instance_list)
+
+
+class SourceCodeTestLoader(BaseLoader):
+    json_model = 'education.sourcecodetest'
+    django_model = apps.get_model('education.IncludedTest')
+    model_fields = ['language', 'code', 'extra_options', 'task']
+    json_fields = ['language', 'code', 'extra_options', 'task']
+
+
+class IncludedTestLoader(BaseLoader):
+    json_model = 'education.test'
+    django_model = apps.get_model('education.IncludedTest')
+    model_fields = ['language', 'extra_options', 'task', 'code']
+    json_fields = ['language', 'extra_options', 'task', 'code']
+
+    def generate_orm_objects(self):
+        source_code_loader = SourceCodeTestLoader()
+        code_data = source_code_loader.data
+        data_index = 0
+        for item in code_data:
+            self.data[data_index]['fields'].update(item['fields'])
+            data_index += 1
+
+        instance_list = []
+        for kwargs in self.get_field_mapping():
+            task_id = kwargs.pop('task')
+            task = IncludedTask.objects.get(id=task_id)
+
+            language_id = kwargs.pop('language')
+            language = ProgrammingLanguage.objects.get(id=language_id)
+
+            test = Test.objects.create(language=language, **kwargs)
+
+            instance = self.django_model(test=test, language=language, task=task, **kwargs)
+            instance_list.append(instance)
+
+        self.django_model.objects.bulk_create(instance_list)

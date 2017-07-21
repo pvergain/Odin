@@ -235,7 +235,8 @@ class IncludedTask(BaseTask):
                              related_name='included_tasks')
     topic = models.ForeignKey(Topic,
                               on_delete=models.CASCADE,
-                              related_name='tasks')
+                              related_name='tasks',
+                              null=True)
 
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
