@@ -12,8 +12,19 @@ from django.urls import reverse_lazy
 from odin.management.permissions import DashboardManagementPermission
 
 from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
-from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission, IsStudentInCoursePermission
-from .mixins import CourseViewMixin, PublicViewContextMixin, SubmitSolutionMixin, TaskViewMixin, CallServiceMixin
+from .permissions import (
+    IsStudentOrTeacherInCoursePermission,
+    IsTeacherInCoursePermission,
+    IsStudentInCoursePermission,
+)
+from .mixins import (
+    CourseViewMixin,
+    PublicViewContextMixin,
+    SubmitSolutionMixin,
+    TaskViewMixin,
+    CallServiceMixin,
+    HasTestMixin,
+)
 from .forms import (
     TopicModelForm,
     IncludedMaterialModelForm,
@@ -456,13 +467,21 @@ class SubmitGradableSolutionView(CourseViewMixin,
                                  TaskViewMixin,
                                  CallServiceMixin,
                                  SubmitSolutionMixin,
+                                 HasTestMixin,
                                  LoginRequiredMixin,
                                  IsStudentInCoursePermission,
                                  FormView):
     form_class = SubmitGradableSolutionForm
 
-    def get_form_kwargs(self):
+    def get(self, *args, **kwargs):
+        res = self.has_test()
+        return res or super().get(*args, **kwargs)
 
+    def post(self, *args, **kwargs):
+        res = self.has_test()
+        return res or super().post(*args, **kwargs)
+
+    def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
         task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))

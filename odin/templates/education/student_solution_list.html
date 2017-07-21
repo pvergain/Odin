@@ -5,6 +5,7 @@
 {% endblock content_title %}
 
 {% block page_content %}
+{% include 'education/partial/message_box.html' %}
   <div class="row">
     <div class="portlet box green">
         <div class="portlet-title">
@@ -42,11 +43,11 @@
                 </table>
             </div>
           </div>
-          {% if task.gradable and task.test %}
+          {% if task.gradable %}
             <a href="{% url 'dashboard:education:add-gradable-solution' course.id task.id %}">
               <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
             </a>
-          {% elif not task.gradable %}
+          {% else %}
             <a href="{% url 'dashboard:education:add-not-gradable-solution' course.id task.id %}">
               <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
             </a>

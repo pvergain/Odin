@@ -691,6 +691,31 @@ class TestSubmitGradableSolutionView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
+    def test_can_not_access_view_if_no_test_for_task(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            redirect_url = reverse('dashboard:education:user-task-solutions',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id})
+            self.assertRedirects(response, expected_url=redirect_url)
+
+    def test_can_not_submit_solution_if_no_test_for_task(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        data = {'code': faker.text()}
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            redirect_url = reverse('dashboard:education:user-task-solutions',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id})
+            self.assertRedirects(response, expected_url=redirect_url)
+            self.assertEqual(solution_count, Solution.objects.count())
+
     def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(self):
         SourceCodeTestFactory(task=self.task)
         student = Student.objects.create_from_user(user=self.user)
