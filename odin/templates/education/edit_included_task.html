@@ -21,6 +21,10 @@
         {{ form.description.label }}
         {% render_field form.description class="form-control form-control-solid"%}
       </div>
+      <div class="form-group">
+        {{ form.gradable.label }}
+        {% render_field form.gradable class="form-control-solid"%}
+      </div>
       <div class="form-actions">
         <button class="btn green uppercase" type="submit" name="button">Update</button>
         <a href="{% url 'dashboard:education:course-management:add-source-test' course.id request.resolver_match.kwargs.task_id %}">

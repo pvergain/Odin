@@ -307,6 +307,14 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         return super().form_valid(form)
 
 
+class TaskDetailView(TaskViewMixin,
+                     LoginRequiredMixin,
+                     DetailView):
+    model = IncludedTask
+    pk_url_kwarg = 'task_id'
+    template_name = 'education/task_detail.html'
+
+
 class EditTaskView(LoginRequiredMixin,
                    DashboardManagementPermission,
                    UpdateView):

@@ -42,11 +42,11 @@
                 </table>
             </div>
           </div>
-          {% if task.gradable %}
+          {% if task.gradable and task.test %}
             <a href="{% url 'dashboard:education:add-gradable-solution' course.id task.id %}">
               <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
             </a>
-          {% else %}
+          {% elif not task.gradable %}
             <a href="{% url 'dashboard:education:add-not-gradable-solution' course.id task.id %}">
               <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
             </a>
