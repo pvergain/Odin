@@ -49,3 +49,6 @@ celery==4.0.2
 
 # Email services
 mandrill==1.0.57
+
+# Markdown parsing
+mistune==0.7.4
