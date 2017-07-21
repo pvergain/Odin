@@ -32,7 +32,11 @@
                             {% for task in object_list %}
                                 <tr>
                                     <td>{{ task.id }}</td>
-                                    <td>{{ task.name }}</td>
+                                    <td>
+                                      <a href="{% url 'dashboard:education:task-detail' task.id%}">
+                                      {{ task.name }}
+                                      </a>
+                                    </td>
                                     <td>
                                       {% if request.user.student in course.students.all %}
                                         <a href="{% url 'dashboard:education:user-task-solutions' course.id task.id%}">
@@ -46,9 +50,6 @@
                                           <button class="btn green uppercase" type="button" name="button">Edit</button>
                                         </a>
                                     {% endif %}
-                                        <a href="{% url 'dashboard:education:task-detail' task.id%}">
-                                          <button class="btn green uppercase" type="button" name="button">View</button>
-                                        </a>
                                       </td>
                                 </tr>
                             {% endfor %}
