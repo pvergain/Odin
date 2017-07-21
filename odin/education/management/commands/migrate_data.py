@@ -13,6 +13,7 @@ from odin.common.load_data import (
     CourseAssignmentLoader,
     TopicLoader,
     IncludedMaterialLoader,
+    ProgrammingLanguageLoader,
 )
 
 
@@ -26,7 +27,8 @@ class Command(BaseCommand):
             StudentLoader(),
             CourseAssignmentLoader(),
             TopicLoader(),
-            IncludedMaterialLoader()
+            IncludedMaterialLoader(),
+            ProgrammingLanguageLoader()
         ]
 
         for loader in loaders:

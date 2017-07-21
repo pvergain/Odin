@@ -286,3 +286,10 @@ class IncludedMaterialLoader(BaseLoader):
 
         self.django_model.objects.bulk_create(instance_list)
         return instance_list
+
+
+class ProgrammingLanguageLoader(BaseLoader):
+    json_model = 'education.programminglanguage'
+    django_model = apps.get_model('education.ProgrammingLanguage')
+    model_fields = ['name']
+    json_fields = ['name']
