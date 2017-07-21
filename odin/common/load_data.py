@@ -18,7 +18,6 @@ from odin.education.models import (
     Topic,
     Task,
     IncludedTask,
-    IncludedTest,
     ProgrammingLanguage,
     Test
 )
