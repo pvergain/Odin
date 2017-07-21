@@ -40,16 +40,16 @@
                                         </a>
                                       {% endif %}
                                      </td>
-                                    {% if request.user.is_teacher %}
                                       <td>
+                                    {% if request.user.is_teacher %}
                                         <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
                                           <button class="btn green uppercase" type="button" name="button">Edit</button>
                                         </a>
+                                    {% endif %}
                                         <a href="{% url 'dashboard:education:task-detail' task.id%}">
                                           <button class="btn green uppercase" type="button" name="button">View</button>
                                         </a>
                                       </td>
-                                    {% endif %}
                                 </tr>
                             {% endfor %}
                         </tbody>
