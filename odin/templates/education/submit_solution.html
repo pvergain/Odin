@@ -1,0 +1,29 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load widget_tweaks %}
+
+{% block content_title %}
+  Submit solution
+{% endblock content_title %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-md-5">
+    {% include "education/partial/message_box.html" %}
+     <form action="" method="POST" enctype="multipart/form-data">
+         {% csrf_token %}
+          {% if task.test.is_source %}
+             <div class="form-group">
+               {% render_field form.code class="form-control form-control-solid placeholder-no-fix" placeholder="Source Code" %}
+             </div>
+          {% else %}
+            <div class="form-group">
+              {% render_field form.file class="form-control form-control-solid placeholder-no-fix" placeholder="File" %}
+            </div>
+          {% endif %}
+           <div class="form-actions">
+             <button type="submit" class="btn green uppercase">Submit</button>
+           </div>
+     </form>
+  </div>
+</div>
+{% endblock page_content %}

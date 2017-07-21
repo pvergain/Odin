@@ -5,13 +5,15 @@ from dateutil import rrule
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import JSONField
 
 from odin.common.models import UpdatedAtCreatedAtModelMixin
-from odin.common.utils import get_now
+from odin.common.utils import get_now, json_field_default
 
 from odin.users.models import BaseUser
 
 from .managers import StudentManager, TeacherManager
+from .query import TaskQuerySet, SolutionQuerySet
 
 
 class Student(BaseUser):
@@ -124,11 +126,11 @@ class BaseMaterial(UpdatedAtCreatedAtModelMixin, models.Model):
         abstract = True
 
 
-class Material(BaseMaterial, models.Model):
+class Material(BaseMaterial):
     pass
 
 
-class IncludedMaterial(BaseMaterial, models.Model):
+class IncludedMaterial(BaseMaterial):
     material = models.ForeignKey(Material,
                                  on_delete=models.CASCADE,
                                  related_name='included_materials')
@@ -203,3 +205,111 @@ class StudentNote(UpdatedAtCreatedAtModelMixin, models.Model):
 
     def __str__(self):
         return f'Note for {self.assignment.student}'
+
+
+class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField(blank=True, null=True)
+    gradable = models.BooleanField(default=False)
+
+    objects = TaskQuerySet.as_manager()
+
+    class Meta:
+        abstract = True
+
+
+class Task(BaseTask):
+    pass
+
+
+class ProgrammingLanguage(models.Model):
+    name = models.CharField(max_length=110)
+
+    def __str__(self):
+        return self.name
+
+
+class IncludedTask(BaseTask):
+    task = models.ForeignKey(Task,
+                             on_delete=models.CASCADE,
+                             related_name='included_tasks')
+    topic = models.ForeignKey(Topic,
+                              on_delete=models.CASCADE,
+                              related_name='tasks')
+
+
+class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
+    language = models.ForeignKey(ProgrammingLanguage)
+    extra_options = JSONField(blank=True, null=True, default=json_field_default())
+    code = models.TextField(blank=True, null=True)
+    file = models.FileField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class Test(BaseTest):
+    pass
+
+
+class IncludedTest(BaseTest):
+    task = models.OneToOneField(IncludedTask,
+                                on_delete=models.CASCADE,
+                                related_name='test')
+    test = models.ForeignKey(Test,
+                             on_delete=models.CASCADE,
+                             related_name='included_tests')
+
+    def is_source(self):
+        return getattr(self, 'code', None) is not None
+
+    def is_binary(self):
+        return getattr(self, 'file', None) is not None
+
+    def test_mode(self):
+        if self.is_binary:
+            return 'binary'
+        return 'plain'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.code is None and str(self.file) is '':
+            raise ValidationError("A binary file or source code must be provided!")
+
+        if self.code is not None and str(self.file) is not '':
+            raise ValidationError("Either a binary file or source code must be provided")
+
+
+class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
+    PENDING = 0
+    RUNNING = 1
+    OK = 2
+    NOT_OK = 3
+    SUBMITTED = 4
+    MISSING = 5
+    SUBMITTED_WITHOUT_GRADING = 6
+
+    STATUS_CHOICE = (
+        (PENDING, 'pending'),
+        (RUNNING, 'running'),
+        (OK, 'ok'),
+        (NOT_OK, 'not_ok'),
+        (SUBMITTED, 'submitted'),
+        (MISSING, 'missing'),
+        (SUBMITTED_WITHOUT_GRADING, 'submitted_without_grading'),
+    )
+
+    task = models.ForeignKey(IncludedTask, related_name='solutions')
+    student = models.ForeignKey(Student, related_name='solutions')
+    url = models.URLField(blank=True, null=True)
+    code = models.TextField(blank=True, null=True)
+    check_status_location = models.CharField(max_length=128, null=True, blank=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
+    test_output = models.TextField(blank=True, null=True)
+    return_code = models.IntegerField(blank=True, null=True)
+    file = models.FileField(upload_to="solutions", blank=True, null=True)
+
+    objects = SolutionQuerySet.as_manager()

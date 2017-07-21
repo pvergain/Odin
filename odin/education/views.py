@@ -1,13 +1,38 @@
-from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.views.generic import (
+    TemplateView,
+    ListView,
+    DetailView,
+    FormView,
+    UpdateView
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
-from .models import Course, Teacher, Student, Material
-from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission
-from .mixins import CourseViewMixin, PublicViewContextMixin
-from .forms import TopicModelForm, IncludedMaterialModelForm, IncludedMaterialFromExistingForm
-from .services import create_topic, create_included_material
+from odin.management.permissions import DashboardManagementPermission
+
+from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
+from .permissions import IsStudentOrTeacherInCoursePermission, IsTeacherInCoursePermission, IsStudentInCoursePermission
+from .mixins import CourseViewMixin, PublicViewContextMixin, SubmitSolutionMixin, TaskViewMixin, CallServiceMixin
+from .forms import (
+    TopicModelForm,
+    IncludedMaterialModelForm,
+    IncludedMaterialFromExistingForm,
+    IncludedTaskModelForm,
+    IncludedTaskFromExistingForm,
+    SourceCodeTestForm,
+    BinaryFileTestForm,
+    SubmitGradableSolutionForm,
+    SubmitNonGradableSolutionForm,
+)
+from .services import (
+    create_topic,
+    create_included_material,
+    create_included_task,
+    create_test_for_task,
+    create_gradable_solution,
+    create_non_gradable_solution
+)
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -62,6 +87,7 @@ class PublicCourseDetailView(PublicViewContextMixin, DetailView):
 
 
 class AddTopicToCourseView(CourseViewMixin,
+                           CallServiceMixin,
                            LoginRequiredMixin,
                            IsTeacherInCoursePermission,
                            FormView):
@@ -78,14 +104,19 @@ class AddTopicToCourseView(CourseViewMixin,
         return form_kwargs
 
     def form_valid(self, form):
-        create_topic(name=form.cleaned_data.get('name'),
-                     week=form.cleaned_data.get('week'),
-                     course=self.course)
 
+        create_topic_kwargs = {
+            'name': form.cleaned_data.get('name'),
+            'week': form.cleaned_data.get('week'),
+            'course': self.course
+        }
+
+        self.call_service(service=create_topic, service_kwargs=create_topic_kwargs)
         return super().form_valid(form)
 
 
 class AddIncludedMaterialFromExistingView(CourseViewMixin,
+                                          CallServiceMixin,
                                           LoginRequiredMixin,
                                           IsTeacherInCoursePermission,
                                           FormView):
@@ -120,7 +151,8 @@ class AddIncludedMaterialFromExistingView(CourseViewMixin,
         data['existing_material'] = form.cleaned_data.get('material')
         data['topic'] = form.cleaned_data.get('topic')
 
-        create_included_material(**data)
+        self.call_service(service=create_included_material, service_kwargs=data)
+
         return super().form_valid(form)
 
 
@@ -139,6 +171,7 @@ class ExistingMaterialListView(CourseViewMixin,
 
 
 class AddNewIncludedMaterialView(CourseViewMixin,
+                                 CallServiceMixin,
                                  LoginRequiredMixin,
                                  IsTeacherInCoursePermission,
                                  FormView):
@@ -152,7 +185,7 @@ class AddNewIncludedMaterialView(CourseViewMixin,
     def get_initial(self):
         self.initial = super().get_initial()
         self.initial['topic'] = self.kwargs.get('topic_id')
-        return self.initial.copy()
+        return self.initial
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -160,9 +193,302 @@ class AddNewIncludedMaterialView(CourseViewMixin,
         return form_kwargs
 
     def form_valid(self, form):
-        create_included_material(identifier=form.cleaned_data.get('identifier'),
-                                 url=form.cleaned_data.get('url'),
-                                 topic=form.cleaned_data.get('topic'),
-                                 content=form.cleaned_data.get('content'))
+        create_included_material_kwargs = {
+            'identifier': form.cleaned_data.get('identifier'),
+            'url': form.cleaned_data.get('url'),
+            'topic': form.cleaned_data.get('topic'),
+            'content': form.cleaned_data.get('content')
+        }
 
+        self.call_service(service=create_included_material, service_kwargs=create_included_material_kwargs)
+
+        return super().form_valid(form)
+
+
+class ExistingTasksView(CourseViewMixin,
+                        LoginRequiredMixin,
+                        IsTeacherInCoursePermission,
+                        FormView):
+    template_name = 'education/existing_task_list.html'
+    form_class = IncludedTaskFromExistingForm
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task_list'] = Task.objects.all()
+        return context
+
+
+class CourseIncludedTasksListView(CourseViewMixin,
+                                  LoginRequiredMixin,
+                                  ListView):
+    template_name = 'education/included_task_list.html'
+
+    def get_queryset(self):
+        return IncludedTask.objects.filter(topic__course=self.course)
+
+
+class AddNewIncludedTaskView(CourseViewMixin,
+                             CallServiceMixin,
+                             LoginRequiredMixin,
+                             IsTeacherInCoursePermission,
+                             FormView):
+    template_name = 'education/add_task.html'
+    form_class = IncludedTaskModelForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_initial(self):
+        self.initial = super().get_initial()
+        self.initial['topic'] = self.kwargs.get('topic_id')
+        return self.initial
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_included_task_kwargs = {
+            'name': form.cleaned_data.get('name'),
+            'description': form.cleaned_data.get('description'),
+            'gradable': form.cleaned_data.get('gradable'),
+            'topic': form.cleaned_data.get('topic')
+        }
+
+        self.call_service(service=create_included_task, service_kwargs=create_included_task_kwargs)
+
+        return super().form_valid(form)
+
+
+class AddIncludedTaskFromExistingView(CourseViewMixin,
+                                      CallServiceMixin,
+                                      LoginRequiredMixin,
+                                      IsTeacherInCoursePermission,
+                                      FormView):
+    template_name = 'education/existing_task_list.html'
+    form_class = IncludedTaskFromExistingForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        context['task_list'] = Task.objects.all()
+
+        return context
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        data = {}
+        data['topic'] = self.request.POST.get('topic')
+        data['task'] = self.request.POST.get('task')
+        form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_included_task_kwargs = {
+            'existing_task': form.cleaned_data.get('task'),
+            'topic': form.cleaned_data.get('topic')
+        }
+
+        self.call_service(service=create_included_task, service_kwargs=create_included_task_kwargs)
+
+        return super().form_valid(form)
+
+
+class EditTaskView(LoginRequiredMixin,
+                   DashboardManagementPermission,
+                   UpdateView):
+
+    model = Task
+    fields = ('name', 'description', 'gradable')
+    pk_url_kwarg = 'task_id'
+    template_name = "education/edit_task.html"
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-courses')
+
+
+class EditIncludedTaskView(CourseViewMixin,
+                           LoginRequiredMixin,
+                           IsTeacherInCoursePermission,
+                           UpdateView):
+
+    model = IncludedTask
+    form_class = IncludedTaskModelForm
+    pk_url_kwarg = 'task_id'
+    template_name = "education/edit_included_task.html"
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+        return form_kwargs
+
+    def get_initial(self):
+        instance = self.get_object()
+        self.initial = super().get_initial()
+        self.initial['topic'] = instance.topic.id
+        return self.initial
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+
+class AddSourceCodeTestToTaskView(CourseViewMixin,
+                                  CallServiceMixin,
+                                  LoginRequiredMixin,
+                                  IsTeacherInCoursePermission,
+                                  FormView):
+
+    form_class = SourceCodeTestForm
+    template_name = 'education/add_source_test.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = {}
+            data['task'] = self.kwargs.get('task_id')
+            data['language'] = self.request.POST.get('language')
+            data['code'] = self.request.POST.get('code')
+
+            form_kwargs['data'] = data
+        return form_kwargs
+
+    def form_valid(self, form):
+        self.call_service(service=create_test_for_task, service_kwargs=form.cleaned_data)
+        return super().form_valid(form)
+
+
+class AddBinaryFileTestToTaskView(CourseViewMixin,
+                                  CallServiceMixin,
+                                  LoginRequiredMixin,
+                                  IsTeacherInCoursePermission,
+                                  FormView):
+
+    form_class = BinaryFileTestForm
+    template_name = 'education/add_binary_test.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = {}
+            data['task'] = self.kwargs.get('task_id')
+            data['language'] = self.request.POST.get('language')
+            data['file'] = self.request.FILES.get('file')
+
+            form_kwargs['data'] = data
+        return form_kwargs
+
+    def form_valid(self, form):
+        self.call_service(service=create_test_for_task, service_kwargs=form.cleaned_data)
+        return super().form_valid(form)
+
+
+class StudentSolutionListView(CourseViewMixin,
+                              TaskViewMixin,
+                              LoginRequiredMixin,
+                              IsStudentInCoursePermission,
+                              ListView):
+    template_name = 'education/student_solution_list.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        return Solution.objects.get_solutions_for(user.student, task)
+
+
+class StudentSolutionDetailView(CourseViewMixin,
+                                TaskViewMixin,
+                                LoginRequiredMixin,
+                                IsStudentInCoursePermission,
+                                DetailView):
+    model = Solution
+    pk_url_kwarg = 'solution_id'
+    template_name = 'education/student_solution_detail.html'
+
+
+class EditStudentSolutionView(CourseViewMixin,
+                              TaskViewMixin,
+                              LoginRequiredMixin,
+                              IsStudentInCoursePermission,
+                              UpdateView):
+    model = Solution
+    fields = ('code', 'file', 'url')
+    pk_url_kwarg = 'solution_id'
+    template_name = 'education/edit_student_solution.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+
+class SubmitGradableSolutionView(CourseViewMixin,
+                                 TaskViewMixin,
+                                 CallServiceMixin,
+                                 SubmitSolutionMixin,
+                                 LoginRequiredMixin,
+                                 IsStudentInCoursePermission,
+                                 FormView):
+    form_class = SubmitGradableSolutionForm
+
+    def get_form_kwargs(self):
+
+        form_kwargs = super().get_form_kwargs()
+
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        test = task.test
+
+        form_kwargs['is_test_source'] = test.is_source()
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_gradable_solution_kwargs = {
+            'student': self.request.user.student,
+            'task': get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        }
+        create_gradable_solution_kwargs.update(form.cleaned_data)
+
+        self.call_service(service=create_gradable_solution, service_kwargs=create_gradable_solution_kwargs)
+        return super().form_valid(form)
+
+
+class SubmitNonGradableSolutionView(CourseViewMixin,
+                                    TaskViewMixin,
+                                    CallServiceMixin,
+                                    SubmitSolutionMixin,
+                                    LoginRequiredMixin,
+                                    IsStudentInCoursePermission,
+                                    FormView):
+    form_class = SubmitNonGradableSolutionForm
+
+    def form_valid(self, form):
+        create_non_gradable_solution_kwargs = {
+            'student': self.request.user.student,
+            'task': get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        }
+        create_non_gradable_solution_kwargs.update(form.cleaned_data)
+
+        self.call_service(service=create_non_gradable_solution, service_kwargs=create_non_gradable_solution_kwargs)
         return super().form_valid(form)

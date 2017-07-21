@@ -1,6 +1,8 @@
 from test_plus import TestCase
 
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import Q
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -11,10 +13,25 @@ from ..factories import (
     TopicFactory,
     MaterialFactory,
     IncludedMaterialFactory,
+    TaskFactory,
+    IncludedTaskFactory,
+    ProgrammingLanguageFactory,
+    SourceCodeTestFactory,
+    BinaryFileTestFactory,
 )
-from ..models import Student, Teacher, Topic, IncludedMaterial, Material
+from ..models import (
+    Student,
+    Teacher,
+    Topic,
+    IncludedMaterial,
+    Material,
+    IncludedTask,
+    Task,
+    Solution,
+    IncludedTest
+)
 
-from odin.users.factories import ProfileFactory, BaseUserFactory
+from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
 
 from odin.common.faker import faker
 
@@ -182,12 +199,43 @@ class TestAddTopicToCourseView(TestCase):
             self.assertEqual(1, Topic.objects.filter(course=self.course).count())
 
 
+class TestExistingMaterialsView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.url = reverse('dashboard:education:course-management:existing-materials',
+                           kwargs={'course_id': self.course.id, 'topic_id': self.topic.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_materials_are_shown_correctly_when_included_or_regular(self):
+        material = MaterialFactory()
+        included_material = IncludedMaterialFactory(topic=self.topic)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertContains(response, material.identifier)
+            self.assertContains(response, included_material.identifier)
+
+
 class TestAddNewIncludedMaterialView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-new-included-material',
                            kwargs={'course_id': self.course.id,
                                    'topic_id': self.topic.id})
@@ -209,6 +257,8 @@ class TestAddNewIncludedMaterialView(TestCase):
     def test_can_create_new_material_for_topic_on_post(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
+        material_count = IncludedMaterial.objects.count()
+        topic_material_count = self.topic.materials.count()
         data = {
             'identifier': faker.name(),
             'url': faker.url(),
@@ -222,16 +272,15 @@ class TestAddNewIncludedMaterialView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}
             ))
-            self.assertEqual(1, IncludedMaterial.objects.count())
-            self.assertEqual(1, self.topic.materials.count())
+            self.assertEqual(material_count + 1, IncludedMaterial.objects.count())
+            self.assertEqual(topic_material_count + 1, self.topic.materials.count())
 
 
 class TestAddIncludedMaterialFromExistingView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.week = WeekFactory(course=self.course)
-        self.topic = TopicFactory(course=self.course, week=self.week)
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-included-material-from-existing',
                            kwargs={'course_id': self.course.id,
                                    'topic_id': self.topic.id})
@@ -273,9 +322,6 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         included_material_count = IncludedMaterial.objects.count()
         material_count = Material.objects.count()
 
-        self.assertEqual(1, included_material_count)
-        self.assertEqual(1, material_count)
-
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data={'material': included_material.material.id})
             self.assertRedirects(response, expected_url=reverse(
@@ -283,3 +329,435 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
                 kwargs={'course_id': self.course.id}))
             self.assertEqual(included_material_count + 1, IncludedMaterial.objects.count())
             self.assertEqual(material_count, Material.objects.count())
+
+
+class TestExistingTasksView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.url = reverse('dashboard:education:course-management:existing-tasks',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_tasks_are_shown_correctly_when_included_or_regular(self):
+        task = TaskFactory()
+        included_task = IncludedTaskFactory(topic__course=self.course)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertContains(response, task.name)
+            self.assertContains(response, included_task.name)
+
+
+class TestAddNewIncludedTaskView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.url = reverse('dashboard:education:course-management:add-new-included-task',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_can_create_new_task_for_topic_on_post(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        task_count = IncludedTask.objects.count()
+        topic_task_count = self.topic.tasks.count()
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'topic': self.topic.id,
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}
+            ))
+            self.assertEqual(task_count + 1, IncludedTask.objects.count())
+            self.assertEqual(topic_task_count + 1, self.topic.tasks.count())
+
+
+class TestAddIncludedTaskFromExistingView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.url = reverse('dashboard:education:course-management:add-included-task-from-existing',
+                           kwargs={'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_can_add_ordinary_task_that_has_not_yet_been_included_to_course(self):
+        task_count = IncludedTask.objects.count()
+        teacher = Teacher.objects.create_from_user(self.user)
+        task = TaskFactory()
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+            response = self.post(self.url, data={'task': task.id, 'topic': self.topic.id})
+            self.assertEqual(task_count + 1, IncludedTask.objects.count())
+            included_task = IncludedTask.objects.filter(task=task)
+            self.assertEqual(1, Topic.objects.filter(tasks__in=included_task).count())
+
+    def test_can_add_included_task_from_existing_already_included_tasks(self):
+        course = CourseFactory()
+        topic = TopicFactory(course=course)
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        included_task = IncludedTaskFactory(topic=topic)
+
+        included_task_count = IncludedTask.objects.count()
+        task_count = Task.objects.count()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data={'task': included_task.task.id, 'topic': self.topic.id})
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}))
+            self.assertEqual(included_task_count + 1, IncludedTask.objects.count())
+            self.assertEqual(task_count, Task.objects.count())
+
+
+class TestEditIncludedTaskView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.included_task = IncludedTaskFactory(topic__course=self.course)
+        self.url = reverse('dashboard:education:course-management:edit-included-task',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'task_id': self.included_task.id
+                           })
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_included_task_is_edited_successfully_on_post(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        new_name = faker.name()
+        data = {
+            'name': new_name,
+            'topic': self.included_task.topic.id,
+            'description': self.included_task.task.description
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.included_task.refresh_from_db()
+            self.assertEquals(new_name, self.included_task.name)
+
+
+class TestEditTaskView(TestCase):
+
+    def setUp(self):
+        self.task = TaskFactory()
+        self.url = reverse('dashboard:education:edit-task',
+                           kwargs={
+                               'task_id': self.task.id
+                           })
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_superuser(self):
+        response = self.get(self.url)
+        self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_task_is_edited_successfully_on_post(self):
+        new_name = faker.name()
+        data = {
+            'name': new_name,
+            'description': self.task.description,
+            'gradable': self.task.gradable
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-courses',
+            ))
+            self.task.refresh_from_db()
+            self.assertEquals(new_name, self.task.name)
+
+
+class TestAddSourceCodeTestToTaskView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.included_task = IncludedTaskFactory(topic__course=self.course)
+        self.test_password = faker.password()
+        self.language = ProgrammingLanguageFactory()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:education:course-management:add-source-test',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'task_id': self.included_task.id,
+                           })
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_source_test_is_added_to_task_on_post(self):
+        filters = {
+            'code__isnull': False,
+            'file': ''
+        }
+
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        source_test_count = IncludedTest.objects.filter(**filters).count()
+        task_tests = IncludedTest.objects.filter(task=self.included_task).count()
+
+        data = {
+            'language': self.language.id,
+            'code': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(source_test_count + 1, IncludedTest.objects.filter(**filters).count())
+            self.assertEqual(task_tests + 1, IncludedTest.objects.filter(task=self.included_task).count())
+
+
+class TestAddBinaryFileTestToTaskView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.included_task = IncludedTaskFactory(topic__course=self.course)
+        self.test_password = faker.password()
+        self.language = ProgrammingLanguageFactory()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:education:course-management:add-binary-test',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'task_id': self.included_task.id,
+                           })
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_binary_test_is_added_to_task_on_post(self):
+        filters = {
+            'code__isnull': True,
+        }
+
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        binary_test_count = IncludedTest.objects.filter(**filters).count()
+        task_tests = IncludedTest.objects.filter(task=self.included_task).count()
+        file = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        data = {
+            'language': self.language.id,
+            'file': file
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(binary_test_count + 1, IncludedTest.objects.filter(~Q(file=''), **filters).count())
+            self.assertEqual(task_tests + 1, IncludedTest.objects.filter(task=self.included_task).count())
+
+
+class TestStudentSolutionListView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.task = IncludedTaskFactory(topic__course=self.course)
+        self.url = reverse('dashboard:education:user-task-solutions',
+                           kwargs={'course_id': self.course.id,
+                                   'task_id': self.task.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_returns_403_when_user_is_not_student_in_course(self):
+        teacher = Teacher.objects.create_from_user(user=self.user)
+        add_teacher(self.course, teacher)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response=response)
+
+    def test_get_returns_200_when_user_is_student_in_course(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response=response)
+
+
+class TestSubmitGradableSolutionView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.task = IncludedTaskFactory(task__gradable=True, topic__course=self.course)
+        self.url = reverse('dashboard:education:add-gradable-solution',
+                           kwargs={'course_id': self.course.id,
+                                   'task_id': self.task.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_when_not_student_or_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_student_for_course(self):
+        BinaryFileTestFactory(task=self.task)
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(self):
+        SourceCodeTestFactory(task=self.task)
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        task_solution_count = self.task.solutions.count()
+        data = {'code': faker.text()}
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(solution_count + 1, Solution.objects.count())
+            self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(self):
+        BinaryFileTestFactory(task=self.task)
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        task_solution_count = self.task.solutions.count()
+        file = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        data = {'file': file}
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(solution_count + 1, Solution.objects.count())
+            self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+
+class TestSubmitNotGradableSolutionView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.task = IncludedTaskFactory(gradable=False, topic__course=self.course)
+        self.url = reverse('dashboard:education:add-not-gradable-solution',
+                           kwargs={'course_id': self.course.id,
+                                   'task_id': self.task.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_when_not_student_or_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_student_for_course(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course(self):
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+        solution_count = Solution.objects.count()
+        task_solution_count = self.task.solutions.count()
+        data = {'url': faker.url()}
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.assertEqual(solution_count + 1, Solution.objects.count())
+            self.assertEqual(task_solution_count + 1, self.task.solutions.count())

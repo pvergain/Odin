@@ -1,0 +1,56 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block content_title %}
+  Your solutions
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="portlet box green">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-comments"></i> Solutions
+            </div>
+            <div class="tools">
+                <a href="javascript:;" class="collapse"> </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+           <div class="table-scrollable">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th> # </th>
+                            <th> Status </th>
+                            <th> </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for solution in object_list %}
+                            <tr>
+                                <td>{{ solution.id }}</td>
+                                <td>{{ solution.status }}</td>
+                                <td><a href="{% url 'dashboard:education:student-solution-detail' course.id task.id solution.id %}"><button class="btn green uppercase" name="button">View</button></a> </td>
+                                  <td>
+                                      <a href="{% url 'dashboard:education:edit-student-solution' course.id task.id solution.id %}">
+                                        <button class="btn green uppercase" type="button" name="button">Edit</button>
+                                      </a>
+                                  </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+          </div>
+          {% if task.gradable %}
+            <a href="{% url 'dashboard:education:add-gradable-solution' course.id task.id %}">
+              <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
+            </a>
+          {% else %}
+            <a href="{% url 'dashboard:education:add-not-gradable-solution' course.id task.id %}">
+              <button type="button" name="button" class="btn green uppercase" >Add a new solution</button>
+            </a>
+          {% endif %}
+    </div>
+  </div>
+{% endblock page_content %}

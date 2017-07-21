@@ -1,9 +1,26 @@
 import factory
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
-from .models import Student, Teacher, Course, Week, Topic, Material, IncludedMaterial
+from odin.education.services import create_test_for_task
+
+
+from .models import (
+    Student,
+    Teacher,
+    Course,
+    Week,
+    Topic,
+    Material,
+    IncludedMaterial,
+    Task,
+    IncludedTask,
+    ProgrammingLanguage,
+    Test
+)
 from .services import create_course
 
 
@@ -18,7 +35,7 @@ class TeacherFactory(BaseUserFactory):
 
 
 class CourseFactory(factory.DjangoModelFactory):
-    name = factory.LazyAttribute(lambda _: faker.word())
+    name = factory.Sequence(lambda n: f'{n}{faker.word()}')
     start_date = factory.LazyAttribute(lambda _: faker.date_object())
     end_date = factory.LazyAttribute(lambda _: faker.date_object())
 
@@ -58,8 +75,8 @@ class TopicFactory(factory.DjangoModelFactory):
 
 
 class MaterialFactory(factory.DjangoModelFactory):
-    identifier = factory.LazyAttribute(lambda _: faker.word())
-    url = factory.LazyAttribute(lambda _: faker.url())
+    identifier = factory.Sequence(lambda n: f'{n}{faker.word()}')
+    url = factory.Sequence(lambda n: f'{faker.url()}{n}')
     content = factory.LazyAttribute(lambda _: faker.text())
 
     class Meta:
@@ -72,3 +89,48 @@ class IncludedMaterialFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = IncludedMaterial
+
+
+class TaskFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: f'{n}{faker.word()}')
+    description = factory.LazyAttribute(lambda _: faker.text())
+    gradable = factory.LazyAttribute(lambda _: faker.boolean())
+
+    class Meta:
+        model = Task
+
+
+class IncludedTaskFactory(factory.DjangoModelFactory):
+    topic = factory.SubFactory(TopicFactory)
+    task = factory.SubFactory(TaskFactory)
+
+    class Meta:
+        model = IncludedTask
+
+
+class ProgrammingLanguageFactory(factory.DjangoModelFactory):
+    name = factory.LazyAttribute(lambda _: faker.word())
+
+    class Meta:
+        model = ProgrammingLanguage
+
+
+class TaskTestFactory(factory.DjangoModelFactory):
+    language = factory.SubFactory(ProgrammingLanguageFactory)
+
+    class Meta:
+        model = Test
+
+
+class SourceCodeTestFactory(TaskTestFactory):
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        kwargs['code'] = faker.text()
+        return create_test_for_task(*args, **kwargs)
+
+
+class BinaryFileTestFactory(TaskTestFactory):
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        kwargs['file'] = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        return create_test_for_task(*args, **kwargs)

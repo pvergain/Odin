@@ -26,3 +26,15 @@ class IsTeacherInCoursePermission(BaseUserPassesTestMixin):
             return True and super().test_func()
 
         return False
+
+
+class IsStudentInCoursePermission(BaseUserPassesTestMixin):
+    raise_exception = True
+
+    def test_func(self):
+        user = self.request.user
+        is_student = self.course.students.filter(email=user.email).exists()
+        if is_student:
+            return True and super().test_func()
+
+        return False

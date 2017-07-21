@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+from typing import Dict, BinaryIO
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
@@ -11,7 +11,13 @@ from .models import (
     Week,
     Topic,
     IncludedMaterial,
-    Material
+    Material,
+    IncludedTask,
+    Task,
+    ProgrammingLanguage,
+    Solution,
+    Test,
+    IncludedTest
 )
 
 
@@ -89,10 +95,103 @@ def create_included_material(*,
         existing_material.full_clean()
         existing_material.save()
 
-    included_material.__dict__.update(existing_material.__dict__)
+    included_material.identifier = existing_material.identifier
+    included_material.url = existing_material.url
+    included_material.content = existing_material.content
 
     included_material.material = existing_material
     included_material.full_clean()
     included_material.save()
 
     return included_material
+
+
+def create_included_task(*,
+                         name: str=None,
+                         description: str=None,
+                         gradable: bool=False,
+                         existing_task: Task=None,
+                         topic: Topic=None) -> IncludedTask:
+    included_task = IncludedTask(topic=topic)
+    if existing_task is None:
+        existing_task = Task(name=name, description=description, gradable=gradable)
+        existing_task.full_clean()
+        existing_task.save()
+
+    included_task.name = existing_task.name
+    included_task.description = existing_task.description
+    included_task.gradable = existing_task.gradable
+
+    included_task.task = existing_task
+    included_task.full_clean()
+    included_task.save()
+
+    return included_task
+
+
+def create_test_for_task(*,
+                         existing_test: Test=None,
+                         task: IncludedTask,
+                         language: ProgrammingLanguage,
+                         extra_options: Dict={},
+                         code: str=None,
+                         file: BinaryIO=None):
+
+    new_test = IncludedTest(task=task)
+    if existing_test is None:
+        existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
+        existing_test.full_clean()
+        existing_test.save()
+
+    new_test.language = existing_test.language
+    new_test.extra_options = existing_test.extra_options
+    new_test.code = existing_test.code
+    new_test.file = existing_test.file
+
+    new_test.test = existing_test
+    new_test.save()
+
+    return new_test
+
+
+def create_gradable_solution(*,
+                             task: IncludedTask,
+                             student: Student,
+                             code: str=None,
+                             file: BinaryIO=None) -> Solution:
+    if code is not None and file is not None:
+        raise ValidationError("Provide either code or a file, not both!")
+    if code is None and file is None:
+        raise ValidationError("Provide either code or a file!")
+    if code is not None:
+        new_solution = Solution.objects.create(
+            task=task,
+            student=student,
+            code=code,
+            status=6
+        )
+    if file is not None:
+        new_solution = Solution.objects.create(
+            task=task,
+            student=student,
+            file=file,
+            status=6
+        )
+
+    return new_solution
+
+
+def create_non_gradable_solution(*,
+                                 task: IncludedTask,
+                                 student: Student,
+                                 url: str=None) -> Solution:
+    if url is None:
+            raise ValidationError("Provide a url!")
+    new_solution = Solution.objects.create(
+        task=task,
+        student=student,
+        url=url,
+        status=6
+    )
+
+    return new_solution
