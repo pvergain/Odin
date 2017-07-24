@@ -7,11 +7,18 @@
 
 {% block page_content %}
 <div class="row">
-  <div class="col-md-7">
+  <div class="col-md-12">
     {% include "education/partial/teachers_table.html" with course=course teachers=course.visible_teachers.all %}
   </div>
-  <div class="col-md-7">
+  <div class="col-md-12">
     {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page%}
   </div>
+  {% if not public_page %}
+    <div class="col-md-3">
+      <a href="{% url 'public:course_detail' course_slug=course.slug_url %}">
+        <button type="button" name="button" class="btn green uppercase">View public version of this course</button>
+      </a>
+    </div>
+  {% endif %}
 </div>
 {% endblock page_content %}
