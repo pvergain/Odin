@@ -12,6 +12,7 @@ from .views import (
     AddNewIncludedTaskView,
     AddIncludedTaskFromExistingView,
     ExistingTasksView,
+    TaskDetailView,
     CourseIncludedTasksListView,
     EditTaskView,
     EditIncludedTaskView,
@@ -97,5 +98,8 @@ urlpatterns = [
         name='student-solution-detail'),
     url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/edit$',
         view=EditStudentSolutionView.as_view(),
-        name='edit-student-solution')
+        name='edit-student-solution'),
+    url(regex='^tasks/(?P<task_id>[0-9]+)/$',
+        view=TaskDetailView.as_view(),
+        name='task-detail')
 ]
