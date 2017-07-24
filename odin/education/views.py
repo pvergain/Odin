@@ -234,15 +234,6 @@ class ExistingTasksView(CourseViewMixin,
         return context
 
 
-class CourseIncludedTasksListView(CourseViewMixin,
-                                  LoginRequiredMixin,
-                                  ListView):
-    template_name = 'education/included_task_list.html'
-
-    def get_queryset(self):
-        return IncludedTask.objects.filter(topic__course=self.course)
-
-
 class AddNewIncludedTaskView(CourseViewMixin,
                              CallServiceMixin,
                              LoginRequiredMixin,
