@@ -313,5 +313,6 @@ class TestCreateCourseView(TestCase):
         }
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse('dashboard:management:management_index'))
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
+                                                                kwargs={'course_id': Course.objects.last().id}))
             self.assertEqual(1, Course.objects.count())
