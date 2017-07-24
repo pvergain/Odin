@@ -85,7 +85,7 @@ class PublicCourseListView(PublicViewContextMixin, ListView):
     template_name = 'education/all_courses.html'
 
     def get_queryset(self):
-        return Course.objects.select_related('description')
+        return Course.objects.filter(public=True).select_related('description')
 
 
 class PublicCourseDetailView(PublicViewContextMixin, DetailView):
