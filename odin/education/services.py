@@ -25,8 +25,8 @@ def add_student(course: Course, student: Student) -> CourseAssignment:
     return CourseAssignment.objects.create(course=course, student=student)
 
 
-def add_teacher(course: Course, teacher: Teacher) -> CourseAssignment:
-    return CourseAssignment.objects.create(course=course, teacher=teacher)
+def add_teacher(course: Course, teacher: Teacher, hidden: bool=False) -> CourseAssignment:
+    return CourseAssignment.objects.create(course=course, teacher=teacher, hidden=hidden)
 
 
 @transaction.atomic

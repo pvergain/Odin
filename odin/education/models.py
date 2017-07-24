@@ -24,7 +24,6 @@ class Student(BaseUser):
 
 class Teacher(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
-    hidden = models.BooleanField(default=False)
 
     objects = TeacherManager()
 
@@ -52,6 +51,10 @@ class Course(models.Model):
     public = models.BooleanField(default=True)
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
+
+    @property
+    def visible_teachers(self):
+        return self.teachers.filter(course_assignments__hidden=False)
 
     @property
     def duration_in_weeks(self):
@@ -105,6 +108,8 @@ class CourseAssignment(models.Model):
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
                                related_name='course_assignments')
+
+    hidden = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (('teacher', 'course'), ('student', 'course'))

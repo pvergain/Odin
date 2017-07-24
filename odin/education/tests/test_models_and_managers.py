@@ -180,7 +180,7 @@ class CourseTests(TestCase):
         course = CourseFactory()
         teacher = TeacherFactory()
 
-        count = course.teachers.count()
+        count = course.visible_teachers.count()
 
         CourseAssignment.objects.create(course=course,
                                         teacher=teacher)

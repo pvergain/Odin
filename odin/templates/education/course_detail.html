@@ -8,11 +8,11 @@
 {% block page_content %}
 <div class="row">
   <div class="col-md-7">
-    {% include "education/partial/teachers_table.html" with course=course teachers=course.teachers.all %}
+    {% include "education/partial/teachers_table.html" with course=course teachers=course.visible_teachers.all %}
   </div>
   <div class="col-md-7">
     {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page%}
   </div>
-  <a href="{% url 'dashboard:education:included-tasks' course.id %}"><button class="btn green uppercase" type="button" name="button">View Tasks For This Course</button></a>  
+  <a href="{% url 'dashboard:education:included-tasks' course.id %}"><button class="btn green uppercase" type="button" name="button">View Tasks For This Course</button></a>
 </div>
 {% endblock page_content %}
