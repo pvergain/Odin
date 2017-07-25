@@ -371,6 +371,7 @@ class TestAddNewIncludedTaskView(TestCase):
                            kwargs={'course_id': self.course.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
+        self.language = ProgrammingLanguageFactory()
 
     def test_get_is_forbidden_if_not_teacher_for_course(self):
         with self.login(email=self.user.email, password=self.test_password):
@@ -403,6 +404,52 @@ class TestAddNewIncludedTaskView(TestCase):
             ))
             self.assertEqual(task_count + 1, IncludedTask.objects.count())
             self.assertEqual(topic_task_count + 1, self.topic.tasks.count())
+
+    def test_view_does_not_create_test_when_task_is_not_gradable(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        task_count = IncludedTask.objects.count()
+        test_count = IncludedTest.objects.count()
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'topic': self.topic.id,
+            'gradable': False,
+            'language': self.language.id,
+            'code': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}
+            ))
+            self.assertEqual(task_count + 1, IncludedTask.objects.count())
+            self.assertEqual(test_count, IncludedTest.objects.count())
+
+    def test_view_creates_test_when_when_task_is_gradeable(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        task_count = IncludedTask.objects.count()
+        test_count = IncludedTest.objects.count()
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'topic': self.topic.id,
+            'gradable': True,
+            'language': self.language.id,
+            'code': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id}
+            ))
+            self.assertEqual(task_count + 1, IncludedTask.objects.count())
+            self.assertEqual(test_count + 1, IncludedTest.objects.count())
 
 
 class TestAddIncludedTaskFromExistingView(TestCase):
@@ -543,7 +590,7 @@ class TestAddSourceCodeTestToTaskView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.included_task = IncludedTaskFactory(topic__course=self.course)
+        self.included_task = IncludedTaskFactory(topic__course=self.course, gradable=True)
         self.test_password = faker.password()
         self.language = ProgrammingLanguageFactory()
         self.user = BaseUserFactory(password=self.test_password)
@@ -595,7 +642,7 @@ class TestAddBinaryFileTestToTaskView(TestCase):
 
     def setUp(self):
         self.course = CourseFactory()
-        self.included_task = IncludedTaskFactory(topic__course=self.course)
+        self.included_task = IncludedTaskFactory(topic__course=self.course, gradable=True)
         self.test_password = faker.password()
         self.language = ProgrammingLanguageFactory()
         self.user = BaseUserFactory(password=self.test_password)
@@ -671,7 +718,7 @@ class TestStudentSolutionListView(TestCase):
 class TestSubmitGradableSolutionView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.task = IncludedTaskFactory(task__gradable=True, topic__course=self.course)
+        self.task = IncludedTaskFactory(gradable=True, topic__course=self.course)
         self.url = reverse('dashboard:education:add-gradable-solution',
                            kwargs={'course_id': self.course.id,
                                    'task_id': self.task.id})

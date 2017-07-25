@@ -19,7 +19,8 @@ from odin.education.models import (
     Task,
     IncludedTask,
     ProgrammingLanguage,
-    Test
+    Test,
+    IncludedMaterial,
 )
 from odin.education.services import add_student, add_teacher
 
@@ -280,20 +281,25 @@ class TopicLoader(BaseLoader):
 class IncludedMaterialLoader(BaseLoader):
     json_model = 'education.material'
     django_model = apps.get_model('education.IncludedMaterial')
-    model_fields = ['identifier', 'content']
-    json_fields = ['title', 'description']
+    model_fields = ['identifier', 'content', 'course']
+    json_fields = ['title', 'description', 'course']
 
     def generate_orm_objects(self):
         instance_list = []
         for kwargs in self.get_field_mapping():
-            id = kwargs.pop('id')
-            material = Material.objects.create(**kwargs)
-            topic_qs = Topic.objects.filter(pk=id)
+            course = Course.objects.get(id=kwargs.pop('course'))
+            topic_qs = Topic.objects.filter(name="Everything", course=course)
             if topic_qs.exists():
-                topic = topic_qs.first()
-                instance = self.django_model(topic=topic, material=material)
-                instance.__dict__.update(material.__dict__)
-                instance_list.append(instance)
+                topic = Topic.objects.first()
+            else:
+                new_topic_id = Topic.objects.last().id + 1
+                topic = Topic.objects.create(id=new_topic_id,
+                                             name="Everything",
+                                             course=course,
+                                             week=course.weeks.first())
+            material = Material.objects.create(**kwargs)
+            instance = IncludedMaterial(topic=topic, material=material, **kwargs)
+            instance_list.append(instance)
 
         self.django_model.objects.bulk_create(instance_list)
         return instance_list
@@ -309,15 +315,37 @@ class ProgrammingLanguageLoader(BaseLoader):
 class IncludedTaskLoader(BaseLoader):
     json_model = 'education.task'
     django_model = apps.get_model('education.IncludedTask')
-    model_fields = ['name', 'description', 'gradable']
-    json_fields = ['name', 'description', 'gradable']
+    model_fields = ['name', 'description', 'gradable', 'course']
+    json_fields = ['name', 'description', 'gradable', 'course']
 
     def generate_orm_objects(self):
         instance_list = []
         for kwargs in self.get_field_mapping():
             id = kwargs.pop('id')
-            task = Task.objects.create(**kwargs)
-            instance = self.django_model(id=id, task=task, **kwargs)
+
+            course_qs = Course.objects.filter(id=kwargs.pop('course'))
+            if course_qs.exists():
+                course = course_qs.first()
+            else:
+                continue
+            topic_qs = Topic.objects.filter(name="Everything", course=course)
+
+            if topic_qs.exists():
+                topic = topic_qs.first()
+            else:
+                new_topic_id = Topic.objects.last().id + 1
+                topic = Topic.objects.create(id=new_topic_id,
+                                             name="Everything",
+                                             course=course,
+                                             week=course.weeks.first())
+
+            task = Task.objects.create(id=id, **kwargs)
+            instance = self.django_model(id=id,
+                                         topic=topic,
+                                         task=task,
+                                         name=kwargs['name'],
+                                         description=kwargs['description'],
+                                         gradable=kwargs['gradable'])
             instance_list.append(instance)
         self.django_model.objects.bulk_create(instance_list)
 
@@ -332,28 +360,40 @@ class SourceCodeTestLoader(BaseLoader):
 class IncludedTestLoader(BaseLoader):
     json_model = 'education.test'
     django_model = apps.get_model('education.IncludedTest')
-    model_fields = ['language', 'extra_options', 'task', 'code']
-    json_fields = ['language', 'extra_options', 'task', 'code']
+    model_fields = ['language', 'extra_options', 'task']
+    json_fields = ['language', 'extra_options', 'task']
 
     def generate_orm_objects(self):
         source_code_loader = SourceCodeTestLoader()
-        code_data = source_code_loader.data
-        data_index = 0
-        for item in code_data:
-            self.data[data_index]['fields'].update(item['fields'])
-            data_index += 1
+
+        code_data = {}
+        for item in source_code_loader.data:
+            item_pk = item.pop('pk')
+            code_data[item_pk] = item
 
         instance_list = []
         for kwargs in self.get_field_mapping():
+            id = kwargs.get('id')
             task_id = kwargs.pop('task')
             task = IncludedTask.objects.get(id=task_id)
 
             language_id = kwargs.pop('language')
             language = ProgrammingLanguage.objects.get(id=language_id)
 
-            test = Test.objects.create(language=language, **kwargs)
+            try:
+                test = Test.objects.create(language=language, code=code_data[id]['fields']['code'], **kwargs)
+            except KeyError as e:
+                """
+                SourceCodeTest objects with certain IDs are missing in source project's `dump.json`
+                """
+                continue
 
-            instance = self.django_model(test=test, language=language, task=task, **kwargs)
+            instance = self.django_model(test=test,
+                                         language=language,
+                                         task=task,
+                                         code=code_data[id]['fields']['code'],
+                                         **kwargs)
+
             instance_list.append(instance)
 
         self.django_model.objects.bulk_create(instance_list)

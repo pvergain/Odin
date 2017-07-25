@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 
 from odin.management.permissions import DashboardManagementPermission
 
-from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution
+from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution, IncludedTest
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
@@ -85,7 +85,7 @@ class PublicCourseListView(PublicViewContextMixin, ListView):
     template_name = 'education/all_courses.html'
 
     def get_queryset(self):
-        return Course.objects.select_related('description')
+        return Course.objects.filter(public=True).select_related('description')
 
 
 class PublicCourseDetailView(PublicViewContextMixin, DetailView):
@@ -234,15 +234,6 @@ class ExistingTasksView(CourseViewMixin,
         return context
 
 
-class CourseIncludedTasksListView(CourseViewMixin,
-                                  LoginRequiredMixin,
-                                  ListView):
-    template_name = 'education/included_task_list.html'
-
-    def get_queryset(self):
-        return IncludedTask.objects.filter(topic__course=self.course)
-
-
 class AddNewIncludedTaskView(CourseViewMixin,
                              CallServiceMixin,
                              LoginRequiredMixin,
@@ -273,7 +264,15 @@ class AddNewIncludedTaskView(CourseViewMixin,
             'topic': form.cleaned_data.get('topic')
         }
 
-        self.call_service(service=create_included_task, service_kwargs=create_included_task_kwargs)
+        task = self.call_service(service=create_included_task, service_kwargs=create_included_task_kwargs)
+        if task.gradable:
+            create_test_kwargs = {
+                'task': task,
+                'language': form.cleaned_data.get('language'),
+                'code': form.cleaned_data.get('code')
+            }
+
+            self.call_service(service=create_test_for_task, service_kwargs=create_test_kwargs)
 
         return super().form_valid(form)
 
@@ -423,6 +422,40 @@ class AddBinaryFileTestToTaskView(CourseViewMixin,
     def form_valid(self, form):
         self.call_service(service=create_test_for_task, service_kwargs=form.cleaned_data)
         return super().form_valid(form)
+
+
+class EditIncludedTestView(CourseViewMixin,
+                           LoginRequiredMixin,
+                           IsTeacherInCoursePermission,
+                           UpdateView):
+    model = IncludedTest
+    template_name = 'education/edit_included_test.html'
+
+    def get_object(self):
+        task = IncludedTask.objects.get(id=self.kwargs.get('task_id'))
+        return task.test
+
+    def get_form_class(self):
+        if self.object.is_source():
+            return SourceCodeTestForm
+
+        return BinaryFileTestForm
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = {}
+            data['task'] = self.kwargs.get('task_id')
+            data['language'] = self.request.POST.get('language')
+            data['code'] = self.request.POST.get('code')
+
+            form_kwargs['data'] = data
+        return form_kwargs
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
 
 
 class StudentSolutionListView(CourseViewMixin,

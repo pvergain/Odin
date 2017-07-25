@@ -24,7 +24,6 @@ class Student(BaseUser):
 
 class Teacher(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
-    hidden = models.BooleanField(default=False)
 
     objects = TeacherManager()
 
@@ -49,7 +48,13 @@ class Course(models.Model):
     video_channel = models.URLField(blank=True, null=True)
     facebook_group = models.URLField(blank=True, null=True)
 
+    public = models.BooleanField(default=True)
+
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
+
+    @property
+    def visible_teachers(self):
+        return self.teachers.filter(course_assignments__hidden=False)
 
     @property
     def duration_in_weeks(self):
@@ -103,6 +108,8 @@ class CourseAssignment(models.Model):
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
                                related_name='course_assignments')
+
+    hidden = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (('teacher', 'course'), ('student', 'course'))
@@ -235,8 +242,7 @@ class IncludedTask(BaseTask):
                              related_name='included_tasks')
     topic = models.ForeignKey(Topic,
                               on_delete=models.CASCADE,
-                              related_name='tasks',
-                              null=True)
+                              related_name='tasks')
 
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
@@ -277,6 +283,9 @@ class IncludedTest(BaseTest):
         return super().save(*args, **kwargs)
 
     def clean(self):
+        if not self.task.gradable:
+            raise ValidationError("Can not add tests to a non-gradable task")
+
         if self.code is None and str(self.file) is '':
             raise ValidationError("A binary file or source code must be provided!")
 
