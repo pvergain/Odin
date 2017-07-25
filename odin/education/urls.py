@@ -22,6 +22,7 @@ from .views import (
     SubmitNonGradableSolutionView,
     StudentSolutionDetailView,
     EditStudentSolutionView,
+    EditIncludedTestView
 )
 
 
@@ -65,6 +66,10 @@ course_management_urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/add-binary-test/(?P<task_id>[0-9]+)$',
         view=AddBinaryFileTestToTaskView.as_view(),
         name='add-binary-test'),
+    url(regex='^(?P<course_id>[0-9]+)/edit-test-for-task/(?P<task_id>[0-9]+)$',
+        view=EditIncludedTestView.as_view(),
+        name='edit-test'),
+
 ]
 
 urlpatterns = [

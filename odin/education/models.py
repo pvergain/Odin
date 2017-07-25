@@ -284,6 +284,9 @@ class IncludedTest(BaseTest):
         return super().save(*args, **kwargs)
 
     def clean(self):
+        if not self.task.gradable:
+            raise ValidationError("Can not add tests to a non-gradable task")
+
         if self.code is None and str(self.file) is '':
             raise ValidationError("A binary file or source code must be provided!")
 
