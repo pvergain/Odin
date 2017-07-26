@@ -11,6 +11,10 @@ def get_grader_ready_data(solution_id, solution_model):
     if solution.file:
         file_type = 'binary'
         test_resource = test.file
+
+    if test.extra_options is None:
+        test.extra_options = {}
+
     data = {
         'language': test.language.name,
         'test_type': 'unittest',
