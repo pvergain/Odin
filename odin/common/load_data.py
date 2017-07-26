@@ -290,7 +290,7 @@ class IncludedMaterialLoader(BaseLoader):
             course = Course.objects.get(id=kwargs.pop('course'))
             topic_qs = Topic.objects.filter(name="Everything", course=course)
             if topic_qs.exists():
-                topic = Topic.objects.first()
+                topic = topic_qs.first()
             else:
                 new_topic_id = Topic.objects.last().id + 1
                 topic = Topic.objects.create(id=new_topic_id,
