@@ -229,7 +229,7 @@ EMAIL_TEMPLATES = {
 GRADER_SOLUTION_MODEL = 'education.Solution'
 
 GRADER_GRADE_PATH = "/grade"
-GRADER_CHECK_PATH = "/check_result/{buildID}/"
+GRADER_CHECK_PATH = "/check_result/{build_id}/"
 GRADER_GET_NONCE_PATH = "/nonce"
 GRADER_ADDRESS = env('GRADER_ADDRESS', default='https://grader.hackbulgaria.com')
 GRADER_API_KEY = env('GRADER_API_KEY', default='')
