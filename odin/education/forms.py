@@ -7,7 +7,8 @@ from .models import (
     Week,
     IncludedTask,
     IncludedTest,
-    Solution
+    Solution,
+    ProgrammingLanguage
 )
 
 
@@ -18,7 +19,16 @@ class DateInput(forms.DateInput):
 class ManagementAddCourseForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ('name', 'start_date', 'end_date', 'repository', 'video_channel', 'facebook_group', 'slug_url')
+        fields = (
+            'name',
+            'start_date',
+            'end_date',
+            'repository',
+            'video_channel',
+            'facebook_group',
+            'slug_url',
+            'public',
+        )
         widgets = {
             'start_date': DateInput(),
             'end_date': DateInput(),
@@ -56,6 +66,9 @@ class IncludedMaterialFromExistingForm(forms.ModelForm):
 
 
 class IncludedTaskModelForm(forms.ModelForm):
+    language = forms.ModelChoiceField(queryset=ProgrammingLanguage.objects.all(), required=False)
+    code = forms.CharField(widget=forms.Textarea(), required=False)
+
     def __init__(self, course, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['topic'] = forms.ModelChoiceField(

@@ -18,7 +18,6 @@ def make_new_superuser_teacher(sender, instance, created, **kwargs):
     if created:
         if instance.is_superuser:
             teacher = Teacher.objects.create_from_user(instance)
-            teacher.hidden = True
             teacher.save()
             for course in Course.objects.all():
-                add_teacher(course, teacher)
+                add_teacher(course, teacher, hidden=True)

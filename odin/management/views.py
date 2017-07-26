@@ -95,9 +95,13 @@ class CreateCourseView(LoginRequiredMixin,
                        FormView):
     template_name = 'dashboard/add_course.html'
     form_class = ManagementAddCourseForm
-    success_url = reverse_lazy('dashboard:management:management_index')
 
     def form_valid(self, form):
-        create_course(**form.cleaned_data)
+        course = create_course(**form.cleaned_data)
+        self.course_id = course.id
 
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course_id})

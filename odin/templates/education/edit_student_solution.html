@@ -1,0 +1,33 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load widget_tweaks %}
+
+{% block content_title %}
+    Edit solution for {{ task.name }} 
+{% endblock content_title%}
+
+{% block page_content %}
+  <div class="row">
+    <form class="col-md-6" action="" method="post">
+      {% csrf_token %}
+      {% if solution.task.test.is_source %}
+          <div class="form-group">
+            {{ form.code.label }}
+            {% render_field form.code class="form-control form-control-solid" placeholder="form.code.label"%}
+          </div>
+      {% elif solution.task.test.is_binary %}
+          <div class="form-group">
+            {{ form.file.label }}
+            {% render_field form.file class="form-control form-control-solid" placeholder="form.file.label"%}
+          </div>
+      {% else %}
+          <div class="form-group">
+            {{ form.url.label }}
+            {% render_field form.url class="form-control form-control-solid" placeholder="form.url.label"%}
+          </div>
+      {% endif %}
+      <div class="form-actions">
+        <button class="btn green uppercase" type="submit" name="button">Update</button>
+      </div>
+    </form>
+  </div>
+{% endblock page_content %}

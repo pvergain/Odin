@@ -65,6 +65,62 @@
                           </div>
                         </td>
                       </tr>
+                      <tr>
+                        <td colspan="100%">
+                          <div class="portlet box green">
+                              <div class="portlet-title">
+                                  <div class="caption">
+                                      <i class="fa fa-comments"></i> Tasks </div>
+                                  <div class="tools">
+                                      <a href="javascript:;" class="expand"> </a>
+                                  </div>
+                              </div>
+                              <div class="portlet-body default-collapsed">
+                                  <div class="table-scrollable">
+                                      <table class="table table-striped table-hover">
+                                          <thead>
+                                              <tr>
+                                                  <th> # </th>
+                                                  <th> Name </th>
+                                                  <th> </th>
+                                                  <th> </th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>
+                                              {% for task in topic.tasks.all %}
+                                                  <tr>
+                                                      <td>{{ task.id }}</td>
+                                                      <td>{{ task.name }}</td>
+                                                      <td>
+                                                        {% if request.user.student in course.students.all %}
+                                                          <a href="{% url 'dashboard:education:user-task-solutions' course.id task.id%}">
+                                                            <button class="btn green uppercase" type="button" name="button">View your solutions</button>
+                                                          </a>
+                                                        {% endif %}
+                                                      </td>
+                                                      <td>
+                                                        {% if request.user.is_teacher %}
+                                                          <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
+                                                            <button class="btn green uppercase" type="button" name="button">Edit</button>
+                                                          </a>
+                                                        {% endif %}
+                                                      </td>
+                                                  </tr>
+                                              {% endfor %}
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  {% if not public_page %}
+                                    {% if request.user.teacher in course.teachers.all %}
+                                      <a href="{% url 'dashboard:education:course-management:existing-tasks' course.pk %}">
+                                        <button type="button" name="button" class="btn green uppercase" >Add new task</button>
+                                      </a>
+                                    {% endif %}
+                                  {% endif %}
+                              </div>
+                          </div>
+                        </td>
+                      </tr>
 
                     {% endfor %}
                 </tbody>

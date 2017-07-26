@@ -10,4 +10,4 @@ def populate_course_teachers_with_superusers(sender, instance, created, **kwargs
     if created:
         superusers = Teacher.objects.filter(is_superuser=True)
         for user in superusers:
-            add_teacher(instance, user)
+            add_teacher(instance, user, hidden=True)

@@ -21,14 +21,26 @@
         {{ form.description.label }}
         {% render_field form.description class="form-control form-control-solid"%}
       </div>
+      <div class="form-group">
+        {{ form.gradable.label }}
+        {% render_field form.gradable class="form-control-solid"%}
+      </div>
       <div class="form-actions">
         <button class="btn green uppercase" type="submit" name="button">Update</button>
-        <a href="{% url 'dashboard:education:course-management:add-source-test' course.id request.resolver_match.kwargs.task_id %}">
-          <button class="btn green uppercase" type="button" name="button">Add source code test</button>
-        </a>
-        <a href="{% url 'dashboard:education:course-management:add-binary-test' course.id request.resolver_match.kwargs.task_id %}">
-          <button class="btn green uppercase" type="button" name="button">Add binary test</button>
-        </a>
+        {% if object.gradable %}
+          {% if object.test %}
+            <a href="{% url 'dashboard:education:course-management:edit-test' course.id object.id %}">
+              <button class="btn green uppercase" type="button" name="button">Edit test</button>
+            </a>
+          {% else %}
+            <a href="{% url 'dashboard:education:course-management:add-source-test' course.id object.id %}">
+              <button class="btn green uppercase" type="button" name="button">Add source code test</button>
+            </a>
+            <a href="{% url 'dashboard:education:course-management:add-binary-test' course.id object.id %}">
+              <button class="btn green uppercase" type="button" name="button">Add binary test</button>
+            </a>
+          {% endif %}
+        {% endif %}
       </div>
     </form>
   </div>

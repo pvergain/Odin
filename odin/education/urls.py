@@ -12,7 +12,7 @@ from .views import (
     AddNewIncludedTaskView,
     AddIncludedTaskFromExistingView,
     ExistingTasksView,
-    CourseIncludedTasksListView,
+    TaskDetailView,
     EditTaskView,
     EditIncludedTaskView,
     AddBinaryFileTestToTaskView,
@@ -20,6 +20,9 @@ from .views import (
     StudentSolutionListView,
     SubmitGradableSolutionView,
     SubmitNonGradableSolutionView,
+    StudentSolutionDetailView,
+    EditStudentSolutionView,
+    EditIncludedTestView
 )
 
 
@@ -63,6 +66,10 @@ course_management_urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/add-binary-test/(?P<task_id>[0-9]+)$',
         view=AddBinaryFileTestToTaskView.as_view(),
         name='add-binary-test'),
+    url(regex='^(?P<course_id>[0-9]+)/edit-test-for-task/(?P<task_id>[0-9]+)$',
+        view=EditIncludedTestView.as_view(),
+        name='edit-test'),
+
 ]
 
 urlpatterns = [
@@ -78,9 +85,6 @@ urlpatterns = [
     url(regex='^tasks/edit-task/(?P<task_id>[0-9]+)/$',
         view=EditTaskView.as_view(),
         name='edit-task'),
-    url(regex='^(?P<course_id>[0-9]+)/tasks/$',
-        view=CourseIncludedTasksListView.as_view(),
-        name='included-tasks'),
     url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions$',
         view=StudentSolutionListView.as_view(),
         name='user-task-solutions'),
@@ -90,4 +94,13 @@ urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/add-not-gradable-solution$',
         view=SubmitNonGradableSolutionView.as_view(),
         name='add-not-gradable-solution'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/$',
+        view=StudentSolutionDetailView.as_view(),
+        name='student-solution-detail'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/edit$',
+        view=EditStudentSolutionView.as_view(),
+        name='edit-student-solution'),
+    url(regex='^tasks/(?P<task_id>[0-9]+)/$',
+        view=TaskDetailView.as_view(),
+        name='task-detail')
 ]

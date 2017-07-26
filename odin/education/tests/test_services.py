@@ -200,7 +200,7 @@ class TestCreateTestForTask(TestCase):
 
     def setUp(self):
         self.topic = TopicFactory()
-        self.included_task = IncludedTaskFactory(topic=self.topic)
+        self.included_task = IncludedTaskFactory(topic=self.topic, gradable=True)
         self.language = ProgrammingLanguageFactory()
 
     def test_create_test_for_task_raises_validation_error_when_no_resource_is_provided(self):
@@ -241,6 +241,15 @@ class TestCreateTestForTask(TestCase):
                              file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
 
         self.assertEqual(current_binary_file_test_count + 1, IncludedTest.objects.filter(**filters).count())
+
+    def test_create_test_for_task_raises_validation_error_when_provided_task_is_not_gradable(self):
+        with self.assertRaises(ValidationError):
+            self.included_task.gradable = False
+            self.included_task.save()
+
+            create_test_for_task(task=self.included_task,
+                                 language=self.language,
+                                 code=faker.text())
 
 
 class TestCreateGradableSolution(TestCase):
@@ -299,8 +308,6 @@ class TestCreateNonGradableSolution(TestCase):
                                          task=self.task)
 
     def test_create_non_gradable_solution_creates_non_gradable_solution_with_url_when_url_is_provided(self):
-        self.task.gradable = False
-        self.task.save()
         current_solution_count = Solution.objects.count()
 
         solution = create_non_gradable_solution(task=self.task,

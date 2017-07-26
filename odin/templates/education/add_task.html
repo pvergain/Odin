@@ -29,7 +29,16 @@
         </div>
         <div class="form-group">
           {{ form.gradable.label }}
-          {% render_field form.gradable class="form-control-solid placeholder-no-fix"%}
+          {% render_field form.gradable id='checkbox-gradable' class="form-control-solid placeholder-no-fix" onchange="changeTestFieldsVisibility()"%}
+        </div>
+        <div class="test-fields">
+          <div class="form-group">
+            {{ form.language.label }}
+            {% render_field form.language class="form-control form-control-solid" %}
+          </div>
+          <div class="form-group">
+            {% render_field form.code class="form-control form-control-solid placeholder-no-fix" placeholder="Enter your test code here" %}
+          </div>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn green uppercase">Add Task</button>
@@ -37,3 +46,17 @@
     </form>
 </div>
 {% endblock page_content %}
+
+{% block extra_scripts %}
+  <script type="text/javascript">
+    function changeTestFieldsVisibility(){
+      checkbox = $('#checkbox-gradable')[0];
+      if (checkbox.checked) {
+        $('.test-fields').show();
+      }else {
+        $('.test-fields').hide();
+      }
+    }
+    $(document).ready(changeTestFieldsVisibility());
+  </script>
+{% endblock extra_scripts %}

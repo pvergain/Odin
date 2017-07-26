@@ -31,10 +31,12 @@
                             <a href="">
                                 <i class="icon-home"></i> Overview </a>
                         </li>
+                        {% if request.user == object.user%}
                         <li>
                             <a href="{% url 'dashboard:users:edit-profile' %}">
                                 <i class="icon-settings"></i> Account Settings </a>
                         </li>
+                        {% endif %}
                         <li>
                             <a href="">
                                 <i class="icon-info"></i> Help </a>
