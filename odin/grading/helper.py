@@ -1,15 +1,22 @@
+from typing import Dict
+
+from django.db.models import Model
+
+from .models import GraderBinaryProblem, GraderPlainProblem
 from .serializers import GraderPlainProblemSerializer, GraderBinaryProblemSerializer
 from . import services
 
 
-def get_grader_ready_data(solution_id, solution_model):
+def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
     solution = solution_model.objects.get(id=solution_id)
     test = solution.task.test
+
     if solution.code:
-        file_type = 'plain'
+        file_type = GraderPlainProblem.PLAIN
         test_resource = test.code
+
     if solution.file:
-        file_type = 'binary'
+        file_type = GraderBinaryProblem.BINARY
         test_resource = test.file
 
     if test.extra_options is None:
@@ -17,7 +24,7 @@ def get_grader_ready_data(solution_id, solution_model):
 
     data = {
         'language': test.language.name,
-        'test_type': 'unittest',
+        'test_type': GraderPlainProblem.UNITTEST,
         'file_type': file_type,
         'test': test_resource,
         'extra_options': test.extra_options

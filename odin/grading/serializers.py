@@ -6,6 +6,8 @@ from .models import GraderPlainProblem, GraderBinaryProblem
 class GraderPlainProblemSerializer(serializers.ModelSerializer):
     solution = serializers.CharField(source='encode_solution_text')
     test = serializers.CharField(source='encode_test_text')
+    test_type = serializers.CharField(source='get_readable_test_type')
+    file_type = serializers.CharField(source='get_readable_file_type')
 
     class Meta:
         model = GraderPlainProblem
@@ -15,6 +17,8 @@ class GraderPlainProblemSerializer(serializers.ModelSerializer):
 class GraderBinaryProblemSerializer(serializers.ModelSerializer):
     solution = serializers.CharField(source='read_binary_file')
     test = serializers.CharField(source='read_binary_test')
+    test_type = serializers.CharField(source='get_readable_test_type')
+    file_type = serializers.CharField(source='get_readable_file_type')
 
     class Meta:
         model = GraderBinaryProblem

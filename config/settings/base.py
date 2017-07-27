@@ -234,5 +234,5 @@ GRADER_GET_NONCE_PATH = "/nonce"
 GRADER_ADDRESS = env('GRADER_ADDRESS', default='https://grader.hackbulgaria.com')
 GRADER_API_KEY = env('GRADER_API_KEY', default='')
 GRADER_API_SECRET = env('GRADER_API_SECRET', default='')
-
-POLLING_SLEEP_TIME = env.int('POLLING_SLEEP_TIME', default=1)  # seconds
+GRADER_POLLING_COUNTDOWN = env.int('GRADER_POLLING_COUNTDOWN', default=2)
+GRADER_RESUBMIT_COUNTDOWN = env.int('GRADER_RESUBMIT_COUNTDOWN', default=10)

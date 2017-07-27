@@ -3,7 +3,9 @@ import hmac
 import json
 import requests
 import time
+from typing import Dict, Callable
 
+from django.db.models import Model
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -11,24 +13,24 @@ from .models import GraderRequest
 from.exceptions import PollingError
 
 
-class DjangoGraderClient:
+class GraderClient:
     def __init__(self,
-                 solution_model,
+                 solution_model: Model,
                  settings_module=settings,
-                 grader_ready_data=None):
+                 grader_ready_data: Dict=None):
 
         self.settings = settings
         self.data = grader_ready_data
         self.solution_model = solution_model
-        self.req_and_resource = self.__generate_req_and_resource()
+        self.req_and_resource = self._generate_req_and_resource()
 
-    def __generate_req_and_resource(self):
+    def _generate_req_and_resource(self) -> Dict[str, str]:
         req_and_resource = {}
         req_and_resource['GET'] = f'GET {self.settings.GRADER_GRADE_PATH}'
         req_and_resource['POST'] = f'POST {self.settings.GRADER_GRADE_PATH}'
         return req_and_resource
 
-    def _generate_grader_headers(self, body, req_and_resource):
+    def _generate_grader_headers(self, body: Dict, req_and_resource: str) -> Dict:
         nonce = self._get_and_update_req_nonce(req_and_resource)
         date = time.strftime("%c")
         msg = body + date + nonce
@@ -43,7 +45,7 @@ class DjangoGraderClient:
 
         return request_headers
 
-    def _get_and_update_req_nonce(self, req_and_resource):
+    def _get_and_update_req_nonce(self, req_and_resource: str) -> str:
         request = GraderRequest.objects.filter(request_info=req_and_resource).first()
 
         if request is not None:
@@ -52,17 +54,17 @@ class DjangoGraderClient:
             request.nonce = nonce
             request.save()
             return str(nonce)
-        else:
-            nonce = 1
-            GraderRequest.objects.create(nonce=nonce, request_info=req_and_resource)
-            return str(nonce)
 
-    def _update_req_and_resource_nonce(self, req_and_resource, nonce):
+        nonce = 1
+        GraderRequest.objects.create(nonce=nonce, request_info=req_and_resource)
+        return str(nonce)
+
+    def _update_req_and_resource_nonce(self, req_and_resource: str, nonce: int):
         grader_request = get_object_or_404(GraderRequest, request_info=req_and_resource)
         grader_request.nonce = nonce
         grader_request.save()
 
-    def _get_valid_nonce(self, req_and_resource):
+    def _get_valid_nonce(self, req_and_resource: str):
         get_nonce_url = settings.GRADER_ADDRESS + settings.GRADER_GET_NONCE_PATH
 
         headers = {
@@ -73,7 +75,7 @@ class DjangoGraderClient:
         nonce = response.json()["nonce"]
         self._update_req_and_resource_nonce(req_and_resource, nonce)
 
-    def submit_request_to_grader(self, solution_id, polling_task):
+    def submit_request_to_grader(self, solution_id: int, polling_task: Callable):
         """
         The task is waiting 202 status code. The infinite loop is to get right nonce.
         """
@@ -96,11 +98,11 @@ class DjangoGraderClient:
             elif response.status_code == 403 and response.text == "Nonce check failed":
                 self._get_valid_nonce(self.req_and_resource['POST'])
             else:
-                solution.status = self.solution_model.failed
+                solution.status = self.solution_model.NOT_OK
                 solution.save()
                 break
 
-    def poll_grader(self, solution_id):
+    def poll_grader(self, solution_id: int):
         solution = self.solution_model.objects.get(id=solution_id)
 
         path = self.settings.GRADER_CHECK_PATH.format(build_id=solution.build_id)

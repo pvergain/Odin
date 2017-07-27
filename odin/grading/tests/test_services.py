@@ -12,10 +12,11 @@ from ..models import GraderBinaryProblem, GraderPlainProblem
 class TestCreatePlainProblem(TestCase):
     def setUp(self):
         self.language = 'python'
-        self.test_type = 'unittest'
-        self.file_type = 'plain'
+        self.test_type = GraderPlainProblem.UNITTEST
+        self.file_type = GraderPlainProblem.PLAIN
         self.code = faker.text()
         self.test = faker.text()
+        self.false_type = 99
 
     def test_create_plain_problem_raises_validation_error_when_language_not_in_supported_languages(self):
         with self.assertRaises(ValidationError):
@@ -28,7 +29,7 @@ class TestCreatePlainProblem(TestCase):
     def test_create_plain_problem_raises_validation_error_when_test_type_not_in_supported_test_types(self):
         with self.assertRaises(ValidationError):
             create_plain_problem(language=self.language,
-                                 test_type='',
+                                 test_type=self.false_type,
                                  file_type=self.file_type,
                                  solution=self.code,
                                  test=self.test)
@@ -37,7 +38,7 @@ class TestCreatePlainProblem(TestCase):
         with self.assertRaises(ValidationError):
             create_plain_problem(language=self.language,
                                  test_type=self.test_type,
-                                 file_type='',
+                                 file_type=self.false_type,
                                  solution=self.code,
                                  test=self.test)
 
@@ -56,10 +57,11 @@ class TestCreatePlainProblem(TestCase):
 class TestCreateBinaryProblem(TestCase):
     def setUp(self):
         self.language = 'python'
-        self.test_type = 'unittest'
-        self.file_type = 'binary'
+        self.test_type = GraderBinaryProblem.UNITTEST
+        self.file_type = GraderBinaryProblem.BINARY
         self.code = SimpleUploadedFile('code.jar', bytes(f'{faker.text}'.encode('utf-8')))
         self.test = SimpleUploadedFile('test.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        self.false_type = 99
 
     def test_create_binary_problem_raises_validation_error_when_language_not_in_supported_languages(self):
         with self.assertRaises(ValidationError):
@@ -72,7 +74,7 @@ class TestCreateBinaryProblem(TestCase):
     def test_create_binary_problem_raises_validation_error_when_test_type_not_in_supported_test_types(self):
         with self.assertRaises(ValidationError):
             create_binary_problem(language=self.language,
-                                  test_type='',
+                                  test_type=self.false_type,
                                   file_type=self.file_type,
                                   solution=self.code,
                                   test=self.test)
@@ -81,11 +83,11 @@ class TestCreateBinaryProblem(TestCase):
         with self.assertRaises(ValidationError):
             create_binary_problem(language=self.language,
                                   test_type=self.test_type,
-                                  file_type='',
+                                  file_type=self.false_type,
                                   solution=self.code,
                                   test=self.test)
 
-    def test_create_binary_problem_creates_bina_problem_when_data_is_valid(self):
+    def test_create_binary_problem_creates_binary_problem_when_data_is_valid(self):
         current_count = GraderBinaryProblem.objects.count()
 
         create_binary_problem(language=self.language,
