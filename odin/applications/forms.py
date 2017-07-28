@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import ApplicationInfo
+from .models import ApplicationInfo, IncludedApplicationTask, ApplicationTask
 
 
 class DateInput(forms.DateInput):
@@ -18,3 +18,16 @@ class ApplicationInfoModelForm(forms.ModelForm):
             'start_interview_date': DateInput(),
             'end_interview_date': DateInput()
         }
+
+
+class IncludedApplicationTaskForm(forms.ModelForm):
+    existing_task = forms.ModelChoiceField(queryset=ApplicationTask.objects.all(),
+                                           required=False)
+
+    class Meta:
+        model = IncludedApplicationTask
+        fields = [
+            'name',
+            'description',
+            'application_info'
+        ]

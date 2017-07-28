@@ -3,7 +3,7 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .models import Application, ApplicationInfo
+from .models import Application, ApplicationInfo, IncludedApplicationTask, ApplicationTask
 from odin.education.models import Course
 from odin.users.models import BaseUser
 
@@ -59,3 +59,27 @@ def create_application(*,
                                       works_at=works_at,
                                       studies_at=studies_at,
                                       has_interview_date=has_interview_date)
+
+
+def create_included_application_task(*,
+                                     name: str=None,
+                                     description: str=None,
+                                     gradable: bool=False,
+                                     existing_task: ApplicationTask=None,
+                                     application_info: ApplicationInfo=None) -> IncludedApplicationTask:
+
+    included_task = IncludedApplicationTask(application_info=application_info)
+    if existing_task is None:
+        existing_task = ApplicationTask(name=name, description=description, gradable=gradable)
+        existing_task.full_clean()
+        existing_task.save()
+
+    included_task.name = existing_task.name
+    included_task.description = existing_task.description
+    included_task.gradable = existing_task.gradable
+
+    included_task.task = existing_task
+    included_task.full_clean()
+    included_task.save()
+
+    return included_task

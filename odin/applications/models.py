@@ -2,7 +2,7 @@ from django.utils import timezone
 
 from django.db import models
 
-from odin.education.models import Course
+from odin.education.models import Course, BaseTask
 from odin.users.models import BaseUser
 from .managers import ApplicationInfoManager
 from .query import ApplicationQuerySet
@@ -17,8 +17,7 @@ class ApplicationInfo(models.Model):
 
     description = models.TextField(
         blank=True,
-        null=True,
-        help_text='Това описва процедурата по кандидатстване. Излиза тук /apply/edit/<course-url>'
+        null=True
     )
 
     external_application_form = models.URLField(blank=True, null=True,
@@ -54,3 +53,22 @@ class Application(models.Model):
 
     class Meta:
         unique_together = (("application_info", "user"),)
+
+
+class ApplicationTask(BaseTask):
+    pass
+
+
+class IncludedApplicationTask(BaseTask):
+    task = models.ForeignKey(ApplicationTask,
+                             on_delete=models.CASCADE,
+                             related_name='included_tasks')
+    application_info = models.ForeignKey(ApplicationInfo,
+                                         on_delete=models.CASCADE,
+                                         related_name='tasks')
+
+
+class ApplicationSolution(models.Model):
+    task = models.ForeignKey(IncludedApplicationTask, related_name='solutions')
+    application = models.ForeignKey(Application, related_name='solutions')
+    url = models.URLField(blank=True, null=True)

@@ -42,6 +42,20 @@
     <div class="form-actions">
       <button class="btn green uppercase" type="submit" name="button">Submit</button>
     </div>
+    <hr>
+    {% if course.application_info %}
+    <div class="form-group">
+      <strong>Current application tasks</strong>
+      <ul>
+        {% for task in course.application_info.tasks.all %}
+          <li>{{ task.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+      <a href="{% url 'dashboard:applications:add-application-task' course.id %}">
+        <button class="btn green uppercase" type="button" name="button">Add application task</button>
+      </a>
+    {% endif %}
   </form>
 </div>
 {% endblock page_content%}

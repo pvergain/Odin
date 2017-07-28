@@ -6,8 +6,8 @@ from django.core.exceptions import ValidationError
 from odin.common.faker import faker
 from odin.education.factories import CourseFactory
 from odin.users.factories import BaseUserFactory
-from odin.applications.models import Application, ApplicationInfo
-from odin.applications.services import create_application, create_application_info
+from odin.applications.models import Application, ApplicationInfo, ApplicationTask, IncludedApplicationTask
+from odin.applications.services import create_application, create_application_info, create_included_application_task
 from odin.applications.factories import ApplicationInfoFactory, ApplicationFactory
 
 
@@ -133,3 +133,31 @@ class TestCreateApplicationService(TestCase):
         create_application(application_info=self.app_info, user=self.user)
 
         self.assertEqual(current_application_count + 1, Application.objects.count())
+
+
+class TestCreateIncludedApplicationTaskService(TestCase):
+    def setUp(self):
+        self.app_info = ApplicationInfoFactory()
+        self.task_name = faker.word()
+        self.task_description = faker.text()
+
+    def test_create_included_application_task_creates_only_included_task_when_existing_is_provided(self):
+        existing_task = ApplicationTask.objects.create(name=self.task_name, description=self.task_description)
+        current_app_task_count = ApplicationTask.objects.count()
+        current_included_app_task_count = IncludedApplicationTask.objects.count()
+
+        create_included_application_task(existing_task=existing_task, application_info=self.app_info)
+
+        self.assertEqual(current_app_task_count, ApplicationTask.objects.count())
+        self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
+
+    def test_create_included_application_task_creates_task_and_included_task_when_no_existing_is_provided(self):
+        current_app_task_count = ApplicationTask.objects.count()
+        current_included_app_task_count = IncludedApplicationTask.objects.count()
+
+        create_included_application_task(name=self.task_name,
+                                         description=self.task_description,
+                                         application_info=self.app_info)
+
+        self.assertEqual(current_app_task_count + 1, ApplicationTask.objects.count())
+        self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
