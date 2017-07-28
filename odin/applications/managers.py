@@ -3,9 +3,6 @@ from .query import ApplicationInfoQuerySet
 
 
 class ApplicationInfoManager(models.Manager):
-    """
-    TODO: Write tests
-    """
     def get_queryset(self):
         return ApplicationInfoQuerySet(self.model, using=self._db)
 
