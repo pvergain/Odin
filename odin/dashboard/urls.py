@@ -12,4 +12,6 @@ urlpatterns = [
         view=include('odin.management.urls', namespace='management')),
     url(regex='^users/',
         view=include('odin.users.urls', namespace='users')),
+    url(regex='^applications/',
+        view=include('odin.applications.urls', namespace='applications')),
 ]

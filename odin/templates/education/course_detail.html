@@ -19,6 +19,17 @@
         <button type="button" name="button" class="btn green uppercase">View public version of this course</button>
       </a>
     </div>
+    {% if request.user.teacher in course.teachers.all %}
+      {% if not course.application_info %}
+        <a href="{% url 'dashboard:applications:create-application-info' course.id %}">
+          <button class="btn green uppercase" type="button" name="button">Create application info</button>
+        </a>
+      {% else %}
+        <a href="#">
+          <button class="btn green uppercase" type="button" name="button">Edit application info</button>
+        </a>
+      {% endif %}
+    {% endif %}
   {% endif %}
 </div>
 {% endblock page_content %}

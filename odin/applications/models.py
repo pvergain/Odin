@@ -11,9 +11,9 @@ from .query import ApplicationQuerySet
 class ApplicationInfo(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
-    course = models.ForeignKey(Course)
-    start_interview_date = models.DateField(blank=False, null=True)
-    end_interview_date = models.DateField(blank=False, null=True)
+    course = models.OneToOneField(Course, related_name="application_info")
+    start_interview_date = models.DateField(blank=True, null=True)
+    end_interview_date = models.DateField(blank=True, null=True)
 
     description = models.TextField(
         blank=True,
