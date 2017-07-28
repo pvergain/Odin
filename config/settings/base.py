@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+from django.apps import apps
 import environ
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
@@ -18,6 +19,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'rest_framework',
     'crispy_forms',
     'allauth',
     'allauth.account',
@@ -36,6 +38,7 @@ LOCAL_APPS = [
     'odin.users.apps.UsersConfig',
     'odin.education.apps.EducationConfig',
     'odin.management.apps.ManagementConfig',
+    'odin.grading.apps.GradingConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -160,7 +163,7 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-MEDIA_ROOT = str(APPS_DIR('media'))
+MEDIA_ROOT = str(ROOT_DIR('media'))
 
 MEDIA_URL = '/media/'
 
@@ -221,3 +224,15 @@ EMAIL_TEMPLATES = {
     key: f(default='')
     for key, f in templates.items()
 }
+
+# Grader client settings
+GRADER_SOLUTION_MODEL = 'education.Solution'
+
+GRADER_GRADE_PATH = "/grade"
+GRADER_CHECK_PATH = "/check_result/{build_id}/"
+GRADER_GET_NONCE_PATH = "/nonce"
+GRADER_ADDRESS = env('GRADER_ADDRESS', default='https://grader.hackbulgaria.com')
+GRADER_API_KEY = env('GRADER_API_KEY', default='')
+GRADER_API_SECRET = env('GRADER_API_SECRET', default='')
+GRADER_POLLING_COUNTDOWN = env.int('GRADER_POLLING_COUNTDOWN', default=2)
+GRADER_RESUBMIT_COUNTDOWN = env.int('GRADER_RESUBMIT_COUNTDOWN', default=10)

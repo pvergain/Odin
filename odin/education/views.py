@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
 from odin.management.permissions import DashboardManagementPermission
+from odin.grading.services import start_grader_communication
 
 from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution, IncludedTest
 from .permissions import (
@@ -530,7 +531,8 @@ class SubmitGradableSolutionView(CourseViewMixin,
         }
         create_gradable_solution_kwargs.update(form.cleaned_data)
 
-        self.call_service(service=create_gradable_solution, service_kwargs=create_gradable_solution_kwargs)
+        solution = self.call_service(service=create_gradable_solution, service_kwargs=create_gradable_solution_kwargs)
+        start_grader_communication(solution.id)
         return super().form_valid(form)
 
 

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from test_plus import TestCase
 
 from django.urls import reverse
@@ -634,6 +636,7 @@ class TestAddSourceCodeTestToTaskView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id})
             )
+
             self.assertEqual(source_test_count + 1, IncludedTest.objects.filter(**filters).count())
             self.assertEqual(task_tests + 1, IncludedTest.objects.filter(task=self.included_task).count())
 
@@ -763,7 +766,10 @@ class TestSubmitGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count, Solution.objects.count())
 
-    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(self):
+    @patch('odin.grading.tasks.submit_solution.delay')
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(
+        self, mock_submit_solution
+    ):
         SourceCodeTestFactory(task=self.task)
         student = Student.objects.create_from_user(user=self.user)
         add_student(self.course, student)
@@ -778,8 +784,12 @@ class TestSubmitGradableSolutionView(TestCase):
             )
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+            self.assertEqual(mock_submit_solution.called, True)
 
-    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(self):
+    @patch('odin.grading.tasks.submit_solution.delay')
+    def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(
+        self, mock_submit_solution
+    ):
         BinaryFileTestFactory(task=self.task)
         student = Student.objects.create_from_user(user=self.user)
         add_student(self.course, student)
@@ -795,6 +805,7 @@ class TestSubmitGradableSolutionView(TestCase):
             )
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+            self.assertEqual(mock_submit_solution.called, True)
 
 
 class TestSubmitNotGradableSolutionView(TestCase):

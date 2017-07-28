@@ -33,7 +33,7 @@ from ..factories import (
     TopicFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
-    StudentFactory
+    StudentFactory,
 )
 
 from odin.common.faker import faker
@@ -170,7 +170,8 @@ class TestCreateIncludedMaterial(TestCase):
 
 class TestCreateIncludedTask(TestCase):
     def setUp(self):
-        self.topic = TopicFactory()
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
         self.task = Task.objects.create(name="Test task",
                                         description=faker.text(),
                                         gradable=faker.boolean())
