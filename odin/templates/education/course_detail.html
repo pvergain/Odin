@@ -25,7 +25,7 @@
           <button class="btn green uppercase" type="button" name="button">Create application info</button>
         </a>
       {% else %}
-        <a href="#">
+        <a href="{% url 'dashboard:applications:edit-application-info' course.id %}">
           <button class="btn green uppercase" type="button" name="button">Edit application info</button>
         </a>
       {% endif %}
