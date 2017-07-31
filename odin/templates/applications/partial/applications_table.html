@@ -24,8 +24,8 @@
                                 <tr>
                                     <td>{{ app.id }}</td>
                                     <td>{{ app.application_info.course.name }}</td>
-                                    <td>{{ app.tasks.count }} / {{app.application_info.tasks.count}}</td>
-                                    <td><a href="#"><button class="btn green uppercase" type="button" name="button">Edit application</button></a></td>
+                                    <td>{{ app.solutions.count }} / {{app.application_info.tasks.count}}</td>
+                                    <td><a href="{% url 'dashboard:applications:edit-application' app.application_info.course.id %}"><button class="btn green uppercase" type="button" name="button">Edit application</button></a></td>
                                 </tr>
                             {% endfor %}
                         </tbody>

@@ -3,7 +3,13 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .models import Application, ApplicationInfo, IncludedApplicationTask, ApplicationTask
+from .models import (
+    Application,
+    ApplicationInfo,
+    IncludedApplicationTask,
+    ApplicationTask,
+    ApplicationSolution
+)
 from odin.education.models import Course
 from odin.users.models import BaseUser
 
@@ -85,3 +91,19 @@ def create_included_application_task(*,
     included_task.save()
 
     return included_task
+
+
+def create_application_solution(*,
+                                task: IncludedApplicationTask,
+                                application: Application,
+                                url: str) -> ApplicationSolution:
+    solution_qs = ApplicationSolution.objects.filter(task=task, application=application)
+
+    if solution_qs.exists():
+        solution = solution_qs.first()
+        solution.url = url
+        solution.save()
+    else:
+        solution = ApplicationSolution.objects.create(task=task, application=application, url=url)
+
+    return solution

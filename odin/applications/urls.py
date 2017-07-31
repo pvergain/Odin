@@ -5,7 +5,8 @@ from .views import (
     EditApplicationInfoView,
     CreateIncludedApplicationTaskView,
     ApplyToCourseView,
-    UserApplicationsListView
+    UserApplicationsListView,
+    EditApplicationView
 )
 
 urlpatterns = [
@@ -23,5 +24,8 @@ urlpatterns = [
         name='apply-to-course'),
     url(regex='^user-applications/$',
         view=UserApplicationsListView.as_view(),
-        name='user-applications')
+        name='user-applications'),
+    url(regex='^(?P<course_id>[0-9]+)/edit-application/$',
+        view=EditApplicationView.as_view(),
+        name='edit-application'),
 ]

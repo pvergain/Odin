@@ -33,7 +33,26 @@ class IncludedApplicationTaskForm(forms.ModelForm):
         ]
 
 
-class ApplicationForm(forms.ModelForm):
+class ApplicationCreateForm(forms.ModelForm):
+    class Meta:
+        model = Application
+        fields = [
+            'application_info',
+            'user',
+            'phone',
+            'skype',
+            'works_at',
+            'studies_at',
+        ]
+
+
+class ApplicationEditForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if hasattr(self.instance.application_info, 'tasks'):
+            for task in self.instance.application_info.tasks.all():
+                self.fields[task.name] = forms.URLField(label=task.name, required=False)
+
     class Meta:
         model = Application
         fields = [

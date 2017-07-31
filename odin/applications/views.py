@@ -2,14 +2,25 @@ from django.views.generic import FormView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
+from django.http import Http404
 
 from odin.common.services import send_email
 from odin.education.mixins import CourseViewMixin, CallServiceMixin
 from odin.education.permissions import IsTeacherInCoursePermission
 from .models import Application
-from .forms import ApplicationInfoModelForm, IncludedApplicationTaskForm, ApplicationForm
-from .services import create_application_info, create_included_application_task, create_application
-from .mixins import ApplicationInfoFormDataMixin, HasStudentAlreadyAppliedMixin
+from .forms import ApplicationInfoModelForm, IncludedApplicationTaskForm, ApplicationCreateForm, ApplicationEditForm
+from .services import (
+    create_application_info,
+    create_included_application_task,
+    create_application,
+    create_application_solution
+)
+from .mixins import (
+    ApplicationInfoFormDataMixin,
+    HasStudentAlreadyAppliedMixin,
+    ApplicationFormDataMixin,
+    ApplicationTasksMixin
+)
 
 
 class CreateApplicationInfoView(CourseViewMixin,
@@ -85,33 +96,14 @@ class CreateIncludedApplicationTaskView(CourseViewMixin,
 
 class ApplyToCourseView(CourseViewMixin,
                         LoginRequiredMixin,
+                        ApplicationFormDataMixin,
                         HasStudentAlreadyAppliedMixin,
                         CallServiceMixin,
                         FormView):
 
-    form_class = ApplicationForm
+    form_class = ApplicationCreateForm
     template_name = "applications/course_application.html"
-
-    def get_success_url(self):
-        return reverse_lazy('public:course_detail',
-                            kwargs={'course_slug': self.course.slug_url})
-
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-
-        if self.request.method in ('POST', 'PUT'):
-            post_data = self.request.POST
-            data = {}
-            data['application_info'] = self.course.application_info.id
-            data['user'] = self.request.user.id
-            data['phone'] = post_data.get('phone')
-            data['skype'] = post_data.get('skype')
-            data['works_at'] = post_data.get('works_at')
-            data['studies_at'] = post_data.get('studies_at')
-
-            form_kwargs['data'] = data
-
-        return form_kwargs
+    success_url = reverse_lazy('dashboard:applications:user-applications')
 
     def form_valid(self, form):
         instance = self.call_service(service=create_application, service_kwargs=form.cleaned_data)
@@ -136,3 +128,51 @@ class UserApplicationsListView(LoginRequiredMixin,
             'application_info__tasks',
         ]
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
+
+
+class EditApplicationView(CourseViewMixin,
+                          ApplicationTasksMixin,
+                          LoginRequiredMixin,
+                          ApplicationFormDataMixin,
+                          CallServiceMixin,
+                          UpdateView):
+    form_class = ApplicationEditForm
+    template_name = "applications/edit_application.html"
+    success_url = reverse_lazy('dasboard:applications:user-applications')
+
+    def get_object(self):
+        user_application = self.request.user.applications.filter(application_info=self.course.application_info)
+        if user_application.exists():
+            return user_application.first()
+        return Http404
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if hasattr(self.object, 'solutions'):
+            for task in self.application_tasks:
+                solution = self.object.solutions.filter(task=task)
+                if solution.exists:
+                    initial[task.name] = solution.first().url
+        return initial
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            post_data = self.request.POST
+            for task in self.application_tasks:
+                form_kwargs['data'][task.name] = post_data.get(task.name)
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        for task in self.application_tasks:
+            create_solution_kwargs = {
+                'task': task,
+                'application': self.object,
+                'url': form.cleaned_data.get(task.name)
+            }
+            if create_solution_kwargs['url']:
+                self.call_service(service=create_application_solution, service_kwargs=create_solution_kwargs)
+
+        return super().form_valid(form)

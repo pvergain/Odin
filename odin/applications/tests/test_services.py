@@ -6,9 +6,25 @@ from django.core.exceptions import ValidationError
 from odin.common.faker import faker
 from odin.education.factories import CourseFactory
 from odin.users.factories import BaseUserFactory
-from odin.applications.models import Application, ApplicationInfo, ApplicationTask, IncludedApplicationTask
-from odin.applications.services import create_application, create_application_info, create_included_application_task
-from odin.applications.factories import ApplicationInfoFactory, ApplicationFactory
+from odin.applications.models import (
+    Application,
+    ApplicationInfo,
+    ApplicationTask,
+    IncludedApplicationTask,
+    ApplicationSolution
+)
+from odin.applications.services import (
+    create_application,
+    create_application_info,
+    create_included_application_task,
+    create_application_solution
+)
+from odin.applications.factories import (
+    ApplicationInfoFactory,
+    ApplicationFactory,
+    IncludedApplicationTaskFactory,
+    ApplicationSolutionFactory
+)
 
 
 class TestCreateApplicationInfoService(TestCase):
@@ -161,3 +177,26 @@ class TestCreateIncludedApplicationTaskService(TestCase):
 
         self.assertEqual(current_app_task_count + 1, ApplicationTask.objects.count())
         self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
+
+
+class TestCreateApplicationSolutionService(TestCase):
+    def setUp(self):
+        self.user = BaseUserFactory()
+        self.user.is_active = True
+        self.user.save()
+        self.app_info = ApplicationInfoFactory()
+        self.task = IncludedApplicationTaskFactory(application_info=self.app_info)
+        self.application = ApplicationFactory(user=self.user, application_info=self.app_info)
+        self.solution = ApplicationSolutionFactory(task=self.task, application=self.application)
+
+    def test_create_application_solution_updates_solutions_when_instance_is_provided(self):
+        previous_url = self.solution.url
+        new_url = str(faker.pyint()) + faker.url()
+        current_solution_count = ApplicationSolution.objects.count()
+        create_application_solution(task=self.task,
+                                    application=self.application,
+                                    url=new_url)
+        self.assertEqual(current_solution_count, ApplicationSolution.objects.count())
+        self.solution.refresh_from_db()
+        self.assertNotEqual(previous_url, self.solution.url)
+        self.assertEqual(new_url, self.solution.url)

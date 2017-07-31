@@ -20,6 +20,25 @@ class ApplicationInfoFormDataMixin:
         return form_kwargs
 
 
+class ApplicationFormDataMixin:
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            post_data = self.request.POST
+            data = {}
+            data['application_info'] = self.course.application_info.id
+            data['user'] = self.request.user.id
+            data['phone'] = post_data.get('phone')
+            data['skype'] = post_data.get('skype')
+            data['works_at'] = post_data.get('works_at')
+            data['studies_at'] = post_data.get('studies_at')
+
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+
 class HasStudentAlreadyAppliedMixin:
     def dispatch(self, request, *args, **kwargs):
         self.user_applied = False
@@ -27,11 +46,23 @@ class HasStudentAlreadyAppliedMixin:
             user_application = request.user.applications.filter(application_info=self.course.application_info)
             if user_application.exists():
                 self.user_applied = True
-                url = reverse('public:course_detail', kwargs={'course_slug': self.course.slug_url})
+                url = reverse('dashboard:applications:edit-application', kwargs={'course_id': self.course.id})
                 return redirect(url)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user_applied'] = self.user_applied
+        return context
+
+
+class ApplicationTasksMixin:
+    def dispatch(self, request, *args, **kwargs):
+        self.application_tasks = self.get_object().application_info.tasks.all()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        task_names = [task.name for task in self.application_tasks]
+        context['task_names'] = task_names
         return context
