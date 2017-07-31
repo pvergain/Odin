@@ -1,6 +1,11 @@
 from django.conf.urls import url
 
-from .views import CreateApplicationInfoView, EditApplicationInfoView, CreateIncludedApplicationTaskView
+from .views import (
+    CreateApplicationInfoView,
+    EditApplicationInfoView,
+    CreateIncludedApplicationTaskView,
+    ApplyToCourseView
+)
 
 urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/create-application-info/$',
@@ -12,4 +17,7 @@ urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/add-application-task/$',
         view=CreateIncludedApplicationTaskView.as_view(),
         name='add-application-task'),
+    url(regex='^(?P<course_id>[0-9]+)/apply/$',
+        view=ApplyToCourseView.as_view(),
+        name='apply-to-course'),
 ]

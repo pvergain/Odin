@@ -15,10 +15,7 @@ class ApplicationInfo(models.Model):
     start_interview_date = models.DateField(blank=True, null=True)
     end_interview_date = models.DateField(blank=True, null=True)
 
-    description = models.TextField(
-        blank=True,
-        null=True
-    )
+    description = models.TextField(blank=True, null=True)
 
     external_application_form = models.URLField(blank=True, null=True,
                                                 help_text='Only add if course requires external application form')
@@ -37,8 +34,8 @@ class ApplicationInfo(models.Model):
 
 
 class Application(models.Model):
-    application_info = models.ForeignKey(ApplicationInfo)
-    user = models.ForeignKey(BaseUser)
+    application_info = models.ForeignKey(ApplicationInfo, related_name='applications')
+    user = models.ForeignKey(BaseUser, related_name='applications')
 
     phone = models.CharField(null=True, blank=True, max_length=255)
     skype = models.CharField(null=True, blank=True, max_length=255)

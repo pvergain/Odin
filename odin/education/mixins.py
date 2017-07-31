@@ -12,14 +12,20 @@ from .models import IncludedTask, Course, IncludedTest
 class CourseViewMixin:
     def dispatch(self, request, *args, **kwargs):
         course_id = self.kwargs.get('course_id')
+        if not course_id:
+            course_slug = self.kwargs.get('course_slug')
 
         prefetch = (
             'students__profile',
             'teachers__profile',
             'topics__week',
-            'topics__materials'
+            'topics__materials',
+            'topics__tasks'
         )
-        self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch)
+        if course_id:
+            self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch)
+        else:
+            self.course = Course.objects.filter(slug_url=course_slug).prefetch_related(*prefetch)
         if not self.course.exists():
             return Http404
 

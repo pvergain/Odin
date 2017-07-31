@@ -1,12 +1,14 @@
 from django.views.generic import FormView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.conf import settings
 
+from odin.common.services import send_email
 from odin.education.mixins import CourseViewMixin, CallServiceMixin
 from odin.education.permissions import IsTeacherInCoursePermission
-from .forms import ApplicationInfoModelForm, IncludedApplicationTaskForm
-from .services import create_application_info, create_included_application_task
-from .mixins import ApplicationInfoFormDataMixin
+from .forms import ApplicationInfoModelForm, IncludedApplicationTaskForm, ApplicationForm
+from .services import create_application_info, create_included_application_task, create_application
+from .mixins import ApplicationInfoFormDataMixin, HasStudentAlreadyAppliedMixin
 
 
 class CreateApplicationInfoView(CourseViewMixin,
@@ -77,4 +79,47 @@ class CreateIncludedApplicationTaskView(CourseViewMixin,
 
     def form_valid(self, form):
         self.call_service(service=create_included_application_task, service_kwargs=form.cleaned_data)
+        return super().form_valid(form)
+
+
+class ApplyToCourseView(CourseViewMixin,
+                        LoginRequiredMixin,
+                        HasStudentAlreadyAppliedMixin,
+                        CallServiceMixin,
+                        FormView):
+
+    form_class = ApplicationForm
+    template_name = "applications/course_application.html"
+
+    def get_success_url(self):
+        return reverse_lazy('public:course_detail',
+                            kwargs={'course_slug': self.course.slug_url})
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            post_data = self.request.POST
+            data = {}
+            data['application_info'] = self.course.application_info.id
+            data['user'] = self.request.user.id
+            data['phone'] = post_data.get('phone')
+            data['skype'] = post_data.get('skype')
+            data['works_at'] = post_data.get('works_at')
+            data['studies_at'] = post_data.get('studies_at')
+
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        instance = self.call_service(service=create_application, service_kwargs=form.cleaned_data)
+
+        if instance:
+            template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')
+            context = {
+                'user': self.request.user.email,
+                'course': self.course.name
+            }
+            send_email(template_name=template_name, recipients=[self.request.user.email], context=context)
         return super().form_valid(form)

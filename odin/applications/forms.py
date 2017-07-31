@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import ApplicationInfo, IncludedApplicationTask, ApplicationTask
+from .models import ApplicationInfo, IncludedApplicationTask, ApplicationTask, Application
 
 
 class DateInput(forms.DateInput):
@@ -30,4 +30,17 @@ class IncludedApplicationTaskForm(forms.ModelForm):
             'name',
             'description',
             'application_info'
+        ]
+
+
+class ApplicationForm(forms.ModelForm):
+    class Meta:
+        model = Application
+        fields = [
+            'application_info',
+            'user',
+            'phone',
+            'skype',
+            'works_at',
+            'studies_at',
         ]
