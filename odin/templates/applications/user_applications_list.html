@@ -1,0 +1,9 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block content_title %}
+  My applications
+{% endblock content_title %}
+
+{% block page_content %}
+  {% include "applications/partial/applications_table.html" with applications=object_list %}
+{% endblock page_content %}

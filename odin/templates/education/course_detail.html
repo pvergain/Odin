@@ -15,7 +15,7 @@
   </div>
 
   {% if course.application_info.apply_is_active and public_page %}
-    {% if request.user.student not in course.students.all and user_applied == False%}
+    {% if request.user.student not in course.students.all and not user_applied %}
       <a href="{% url 'dashboard:applications:apply-to-course' course.id %}">
         <button class="btn green uppercase" type="button" name="button">Apply to course</button>
       </a>

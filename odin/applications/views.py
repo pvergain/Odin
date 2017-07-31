@@ -1,4 +1,4 @@
-from django.views.generic import FormView, UpdateView
+from django.views.generic import FormView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
@@ -6,6 +6,7 @@ from django.conf import settings
 from odin.common.services import send_email
 from odin.education.mixins import CourseViewMixin, CallServiceMixin
 from odin.education.permissions import IsTeacherInCoursePermission
+from .models import Application
 from .forms import ApplicationInfoModelForm, IncludedApplicationTaskForm, ApplicationForm
 from .services import create_application_info, create_included_application_task, create_application
 from .mixins import ApplicationInfoFormDataMixin, HasStudentAlreadyAppliedMixin
@@ -123,3 +124,15 @@ class ApplyToCourseView(CourseViewMixin,
             }
             send_email(template_name=template_name, recipients=[self.request.user.email], context=context)
         return super().form_valid(form)
+
+
+class UserApplicationsListView(LoginRequiredMixin,
+                               ListView):
+    template_name = 'applications/user_applications_list.html'
+
+    def get_queryset(self):
+        prefetch = [
+            'application_info__course',
+            'application_info__tasks',
+        ]
+        return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
