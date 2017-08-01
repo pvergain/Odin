@@ -106,15 +106,8 @@ class ApplyToCourseView(CourseViewMixin,
     success_url = reverse_lazy('dashboard:applications:user-applications')
 
     def form_valid(self, form):
-        instance = self.call_service(service=create_application, service_kwargs=form.cleaned_data)
+        self.call_service(service=create_application, service_kwargs=form.cleaned_data)
 
-        if instance:
-            template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')
-            context = {
-                'user': self.request.user.email,
-                'course': self.course.name
-            }
-            send_email(template_name=template_name, recipients=[self.request.user.email], context=context)
         return super().form_valid(form)
 
 

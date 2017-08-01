@@ -1,5 +1,7 @@
 from datetime import date
 
+from django.conf import settings
+
 from .models import (
     Application,
     ApplicationInfo,
@@ -9,6 +11,7 @@ from .models import (
 )
 from odin.education.models import Course
 from odin.users.models import BaseUser
+from odin.common.services import send_email
 
 
 def create_application_info(*,
@@ -53,6 +56,13 @@ def create_application(*,
 
     instance.full_clean()
     instance.save()
+    template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')
+    context = {
+        'user': user.email,
+        'course': application_info.course.name
+    }
+    send_email(template_name=template_name, recipients=[user.email], context=context)
+
     return instance
 
 
