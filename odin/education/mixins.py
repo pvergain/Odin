@@ -27,7 +27,7 @@ class CourseViewMixin:
         else:
             self.course = Course.objects.filter(slug_url=course_slug).prefetch_related(*prefetch)
         if not self.course.exists():
-            return Http404
+            raise Http404
 
         self.course = self.course.first()
 

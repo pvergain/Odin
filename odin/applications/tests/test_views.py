@@ -7,7 +7,7 @@ from django.test.utils import override_settings
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
-from odin.education.models import Teacher
+from odin.education.models import Teacher, Course
 from odin.education.factories import CourseFactory
 from odin.education.services import add_teacher
 from odin.applications.models import (
@@ -16,7 +16,13 @@ from odin.applications.models import (
     IncludedApplicationTask,
     Application
 )
-from odin.applications.factories import ApplicationInfoFactory
+from odin.applications.factories import (
+    ApplicationInfoFactory,
+    IncludedApplicationTaskFactory,
+    ApplicationFactory,
+    ApplicationTaskFactory,
+    ApplicationSolutionFactory
+)
 from odin.applications.services import create_application
 
 
@@ -241,3 +247,72 @@ class TestApplyToCourseView(TestCase):
             self.assertEqual(mock_send_mail.called, True)
             (template_name, recipients, context), kwargs = mock_send_mail.call_args
             self.assertEqual([self.user.email], recipients)
+
+
+class TestEditApplicationView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.course = CourseFactory()
+        self.app_info = ApplicationInfoFactory(course=self.course,
+                                               start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=2))
+        self.application = ApplicationFactory(user=self.user, application_info=self.app_info)
+        self.url = reverse('dashboard:applications:edit-application',
+                           kwargs={'course_id': self.course.id})
+        self.success_url = reverse('dashboard:applications:user-applications')
+
+    def test_update_works_without_submitted_tasks(self):
+        IncludedApplicationTaskFactory(application_info=self.app_info)
+        previous_works_at = self.application.works_at
+        new_works_at = str(faker.pyint()) + faker.job()
+
+        data = {
+            'phone': faker.phone_number(),
+            'works_at': new_works_at
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=self.success_url)
+            self.application.refresh_from_db()
+            self.assertNotEqual(previous_works_at, self.application.works_at)
+            self.assertEqual(new_works_at, self.application.works_at)
+
+    def test_update_works_with_multiple_submitted_tasks(self):
+        tasks = ApplicationTaskFactory.create_batch(5)
+        app_tasks = []
+        for task in tasks:
+            app_tasks.append(IncludedApplicationTaskFactory(task=task, application_info=self.app_info))
+        data = {task.name: faker.url() for task in app_tasks}
+        data['phone'] = faker.phone_number()
+        data['works_at'] = faker.job()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=self.success_url)
+            self.application.refresh_from_db()
+            self.assertEqual(len(tasks), self.application.solutions.count())
+            for solution in self.application.solutions.all():
+                self.assertIsNotNone(solution)
+                self.assertIsNotNone(solution.url)
+
+    def test_form_has_initial_data_for_solutions_when_user_has_submitted(self):
+        task = ApplicationTaskFactory()
+        app_task = IncludedApplicationTaskFactory(task=task, application_info=self.app_info)
+        solution = ApplicationSolutionFactory(task=app_task, application=self.application)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(solution.url, response.context_data['form'].initial[app_task.name])
+
+    def test_get_returns_404_when_application_does_not_exist(self):
+        fake_course_id = Course.objects.last().id + faker.pyint()
+        self.url = reverse('dashboard:applications:edit-application',
+                           kwargs={'course_id': fake_course_id})
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_404(response)

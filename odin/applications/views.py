@@ -138,20 +138,20 @@ class EditApplicationView(CourseViewMixin,
                           UpdateView):
     form_class = ApplicationEditForm
     template_name = "applications/edit_application.html"
-    success_url = reverse_lazy('dasboard:applications:user-applications')
+    success_url = reverse_lazy('dashboard:applications:user-applications')
 
     def get_object(self):
         user_application = self.request.user.applications.filter(application_info=self.course.application_info)
         if user_application.exists():
             return user_application.first()
-        return Http404
+        raise Http404
 
     def get_initial(self):
         initial = super().get_initial()
         if hasattr(self.object, 'solutions'):
             for task in self.application_tasks:
                 solution = self.object.solutions.filter(task=task)
-                if solution.exists:
+                if solution.exists():
                     initial[task.name] = solution.first().url
         return initial
 
