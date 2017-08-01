@@ -61,8 +61,8 @@ class ApplicationTasksMixin:
         self.application_tasks = self.get_object().application_info.tasks.all()
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self):
-        context = super().get_context_data()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         task_names = [task.name for task in self.application_tasks]
         context['task_names'] = task_names
         return context

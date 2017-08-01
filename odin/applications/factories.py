@@ -1,5 +1,7 @@
 import factory
 
+from django.utils import timezone
+
 from odin.common.faker import faker
 from odin.education.factories import CourseFactory
 from odin.users.factories import BaseUserFactory
@@ -13,11 +15,12 @@ from .models import (
 
 
 class ApplicationInfoFactory(factory.DjangoModelFactory):
-    start_date = factory.LazyAttribute(lambda _: faker.date_object())
-    end_date = factory.LazyAttribute(lambda _: faker.date_object())
+    start_date = factory.LazyAttribute(lambda _: timezone.now().date() + timezone.timedelta(days=faker.pyint()))
+    end_date = factory.LazyAttribute(lambda _: timezone.now().date() + timezone.timedelta(days=faker.pyint()))
     course = factory.SubFactory(CourseFactory)
-    start_interview_date = factory.LazyAttribute(lambda _: faker.date_object())
-    end_interview_date = factory.LazyAttribute(lambda _: faker.date_object())
+    start_interview_date = factory.LazyAttribute(lambda _: timezone.now().date() +
+                                                 timezone.timedelta(days=faker.pyint()))
+    end_interview_date = factory.LazyAttribute(lambda _: timezone.now().date() + timezone.timedelta(days=faker.pyint()))
     description = factory.LazyAttribute(lambda _: faker.text())
 
     class Meta:

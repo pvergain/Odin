@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from odin.education.models import Course, BaseTask
 from odin.users.models import BaseUser
@@ -32,6 +33,20 @@ class ApplicationInfo(models.Model):
         return self.start_interview_date <= timezone.now().date() and \
                self.end_interview_date >= timezone.now().date()
 
+    def clean(self):
+        if self.start_date < timezone.now().date() or self.end_date <= timezone.now().date():
+            raise ValidationError("Can not create an application in the past")
+
+        if self.start_date >= self.end_date:
+            raise ValidationError("Start date can not be after end date")
+
+        if self.start_interview_date and self.end_interview_date:
+            if self.start_interview_date < timezone.now().date() or self.end_interview_date <= timezone.now().date():
+                raise ValidationError("Can not create interview dates in the past")
+
+            if self.start_interview_date >= self.end_interview_date:
+                raise ValidationError("Start interview date can not be after end interview date")
+
 
 class Application(models.Model):
     application_info = models.ForeignKey(ApplicationInfo, related_name='applications')
@@ -50,6 +65,10 @@ class Application(models.Model):
 
     class Meta:
         unique_together = (("application_info", "user"),)
+
+    def clean(self):
+        if not self.application_info.apply_is_active():
+            raise ValidationError(f"The application period for {self.application_info.course} has expired!")
 
 
 class ApplicationTask(BaseTask):

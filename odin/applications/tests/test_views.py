@@ -72,9 +72,7 @@ class TestCreateApplicationInfoView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
 
-            self.assertRedirects(response,
-                                 expected_url=reverse('dashboard:education:user-course-detail',
-                                                      kwargs={'course_id': self.course.id}))
+            self.assertFalse(response.context_data['form'].is_valid())
             self.assertEqual(current_app_info_count, ApplicationInfo.objects.count())
 
     def test_post_creates_instance_when_data_is_valid(self):
@@ -197,7 +195,7 @@ class TestApplyToCourseView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
 
-            self.assertRedirects(response, expected_url=reverse('dashboard:applications:user-applications'))
+            self.assertFalse(response.context_data['form'].is_valid())
             self.assertEqual(current_app_count, Application.objects.count())
 
     def test_get_redirects_when_user_has_already_applied(self):
