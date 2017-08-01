@@ -12,20 +12,23 @@ class ApplicationInfoTests(TestCase):
     def setUp(self):
         self.start_date = timezone.now().date()
         self.end_date = timezone.now().date() + timezone.timedelta(days=2)
-        self.open_applications = [ApplicationInfoFactory(
-                                    start_date=self.start_date,
-                                    end_date=self.end_date,
-                                    start_interview_date=self.start_date,
-                                    end_interview_date=self.end_date) for i in range(5)]
+        self.open_applications = ApplicationInfoFactory.create_batch(size=5,
+                                                                     start_date=self.start_date,
+                                                                     end_date=self.end_date,
+                                                                     start_interview_date=self.start_date,
+                                                                     end_interview_date=self.end_date)
+
         false_start_date = timezone.now().date() - timezone.timedelta(days=2)
         false_end_date = timezone.now().date() - timezone.timedelta(days=1)
-        self.closed_applications = [ApplicationInfoFactory(
+        self.closed_applications = ApplicationInfoFactory.create_batch(
+                                      size=5,
                                       start_date=false_start_date,
                                       end_date=false_end_date,
                                       start_interview_date=false_start_date,
-                                      end_interview_date=false_end_date) for i in range(5)]
+                                      end_interview_date=false_end_date)
 
     def test_get_open_for_apply_returns_only_open_applications(self):
+
         applications = ApplicationInfo.objects.get_open_for_apply()
         self.assertEqual(applications, self.open_applications)
 

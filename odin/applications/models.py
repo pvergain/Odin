@@ -88,3 +88,6 @@ class ApplicationSolution(models.Model):
     task = models.ForeignKey(IncludedApplicationTask, related_name='solutions')
     application = models.ForeignKey(Application, related_name='solutions')
     url = models.URLField(blank=True, null=True)
+
+    class Meta:
+        unique_together = (("task", 'application_info'),)
