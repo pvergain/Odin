@@ -1,4 +1,6 @@
-from django.shortcuts import redirect, reverse
+from django.shortcuts import redirect, reverse, get_object_or_404
+
+from .models import ApplicationInfo
 
 
 class ApplicationInfoFormDataMixin:
@@ -39,10 +41,19 @@ class ApplicationFormDataMixin:
         return form_kwargs
 
 
+class RedirectToExternalFormMixin:
+    def dispatch(self, request, *args, **kwargs):
+        application_info = get_object_or_404(ApplicationInfo, course=self.course)
+        external_url = application_info.external_application_form
+        if external_url:
+            return redirect(external_url)
+        return super().dispatch(request, *args, **kwargs)
+
+
 class HasStudentAlreadyAppliedMixin:
     def dispatch(self, request, *args, **kwargs):
         self.user_applied = False
-        if hasattr(request.user, 'applications'):
+        if hasattr(request.user, 'applications') and hasattr(self.course, 'application_info'):
             user_application = request.user.applications.filter(application_info=self.course.application_info)
             if user_application.exists():
                 self.user_applied = True

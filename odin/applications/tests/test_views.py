@@ -228,6 +228,15 @@ class TestApplyToCourseView(TestCase):
             self.assertRedirects(response,
                                  expected_url=expected_url)
 
+    def test_view_redirects_to_external_url_when_external_application_form_is_provided(self):
+        self.app_info.external_application_form = faker.url()
+        self.app_info.save()
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertRedirects(response,
+                                 expected_url=self.app_info.external_application_form,
+                                 fetch_redirect_response=False)
+
     @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
     @patch('odin.common.tasks.send_template_mail.delay')
     def test_sends_mail_to_address_upon_successful_application(self, mock_send_mail):

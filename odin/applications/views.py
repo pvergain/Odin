@@ -1,10 +1,8 @@
 from django.views.generic import FormView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.conf import settings
-from django.http import Http404
+from django.shortcuts import get_object_or_404
 
-from odin.common.services import send_email
 from odin.education.mixins import CourseViewMixin, CallServiceMixin
 from odin.education.permissions import IsTeacherInCoursePermission
 from .models import Application
@@ -19,7 +17,8 @@ from .mixins import (
     ApplicationInfoFormDataMixin,
     HasStudentAlreadyAppliedMixin,
     ApplicationFormDataMixin,
-    ApplicationTasksMixin
+    ApplicationTasksMixin,
+    RedirectToExternalFormMixin
 )
 
 
@@ -96,6 +95,7 @@ class CreateIncludedApplicationTaskView(CourseViewMixin,
 
 class ApplyToCourseView(CourseViewMixin,
                         LoginRequiredMixin,
+                        RedirectToExternalFormMixin,
                         ApplicationFormDataMixin,
                         HasStudentAlreadyAppliedMixin,
                         CallServiceMixin,
@@ -134,10 +134,8 @@ class EditApplicationView(CourseViewMixin,
     success_url = reverse_lazy('dashboard:applications:user-applications')
 
     def get_object(self):
-        user_application = self.request.user.applications.filter(application_info=self.course.application_info)
-        if user_application.exists():
-            return user_application.first()
-        raise Http404
+        user_application = get_object_or_404(Application, user=self.request.user, application_info__course=self.course)
+        return user_application
 
     def get_initial(self):
         initial = super().get_initial()
