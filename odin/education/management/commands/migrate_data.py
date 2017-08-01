@@ -15,7 +15,8 @@ from odin.common.load_data import (
     IncludedMaterialLoader,
     ProgrammingLanguageLoader,
     IncludedTaskLoader,
-    IncludedTestLoader
+    IncludedTestLoader,
+    SolutionLoader
 )
 
 
@@ -32,7 +33,8 @@ class Command(BaseCommand):
             IncludedMaterialLoader(),
             ProgrammingLanguageLoader(),
             IncludedTaskLoader(),
-            IncludedTestLoader()
+            IncludedTestLoader(),
+            SolutionLoader()
         ]
 
         for loader in loaders:

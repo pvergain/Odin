@@ -397,3 +397,47 @@ class IncludedTestLoader(BaseLoader):
             instance_list.append(instance)
 
         self.django_model.objects.bulk_create(instance_list)
+
+
+class SolutionLoader(BaseLoader):
+    json_model = 'education.solution'
+    django_model = apps.get_model('education.Solution')
+    model_fields = [
+        'task',
+        'student',
+        'url',
+        'code',
+        'check_status_location',
+        'build_id',
+        'status',
+        'test_output',
+        'return_code',
+        'file'
+    ]
+    json_fields = [
+        'task',
+        'student',
+        'url',
+        'code',
+        'check_status_location',
+        'build_id',
+        'status',
+        'test_output',
+        'return_code',
+        'file'
+    ]
+
+    def generate_orm_objects(self):
+        instance_list = []
+
+        for kwargs in self.get_field_mapping():
+            task_qs = IncludedTask.objects.filter(id=kwargs['task'])
+            student_qs = Student.objects.filter(id=kwargs['student'])
+            if student_qs.exists() and task_qs.exists():
+                kwargs['task'] = task_qs.first()
+                kwargs['student'] = student_qs.first()
+
+                instance = self.django_model(**kwargs)
+                instance_list.append(instance)
+
+        self.django_model.objects.bulk_create(instance_list)

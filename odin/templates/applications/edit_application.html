@@ -32,6 +32,7 @@
         {% for form_field in form %}
           {% if form_field.name in task_names %}
           <div class="form-group">
+            {{ form_field.label }}
             {% render_field form_field class="form-control form-control-solid placeholder-no-fix" placeholder=form_field.label %}
           </div>
           {% endif %}
