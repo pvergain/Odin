@@ -121,6 +121,15 @@ class TestCreateApplicationInfoService(TestCase):
 
         self.assertEqual(current_app_info_count + 1, ApplicationInfo.objects.count())
 
+    def test_create_application_info_raises_validation_error_when_course_has_started(self):
+        self.course.start_date = timezone.now().date() - timezone.timedelta(days=faker.pyint())
+        with self.assertRaises(ValidationError):
+            create_application_info(start_date=self.start_date,
+                                    end_date=self.end_date,
+                                    course=self.course,
+                                    start_interview_date=self.start_interview_date,
+                                    end_interview_date=self.end_interview_date)
+
 
 class TestCreateApplicationService(TestCase):
     def setUp(self):

@@ -94,6 +94,21 @@ class TestCreateApplicationInfoView(TestCase):
                                                       kwargs={'course_id': self.course.id}))
             self.assertEqual(current_app_info_count + 1, ApplicationInfo.objects.count())
 
+    def test_post_does_not_create_instance_when_course_has_already_started(self):
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.course.start_date = timezone.now().date() - timezone.timedelta(days=faker.pyint())
+        self.course.save()
+        current_app_info_count = ApplicationInfo.objects.count()
+        data = {
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertFalse(response.context_data['form'].is_valid())
+            self.assertEqual(current_app_info_count, ApplicationInfo.objects.count())
+
 
 class TestCreateIncludedApplicationTaskView(TestCase):
     def setUp(self):
