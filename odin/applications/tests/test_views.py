@@ -323,3 +323,11 @@ class TestEditApplicationView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.response_404(response)
+
+    def test_get_returns_403_when_application_info_has_external_application_form(self):
+        self.app_info.external_application_form = faker.url()
+        self.app_info.save()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)

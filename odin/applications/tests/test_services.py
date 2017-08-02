@@ -178,6 +178,14 @@ class TestCreateIncludedApplicationTaskService(TestCase):
         self.assertEqual(current_app_task_count + 1, ApplicationTask.objects.count())
         self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
 
+    def test_create_included_application_task_raises_validation_error_when_task_has_external_form(self):
+        self.app_info.external_application_form = faker.url()
+        self.app_info.save()
+        with self.assertRaises(ValidationError):
+            create_included_application_task(name=self.task_name,
+                                             description=self.task_description,
+                                             application_info=self.app_info)
+
 
 class TestCreateApplicationSolutionService(TestCase):
     def setUp(self):

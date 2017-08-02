@@ -83,6 +83,10 @@ class IncludedApplicationTask(BaseTask):
                                          on_delete=models.CASCADE,
                                          related_name='tasks')
 
+    def clean(self):
+        if self.application_info.external_application_form:
+            raise ValidationError("Can not add tasks to a course with external application")
+
 
 class ApplicationSolution(models.Model):
     task = models.ForeignKey(IncludedApplicationTask, related_name='solutions')

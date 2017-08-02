@@ -24,8 +24,10 @@
                                 <tr>
                                     <td>{{ app.id }}</td>
                                     <td>{{ app.application_info.course.name }}</td>
+				    {% if not app.application_info.external_application_form %}
                                     <td>{{ app.solutions.count }} / {{app.application_info.tasks.count}}</td>
-                                    <td><a href="{% url 'dashboard:applications:edit-application' app.application_info.course.id %}"><button class="btn green uppercase" type="button" name="button">Edit application</button></a></td>
+				    <td><a href="{% url 'dashboard:applications:edit-application' app.application_info.course.id %}"><button class="btn green uppercase" type="button" name="button">Edit application</button></a></td>
+				    {% endif %}
                                 </tr>
                             {% endfor %}
                         </tbody>

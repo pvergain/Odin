@@ -1,4 +1,5 @@
 from django.shortcuts import redirect, reverse, get_object_or_404
+from django.http import HttpResponseForbidden
 
 from .models import ApplicationInfo
 
@@ -69,6 +70,8 @@ class HasStudentAlreadyAppliedMixin:
 
 class ApplicationTasksMixin:
     def dispatch(self, request, *args, **kwargs):
+        if self.get_object().application_info.external_application_form:
+            return HttpResponseForbidden("Can not edit an application with an external form")
         self.application_tasks = self.get_object().application_info.tasks.all()
         return super().dispatch(request, *args, **kwargs)
 

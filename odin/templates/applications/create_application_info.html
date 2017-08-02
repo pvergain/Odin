@@ -44,17 +44,19 @@
     </div>
     <hr>
     {% if course.application_info %}
-    <div class="form-group">
-      <strong>Current application tasks</strong>
-      <ul>
-        {% for task in course.application_info.tasks.all %}
-          <li>{{ task.name }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-      <a href="{% url 'dashboard:applications:add-application-task' course.id %}">
-        <button class="btn green uppercase" type="button" name="button">Add application task</button>
-      </a>
+      {% if not course.application_info.external_application_form %}
+        <div class="form-group">
+          <strong>Current application tasks</strong>
+          <ul>
+            {% for task in course.application_info.tasks.all %}
+              <li>{{ task.name }}</li>
+            {% endfor %}
+	  </ul>
+	</div>
+	<a href="{% url 'dashboard:applications:add-application-task' course.id %}">
+          <button class="btn green uppercase" type="button" name="button">Add application task</button>
+	</a>
+      {% endif %}
     {% endif %}
   </form>
 </div>
