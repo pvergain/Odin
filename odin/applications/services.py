@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from .models import (
     Application,
@@ -72,12 +73,14 @@ def create_included_application_task(*,
                                      gradable: bool=False,
                                      existing_task: ApplicationTask=None,
                                      application_info: ApplicationInfo=None) -> IncludedApplicationTask:
-
     included_task = IncludedApplicationTask(application_info=application_info)
     if existing_task is None:
         existing_task = ApplicationTask(name=name, description=description, gradable=gradable)
         existing_task.full_clean()
         existing_task.save()
+
+    if IncludedApplicationTask.objects.filter(application_info=application_info, task=existing_task):
+        raise ValidationError("Task already added")
 
     included_task.name = existing_task.name
     included_task.description = existing_task.description

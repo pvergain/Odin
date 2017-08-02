@@ -6,7 +6,8 @@ from .views import (
     CreateIncludedApplicationTaskView,
     ApplyToCourseView,
     UserApplicationsListView,
-    EditApplicationView
+    EditApplicationView,
+    AddIncludedApplicationTaskFromExistingView
 )
 
 urlpatterns = [
@@ -28,4 +29,7 @@ urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/edit-application/$',
         view=EditApplicationView.as_view(),
         name='edit-application'),
+    url(regex='^(?P<course_id>[0-9]+)/existing-application-tasks/$',
+        view=AddIncludedApplicationTaskFromExistingView.as_view(),
+        name='add-application-task-from-existing'),
 ]

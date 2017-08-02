@@ -148,16 +148,27 @@ class TestCreateIncludedApplicationTaskView(TestCase):
         self.assertEqual(current_app_task_count + 1, ApplicationTask.objects.count())
         self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
 
+
+class TestAddInclduedApplicationTaskFromExistingView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.app_info = ApplicationInfoFactory(course=self.course)
+        self.task_name = faker.word()
+        self.task_description = faker.text()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.teacher = Teacher.objects.create_from_user(self.user)
+        self.url = reverse('dashboard:applications:add-application-task-from-existing',
+                           kwargs={'course_id': self.course.id})
+
     def test_post_creates_only_included_task_when_existing_is_provided(self):
         add_teacher(course=self.course, teacher=self.teacher)
-        existing_task = ApplicationTask.objects.create(name=self.task_name, description=self.task_description)
+        existing_task = ApplicationTaskFactory(name=self.task_name, description=self.task_description)
         current_app_task_count = ApplicationTask.objects.count()
         current_included_app_task_count = IncludedApplicationTask.objects.count()
 
         data = {
-            'existing_task': existing_task.id,
-            'name': self.task_name,
-            'description': self.task_description
+            'task': existing_task.id,
         }
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
@@ -165,8 +176,48 @@ class TestCreateIncludedApplicationTaskView(TestCase):
             self.assertRedirects(response, expected_url=reverse('dashboard:applications:edit-application-info',
                                                                 kwargs={'course_id': self.course.id}))
 
-        self.assertEqual(current_app_task_count, ApplicationTask.objects.count())
-        self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
+            self.assertEqual(current_app_task_count, ApplicationTask.objects.count())
+            self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
+
+    def test_post_does_not_create_included_task_when_it_is_already_added_to_course(self):
+        add_teacher(course=self.course, teacher=self.teacher)
+        task = IncludedApplicationTaskFactory(application_info=self.app_info)
+        current_app_task_count = ApplicationTask.objects.count()
+        current_included_app_task_count = IncludedApplicationTask.objects.count()
+
+        data = {
+            'task': task.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+
+            self.assertRedirects(response, expected_url=reverse('dashboard:applications:edit-application-info',
+                                                                kwargs={'course_id': self.course.id}))
+            self.assertEqual(current_app_task_count, ApplicationTask.objects.count())
+            self.assertEqual(current_included_app_task_count, IncludedApplicationTask.objects.count())
+
+    def test_post_with_task_created_from_different_course_creates_only_included_task_for_the_new_course(self):
+        add_teacher(course=self.course, teacher=self.teacher)
+        task = IncludedApplicationTaskFactory(application_info=self.app_info)
+        current_app_task_count = ApplicationTask.objects.count()
+        current_included_app_task_count = IncludedApplicationTask.objects.count()
+
+        new_course = CourseFactory()
+        add_teacher(course=new_course, teacher=self.teacher)
+        ApplicationInfoFactory(course=new_course)
+        new_url = reverse('dashboard:applications:add-application-task-from-existing',
+                          kwargs={'course_id': new_course.id})
+        data = {
+            'task': task.task.id
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(new_url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:applications:edit-application-info',
+                                                                kwargs={'course_id': new_course.id}))
+            self.assertEqual(current_app_task_count, ApplicationTask.objects.count())
+            self.assertEqual(current_included_app_task_count + 1, IncludedApplicationTask.objects.count())
+            self.assertEqual(IncludedApplicationTask.objects.last().application_info.id, new_course.application_info.id)
 
 
 class TestApplyToCourseView(TestCase):

@@ -195,6 +195,14 @@ class TestCreateIncludedApplicationTaskService(TestCase):
                                              description=self.task_description,
                                              application_info=self.app_info)
 
+    def test_create_application_task_rasies_validation_error_when_task_is_already_added(self):
+        task = IncludedApplicationTaskFactory(name=self.task_name,
+                                              description=self.task_description,
+                                              application_info=self.app_info)
+
+        with self.assertRaises(ValidationError):
+            create_included_application_task(application_info=self.app_info, existing_task=task.task)
+
 
 class TestCreateApplicationSolutionService(TestCase):
     def setUp(self):

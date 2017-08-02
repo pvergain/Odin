@@ -54,9 +54,12 @@
 	  </ul>
 	</div>
 	<a href="{% url 'dashboard:applications:add-application-task' course.id %}">
-          <button class="btn green uppercase" type="button" name="button">Add application task</button>
+          <button class="btn green uppercase" type="button" name="button">Add new application task</button>
 	</a>
-      {% endif %}
+	<a href="{% url 'dashboard:applications:add-application-task-from-existing' course.id  %}">
+	  <button class="btn green uppercase" type="button" name="button">Choose from existing tasks</button>
+	</a>
+     {% endif %}
     {% endif %}
   </form>
 </div>

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import ApplicationInfo, IncludedApplicationTask, ApplicationTask, Application
+from .models import ApplicationInfo, IncludedApplicationTask, Application
 
 
 class DateInput(forms.DateInput):
@@ -21,9 +21,6 @@ class ApplicationInfoModelForm(forms.ModelForm):
 
 
 class IncludedApplicationTaskForm(forms.ModelForm):
-    existing_task = forms.ModelChoiceField(queryset=ApplicationTask.objects.all(),
-                                           required=False)
-
     class Meta:
         model = IncludedApplicationTask
         fields = [
@@ -31,6 +28,12 @@ class IncludedApplicationTaskForm(forms.ModelForm):
             'description',
             'application_info'
         ]
+
+
+class IncludedApplicationTaskFromExistingForm(forms.ModelForm):
+    class Meta:
+        model = IncludedApplicationTask
+        fields = ['task', 'application_info']
 
 
 class ApplicationCreateForm(forms.ModelForm):

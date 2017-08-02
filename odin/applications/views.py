@@ -5,8 +5,14 @@ from django.shortcuts import get_object_or_404
 
 from odin.education.mixins import CourseViewMixin, CallServiceMixin
 from odin.education.permissions import IsTeacherInCoursePermission
-from .models import Application
-from .forms import ApplicationInfoModelForm, IncludedApplicationTaskForm, ApplicationCreateForm, ApplicationEditForm
+from .models import Application, ApplicationTask
+from .forms import (
+    ApplicationInfoModelForm,
+    IncludedApplicationTaskForm,
+    ApplicationCreateForm,
+    ApplicationEditForm,
+    IncludedApplicationTaskFromExistingForm
+)
 from .services import (
     create_application_info,
     create_included_application_task,
@@ -59,6 +65,45 @@ class EditApplicationInfoView(CourseViewMixin,
                                    kwargs={'course_id': self.course.id})
 
         return success_url
+
+
+class AddIncludedApplicationTaskFromExistingView(CourseViewMixin,
+                                                 LoginRequiredMixin,
+                                                 IsTeacherInCoursePermission,
+                                                 CallServiceMixin,
+                                                 FormView):
+    template_name = "applications/existing_task_list.html"
+    form_class = IncludedApplicationTaskFromExistingForm
+
+    def get_success_url(self):
+        success_url = reverse_lazy('dashboard:applications:edit-application-info',
+                                   kwargs={'course_id': self.course.id})
+        return success_url
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST, PUT'):
+            post_data = self.request.POST
+            data = {}
+            data['task'] = post_data.get('task')
+            data['application_info'] = self.course.application_info.id
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        data = {
+            'existing_task': form.cleaned_data.get('task'),
+            'application_info': form.cleaned_data.get('application_info')
+        }
+        self.call_service(service=create_included_application_task, service_kwargs=data)
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task_list'] = ApplicationTask.objects.all()
+        return context
 
 
 class CreateIncludedApplicationTaskView(CourseViewMixin,
