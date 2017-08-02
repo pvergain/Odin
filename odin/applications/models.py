@@ -90,4 +90,4 @@ class ApplicationSolution(models.Model):
     url = models.URLField(blank=True, null=True)
 
     class Meta:
-        unique_together = (("task", 'application_info'),)
+        unique_together = (("task", 'application'),)
