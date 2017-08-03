@@ -3,16 +3,20 @@ from django.views.generic import View, ListView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
-from .permissions import DashboardManagementPermission
-from .filters import UserFilter
-from .mixins import DashboardCreateUserMixin
-
 from odin.users.models import BaseUser
 from odin.users.services import create_user
 
+from odin.education.mixins import CallServiceMixin  # TODO: Move to common
 from odin.education.models import Student, Teacher, Course
-from odin.education.forms import ManagementAddCourseForm
-from odin.education.services import create_course
+from odin.education.forms import ManagementAddCourseForm  # TODO: Check
+from odin.education.services import create_course, add_student
+
+from odin.common.mixins import ReadableFormErrorsMixin
+
+from .permissions import DashboardManagementPermission
+from .filters import UserFilter
+from .mixins import DashboardCreateUserMixin
+from .forms import AddStudentToCourseForm
 
 
 class DashboardManagementView(LoginRequiredMixin,
@@ -105,3 +109,20 @@ class CreateCourseView(LoginRequiredMixin,
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course_id})
+
+
+class AddStudentToCourseView(DashboardManagementPermission,
+                             CallServiceMixin,
+                             ReadableFormErrorsMixin,
+                             FormView):
+    template_name = 'dashboard/add_student_to_course.html'
+    form_class = AddStudentToCourseForm
+    success_url = reverse_lazy('dashboard:management:management_index')
+
+    def get_service(self):
+        return add_student
+
+    def form_valid(self, form):
+        self.call_service(service_kwargs=form.cleaned_data)
+
+        return super().form_valid(form)

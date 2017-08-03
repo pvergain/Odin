@@ -11,13 +11,9 @@
     <div class="col-md-5">
         <form action="" method="POST">
 	    {% csrf_token %}
-	    {% if not form.is_valid %}
-            {% for error in readable_errors %}
-              <div class="alert alert-warning">
-                <span>{{ error }}</span>
-              </div>
-            {% endfor %}
-            {% endif %}
+
+      {% include "partial/form_errors.html" with form=form errors=readable_errors %}
+
 	    <div class="form-group">
         {% render_field form.name class="form-control form-control-solid placeholder-no-fix" placeholder="Course name" %}
 	    </div>
