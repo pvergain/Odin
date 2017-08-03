@@ -57,7 +57,9 @@ class Command(BaseCommand):
 
         while tasks:
             task = tasks.popleft()
-            SourceCodeTestFactory(task=task, language=language)
+
+            if task.gradable:
+                SourceCodeTestFactory(task=task, language=language)
 
         email = 'testadmin@hacksoft.io'
         password = 'asdf'
