@@ -44,7 +44,7 @@ class PromoteUserToStudentView(LoginRequiredMixin,
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
         Student.objects.create_from_user(instance)
-        return redirect('dashboard:management:management_index')
+        return redirect('dashboard:management:index')
 
 
 class PromoteUserToTeacherView(LoginRequiredMixin,
@@ -53,7 +53,7 @@ class PromoteUserToTeacherView(LoginRequiredMixin,
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
         Teacher.objects.create_from_user(instance)
-        return redirect('dashboard:management:management_index')
+        return redirect('dashboard:management:index')
 
 
 class CreateUserView(DashboardCreateUserMixin, FormView):
@@ -117,7 +117,7 @@ class AddStudentToCourseView(DashboardManagementPermission,
                              FormView):
     template_name = 'dashboard/add_student_to_course.html'
     form_class = AddStudentToCourseForm
-    success_url = reverse_lazy('dashboard:management:management_index')
+    success_url = reverse_lazy('dashboard:management:index')
 
     def get_service(self):
         return add_student
