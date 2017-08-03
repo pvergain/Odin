@@ -8,4 +8,4 @@ from .forms import ManagementAddUserForm
 class DashboardCreateUserMixin(LoginRequiredMixin, DashboardManagementPermission):
     form_class = ManagementAddUserForm
     template_name = 'dashboard/add_user.html'
-    success_url = reverse_lazy('dashboard:management:management_index')
+    success_url = reverse_lazy('dashboard:management:index')

@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from typing import Dict, BinaryIO
 
 from .models import GraderBinaryProblem, GraderPlainProblem
@@ -6,7 +8,7 @@ from .tasks import submit_solution
 
 
 def create_plain_problem(*,
-                         language: str="",
+                         language: str='',
                          test_type: int=GraderPlainProblem.UNITTEST,
                          file_type: int=GraderPlainProblem.PLAIN,
                          solution: str=None,
@@ -28,7 +30,7 @@ def create_plain_problem(*,
 
 
 def create_binary_problem(*,
-                          language: str="",
+                          language: str='',
                           test_type: int=GraderBinaryProblem.UNITTEST,
                           file_type: int=GraderBinaryProblem.BINARY,
                           solution: BinaryIO=None,
@@ -50,4 +52,4 @@ def create_binary_problem(*,
 
 
 def start_grader_communication(solution_id: int):
-    submit_solution.delay(solution_id)
+    transaction.on_commit(lambda: submit_solution.delay(solution_id))

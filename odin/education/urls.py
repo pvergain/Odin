@@ -21,7 +21,6 @@ from .views import (
     SubmitGradableSolutionView,
     SubmitNonGradableSolutionView,
     StudentSolutionDetailView,
-    EditStudentSolutionView,
     EditIncludedTestView
 )
 
@@ -72,10 +71,15 @@ course_management_urlpatterns = [
 
 ]
 
+"""
+TODO: Better styling
+"""
 urlpatterns = [
-    url(regex='^my-courses/$',
+    url(
+        regex='^my-courses/$',
         view=UserCoursesView.as_view(),
-        name='user-courses'),
+        name='user-courses'
+    ),
     url(regex='^my-courses/(?P<course_id>[0-9]+)/$',
         view=CourseDetailView.as_view(),
         name='user-course-detail'),
@@ -97,9 +101,6 @@ urlpatterns = [
     url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/$',
         view=StudentSolutionDetailView.as_view(),
         name='student-solution-detail'),
-    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/edit$',
-        view=EditStudentSolutionView.as_view(),
-        name='edit-student-solution'),
     url(regex='^tasks/(?P<task_id>[0-9]+)/$',
         view=TaskDetailView.as_view(),
         name='task-detail')

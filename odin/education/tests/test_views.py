@@ -766,7 +766,7 @@ class TestSubmitGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count, Solution.objects.count())
 
-    @patch('odin.grading.tasks.submit_solution.delay')
+    @patch('odin.education.views.start_grader_communication')
     def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(
         self, mock_submit_solution
     ):
@@ -786,7 +786,7 @@ class TestSubmitGradableSolutionView(TestCase):
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
             self.assertEqual(mock_submit_solution.called, True)
 
-    @patch('odin.grading.tasks.submit_solution.delay')
+    @patch('odin.education.views.start_grader_communication')
     def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_binary_code_tests(
         self, mock_submit_solution
     ):

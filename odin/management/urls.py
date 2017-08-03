@@ -1,33 +1,55 @@
 from django.conf.urls import url
 
-from .views import (PromoteUserToStudentView,
-                    PromoteUserToTeacherView,
-                    DashboardManagementView,
-                    CreateUserView,
-                    CreateStudentView,
-                    CreateTeacherView,
-                    CreateCourseView)
+from .views import (
+    PromoteUserToStudentView,
+    PromoteUserToTeacherView,
+    DashboardManagementView,
+    CreateUserView,
+    CreateStudentView,
+    CreateTeacherView,
+    CreateCourseView,
+    AddStudentToCourseView
+)
 
 urlpatterns = [
-    url(regex='^$',
+    url(
+        regex='^$',
         view=DashboardManagementView.as_view(),
-        name='management_index'),
-    url(regex='^promote/student/(?P<id>[0-9]+)/$',
+        name='index'
+    ),
+    url(
+        regex='^promote/student/(?P<id>[0-9]+)/$',
         view=PromoteUserToStudentView.as_view(),
-        name='promote-to-student'),
-    url(regex='^promote/teacher/(?P<id>[0-9]+)/$',
+        name='promote-to-student'
+    ),
+    url(
+        regex='^promote/teacher/(?P<id>[0-9]+)/$',
         view=PromoteUserToTeacherView.as_view(),
-        name='promote-to-teacher'),
-    url(regex='^add-student/$',
+        name='promote-to-teacher'
+    ),
+    url(
+        regex='^add-student/$',
         view=CreateStudentView.as_view(),
-        name='add-student'),
-    url(regex='^add-user/$',
+        name='add-student'
+    ),
+    url(
+        regex='^add-user/$',
         view=CreateUserView.as_view(),
-        name='add-user'),
-    url(regex='^add-teacher/$',
+        name='add-user'
+    ),
+    url(
+        regex='^add-teacher/$',
         view=CreateTeacherView.as_view(),
-        name='add-teacher'),
-    url(regex='^add-course/$',
+        name='add-teacher'
+    ),
+    url(
+        regex='^add-course/$',
         view=CreateCourseView.as_view(),
-        name='add-course'),
+        name='add-course'
+    ),
+    url(
+        regex='^add-student-to-course/$',
+        view=AddStudentToCourseView.as_view(),
+        name='add-student-to-course'
+    ),
 ]
