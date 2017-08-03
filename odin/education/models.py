@@ -324,3 +324,9 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     file = models.FileField(upload_to="solutions", blank=True, null=True)
 
     objects = SolutionQuerySet.as_manager()
+
+    @property
+    def verbose_status(self):
+        for status_index, status in self.STATUS_CHOICE:
+            if status_index == self.status:
+                return status

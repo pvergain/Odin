@@ -423,9 +423,9 @@ class AddSourceCodeTestToTaskView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class AddBinaryFileTestToTaskView(CourseViewMixin,
+class AddBinaryFileTestToTaskView(LoginRequiredMixin,
+                                  CourseViewMixin,
                                   CallServiceMixin,
-                                  LoginRequiredMixin,
                                   IsTeacherInCoursePermission,
                                   FormView):
 
@@ -516,21 +516,6 @@ class StudentSolutionDetailView(CourseViewMixin,
     model = Solution
     pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
-
-
-class EditStudentSolutionView(CourseViewMixin,
-                              TaskViewMixin,
-                              LoginRequiredMixin,
-                              IsStudentInCoursePermission,
-                              UpdateView):
-    model = Solution
-    fields = ('code', 'file', 'url')
-    pk_url_kwarg = 'solution_id'
-    template_name = 'education/edit_student_solution.html'
-
-    def get_success_url(self):
-        return reverse_lazy('dashboard:education:user-course-detail',
-                            kwargs={'course_id': self.course.id})
 
 
 class SubmitGradableSolutionView(CourseViewMixin,
