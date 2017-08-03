@@ -1,6 +1,5 @@
 from django.shortcuts import redirect
 from django.views.generic import View, ListView, FormView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
 from odin.users.models import BaseUser
@@ -19,8 +18,7 @@ from .mixins import DashboardCreateUserMixin
 from .forms import AddStudentToCourseForm
 
 
-class DashboardManagementView(LoginRequiredMixin,
-                              DashboardManagementPermission,
+class DashboardManagementView(DashboardManagementPermission,
                               ListView):
     template_name = 'dashboard/management.html'
     paginate_by = 101
@@ -38,8 +36,7 @@ class DashboardManagementView(LoginRequiredMixin,
         return context
 
 
-class PromoteUserToStudentView(LoginRequiredMixin,
-                               DashboardManagementPermission,
+class PromoteUserToStudentView(DashboardManagementPermission,
                                View):
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
@@ -47,8 +44,7 @@ class PromoteUserToStudentView(LoginRequiredMixin,
         return redirect('dashboard:management:index')
 
 
-class PromoteUserToTeacherView(LoginRequiredMixin,
-                               DashboardManagementPermission,
+class PromoteUserToTeacherView(DashboardManagementPermission,
                                View):
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
@@ -94,8 +90,7 @@ class CreateTeacherView(DashboardCreateUserMixin, FormView):
         return super().form_valid(form)
 
 
-class CreateCourseView(LoginRequiredMixin,
-                       DashboardManagementPermission,
+class CreateCourseView(DashboardManagementPermission,
                        FormView):
     template_name = 'dashboard/add_course.html'
     form_class = ManagementAddCourseForm
