@@ -39,7 +39,7 @@ class TopicModelForm(forms.ModelForm):
     def __init__(self, course, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['week'] = forms.ModelChoiceField(
-            queryset=Week.objects.filter(course=course)
+            queryset=Week.objects.filter(course=course).order_by('number')
         )
 
     class Meta:
