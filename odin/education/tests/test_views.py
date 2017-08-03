@@ -146,6 +146,19 @@ class TestCourseDetailView(TestCase):
             self.assertNotContains(response, self.teacher.profile.description)
 
 
+class TestPublicCourseListView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.url = reverse('public:courses')
+
+    def test_template_does_not_contain_sidebar_and_sidebar_button(self):
+        response = self.get(self.url)
+        self.response_200(response)
+        content = response.content.decode('utf-8')
+        self.assertNotIn('<div class="page-content-wrapper">', content)
+        self.assertIn('<div class="menu-toggler sidebar-toggler hide">', content)
+
+
 class TestPublicCourseDetailView(TestCase):
 
     def setUp(self):
@@ -160,6 +173,13 @@ class TestPublicCourseDetailView(TestCase):
                          "<button type='button' name='button' class='btn green uppercase' >Add new topic</button>")
         self.assertNotIn(content,
                          "<button type='button' name='button' class='btn green uppercase' >Add new material</button>")
+
+        def test_template_does_not_contain_sidebar_and_sidebar_button(self):
+            response = self.get(self.url)
+            self.response_200(response)
+            content = response.content.decode('utf-8')
+            self.assertNotIn('<div class="page-content-wrapper">', content)
+            self.assertIn('<div class="menu-toggler sidebar-toggler hide">', content)
 
 
 class TestAddTopicToCourseView(TestCase):
