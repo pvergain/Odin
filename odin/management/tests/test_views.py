@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
-from odin.education.models import Student, Teacher, BaseUser, Course
+from odin.education.models import Student, Teacher, BaseUser, Course, CourseAssignment
 
 from odin.common.faker import faker
 
@@ -316,3 +316,24 @@ class TestCreateCourseView(TestCase):
             self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
                                                                 kwargs={'course_id': Course.objects.last().id}))
             self.assertEqual(1, Course.objects.count())
+
+
+class TestAddTeacherToCourseView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        self.url = reverse('dashboard:management:add-teacher-to-course')
+
+    def test_adding_superuser_as_actual_teacher_makes_him_visible_for_course(self):
+        self.assertNotIn(self.user.teacher, self.course.visible_teachers)
+
+        data = {
+            'teacher': self.user.id,
+            'course': self.course.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:management:index'))
+            self.assertIn(self.user.teacher, self.course.visible_teachers)

@@ -8,7 +8,8 @@ from .views import (
     CreateStudentView,
     CreateTeacherView,
     CreateCourseView,
-    AddStudentToCourseView
+    AddStudentToCourseView,
+    AddTeacherToCourseView
 )
 
 urlpatterns = [
@@ -51,5 +52,10 @@ urlpatterns = [
         regex='^add-student-to-course/$',
         view=AddStudentToCourseView.as_view(),
         name='add-student-to-course'
+    ),
+    url(
+        regex='^add-teacher-to-course/$',
+        view=AddTeacherToCourseView.as_view(),
+        name='add-teacher-to-course'
     ),
 ]

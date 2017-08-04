@@ -7,8 +7,8 @@
    {% include "partial/form_errors.html" with form=form errors=readable_errors %}
    {% csrf_token %}
    <div class="form-group">
-     {{ form.student.label }}
-     {% render_field form.student class="form-control form-control-solid" %}
+     {{ form.teacher.label }}
+     {% render_field form.teacher class="form-control form-control-solid" %}
    </div>
 
    <div class="form-group">
