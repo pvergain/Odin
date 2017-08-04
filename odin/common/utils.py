@@ -14,9 +14,12 @@ def get_readable_form_errors(form):
     Provides an easier way to access form errors through templates.
     """
     if not form.is_valid():
-        readable_errors = []
+        readable_errors = {}
         for field, error in form.errors.items():
-            readable_errors.extend(error)
+            if field == '__all__':
+                readable_errors['Errors'] = error
+            else:
+                readable_errors[field] = error
     return readable_errors
 
 
