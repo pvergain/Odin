@@ -559,7 +559,9 @@ class SubmitGradableSolutionView(CourseViewMixin,
         create_gradable_solution_kwargs.update(form.cleaned_data)
 
         solution = self.call_service(service_kwargs=create_gradable_solution_kwargs)
-        start_grader_communication(solution.id)
+        if solution:
+            self.solution_id = solution.id
+            start_grader_communication(solution.id)
 
         return super().form_valid(form)
 
@@ -583,6 +585,8 @@ class SubmitNonGradableSolutionView(CourseViewMixin,
         }
         create_non_gradable_solution_kwargs.update(form.cleaned_data)
 
-        self.call_service(service_kwargs=create_non_gradable_solution_kwargs)
+        solution = self.call_service(service_kwargs=create_non_gradable_solution_kwargs)
+        if solution:
+            self.solution_id = solution.id
 
         return super().form_valid(form)

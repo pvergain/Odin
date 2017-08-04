@@ -798,10 +798,12 @@ class TestSubmitGradableSolutionView(TestCase):
         data = {'code': faker.text()}
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse(
-                'dashboard:education:user-course-detail',
-                kwargs={'course_id': self.course.id})
-            )
+            redirect_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id,
+                                           'solution_id': Solution.objects.last().id})
+
+            self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
             self.assertEqual(mock_submit_solution.called, True)
@@ -819,10 +821,12 @@ class TestSubmitGradableSolutionView(TestCase):
         data = {'file': file}
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse(
-                'dashboard:education:user-course-detail',
-                kwargs={'course_id': self.course.id})
-            )
+            redirect_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id,
+                                           'solution_id': Solution.objects.last().id})
+
+            self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
             self.assertEqual(mock_submit_solution.called, True)
@@ -858,9 +862,11 @@ class TestSubmitNotGradableSolutionView(TestCase):
         data = {'url': faker.url()}
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse(
-                'dashboard:education:user-course-detail',
-                kwargs={'course_id': self.course.id})
-            )
+            redirect_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id,
+                                           'solution_id': Solution.objects.last().id})
+
+            self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())

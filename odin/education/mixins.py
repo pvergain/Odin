@@ -46,8 +46,10 @@ class SubmitSolutionMixin:
     template_name = 'education/submit_solution.html'
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:user-course-detail',
-                            kwargs={'course_id': self.course.id})
+        return reverse_lazy('dashboard:education:student-solution-detail',
+                            kwargs={'course_id': self.course.id,
+                                    'task_id': self.kwargs.get('task_id'),
+                                    'solution_id': self.solution_id})
 
 
 class TaskViewMixin:
