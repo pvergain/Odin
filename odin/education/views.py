@@ -535,7 +535,7 @@ class StudentSolutionListView(CourseViewMixin,
 class StudentSolutionDetailView(CourseViewMixin,
                                 TaskViewMixin,
                                 LoginRequiredMixin,
-                                IsStudentInCoursePermission,
+                                IsStudentOrTeacherInCoursePermission,
                                 DetailView):
     model = Solution
     pk_url_kwarg = 'solution_id'
@@ -614,3 +614,14 @@ class SubmitNonGradableSolutionView(CourseViewMixin,
             self.solution_id = solution.id
 
         return super().form_valid(form)
+
+
+class AllStudentsSolutionsView(CourseViewMixin,
+                               TaskViewMixin,
+                               LoginRequiredMixin,
+                               IsTeacherInCoursePermission,
+                               ListView):
+    template_name = "education/all_students_solutions.html"
+
+    def get_queryset(self):
+        return self.course.students.select_related('profile').prefetch_related('solutions').all()

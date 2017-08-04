@@ -22,7 +22,8 @@ from .views import (
     SubmitNonGradableSolutionView,
     StudentSolutionDetailView,
     EditIncludedTestView,
-    MaterialDetailView
+    MaterialDetailView,
+    AllStudentsSolutionsView
 )
 
 
@@ -107,5 +108,9 @@ urlpatterns = [
         name='task-detail'),
     url(regex='^materials/(?P<material_id>[0-9]+)/$',
         view=MaterialDetailView.as_view(),
-        name='material-detail')
+        name='material-detail'),
+    url(regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/all-students-solutions/$',
+        view=AllStudentsSolutionsView.as_view(),
+        name='all-students-solutions'),
+
 ]

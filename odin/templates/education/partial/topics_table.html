@@ -105,6 +105,9 @@
                                                           <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
                                                             <button class="btn green uppercase" type="button" name="button">Edit</button>
                                                           </a>
+                                                          <a href="{% url 'dashboard:education:all-students-solutions' course.id task.id%}">
+                                                            <button class="btn green uppercase" type="button" name="button">View all solutions</button>
+                                                          </a>
                                                         {% endif %}
                                                       </td>
                                                   </tr>
