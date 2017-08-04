@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
-from odin.education.models import Student, Teacher, BaseUser, Course, CourseAssignment
+from odin.education.models import Student, Teacher, BaseUser, Course
 
 from odin.common.faker import faker
 

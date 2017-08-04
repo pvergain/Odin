@@ -47,7 +47,9 @@
                                               {% for material in topic.materials.all %}
                                                   <tr>
                                                       <td>{{ material.id }}</td>
-                                                      <td>{{ material.identifier }}</td>
+                                                      <td>
+                                                        <a href="{% url 'dashboard:education:material-detail' material.id %}">{{ material.identifier }}</a>
+                                                      </td>
                                                       <td>{{ material.url }}</td>
                                                   </tr>
                                               {% endfor %}

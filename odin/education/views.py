@@ -12,7 +12,17 @@ from django.urls import reverse_lazy
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
 
-from .models import Course, Teacher, Student, Material, Task, IncludedTask, Solution, IncludedTest
+from .models import (
+    Course,
+    Teacher,
+    Student,
+    Material,
+    Task,
+    IncludedTask,
+    Solution,
+    IncludedTest,
+    IncludedMaterial
+)
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
@@ -345,6 +355,13 @@ class TaskDetailView(TaskViewMixin,
     model = IncludedTask
     pk_url_kwarg = 'task_id'
     template_name = 'education/task_detail.html'
+
+
+class MaterialDetailView(LoginRequiredMixin,
+                         DetailView):
+    model = IncludedMaterial
+    pk_url_kwarg = 'material_id'
+    template_name = 'education/material_detail.html'
 
 
 class EditTaskView(LoginRequiredMixin,
