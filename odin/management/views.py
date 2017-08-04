@@ -6,17 +6,15 @@ from django.shortcuts import get_object_or_404
 from odin.users.models import BaseUser
 from odin.users.services import create_user
 
-from odin.education.mixins import CallServiceMixin  # TODO: Move to common
 from odin.education.models import Student, Teacher, Course, CourseAssignment
-from odin.education.forms import ManagementAddCourseForm  # TODO: Check
 from odin.education.services import create_course, add_student, add_teacher
 
-from odin.common.mixins import ReadableFormErrorsMixin
+from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
 from .permissions import DashboardManagementPermission
 from .filters import UserFilter
 from .mixins import DashboardCreateUserMixin
-from .forms import AddStudentToCourseForm, AddTeacherToCourseForm
+from .forms import AddStudentToCourseForm, AddTeacherToCourseForm, ManagementAddCourseForm
 
 
 class DashboardManagementView(DashboardManagementPermission,

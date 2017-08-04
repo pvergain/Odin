@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
+from odin.common.mixins import CallServiceMixin
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
 
@@ -33,7 +34,6 @@ from .mixins import (
     PublicViewContextMixin,
     SubmitSolutionMixin,
     TaskViewMixin,
-    CallServiceMixin,
     HasTestMixin,
 )
 from .forms import (
@@ -83,8 +83,8 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class CourseDetailView(CourseViewMixin,
-                       LoginRequiredMixin,
+class CourseDetailView(LoginRequiredMixin,
+                       CourseViewMixin,
                        IsStudentOrTeacherInCoursePermission,
                        TemplateView):
 
@@ -109,9 +109,9 @@ class PublicCourseDetailView(PublicViewContextMixin, DetailView):
         return get_object_or_404(Course, slug_url=course_url)
 
 
-class AddTopicToCourseView(CourseViewMixin,
+class AddTopicToCourseView(LoginRequiredMixin,
+                           CourseViewMixin,
                            CallServiceMixin,
-                           LoginRequiredMixin,
                            IsTeacherInCoursePermission,
                            FormView):
     template_name = 'education/add_topic.html'
@@ -142,9 +142,9 @@ class AddTopicToCourseView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class AddIncludedMaterialFromExistingView(CourseViewMixin,
+class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
+                                          CourseViewMixin,
                                           CallServiceMixin,
-                                          LoginRequiredMixin,
                                           IsTeacherInCoursePermission,
                                           FormView):
     template_name = 'education/existing_material_list.html'
@@ -186,8 +186,8 @@ class AddIncludedMaterialFromExistingView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class ExistingMaterialListView(CourseViewMixin,
-                               LoginRequiredMixin,
+class ExistingMaterialListView(LoginRequiredMixin,
+                               CourseViewMixin,
                                IsTeacherInCoursePermission,
                                ListView):
     template_name = 'education/existing_material_list.html'
@@ -201,9 +201,9 @@ class ExistingMaterialListView(CourseViewMixin,
         return context
 
 
-class AddNewIncludedMaterialView(CourseViewMixin,
+class AddNewIncludedMaterialView(LoginRequiredMixin,
+                                 CourseViewMixin,
                                  CallServiceMixin,
-                                 LoginRequiredMixin,
                                  IsTeacherInCoursePermission,
                                  FormView):
     template_name = 'education/add_material.html'
@@ -241,8 +241,8 @@ class AddNewIncludedMaterialView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class ExistingTasksView(CourseViewMixin,
-                        LoginRequiredMixin,
+class ExistingTasksView(LoginRequiredMixin,
+                        CourseViewMixin,
                         IsTeacherInCoursePermission,
                         FormView):
     template_name = 'education/existing_task_list.html'
@@ -267,9 +267,9 @@ class ExistingTasksView(CourseViewMixin,
         return context
 
 
-class AddNewIncludedTaskView(CourseViewMixin,
+class AddNewIncludedTaskView(LoginRequiredMixin,
+                             CourseViewMixin,
                              CallServiceMixin,
-                             LoginRequiredMixin,
                              IsTeacherInCoursePermission,
                              FormView):
     template_name = 'education/add_task.html'
@@ -312,9 +312,9 @@ class AddNewIncludedTaskView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class AddIncludedTaskFromExistingView(CourseViewMixin,
+class AddIncludedTaskFromExistingView(LoginRequiredMixin,
+                                      CourseViewMixin,
                                       CallServiceMixin,
-                                      LoginRequiredMixin,
                                       IsTeacherInCoursePermission,
                                       FormView):
     template_name = 'education/existing_task_list.html'
@@ -356,8 +356,8 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class TaskDetailView(TaskViewMixin,
-                     LoginRequiredMixin,
+class TaskDetailView(LoginRequiredMixin,
+                     TaskViewMixin,
                      DetailView):
     model = IncludedTask
     pk_url_kwarg = 'task_id'
@@ -384,8 +384,8 @@ class EditTaskView(LoginRequiredMixin,
         return reverse_lazy('dashboard:education:user-courses')
 
 
-class EditIncludedTaskView(CourseViewMixin,
-                           LoginRequiredMixin,
+class EditIncludedTaskView(LoginRequiredMixin,
+                           CourseViewMixin,
                            IsTeacherInCoursePermission,
                            UpdateView):
 
@@ -412,9 +412,9 @@ class EditIncludedTaskView(CourseViewMixin,
                             kwargs={'course_id': self.course.id})
 
 
-class AddSourceCodeTestToTaskView(CourseViewMixin,
+class AddSourceCodeTestToTaskView(LoginRequiredMixin,
+                                  CourseViewMixin,
                                   CallServiceMixin,
-                                  LoginRequiredMixin,
                                   IsTeacherInCoursePermission,
                                   FormView):
 
@@ -482,8 +482,8 @@ class AddBinaryFileTestToTaskView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class EditIncludedTestView(CourseViewMixin,
-                           LoginRequiredMixin,
+class EditIncludedTestView(LoginRequiredMixin,
+                           CourseViewMixin,
                            IsTeacherInCoursePermission,
                            UpdateView):
     model = IncludedTest
@@ -518,9 +518,9 @@ class EditIncludedTestView(CourseViewMixin,
                             kwargs={'course_id': self.course.id})
 
 
-class StudentSolutionListView(CourseViewMixin,
+class StudentSolutionListView(LoginRequiredMixin,
+                              CourseViewMixin,
                               TaskViewMixin,
-                              LoginRequiredMixin,
                               IsStudentInCoursePermission,
                               ListView):
     template_name = 'education/student_solution_list.html'
@@ -532,9 +532,9 @@ class StudentSolutionListView(CourseViewMixin,
         return Solution.objects.get_solutions_for(user.student, task)
 
 
-class StudentSolutionDetailView(CourseViewMixin,
+class StudentSolutionDetailView(LoginRequiredMixin,
+                                CourseViewMixin,
                                 TaskViewMixin,
-                                LoginRequiredMixin,
                                 IsStudentOrTeacherInCoursePermission,
                                 DetailView):
     model = Solution
@@ -542,12 +542,12 @@ class StudentSolutionDetailView(CourseViewMixin,
     template_name = 'education/student_solution_detail.html'
 
 
-class SubmitGradableSolutionView(CourseViewMixin,
+class SubmitGradableSolutionView(LoginRequiredMixin,
+                                 CourseViewMixin,
                                  TaskViewMixin,
                                  CallServiceMixin,
                                  SubmitSolutionMixin,
                                  HasTestMixin,
-                                 LoginRequiredMixin,
                                  IsStudentInCoursePermission,
                                  FormView):
     form_class = SubmitGradableSolutionForm
@@ -590,11 +590,11 @@ class SubmitGradableSolutionView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class SubmitNonGradableSolutionView(CourseViewMixin,
+class SubmitNonGradableSolutionView(LoginRequiredMixin,
+                                    CourseViewMixin,
                                     TaskViewMixin,
                                     CallServiceMixin,
                                     SubmitSolutionMixin,
-                                    LoginRequiredMixin,
                                     IsStudentInCoursePermission,
                                     FormView):
     form_class = SubmitNonGradableSolutionForm
@@ -616,9 +616,9 @@ class SubmitNonGradableSolutionView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class AllStudentsSolutionsView(CourseViewMixin,
+class AllStudentsSolutionsView(LoginRequiredMixin,
+                               CourseViewMixin,
                                TaskViewMixin,
-                               LoginRequiredMixin,
                                IsTeacherInCoursePermission,
                                ListView):
     template_name = "education/all_students_solutions.html"

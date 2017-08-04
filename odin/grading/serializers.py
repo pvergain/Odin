@@ -11,7 +11,14 @@ class GraderPlainProblemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GraderPlainProblem
-        fields = '__all__'
+        fields = [
+            'test_type',
+            'language',
+            'file_type',
+            'solution',
+            'test',
+            'extra_options'
+        ]
 
 
 class GraderBinaryProblemSerializer(serializers.ModelSerializer):
@@ -22,4 +29,11 @@ class GraderBinaryProblemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GraderBinaryProblem
-        fields = '__all__'
+        fields = [
+            'test_type',
+            'language',
+            'file_type',
+            'solution',
+            'test',
+            'extra_options'
+        ]
