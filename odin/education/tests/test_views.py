@@ -356,8 +356,10 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
 class TestExistingTasksView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:existing-tasks',
-                           kwargs={'course_id': self.course.id})
+                           kwargs={'course_id': self.course.id,
+                                   'topic_id': self.topic.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
 
@@ -480,7 +482,8 @@ class TestAddIncludedTaskFromExistingView(TestCase):
         self.course = CourseFactory()
         self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-included-task-from-existing',
-                           kwargs={'course_id': self.course.id})
+                           kwargs={'course_id': self.course.id,
+                                   'topic_id': self.topic.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
 
@@ -504,7 +507,7 @@ class TestAddIncludedTaskFromExistingView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
-            response = self.post(self.url, data={'task': task.id, 'topic': self.topic.id})
+            response = self.post(self.url, data={'task': task.id})
             self.assertEqual(task_count + 1, IncludedTask.objects.count())
             included_task = IncludedTask.objects.filter(task=task)
             self.assertEqual(1, Topic.objects.filter(tasks__in=included_task).count())
@@ -520,7 +523,7 @@ class TestAddIncludedTaskFromExistingView(TestCase):
         task_count = Task.objects.count()
 
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data={'task': included_task.task.id, 'topic': self.topic.id})
+            response = self.post(self.url, data={'task': included_task.task.id})
             self.assertRedirects(response, expected_url=reverse(
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}))

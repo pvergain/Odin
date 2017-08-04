@@ -252,11 +252,17 @@ class ExistingTasksView(CourseViewMixin,
         form_kwargs = super().get_form_kwargs()
         form_kwargs['course'] = self.course
 
+        data = {}
+        data['topic'] = self.kwargs.get('topic_id')
+        data['task'] = self.request.POST.get('task')
+        form_kwargs['data'] = data
+
         return form_kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['task_list'] = Task.objects.all()
+        context['topic_id'] = self.kwargs.get('topic_id')
 
         return context
 
@@ -323,7 +329,7 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-
+        context['topic_id'] = self.kwargs.get('topic_id')
         context['task_list'] = Task.objects.all()
 
         return context
@@ -331,10 +337,11 @@ class AddIncludedTaskFromExistingView(CourseViewMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = {}
-        data['topic'] = self.request.POST.get('topic')
-        data['task'] = self.request.POST.get('task')
-        form_kwargs['data'] = data
+        if self.request.method in ('POST', 'PUT'):
+            data = {}
+            data['topic'] = self.kwargs.get('topic_id')
+            data['task'] = self.request.POST.get('task')
+            form_kwargs['data'] = data
 
         return form_kwargs
 
