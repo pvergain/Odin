@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 
+from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin
 from odin.education.mixins import CourseViewMixin
 from odin.education.permissions import IsTeacherInCoursePermission
@@ -85,9 +86,7 @@ class AddIncludedApplicationTaskFromExistingView(CourseViewMixin,
         form_kwargs = super().get_form_kwargs()
 
         if self.request.method in ('POST, PUT'):
-            post_data = self.request.POST
-            data = {}
-            data['task'] = post_data.get('task')
+            data = transfer_POST_data_to_dict(self.request.POST)
             data['application_info'] = self.course.application_info.id
             form_kwargs['data'] = data
 
@@ -119,11 +118,7 @@ class CreateIncludedApplicationTaskView(CourseViewMixin,
         form_kwargs = super().get_form_kwargs()
 
         if self.request.method in ('POST', 'PUT'):
-            post_data = self.request.POST
-            data = {}
-            data['name'] = post_data.get('name')
-            data['description'] = post_data.get('description')
-            data['existing_task'] = post_data.get('existing_task')
+            data = transfer_POST_data_to_dict(self.request.POST)
             data['application_info'] = self.course.application_info.id
 
             form_kwargs['data'] = data

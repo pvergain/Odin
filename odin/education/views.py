@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
+from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
@@ -169,9 +170,8 @@ class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = {}
+        data = transfer_POST_data_to_dict(self.request.POST)
         data['topic'] = self.kwargs.get('topic_id')
-        data['material'] = self.request.POST.get('material')
         form_kwargs['data'] = data
 
         return form_kwargs
@@ -252,9 +252,8 @@ class ExistingTasksView(LoginRequiredMixin,
         form_kwargs = super().get_form_kwargs()
         form_kwargs['course'] = self.course
 
-        data = {}
+        data = transfer_POST_data_to_dict(self.request.POST)
         data['topic'] = self.kwargs.get('topic_id')
-        data['task'] = self.request.POST.get('task')
         form_kwargs['data'] = data
 
         return form_kwargs
@@ -338,9 +337,8 @@ class AddIncludedTaskFromExistingView(LoginRequiredMixin,
         form_kwargs = super().get_form_kwargs()
 
         if self.request.method in ('POST', 'PUT'):
-            data = {}
+            data = transfer_POST_data_to_dict(self.request.POST)
             data['topic'] = self.kwargs.get('topic_id')
-            data['task'] = self.request.POST.get('task')
             form_kwargs['data'] = data
 
         return form_kwargs
@@ -432,10 +430,8 @@ class AddSourceCodeTestToTaskView(LoginRequiredMixin,
         form_kwargs = super().get_form_kwargs()
 
         if self.request.method in ('POST', 'PUT'):
-            data = {}
+            data = transfer_POST_data_to_dict(self.request.POST)
             data['task'] = self.kwargs.get('task_id')
-            data['language'] = self.request.POST.get('language')
-            data['code'] = self.request.POST.get('code')
 
             form_kwargs['data'] = data
 
@@ -467,10 +463,8 @@ class AddBinaryFileTestToTaskView(LoginRequiredMixin,
         form_kwargs = super().get_form_kwargs()
 
         if self.request.method in ('POST', 'PUT'):
-            data = {}
+            data = transfer_POST_data_to_dict(self.request.POST)
             data['task'] = self.kwargs.get('task_id')
-            data['language'] = self.request.POST.get('language')
-            data['file'] = self.request.FILES.get('file')
 
             form_kwargs['data'] = data
 
@@ -504,10 +498,8 @@ class EditIncludedTestView(LoginRequiredMixin,
         form_kwargs = super().get_form_kwargs()
 
         if self.request.method in ('POST', 'PUT'):
-            data = {}
+            data = transfer_POST_data_to_dict(self.request.POST)
             data['task'] = self.kwargs.get('task_id')
-            data['language'] = self.request.POST.get('language')
-            data['code'] = self.request.POST.get('code')
 
             form_kwargs['data'] = data
 
