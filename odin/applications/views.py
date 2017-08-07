@@ -3,7 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 
-from odin.education.mixins import CourseViewMixin, CallServiceMixin
+from odin.common.mixins import CallServiceMixin
+from odin.education.mixins import CourseViewMixin
 from odin.education.permissions import IsTeacherInCoursePermission
 from .models import Application, ApplicationTask
 from .forms import (

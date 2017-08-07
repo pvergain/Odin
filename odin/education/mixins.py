@@ -1,9 +1,6 @@
-from typing import Callable, Dict
-
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
-from django.core.exceptions import ValidationError
 from django.contrib import messages
 
 from .models import IncludedTask, Course, IncludedTest
@@ -52,8 +49,10 @@ class SubmitSolutionMixin:
     template_name = 'education/submit_solution.html'
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:user-course-detail',
-                            kwargs={'course_id': self.course.id})
+        return reverse_lazy('dashboard:education:student-solution-detail',
+                            kwargs={'course_id': self.course.id,
+                                    'task_id': self.kwargs.get('task_id'),
+                                    'solution_id': self.solution_id})
 
 
 class TaskViewMixin:
@@ -63,23 +62,12 @@ class TaskViewMixin:
         return context
 
 
-class CallServiceMixin:
-    def call_service(self,
-                     *,
-                     service: Callable=None,
-                     service_kwargs: Dict=None):
-        try:
-            return service(**service_kwargs)
-        except ValidationError as e:
-            messages.warning(request=self.request, message=str(e))
-
-
 class HasTestMixin:
     def has_test(self):
         task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
         test = IncludedTest.objects.filter(task=task)
         if not test.exists():
-            msg = "This task has no tests added to it yet"
+            msg = 'This task has no tests added to it yet'
             messages.warning(request=self.request, message=msg)
             return redirect(reverse_lazy('dashboard:education:user-task-solutions',
                             kwargs={'course_id': self.course.id,

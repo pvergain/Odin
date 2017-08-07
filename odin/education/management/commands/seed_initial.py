@@ -51,13 +51,15 @@ class Command(BaseCommand):
         while topics:
             topic = topics.popleft()
             task = TaskFactory()
-            tasks.appendleft(IncludedTaskFactory(existing_task=task, topic=topic))
+            tasks.appendleft(IncludedTaskFactory(task=task, topic=topic))
 
         language = ProgrammingLanguageFactory(name='python')
 
         while tasks:
             task = tasks.popleft()
-            SourceCodeTestFactory(task=task, language=language)
+
+            if task.gradable:
+                SourceCodeTestFactory(task=task, language=language)
 
         email = 'testadmin@hacksoft.io'
         password = 'asdf'
