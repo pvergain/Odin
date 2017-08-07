@@ -18,16 +18,11 @@
                 <div class="tools">
                     <a href="javascript:;" class="collapse"> </a>
                 </div>
-
             </div>
             <div class="portlet-body">
-              <form class="" action="{% url 'dashboard:education:course-management:add-included-task-from-existing' course.pk %}" method="POST">
+              <form class="" action="{% url 'dashboard:education:course-management:add-included-task-from-existing' course.pk topic_id %}" method="POST">
                 {% csrf_token %}
-                <div class="form-group">
-                  {{ form.topic.label }}
-                  {% render_field form.topic class="form-control " %}
-                </div>
-               <div class="table-scrollable">
+                <div class="table-scrollable">
                     <table class="table table-striped table-hover">
 
 
@@ -56,9 +51,9 @@
                                 </tr>
                             {% endfor %}
                         </tbody>
-                      </form>
+              </form>
                     </table>
-                </div>
+               </div>
               </div>
               <a href="{% url 'dashboard:education:course-management:add-new-included-task' course.pk  %}"><button type="button" name="button" class="btn green uppercase" >Add new task</button></a>
         </div>

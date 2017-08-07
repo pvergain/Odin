@@ -1,21 +1,20 @@
 from django.shortcuts import redirect
 from django.views.generic import View, ListView, FormView
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 
 from odin.users.models import BaseUser
 from odin.users.services import create_user
 
-from odin.education.mixins import CallServiceMixin  # TODO: Move to common
-from odin.education.models import Student, Teacher, Course
-from odin.education.forms import ManagementAddCourseForm  # TODO: Check
-from odin.education.services import create_course, add_student
+from odin.education.models import Student, Teacher, Course, CourseAssignment
+from odin.education.services import create_course, add_student, add_teacher
 
-from odin.common.mixins import ReadableFormErrorsMixin
+from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
 from .permissions import DashboardManagementPermission
 from .filters import UserFilter
 from .mixins import DashboardCreateUserMixin
-from .forms import AddStudentToCourseForm
+from .forms import AddStudentToCourseForm, AddTeacherToCourseForm, ManagementAddCourseForm
 
 
 class DashboardManagementView(DashboardManagementPermission,
@@ -119,5 +118,29 @@ class AddStudentToCourseView(DashboardManagementPermission,
 
     def form_valid(self, form):
         self.call_service(service_kwargs=form.cleaned_data)
+
+        return super().form_valid(form)
+
+
+class AddTeacherToCourseView(DashboardManagementPermission,
+                             CallServiceMixin,
+                             ReadableFormErrorsMixin,
+                             FormView):
+    template_name = 'dashboard/add_teacher_to_course.html'
+    form_class = AddTeacherToCourseForm
+    success_url = reverse_lazy('dashboard:management:index')
+
+    def get_service(self):
+        return add_teacher
+
+    def form_valid(self, form):
+        teacher = form.cleaned_data.get('teacher')
+        if teacher.is_superuser:
+            course = form.cleaned_data.get('course')
+            assignment = get_object_or_404(CourseAssignment, teacher=teacher, course=course)
+            assignment.hidden = False
+            assignment.save()
+        else:
+            self.call_service(service_kwargs=form.cleaned_data)
 
         return super().form_valid(form)

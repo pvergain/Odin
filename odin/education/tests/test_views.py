@@ -146,6 +146,19 @@ class TestCourseDetailView(TestCase):
             self.assertNotContains(response, self.teacher.profile.description)
 
 
+class TestPublicCourseListView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.url = reverse('public:courses')
+
+    def test_template_does_not_contain_sidebar_and_sidebar_button(self):
+        response = self.get(self.url)
+        self.response_200(response)
+        content = response.content.decode('utf-8')
+        self.assertNotIn('<div class="page-content-wrapper">', content)
+        self.assertIn('<div class="menu-toggler sidebar-toggler hide">', content)
+
+
 class TestPublicCourseDetailView(TestCase):
 
     def setUp(self):
@@ -160,6 +173,13 @@ class TestPublicCourseDetailView(TestCase):
                          "<button type='button' name='button' class='btn green uppercase' >Add new topic</button>")
         self.assertNotIn(content,
                          "<button type='button' name='button' class='btn green uppercase' >Add new material</button>")
+
+        def test_template_does_not_contain_sidebar_and_sidebar_button(self):
+            response = self.get(self.url)
+            self.response_200(response)
+            content = response.content.decode('utf-8')
+            self.assertNotIn('<div class="page-content-wrapper">', content)
+            self.assertIn('<div class="menu-toggler sidebar-toggler hide">', content)
 
 
 class TestAddTopicToCourseView(TestCase):
@@ -336,8 +356,10 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
 class TestExistingTasksView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:existing-tasks',
-                           kwargs={'course_id': self.course.id})
+                           kwargs={'course_id': self.course.id,
+                                   'topic_id': self.topic.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
 
@@ -460,7 +482,8 @@ class TestAddIncludedTaskFromExistingView(TestCase):
         self.course = CourseFactory()
         self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-included-task-from-existing',
-                           kwargs={'course_id': self.course.id})
+                           kwargs={'course_id': self.course.id,
+                                   'topic_id': self.topic.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
 
@@ -484,7 +507,7 @@ class TestAddIncludedTaskFromExistingView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
-            response = self.post(self.url, data={'task': task.id, 'topic': self.topic.id})
+            response = self.post(self.url, data={'task': task.id})
             self.assertEqual(task_count + 1, IncludedTask.objects.count())
             included_task = IncludedTask.objects.filter(task=task)
             self.assertEqual(1, Topic.objects.filter(tasks__in=included_task).count())
@@ -500,7 +523,7 @@ class TestAddIncludedTaskFromExistingView(TestCase):
         task_count = Task.objects.count()
 
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data={'task': included_task.task.id, 'topic': self.topic.id})
+            response = self.post(self.url, data={'task': included_task.task.id})
             self.assertRedirects(response, expected_url=reverse(
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}))
@@ -778,10 +801,12 @@ class TestSubmitGradableSolutionView(TestCase):
         data = {'code': faker.text()}
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse(
-                'dashboard:education:user-course-detail',
-                kwargs={'course_id': self.course.id})
-            )
+            redirect_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id,
+                                           'solution_id': Solution.objects.last().id})
+
+            self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
             self.assertEqual(mock_submit_solution.called, True)
@@ -799,10 +824,12 @@ class TestSubmitGradableSolutionView(TestCase):
         data = {'file': file}
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse(
-                'dashboard:education:user-course-detail',
-                kwargs={'course_id': self.course.id})
-            )
+            redirect_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id,
+                                           'solution_id': Solution.objects.last().id})
+
+            self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
             self.assertEqual(mock_submit_solution.called, True)
@@ -838,9 +865,11 @@ class TestSubmitNotGradableSolutionView(TestCase):
         data = {'url': faker.url()}
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(url_name=self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse(
-                'dashboard:education:user-course-detail',
-                kwargs={'course_id': self.course.id})
-            )
+            redirect_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={'course_id': self.course.id,
+                                           'task_id': self.task.id,
+                                           'solution_id': Solution.objects.last().id})
+
+            self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())

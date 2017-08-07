@@ -1,11 +1,15 @@
-{% extends "dashboard/dashboard_base.html" %}
+{% extends public_page|yesno:"partial/public_base.html, dashboard/dashboard_base.html" %}
 
 {% block content_title %}
-  All courses
+  <div class="container">
+    All courses
+  </div>
 {% endblock content_title %}
 
 {% block page_content %}
-  {% for course in object_list %}
-    {% include "education/partial/course_box.html" with course=course %}
-  {% endfor %}
+  <div class="container">
+    {% for course in object_list %}
+      {% include "education/partial/course_box.html" with course=course %}
+    {% endfor %}
+  </div>
 {% endblock %}

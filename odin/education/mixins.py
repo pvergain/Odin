@@ -1,9 +1,6 @@
-from typing import Callable, Dict
-
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
-from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.contrib import messages
 
 from .models import IncludedTask, Course, IncludedTest
@@ -46,8 +43,10 @@ class SubmitSolutionMixin:
     template_name = 'education/submit_solution.html'
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:user-course-detail',
-                            kwargs={'course_id': self.course.id})
+        return reverse_lazy('dashboard:education:student-solution-detail',
+                            kwargs={'course_id': self.course.id,
+                                    'task_id': self.kwargs.get('task_id'),
+                                    'solution_id': self.solution_id})
 
 
 class TaskViewMixin:
@@ -55,23 +54,6 @@ class TaskViewMixin:
         context = super().get_context_data(**kwargs)
         context['task'] = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
         return context
-
-
-class CallServiceMixin:
-    def get_service(self):
-        raise ImproperlyConfigured('CallSerivceMixin requires service.')
-
-    def call_service(self,
-                     *,
-                     service: Callable=None,
-                     service_kwargs: Dict=None):
-        if service is None:
-            service = self.get_service()
-
-        try:
-            return service(**service_kwargs)
-        except ValidationError as e:
-            messages.warning(request=self.request, message=str(e))
 
 
 class HasTestMixin:
