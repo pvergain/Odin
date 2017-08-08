@@ -43,3 +43,7 @@ def build_message(recipients, context):
         message['global_merge_vars'].append({'name': k, 'content': v})
 
     return message
+
+
+def transfer_POST_data_to_dict(data):
+    return {key: data.get(key) for key in data}

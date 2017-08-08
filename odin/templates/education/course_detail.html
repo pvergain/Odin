@@ -11,14 +11,34 @@
     {% include "education/partial/teachers_table.html" with course=course teachers=course.visible_teachers.all %}
   </div>
   <div class="col-md-12">
-    {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page%}
+    {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page tasks=course_tasks%}
   </div>
+
+  {% if course.application_info.apply_is_active and public_page %}
+    {% if request.user.student not in course.students.all and not user_applied %}
+      <a href="{% url 'dashboard:applications:apply-to-course' course.id %}">
+        <button class="btn green uppercase" type="button" name="button">Apply to course</button>
+      </a>
+    {% endif %}
+  {% endif %}
+
   {% if not public_page %}
     <div class="col-md-3">
       <a href="{% url 'public:course_detail' course_slug=course.slug_url %}">
         <button type="button" name="button" class="btn green uppercase">View public version of this course</button>
       </a>
     </div>
+    {% if request.user.teacher in course.teachers.all %}
+      {% if not course.application_info %}
+        <a href="{% url 'dashboard:applications:create-application-info' course.id %}">
+          <button class="btn green uppercase" type="button" name="button">Create application info</button>
+        </a>
+      {% else %}
+        <a href="{% url 'dashboard:applications:edit-application-info' course.id %}">
+          <button class="btn green uppercase" type="button" name="button">Edit application info</button>
+        </a>
+      {% endif %}
+    {% endif %}
   {% endif %}
 </div>
 {% endblock page_content %}

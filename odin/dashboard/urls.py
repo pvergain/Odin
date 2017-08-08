@@ -20,4 +20,9 @@ urlpatterns = [
         regex='^users/',
         view=include('odin.users.urls', namespace='users')
     ),
+    url(
+        regex='^applications/',
+        view=include('odin.applications.urls',
+                     namespace='applications')),
+
 ]

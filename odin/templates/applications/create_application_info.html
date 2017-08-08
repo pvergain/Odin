@@ -1,0 +1,66 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load widget_tweaks  %}
+
+{% block content_title %}
+  Application info
+{% endblock content_title %}
+
+{% block page_content %}
+<div class="row">
+  <form class="col-md-6" action="" method="post">
+    {% include "education/partial/message_box.html" %}
+    {% csrf_token %}
+    {% if form.errors %}
+      {% for error_key, error_value  in form.errors.items %}
+        <div class="alert alert-warning">
+          <span>{{ error_value }}</span>
+        </div>
+      {% endfor %}
+    {% endif %}
+    <div class="form-group">
+      {{ form.start_date.label }}
+      {% render_field form.start_date class="form-control form-control-solid placeholder-no-fix" placeholder="Start date"%}
+    </div>
+    <div class="form-group">
+      {{ form.end_date.label }}
+      {% render_field form.end_date class="form-control form-control-solid placeholder-no-fix" placeholder="End date"%}
+    </div>
+    <div class="form-group">
+      {{ form.start_interview_date.label }}
+      {% render_field form.start_interview_date class="form-control form-control-solid placeholder-no-fix" placeholder="Start interview date"%}
+    </div>
+    <div class="form-group">
+      {{ form.end_interview_date.label }}
+      {% render_field form.end_interview_date class="form-control form-control-solid placeholder-no-fix" placeholder="End interview date"%}
+    </div>
+    <div class="form-group">
+      {% render_field form.description class="form-control form-control-solid placeholder-no-fix" placeholder="Description"%}
+    </div>
+    <div class="form-group">
+      {% render_field form.external_application_form class="form-control form-control-solid placeholder-no-fix" placeholder="External form"%}
+    </div>
+    <div class="form-actions">
+      <button class="btn green uppercase" type="submit" name="button">Submit</button>
+    </div>
+    <hr>
+    {% if course.application_info %}
+      {% if not course.application_info.external_application_form %}
+        <div class="form-group">
+          <strong>Current application tasks</strong>
+          <ul>
+            {% for task in course.application_info.tasks.all %}
+              <li>{{ task.name }}</li>
+            {% endfor %}
+	  </ul>
+	</div>
+	<a href="{% url 'dashboard:applications:add-application-task' course.id %}">
+          <button class="btn green uppercase" type="button" name="button">Add new application task</button>
+	</a>
+	<a href="{% url 'dashboard:applications:add-application-task-from-existing' course.id  %}">
+	  <button class="btn green uppercase" type="button" name="button">Choose from existing tasks</button>
+	</a>
+     {% endif %}
+    {% endif %}
+  </form>
+</div>
+{% endblock page_content%}
