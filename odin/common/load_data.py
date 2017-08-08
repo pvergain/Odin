@@ -147,7 +147,10 @@ class TeacherLoader(BaseLoader):
     def generate_orm_objects(self):
         for kwargs in self.get_field_mapping():
             user = BaseUser.objects.get(pk=kwargs['id'])
-            self.django_model.objects.create_from_user(user)
+            instance = self.django_model.objects.create_from_user(user)
+            if instance.user.is_superuser:
+                for course in Course.objects.all():
+                    add_teacher(course, instance, hidden=True)
 
 
 class StudentLoader(BaseLoader):
@@ -252,6 +255,12 @@ class CourseAssignmentLoader(BaseLoader):
                     else:
                         continue
                     if teacher and course:
+                        course_assignment_qs = self.django_model.objects.filter(teacher=teacher, course=course)
+                        if course_assignment_qs.exists():
+                            cs = course_assignment_qs.first()
+                            cs.hidden = False
+                            cs.save()
+                    else:
                         add_teacher(course, teacher)
 
 
