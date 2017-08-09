@@ -3,13 +3,12 @@
 {% load widget_tweaks %}
 
 {% block content_title %}
-    Add course
+    Edit course
 {% endblock content_title %}
 
 {% block page_content %}
 <div class="row">
     <div class="col-md-5">
-        {% include "education/partial/message_box.html" %}
         <form action="" method="POST">
 	    {% csrf_token %}
 
