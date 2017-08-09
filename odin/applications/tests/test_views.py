@@ -77,6 +77,9 @@ class TestCreateApplicationInfoView(TestCase):
 
     def test_post_creates_instance_when_data_is_valid(self):
         add_teacher(course=self.course, teacher=self.teacher)
+        self.course.start_date = timezone.now().date() + timezone.timedelta(days=1)
+        self.course.end_date = timezone.now().date() + timezone.timedelta(days=2)
+        self.course.save()
         current_app_info_count = ApplicationInfo.objects.count()
         self.start_date = timezone.now().date() + timezone.timedelta(days=1)
         self.end_date = timezone.now().date() + timezone.timedelta(days=2)

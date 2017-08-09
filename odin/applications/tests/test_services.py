@@ -31,7 +31,8 @@ class TestCreateApplicationInfoService(TestCase):
     def setUp(self):
         self.start_date = faker.date_object()
         self.end_date = faker.date_object()
-        self.course = CourseFactory()
+        self.course = CourseFactory(start_date=timezone.now().date(),
+                                    end_date=timezone.now().date() + timezone.timedelta(days=1))
         self.start_interview_date = faker.date_object()
         self.end_interview_date = faker.date_object()
 

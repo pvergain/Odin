@@ -34,10 +34,10 @@ class ApplicationInfo(models.Model):
                self.end_interview_date >= timezone.now().date()
 
     def clean(self):
-        if self.course.start_date >= timezone.now().date():
+        if self.course.start_date < timezone.now().date():
             raise ValidationError(f"{self.course} has already started")
 
-        if self.start_date < timezone.now().date() or self.end_date <= timezone.now().date():
+        if self.start_date < timezone.now().date() or self.end_date < timezone.now().date():
             raise ValidationError("Can not create an application in the past")
 
         if self.start_date >= self.end_date:
