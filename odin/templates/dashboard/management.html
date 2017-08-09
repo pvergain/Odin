@@ -7,7 +7,7 @@
 
 {% block page_content %}
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
         <!-- BEGIN SAMPLE TABLE PORTLET-->
         <div class="portlet box green">
             <div class="portlet-title">
@@ -127,6 +127,7 @@
                                 <th>Duration</th>
                                 <th> Students </th>
                                 <th> Teachers </th>
+                                <th> Actions </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,6 +143,7 @@
                                     <td>{{ course.duration_in_weeks }}</td>
                                     <td>{{ course.students.count }}</td>
                                     <td>{{ course.visible_teachers.count }}</td>
+                                    <td><a href="{% url 'dashboard:management:edit-course' course_id=course.id %}"><button class="btn green uppercase" type="button" name="button">Edit course</button></a></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
