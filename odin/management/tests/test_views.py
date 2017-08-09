@@ -1,6 +1,7 @@
 from test_plus import TestCase
 
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 
@@ -302,10 +303,11 @@ class TestCreateCourseView(TestCase):
 
     def test_course_is_created_successfully_on_post(self):
         self.assertEqual(0, Course.objects.count())
+        start_date = faker.date_object()
         data = {
             'name': faker.word(),
-            'start_date': faker.date(),
-            'end_date': faker.date(),
+            'start_date': start_date,
+            'end_date': start_date + timezone.timedelta(days=faker.pyint()),
             'repository': faker.url(),
             'video_channel': faker.url(),
             'facebook_group': faker.url(),

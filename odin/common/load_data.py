@@ -220,7 +220,11 @@ class ProfileLoader(BaseLoader):
         instance_list = []
         for kwargs in self.get_field_mapping():
             kwargs['user'] = BaseUser.objects.get(pk=kwargs.pop('id', None))
-            instance_list.append(self.django_model(**kwargs))
+            avatar = kwargs.get('avatar')
+            avatar = avatar.split('/')[-1]
+            final_kwargs = deepcopy(kwargs)
+            final_kwargs['avatar'] = avatar
+            instance_list.append(self.django_model(**final_kwargs))
         self.django_model.objects.bulk_create(instance_list)
         return instance_list
 
@@ -343,6 +347,8 @@ class IncludedTaskLoader(BaseLoader):
                 topic = topic_qs.first()
             else:
                 new_topic_id = Topic.objects.last().id + 1
+                while(Topic.objects.filter(id=new_topic_id).exists()):
+                    new_topic_id += 1
                 topic = Topic.objects.create(id=new_topic_id,
                                              name="Everything",
                                              course=course,

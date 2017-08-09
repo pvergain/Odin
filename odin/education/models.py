@@ -52,6 +52,14 @@ class Course(models.Model):
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
 
+    def clean(self):
+        if self.start_date > self.end_date:
+            raise ValidationError("End date cannot be before start date!")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
     @property
     def visible_teachers(self):
         return self.teachers.filter(course_assignments__hidden=False)
@@ -170,6 +178,9 @@ class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
+    class Meta:
+        ordering = ('week__number',)
 
 
 class Lecture(models.Model):

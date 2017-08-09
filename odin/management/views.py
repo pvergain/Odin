@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from django.views.generic import View, ListView, FormView
+from django.views.generic import View, ListView, FormView, UpdateView
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 
@@ -90,12 +90,17 @@ class CreateTeacherView(DashboardCreateUserMixin, FormView):
 
 
 class CreateCourseView(DashboardManagementPermission,
+                       CallServiceMixin,
+                       ReadableFormErrorsMixin,
                        FormView):
     template_name = 'dashboard/add_course.html'
     form_class = ManagementAddCourseForm
 
+    def get_service(self):
+        return create_course
+
     def form_valid(self, form):
-        course = create_course(**form.cleaned_data)
+        course = self.call_service(service_kwargs=form.cleaned_data)
         self.course_id = course.id
 
         return super().form_valid(form)
@@ -103,6 +108,19 @@ class CreateCourseView(DashboardManagementPermission,
     def get_success_url(self):
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={'course_id': self.course_id})
+
+
+class EditCourseView(DashboardManagementPermission,
+                     ReadableFormErrorsMixin,
+                     UpdateView):
+    model = Course
+    form_class = ManagementAddCourseForm
+    template_name = 'dashboard/edit_course.html'
+    pk_url_kwarg = 'course_id'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.kwargs.get('course_id')})
 
 
 class AddStudentToCourseView(DashboardManagementPermission,

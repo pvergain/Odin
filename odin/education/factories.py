@@ -1,6 +1,9 @@
+from copy import deepcopy
+
 import factory
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils.timezone import timedelta
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
@@ -37,7 +40,6 @@ class TeacherFactory(BaseUserFactory):
 class CourseFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: f'{n}{faker.word()}')
     start_date = factory.LazyAttribute(lambda _: faker.date_object())
-    end_date = factory.LazyAttribute(lambda _: faker.date_object())
 
     slug_url = factory.LazyAttribute(lambda _: faker.slug())
 
@@ -50,7 +52,11 @@ class CourseFactory(factory.DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        return create_course(*args, **kwargs)
+        new_kwargs = deepcopy(kwargs)
+        if not kwargs.get('end_date'):
+            end_date = kwargs.get('start_date') + timedelta(days=faker.pyint())
+            new_kwargs['end_date'] = end_date
+        return create_course(*args, **new_kwargs)
 
 
 class WeekFactory(factory.DjangoModelFactory):

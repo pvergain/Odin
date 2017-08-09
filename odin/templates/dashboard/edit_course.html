@@ -1,0 +1,49 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content_title %}
+    Edit course
+{% endblock content_title %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-5">
+        <form action="" method="POST">
+	    {% csrf_token %}
+
+      {% include "partial/form_errors.html" with form=form errors=readable_errors %}
+
+	    <div class="form-group">
+        {% render_field form.name class="form-control form-control-solid placeholder-no-fix" placeholder="Course name" %}
+	    </div>
+      <div class="form-group">
+        {{ form.start_date.label }}
+        {% render_field form.start_date class="form-control form-control-solid placeholder-no-fix" placeholder="Start date" %}
+	    </div>
+      <div class="form-group">
+        {{ form.end_date.label }}
+        {% render_field form.end_date class="form-control form-control-solid placeholder-no-fix" placeholder="End date"%}
+	    </div>
+      <div class="form-group">
+        {% render_field form.repository class="form-control form-control-solid placeholder-no-fix" placeholder="Course repo" %}
+	    </div>
+      <div class="form-group">
+        {% render_field form.video_channel class="form-control form-control-solid placeholder-no-fix" placeholder="Course video channel" %}
+	    </div>
+      <div class="form-group">
+        {% render_field form.facebook_group class="form-control form-control-solid placeholder-no-fix" placeholder="Course Facebook group" %}
+	    </div>
+      <div class="form-group">
+        {% render_field form.slug_url class="form-control form-control-solid placeholder-no-fix" placeholder="Course slug" %}
+	    </div>
+      <div class="form-group">
+        <label class="checkbox-inline">{{ form.public }} Make this course public</label>
+      </div>
+	    <div class="form-actions">
+	        <button class="btn green uppercase" type="submit">Submit</button>
+	    </div>
+        </form>
+    </div>
+</div>
+{% endblock page_content %}
