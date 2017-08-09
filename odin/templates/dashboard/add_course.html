@@ -3,7 +3,10 @@
 {% load widget_tweaks %}
 
 {% block page_content %}
+<div class="row">
   <div class="col-md-6">
+    {% include "partial/form_errors.html" with form=form errors=readable_errors %}
+    {% include "education/partial/message_box.html" %}
     <div class="portlet light ">
       <div class="portlet-title">
         <div class="caption font-blue-sunglo">
@@ -12,12 +15,9 @@
         </div>
       </div>
       <div class="portlet-body form">
-        <form role="form">
+        <form action="" method="POST">
           <div class="form-body">
             {% csrf_token %}
-            {% include "partial/form_errors.html" with form=form errors=readable_errors %}
-            {% include "education/partial/message_box.html" %}
-
             <div class="form-group form-md-line-input">
               {% render_field form.name class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Course name" %}
               <span class="help-block">Some help goes here...</span>
@@ -58,5 +58,6 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 {% endblock page_content %}
