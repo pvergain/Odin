@@ -179,6 +179,9 @@ class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
     def __str__(self):
         return f'{self.name}'
 
+    class Meta:
+        ordering = ('week__number',)
+
 
 class Lecture(models.Model):
     date = models.DateField()
