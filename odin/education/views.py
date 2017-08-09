@@ -616,4 +616,4 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
     template_name = "education/all_students_solutions.html"
 
     def get_queryset(self):
-        return self.course.students.select_related('profile').prefetch_related('solutions').all()
+        return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
