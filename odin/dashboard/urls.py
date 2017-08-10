@@ -22,7 +22,10 @@ urlpatterns = [
     ),
     url(
         regex='^applications/',
-        view=include('odin.applications.urls',
-                     namespace='applications')),
-
+        view=include('odin.applications.urls', namespace='applications')
+    ),
+    url(
+        regex='^interviews/',
+        view=include('odin.interviews.urls', namespace='interviews')
+    ),
 ]
