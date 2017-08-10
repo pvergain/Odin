@@ -10,36 +10,49 @@
     <div class="col-md-12">
         <h2>{{ course.name }}</h2>
     </div>
-</div>
-<div class="col-md-5">
-  {% include "education/partial/message_box.html" %}
-    <form method="POST" action="">
+ </div>
+ <div class="row">
+  <div class="col-md-6">
+    {% include "education/partial/message_box.html" %}
+    <div class="portlet light ">
+      <div class="portlet-title">
+        <div class="caption font-blue-sunglo">
+          <i class="icon-settings font-blue-sunglo"></i>
+          <span class="caption-subject bold uppercase"> Edit Application </span>
+        </div>
+      </div>
+      <div class="portlet-body form">
+        <form action="" method="POST">
+          <div class="form-body">
+            {% csrf_token %}
 
-        {% csrf_token %}
-
-        <div class="form-group">
-          {% render_field form.phone class="form-control form-control-solid placeholder-no-fix" placeholder="Phone number" %}
-        </div>
-        <div class="form-group">
-          {% render_field form.skype class="form-control form-control-solid placeholder-no-fix" placeholder="Skype" %}
-        </div>
-        <div class="form-group">
-          {% render_field form.works_at class="form-control form-control-solid placeholder-no-fix" placeholder="Where do you work?" %}
-        </div>
-        <div class="form-group">
-          {% render_field form.studies_at class="form-control form-control-solid placeholder-no-fix" placeholder="Where do you study?" %}
-        </div>
-        {% for form_field in form %}
-          {% if form_field.name in task_names %}
-          <div class="form-group">
-            {{ form_field.label }}
-            {% render_field form_field class="form-control form-control-solid placeholder-no-fix" placeholder=form_field.label %}
+            <div class="form-group form-md-line-input">
+              {% render_field form.phone class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Phone number" %}
+            </div>
+            <div class="form-group form-md-line-input">
+              {% render_field form.skype class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Skype" %}
+	    </div>
+            <div class="form-group form-md-line-input">
+              {% render_field form.works_at class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Where do you work?" %}
+	    </div>
+            <div class="form-group form-md-line-input">
+              {% render_field form.studies_at class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Where do you study?" %}
+	    </div>
+            {% for form_field in form %}
+              {% if form_field.name in task_names %}
+                <div class="form-group form-md-line-input">
+                  {{ form_field.label }}
+                  {% render_field form_field class="form-control form-control-solid placeholder-no-fix" placeholder=form_field.label %}
+                </div>
+              {% endif %}
+            {% endfor %}
+            <div class="form-actions noborder">
+              <button class="btn green uppercase" type="submit">Submit application</button>
+            </div>
           </div>
-          {% endif %}
-        {% endfor %}
-        <div class="form-actions">
-          <button type="submit" class="btn green uppercase">Submit application</button>
-        </div>
-    </form>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock page_content %}
