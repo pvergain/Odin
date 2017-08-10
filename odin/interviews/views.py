@@ -20,6 +20,7 @@ class ChooseInterviewView(LoginRequiredMixin,
                           CheckInterviewDataMixin,
                           FormView):
     form_class = ChooseInterviewForm
+    template_name = 'interviews/choose_interview.html'
 
     def get_service(self):
         return create_new_interview_for_application
@@ -27,7 +28,7 @@ class ChooseInterviewView(LoginRequiredMixin,
     def get(self, request, *args, **kwargs):
         if self.interview.has_confirmed:
             return redirect(reverse('dashboard:interviews:confirm_interview',
-                            kwargs={'application_id': self.application_id,
+                            kwargs={'application_id': self.kwargs.application_id,
                                     'interview_token': self.interview.uuid}))
 
         return super().get(request, args, kwargs)
@@ -35,8 +36,8 @@ class ChooseInterviewView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        uuid = kwargs.get('interview_token')
-        application_id = kwargs.get('application_id')
+        uuid = self.kwargs.get('interview_token')
+        application_id = self.kwargs.get('application_id')
         context['current_interview'] = Interview.objects.filter(uuid=uuid).first()
         application = Application.objects.filter(id=application_id).first()
         context['application'] = application
