@@ -1,0 +1,19 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+{% endblock content_title %}
+
+{% block page_content %}
+<div class="col-md-5">
+  {% include "education/partial/message_box.html" %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          {% render_field form.interviews class="form-control" %}
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn green uppercase">Change interview</button>
+        </div>
+    </form>
+</div>
+{% endblock page_content %}
