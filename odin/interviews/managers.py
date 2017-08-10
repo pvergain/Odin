@@ -1,21 +1,31 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.apps import apps
+
+from odin.users.models import BaseUser
 
 from .query import InterviewQuerySet
 
 
 class InterviewerManager(models.Manager):
-    def create_from_baseuser(self, baseuser):
-        if baseuser.get_interviewer() is not False:
-            return None
+    def create_from_user(self, user: BaseUser):
+        Interviewer = apps.get_model('interviews', 'Interviewer')
+        if user.downcast(Interviewer) is not None:
+            raise ValidationError('Interviewer already exists')
 
-        interviewer = self.model(baseuser_ptr_id=baseuser.id)
+        user._state.adding = False
 
-        interviewer.__dict__.update(baseuser.__dict__)
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+
+        interviewer = Interviewer(user_id=user.id)
+        interviewer.__dict__.update(user.__dict__)
         interviewer.is_staff = True
 
         interviewer.save()
 
-        return interviewer
+        return Interviewer.objects.get(id=interviewer.id)
 
 
 class InterviewManager(models.Manager):
