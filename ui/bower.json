@@ -23,7 +23,8 @@
     "bootstrap-daterangepicker": "^2.1.25",
     "jquery-validation": "^1.16.0",
     "morris.js": "morrisjs#^0.5.1",
-    "purl": "^2.3.1"
+    "purl": "^2.3.1",
+    "codemirror": "^5.27.4"
   },
   "resolutions": {
     "jquery": "^3.2.1"

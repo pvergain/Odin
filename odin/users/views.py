@@ -3,8 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
-from .models import Profile, BaseUser
+from odin.common.mixins import ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
+from .models import Profile, BaseUser
 
 
 class PersonalProfileView(LoginRequiredMixin, DetailView):
@@ -23,7 +24,7 @@ class UserProfileView(LoginRequiredMixin, DashboardManagementPermission, DetailV
         return Profile.objects.get(user=user_instance)
 
 
-class EditProfileView(LoginRequiredMixin, UpdateView):
+class EditProfileView(LoginRequiredMixin, ReadableFormErrorsMixin, UpdateView):
     model = Profile
     fields = ['full_name', 'description', 'avatar', 'cropping']
     success_url = reverse_lazy('dashboard:users:profile')

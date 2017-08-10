@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
 from odin.common.utils import transfer_POST_data_to_dict
-from odin.common.mixins import CallServiceMixin
+from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
 
@@ -113,6 +113,7 @@ class PublicCourseDetailView(CourseViewMixin, PublicViewContextMixin, DetailView
 class AddTopicToCourseView(LoginRequiredMixin,
                            CourseViewMixin,
                            CallServiceMixin,
+                           ReadableFormErrorsMixin,
                            IsTeacherInCoursePermission,
                            FormView):
     template_name = 'education/add_topic.html'
@@ -146,6 +147,7 @@ class AddTopicToCourseView(LoginRequiredMixin,
 class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
                                           CourseViewMixin,
                                           CallServiceMixin,
+                                          ReadableFormErrorsMixin,
                                           IsTeacherInCoursePermission,
                                           FormView):
     template_name = 'education/existing_material_list.html'
@@ -204,6 +206,7 @@ class ExistingMaterialListView(LoginRequiredMixin,
 class AddNewIncludedMaterialView(LoginRequiredMixin,
                                  CourseViewMixin,
                                  CallServiceMixin,
+                                 ReadableFormErrorsMixin,
                                  IsTeacherInCoursePermission,
                                  FormView):
     template_name = 'education/add_material.html'
@@ -269,6 +272,7 @@ class ExistingTasksView(LoginRequiredMixin,
 class AddNewIncludedTaskView(LoginRequiredMixin,
                              CourseViewMixin,
                              CallServiceMixin,
+                             ReadableFormErrorsMixin,
                              IsTeacherInCoursePermission,
                              FormView):
     template_name = 'education/add_task.html'
@@ -314,6 +318,7 @@ class AddNewIncludedTaskView(LoginRequiredMixin,
 class AddIncludedTaskFromExistingView(LoginRequiredMixin,
                                       CourseViewMixin,
                                       CallServiceMixin,
+                                      ReadableFormErrorsMixin,
                                       IsTeacherInCoursePermission,
                                       FormView):
     template_name = 'education/existing_task_list.html'
@@ -370,6 +375,7 @@ class MaterialDetailView(LoginRequiredMixin,
 
 
 class EditTaskView(LoginRequiredMixin,
+                   ReadableFormErrorsMixin,
                    DashboardManagementPermission,
                    UpdateView):
 
@@ -384,6 +390,7 @@ class EditTaskView(LoginRequiredMixin,
 
 class EditIncludedTaskView(LoginRequiredMixin,
                            CourseViewMixin,
+                           ReadableFormErrorsMixin,
                            IsTeacherInCoursePermission,
                            UpdateView):
 
@@ -413,6 +420,7 @@ class EditIncludedTaskView(LoginRequiredMixin,
 class AddSourceCodeTestToTaskView(LoginRequiredMixin,
                                   CourseViewMixin,
                                   CallServiceMixin,
+                                  ReadableFormErrorsMixin,
                                   IsTeacherInCoursePermission,
                                   FormView):
 
@@ -446,6 +454,7 @@ class AddSourceCodeTestToTaskView(LoginRequiredMixin,
 class AddBinaryFileTestToTaskView(LoginRequiredMixin,
                                   CourseViewMixin,
                                   CallServiceMixin,
+                                  ReadableFormErrorsMixin,
                                   IsTeacherInCoursePermission,
                                   FormView):
 
@@ -478,6 +487,7 @@ class AddBinaryFileTestToTaskView(LoginRequiredMixin,
 
 class EditIncludedTestView(LoginRequiredMixin,
                            CourseViewMixin,
+                           ReadableFormErrorsMixin,
                            IsTeacherInCoursePermission,
                            UpdateView):
     model = IncludedTest
@@ -538,6 +548,7 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
                                  CourseViewMixin,
                                  TaskViewMixin,
                                  CallServiceMixin,
+                                 ReadableFormErrorsMixin,
                                  SubmitSolutionMixin,
                                  HasTestMixin,
                                  IsStudentInCoursePermission,
@@ -586,6 +597,7 @@ class SubmitNonGradableSolutionView(LoginRequiredMixin,
                                     CourseViewMixin,
                                     TaskViewMixin,
                                     CallServiceMixin,
+                                    ReadableFormErrorsMixin,
                                     SubmitSolutionMixin,
                                     IsStudentInCoursePermission,
                                     FormView):
