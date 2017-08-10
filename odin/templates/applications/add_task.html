@@ -6,26 +6,40 @@
 {% endblock content_title %}
 
 {% block page_content %}
- <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+  <div class="row margin-bottom-40 stories-header" data-auto-height="true">
     <div class="col-md-12">
-        <h2>{{ course.name }}</h2>
+      <h2>{{ course.name }}</h2>
     </div>
-</div>
-<div class="col-md-5">
-  {% include "education/partial/message_box.html" %}
-    <form method="POST" action="">
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {% include "education/partial/message_box.html" %}
+      {% include "partial/form_errors.html" with errors=readable_errors %}
+      <div class="portlet light ">
+        <div class="portlet-title">
+          <div class="caption font-blue-sunglo">
+            <i class="icon-settings font-blue-sunglo"></i>
+            <span class="caption-subject bold uppercase"> Add Application Task</span>
+          </div>
+        </div>
+        <div class="portlet-body form">
+          <form action="" method="POST">
+            <div class="form-body">
+              {% csrf_token %}
 
-        {% csrf_token %}
-
-        <div class="form-group">
-          {% render_field form.name class="form-control form-control-solid placeholder-no-fix" placeholder="Task name" %}
+              <div class="form-group form-md-line-input">
+                {% render_field form.name class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Task Name" %}
+              </div>
+              <div class="form-group form-md-line-input">
+                {% render_field form.description class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Task Description" %}
+	      </div>
+              <div class="form-actions noborder">
+                <button class="btn green uppercase" type="submit">Add Task</button>
+              </div>
+            </div>
+          </form>
         </div>
-        <div class="form-group">
-          {% render_field form.description class="form-control form-control-solid placeholder-no-fix" placeholder="Task description" %}
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn green uppercase">Add Task</button>
-        </div>
-    </form>
-</div>
+      </div>
+    </div>
+  </div>
 {% endblock page_content %}

@@ -10,7 +10,15 @@ class DateInput(forms.DateInput):
 class ApplicationInfoModelForm(forms.ModelForm):
     class Meta:
         model = ApplicationInfo
-        fields = '__all__'
+        fields = [
+            'course',
+            'start_date',
+            'end_date',
+            'start_interview_date',
+            'end_interview_date',
+            'description',
+            'external_application_form'
+        ]
 
         widgets = {
             'start_date': DateInput(),

@@ -7,55 +7,47 @@
 
 
 {% block page_content %}
-<div class="row">
+  <div class="row">
     <!-- BEGIN SAMPLE TABLE PORTLET-->
     {% include "education/partial/message_box.html" %}
-        <div class="portlet box green">
-            <div class="portlet-title">
-                <div class="caption">
-                    <i class="fa fa-comments"></i>  Existing application tasks
-                </div>
-                <div class="tools">
-                    <a href="javascript:;" class="collapse"> </a>
-                </div>
-
-            </div>
-            <div class="portlet-body">
-              <form class="" action="{% url 'dashboard:applications:add-application-task-from-existing' course.id %}" method="POST">
-                {% csrf_token %}
-                <div class="table-scrollable">
-                    <table class="table table-striped table-hover">
-
-
-                      {% if not form.is_valid %}
-		         {% for error in form.errors %}
-                            <div class="alert alert-warning">
-                              <span>{{ error }}</span>
-                            </div>
-                          {% endfor %}
-		      {% endif %}
-                        <thead>
-                            <tr>
-                                <th> # </th>
-                                <th> Name </th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            {% for task in task_list %}
-                                <tr>
-                                    <td>{{ task.id }}</td>
-                                    <td>{{ task.name }}</td>
-                                    <td><button type="submit" class="btn green uppercase" name="task" value="{{ task.id }}">Add task</button></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                      </form>
-                    </table>
-                </div>
-              </div>
+    {% include "partial/form_errors.html" with errors=readable_errors %}
+    <div class="portlet box green">
+      <div class="portlet-title">
+        <div class="caption">
+          <i class="fa fa-comments"></i>  Existing application tasks
         </div>
-        <!-- END SAMPLE TABLE PORTLET-->
-</div>
+        <div class="tools">
+          <a href="javascript:;" class="collapse"> </a>
+        </div>
+
+      </div>
+      <div class="portlet-body">
+        <form class="" action="{% url 'dashboard:applications:add-application-task-from-existing' course.id %}" method="POST">
+          {% csrf_token %}
+          <div class="table-scrollable">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th> # </th>
+                  <th> Name </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for task in task_list %}
+                  <tr>
+                    <td>{{ task.id }}</td>
+                    <td>{{ task.name }}</td>
+                    <td><button type="submit" class="btn green uppercase" name="task" value="{{ task.id }}">Add task</button></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+        </form>
+            </table>
+          </div>
+      </div>
+    </div>
+    <!-- END SAMPLE TABLE PORTLET-->
+  </div>
 {% endblock page_content %}

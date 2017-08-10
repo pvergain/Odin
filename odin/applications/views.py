@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 
 from odin.common.utils import transfer_POST_data_to_dict
-from odin.common.mixins import CallServiceMixin
+from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
 from odin.education.permissions import IsTeacherInCoursePermission
 from .models import Application, ApplicationTask
@@ -30,11 +30,12 @@ from .mixins import (
 )
 
 
-class CreateApplicationInfoView(CourseViewMixin,
-                                LoginRequiredMixin,
+class CreateApplicationInfoView(LoginRequiredMixin,
+                                CourseViewMixin,
                                 IsTeacherInCoursePermission,
                                 ApplicationInfoFormDataMixin,
                                 CallServiceMixin,
+                                ReadableFormErrorsMixin,
                                 FormView):
     form_class = ApplicationInfoModelForm
     template_name = "applications/create_application_info.html"
@@ -50,10 +51,11 @@ class CreateApplicationInfoView(CourseViewMixin,
         return success_url
 
 
-class EditApplicationInfoView(CourseViewMixin,
-                              LoginRequiredMixin,
+class EditApplicationInfoView(LoginRequiredMixin,
+                              CourseViewMixin,
                               IsTeacherInCoursePermission,
                               ApplicationInfoFormDataMixin,
+                              ReadableFormErrorsMixin,
                               UpdateView):
 
     form_class = ApplicationInfoModelForm
@@ -69,10 +71,11 @@ class EditApplicationInfoView(CourseViewMixin,
         return success_url
 
 
-class AddIncludedApplicationTaskFromExistingView(CourseViewMixin,
-                                                 LoginRequiredMixin,
+class AddIncludedApplicationTaskFromExistingView(LoginRequiredMixin,
+                                                 CourseViewMixin,
                                                  IsTeacherInCoursePermission,
                                                  CallServiceMixin,
+                                                 ReadableFormErrorsMixin,
                                                  FormView):
     template_name = "applications/existing_task_list.html"
     form_class = IncludedApplicationTaskFromExistingForm
@@ -106,10 +109,11 @@ class AddIncludedApplicationTaskFromExistingView(CourseViewMixin,
         return context
 
 
-class CreateIncludedApplicationTaskView(CourseViewMixin,
-                                        LoginRequiredMixin,
+class CreateIncludedApplicationTaskView(LoginRequiredMixin,
+                                        CourseViewMixin,
                                         IsTeacherInCoursePermission,
                                         CallServiceMixin,
+                                        ReadableFormErrorsMixin,
                                         FormView):
     form_class = IncludedApplicationTaskForm
     template_name = "applications/add_task.html"
@@ -134,12 +138,13 @@ class CreateIncludedApplicationTaskView(CourseViewMixin,
         return super().form_valid(form)
 
 
-class ApplyToCourseView(CourseViewMixin,
-                        LoginRequiredMixin,
+class ApplyToCourseView(LoginRequiredMixin,
+                        CourseViewMixin,
                         RedirectToExternalFormMixin,
                         ApplicationFormDataMixin,
                         HasStudentAlreadyAppliedMixin,
                         CallServiceMixin,
+                        ReadableFormErrorsMixin,
                         FormView):
 
     form_class = ApplicationCreateForm
@@ -164,11 +169,12 @@ class UserApplicationsListView(LoginRequiredMixin,
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
 
 
-class EditApplicationView(CourseViewMixin,
+class EditApplicationView(LoginRequiredMixin,
+                          CourseViewMixin,
                           ApplicationTasksMixin,
-                          LoginRequiredMixin,
                           ApplicationFormDataMixin,
                           CallServiceMixin,
+                          ReadableFormErrorsMixin,
                           UpdateView):
     form_class = ApplicationEditForm
     template_name = "applications/edit_application.html"
