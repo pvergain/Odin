@@ -1,5 +1,6 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block content_title %}
   Add task
@@ -47,7 +48,8 @@
                   {% render_field form.language class="form-control form-control-solid" %}
                 </div>
                 <div class="form-group form-md-line-input">
-                  {% render_field form.code class="form-control form-control-solid placeholder-no-fix" placeholder="Enter your test code here" %}
+                  <span>Write your tests below</span>
+                  {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="code_area" placeholder="Enter your test code here" %}
                 </div>
               </div>
               <div class="form-actions noborder">
@@ -62,15 +64,32 @@
 {% endblock page_content %}
 
 {% block extra_scripts %}
+  <link href="{% static 'codemirror/lib/codemirror.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'codemirror/theme/neat.css' %}" rel="stylesheet" type="text/css">
+  <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+  <script src="{% static 'codemirror/mode/python/python.js'%}"></script>
   <script type="text/javascript">
-   function changeTestFieldsVisibility(){
-       checkbox = $('#checkbox6')[0];
-       if (checkbox.checked) {
-           $('.test-fields').show();
-       }else {
-           $('.test-fields').hide();
-       }
-   }
-   $(document).ready(changeTestFieldsVisibility());
+    function changeTestFieldsVisibility(){
+      checkbox = $('#checkbox6')[0];
+      if (checkbox.checked) {
+        $('.test-fields').show();
+      }else {
+        $('.test-fields').hide();
+      }
+    }
+    $(document).ready(changeTestFieldsVisibility());
+  </script>
+  <script type="text/javascript">
+   var codeArea = $('#code_area')[0];
+   var testMirror = CodeMirror.fromTextArea(codeArea,
+                                              {
+                                                  lineNumbers: true,
+                                                  mode: "python",
+                                                  matchBrackets: true,
+                                                  theme: "neat",
+                                                  indentUnit: 4
+
+                                              })
+   testMirror.refresh();
   </script>
 {% endblock extra_scripts %}

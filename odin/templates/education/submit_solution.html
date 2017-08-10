@@ -1,5 +1,6 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block content_title %}
   Submit solution
@@ -18,13 +19,14 @@
           </div>
         </div>
         <div class="portlet-body form">
-          <form action="" method="POST" enctype="multipart/form-data">
+          <form action="" method="POST" enctype="multipart/form-data" novalidate>
             <div class="form-body">
               {% csrf_token %}
               {% if task.gradable %}
                 {% if task.test.is_source %}
                   <div class="form-group form-md-line-input">
-                    {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Source Code" %}
+                    {{ form.code.label }}
+                    {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="code_area" placeholder="Source Code" %}
                   </div>
                 {% else %}
                   <div class="form-group form-md-line-input">
@@ -37,7 +39,7 @@
                     {% render_field form.url class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Solution URL" %}
                   </div>
               {% endif %}
-               <div class="form-actions noborder">
+              <div class="form-actions noborder">
                 <button class="btn green uppercase" type="submit">Submit</button>
               </div>
             </div>
@@ -47,3 +49,23 @@
     </div>
   </div>
 {% endblock page_content %}
+
+{% block extra_scripts %}
+  <link href="{% static 'codemirror/lib/codemirror.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'codemirror/theme/neat.css' %}" rel="stylesheet" type="text/css">
+  <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+  <script src="{% static 'codemirror/mode/python/python.js'%}"></script>
+  <script type="text/javascript">
+   var codeArea = $('#code_area')[0];
+   var testMirror = CodeMirror.fromTextArea(codeArea,
+                                              {
+                                                  lineNumbers: true,
+                                                  mode: "python",
+                                                  matchBrackets: true,
+                                                  theme: "neat",
+                                                  indentUnit: 4
+
+                                              })
+   testMirror.refresh();
+  </script>
+{% endblock extra_scripts %}
