@@ -68,6 +68,9 @@ class Interview(models.Model):
 
     objects = InterviewManager.from_queryset(InterviewQuerySet)()
 
+    def __str__(self):
+        return f"Interview on {self.date}, starting at {self.start_time} and ending on {self.end_time}"
+
     def reset(self):
         self.application = None
         self.has_received_email = False
