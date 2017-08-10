@@ -6,6 +6,8 @@ from .models import Interview, Interviewer
 
 
 class CannotConfirmOthersInterviewPermission(BaseUserPassesTestMixin):
+    raise_exception = True
+
     def test_func(self):
         uuid = self.kwargs.get('interview_token')
         application_id = self.kwargs.get('application_id')
