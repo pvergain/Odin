@@ -7,22 +7,39 @@
 
 {% block page_content %}
   <div class="row">
-    <form class="col-md-6" action="" method="post">
-      {% csrf_token %}
-      <div class="form-group">
-        {{ form.name.label }}
-        {% render_field form.language class="form-control form-control-solid" %}
+    <div class="col-md-6">
+      {% include "education/partial/message_box.html" %}
+      <div class="portlet light ">
+        <div class="portlet-title">
+          <div class="caption font-blue-sunglo">
+            <i class="icon-settings font-blue-sunglo"></i>
+            <span class="caption-subject bold uppercase"> Edit test</span>
+          </div>
+        </div>
+        <div class="portlet-body form">
+          <form action="" method="POST">
+            <div class="form-body">
+              {% csrf_token %}
+
+              <div class="form-group form-md-line-input">
+                {{ form.language.label }}
+                {% render_field form.language class="form-control form-control-solid" id="form_control_1" %}
+              </div>
+              <div class="form-group form-md-line-input">
+                {{ form.code.label }}
+                {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Enter your tests here" %}
+	      </div>
+              <div class="form-group form-md-line-input">
+                {{ form.file.label }}
+                {% render_field form.file class="form-control form-control-solid" id="form_control_1" %}
+	      </div>
+              <div class="form-actions noborder">
+                <button class="btn green uppercase" type="submit">Update</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="form-group">
-        {% render_field form.code class="form-control form-control-solid placeholder-no-fix" placeholder="Enter your tests here" %}
-      </div>
-      <div class="form-group">
-        {{ form.file.label }}
-        {% render_field form.file class="form-control form-control-solid"%}
-      </div>
-      <div class="form-actions">
-        <button class="btn green uppercase" type="submit" name="button">Update</button>
-      </div>
-    </form>
+    </div>
   </div>
 {% endblock page_content %}

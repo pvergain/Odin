@@ -2,33 +2,40 @@
 {% load widget_tweaks %}
 
 {% block content_title %}
-  Add source test
+  Add source code test
 {% endblock content_title%}
 
 {% block page_content %}
   <div class="row">
-    <form class="col-md-6" action="" method="post">
+    <div class="col-md-6">
       {% include "education/partial/message_box.html" %}
-      {% csrf_token %}
-
-      {% if form.errors %}
-      {% for error_key, error_value  in form.errors.items %}
-        <div class="alert alert-warning">
-          <span>{{ error_value }}</span>
+      <div class="portlet light ">
+        <div class="portlet-title">
+          <div class="caption font-blue-sunglo">
+            <i class="icon-settings font-blue-sunglo"></i>
+            <span class="caption-subject bold uppercase"> Add source code test</span>
+          </div>
         </div>
-      {% endfor %}
-      {% endif %}
-      <div class="form-group">
-        {{ form.language.label }}
-        {% render_field form.language class="form-control form-control-solid" %}
+        <div class="portlet-body form">
+          <form action="" method="POST">
+            <div class="form-body">
+              {% csrf_token %}
+
+              <div class="form-group form-md-line-input">
+                {{ form.language.label }}
+                {% render_field form.language class="form-control form-control-solid" id="form_control_1" %}
+              </div>
+              <div class="form-group form-md-line-input">
+                {{ form.code.label }}
+                {% render_field form.code class="form-control form-control-solid" id="form_control_1" %}
+	      </div>
+              <div class="form-actions noborder">
+                <button class="btn green uppercase" type="submit">Submit</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="form-group">
-        {{ form.code.label }}
-        {% render_field form.code class="form-control form-control-solid"%}
-      </div>
-      <div class="form-actions">
-        <button class="btn green uppercase" type="submit" name="button">Add</button>
-      </div>
-    </form>
+    </div>
   </div>
 {% endblock page_content %}
