@@ -15,7 +15,7 @@ class CannotConfirmOthersInterviewPermission(BaseUserPassesTestMixin):
         self.application = Application.objects.filter(id=application_id).first()
         self.interviewer = Interviewer.objects.filter(interview=self.interview).first()
 
-        if self.application.user != self.request.user or self.application_id != int(application_id):
+        if self.application.user != self.request.user or self.application.id != int(application_id):
             return False
 
         return True and super().test_func()
