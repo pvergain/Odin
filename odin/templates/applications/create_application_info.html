@@ -9,13 +9,7 @@
   <div class="row">
     <div class="col-md-6">
       {% include "education/partial/message_box.html" %}
-      {% if form.errors %}
-        {% for error_key, error_value  in form.errors.items %}
-          <div class="alert alert-warning">
-            <span>{{ error_value }}</span>
-          </div>
-        {% endfor %}
-      {% endif %}
+      {% include "partial/form_errors.html" with errors=readable_errors%}
 
       <div class="portlet light ">
         <div class="portlet-title">
