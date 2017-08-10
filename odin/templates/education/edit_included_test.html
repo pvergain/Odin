@@ -47,21 +47,5 @@
 {% endblock page_content %}
 
 {% block extra_scripts %}
-  <link href="{% static 'codemirror/lib/codemirror.css' %}" rel="stylesheet" type="text/css">
-  <link href="{% static 'codemirror/theme/neat.css' %}" rel="stylesheet" type="text/css">
-  <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
-  <script src="{% static 'codemirror/mode/python/python.js'%}"></script>
-  <script type="text/javascript">
-   var codeArea = $('#code_area')[0];
-   var testMirror = CodeMirror.fromTextArea(codeArea,
-                                            {
-                                                lineNumbers: true,
-                                                mode: "python",
-                                                matchBrackets: true,
-                                                theme: "neat",
-                                                indentUnit: 4
-
-                                            })
-   testMirror.refresh();
-  </script>
+  {% include "partial/code_editor.html" with mode="python" %}
 {% endblock extra_scripts %}

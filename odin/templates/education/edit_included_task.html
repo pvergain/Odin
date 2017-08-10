@@ -27,8 +27,8 @@
                 {% render_field form.name class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Task Name" %}
               </div>
               <div class="form-group form-md-line-input">
-                {{ form.description.label }}
-                {% render_field form.description class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Task Description" %}
+                {{ form.description.label }} - Markdown supported
+                {% render_field form.description class="form-control form-control-solid placeholder-no-fix" id="description_area" placeholder="Task Description" %}
 	      </div>
               <div class="form-group form-md-line-input">
                 {{ form.topic.label }}
@@ -67,3 +67,7 @@
     </div>
   </div>
 {% endblock page_content %}
+
+{% block extra_scripts %}
+  {% include "partial/code_editor.html" with area_id="description_area" mode="markdown" %}
+{% endblock extra_scripts %}
