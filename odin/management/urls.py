@@ -3,6 +3,7 @@ from django.conf.urls import url
 from .views import (
     PromoteUserToStudentView,
     PromoteUserToTeacherView,
+    PromoteUserToInterviewerView,
     DashboardManagementView,
     CreateUserView,
     CreateStudentView,
@@ -10,7 +11,8 @@ from .views import (
     CreateCourseView,
     EditCourseView,
     AddStudentToCourseView,
-    AddTeacherToCourseView
+    AddTeacherToCourseView,
+    AddCourseToInterviewerCoursesView
 )
 
 urlpatterns = [
@@ -28,6 +30,11 @@ urlpatterns = [
         regex='^promote/teacher/(?P<id>[0-9]+)/$',
         view=PromoteUserToTeacherView.as_view(),
         name='promote-to-teacher'
+    ),
+    url(
+        regex='^promote/interviewer/(?P<id>[0-9]+)/$',
+        view=PromoteUserToInterviewerView.as_view(),
+        name='promote-to-interviewer'
     ),
     url(
         regex='^add-student/$',
@@ -63,5 +70,10 @@ urlpatterns = [
         regex='^add-teacher-to-course/$',
         view=AddTeacherToCourseView.as_view(),
         name='add-teacher-to-course'
+    ),
+    url(
+        regex='^add-interviewer-to-course/$',
+        view=AddCourseToInterviewerCoursesView.as_view(),
+        name='add-interviewer-to-course'
     ),
 ]

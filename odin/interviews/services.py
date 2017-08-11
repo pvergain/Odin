@@ -1,8 +1,19 @@
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 
 from odin.applications.models import Application
+from odin.education.models import Course
 
-from .models import Interview
+from .models import Interview, Interviewer
+
+
+def add_course_to_interviewer_courses(*,
+                                      interviewer: Interviewer,
+                                      course: Course) -> QuerySet:
+    if not hasattr(course, 'application_info'):
+        raise ValidationError('Applications for this course are closed')
+    interviewer.courses_to_interview.add(course.application_info)
+    return interviewer.courses_to_interview
 
 
 def create_new_interview_for_application(*,

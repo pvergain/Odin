@@ -66,6 +66,9 @@ class BaseUser(PermissionsMixin,
     def is_teacher(self):
         return hasattr(self, 'teacher')
 
+    def is_interviewer(self):
+        return hasattr(self, 'interviewer')
+
 
 class Profile(models.Model):
     user = models.OneToOneField(BaseUser)

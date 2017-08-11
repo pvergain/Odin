@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 from odin.users.factories import BaseUserFactory, SuperUserFactory
+from odin.interviews.models import Interviewer
+from odin.applications.factories import ApplicationInfoFactory
 
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
 from odin.education.models import Student, Teacher, BaseUser, Course
@@ -339,3 +341,40 @@ class TestAddTeacherToCourseView(TestCase):
             response = self.post(self.url, data=data)
             self.assertRedirects(response, expected_url=reverse('dashboard:management:index'))
             self.assertIn(self.user.teacher, self.course.visible_teachers)
+
+
+class TestAdddCourseToInterViewerCoursesView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.interviewer = Interviewer.objects.create_from_user(SuperUserFactory(password=self.test_password))
+        self.interviewer.is_superuser = True
+        self.interviewer.save()
+        self.url = reverse('dashboard:management:add-interviewer-to-course')
+
+    def test_post_does_not_add_course_when_course_does_not_have_application_info(self):
+        current_course_count = self.interviewer.courses_to_interview.count()
+
+        data = {
+            'interviewer': self.interviewer.id,
+            'course': self.course.id
+        }
+
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.interviewer.refresh_from_db()
+            self.assertEqual(current_course_count, self.interviewer.courses_to_interview.count())
+
+    def test_post_adds_course_when_course_has_have_application_info(self):
+        ApplicationInfoFactory(course=self.course)
+        self.course.refresh_from_db()
+
+        data = {
+            'interviewer': self.interviewer.id,
+            'course': self.course.id
+        }
+
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:management:index'))
+            self.assertIn(self.course.application_info, self.interviewer.courses_to_interview.all())
