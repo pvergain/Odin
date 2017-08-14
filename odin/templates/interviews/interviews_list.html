@@ -1,0 +1,56 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+  Interviews
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-6">
+      <!-- BEGIN SAMPLE TABLE PORTLET-->
+      <div class="portlet box green">
+        <div class="portlet-title">
+          <div class="caption">
+            <i class="fa fa-comments"></i> Your interviews
+          </div>
+          <div class="tools">
+            <a href="javascript:;" class="expand"> </a>
+          </div>
+        </div>
+        <div class="portlet-body default-collapsed">
+          <div class="table-scrollable">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th> # </th>
+                  <th> Date </th>
+                  <th> Start Time </th>
+                  <th> End Time </th>
+                  <th> Applicant name </th>
+                  <th> Applicant skype </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in object_list %}
+                  <tr>
+                    <td> {{ obj.date }} </td>
+                    <td> {{ obj.start_time }} </td>
+                    <td> {{ obj.end_time }} </td>
+                    <td> {{ obj.application.user.get_full_name }} </td>
+                    <td> {{ obj.application.skype }} </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <form  action="{% url 'dashboard:interviews:generate-interviews' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-actions">
+              <input class="btn red uppercase" type="submit" value="Generate interviews" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}

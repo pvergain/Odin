@@ -43,7 +43,7 @@
                   <a href="{% url 'dashboard:management:add-teacher' %}"><button class="btn green uppercase" type="button" name="button">Add teacher</button></a>
                   <a href="{% url 'dashboard:management:add-user' %}"><button class="btn green uppercase" type="button" name="button">Add user</button></a>
                   <a href="{% url 'dashboard:management:add-student-to-course' %}"><button class="btn green uppercase" type="button" name="button">Add student to course</button></a>
-                   <a href="{% url 'dashboard:management:add-teacher-to-course' %}"><button class="btn green uppercase" type="button" name="button">Add teacher to course</button></a>
+                  <a href="{% url 'dashboard:management:add-teacher-to-course' %}"><button class="btn green uppercase" type="button" name="button">Add teacher to course</button></a>
                 </div>
               </form>
                 <div class="table-scrollable">
@@ -75,7 +75,12 @@
                                           <a href="{% url 'dashboard:management:promote-to-teacher' id=obj.id %}">
                                               <button type="button" class="btn btn-default">Make Teacher</button>
                                           </a>
-                            		        {% endif %}
+                            		  {% endif %}
+                                          {% if not obj.is_interviewer %}
+                                            <a href="{% url 'dashboard:management:promote-to-interviewer' id=obj.id %}">
+                                              <button type="button" class="btn btn-default">Make Interviewer</button>
+                                            </a>
+                                          {% endif %}
                                     </div>
                                 </td>
                               </tr>

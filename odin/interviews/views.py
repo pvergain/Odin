@@ -1,16 +1,18 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import FormView
+from django.views.generic import FormView, View, ListView
 from django.urls import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
+from odin.management.permissions import DashboardManagementPermission
 from odin.applications.models import Application
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 
-from .permissions import CannotConfirmOthersInterviewPermission
+from .permissions import CannotConfirmOthersInterviewPermission, IsInterviewerPermission
 from .mixins import CheckInterviewDataMixin
-from .models import Interview
+from .models import Interview, Interviewer
 from .services import create_new_interview_for_application
 from .forms import ChooseInterviewForm
+from .tasks import generate_interview_slots
 
 
 class ChooseInterviewView(LoginRequiredMixin,
@@ -54,4 +56,21 @@ class ChooseInterviewView(LoginRequiredMixin,
             'application': application,
         }
         self.call_service(service_kwargs=service_kwargs)
+
         return super().form_valid(form)
+
+
+class InterviewsListView(LoginRequiredMixin, IsInterviewerPermission, ListView):
+    template_name = 'interviews/interviews_list.html'
+
+    def get_queryset(self):
+        interviewer = get_object_or_404(Interviewer, user=self.request.user)
+
+        return interviewer.interviews.all()
+
+
+class GenerateInterviewsView(DashboardManagementPermission, View):
+    def post(self, request, *args, **kwargs):
+        generate_interview_slots.delay()
+
+        return redirect('dashboard:interviews:user-interviews')
