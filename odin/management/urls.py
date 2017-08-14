@@ -12,6 +12,7 @@ from .views import (
     EditCourseView,
     AddStudentToCourseView,
     AddTeacherToCourseView,
+    AddCourseToInterviewerCoursesView,
 )
 
 urlpatterns = [
@@ -69,5 +70,16 @@ urlpatterns = [
         regex='^add-teacher-to-course/$',
         view=AddTeacherToCourseView.as_view(),
         name='add-teacher-to-course'
+    ),
+    url(
+        regex='^add-interviewer-to-course/$',
+        view=AddCourseToInterviewerCoursesView.as_view(),
+        name='add-interviewer-to-course'
+
+    ),
+    url(
+        regex='^promote/interviewer/(?P<id>[0-9]+)/$',
+        view=PromoteUserToInterviewerView.as_view(),
+        name='promote-to-interviewer'
     ),
 ]

@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from odin.users.models import BaseUser
 from odin.users.services import create_user
 
+from odin.interviews.services import add_course_to_interviewer_courses
 from odin.interviews.models import Interviewer
 from odin.education.models import Student, Teacher, Course, CourseAssignment
 from odin.education.services import create_course, add_student, add_teacher
@@ -19,6 +20,7 @@ from .forms import (
     AddStudentToCourseForm,
     AddTeacherToCourseForm,
     ManagementAddCourseForm,
+    AddCourseToInterviewerCoursesForm
 )
 
 
@@ -173,5 +175,22 @@ class AddTeacherToCourseView(DashboardManagementPermission,
             assignment.save()
         else:
             self.call_service(service_kwargs=form.cleaned_data)
+
+        return super().form_valid(form)
+
+
+class AddCourseToInterviewerCoursesView(DashboardManagementPermission,
+                                        CallServiceMixin,
+                                        ReadableFormErrorsMixin,
+                                        FormView):
+    template_name = 'dashboard/add_course_to_interviewer_courses.html'
+    form_class = AddCourseToInterviewerCoursesForm
+    success_url = reverse_lazy('dashboard:management:index')
+
+    def get_service(self):
+        return add_course_to_interviewer_courses
+
+    def form_valid(self, form):
+        self.call_service(service_kwargs=form.cleaned_data)
 
         return super().form_valid(form)
