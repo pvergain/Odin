@@ -4,8 +4,6 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 from odin.users.factories import BaseUserFactory, SuperUserFactory
-from odin.interviews.models import Interviewer
-from odin.applications.factories import ApplicationInfoFactory
 
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
 from odin.education.models import Student, Teacher, BaseUser, Course

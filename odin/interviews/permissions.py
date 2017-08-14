@@ -19,3 +19,13 @@ class CannotConfirmOthersInterviewPermission(BaseUserPassesTestMixin):
             return False
 
         return True and super().test_func()
+
+
+class IsInterviewerPermission(BaseUserPassesTestMixin):
+    raise_exception = True
+
+    def test_func(self):
+        if self.request.user.is_interviewer():
+            return True and super().test_func()
+
+        return False
