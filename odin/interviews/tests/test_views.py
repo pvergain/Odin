@@ -8,8 +8,8 @@ from odin.users.factories import BaseUserFactory
 
 from odin.applications.factories import ApplicationFactory, ApplicationInfoFactory
 
-from ..factories import InterviewFactory, InterviewerFreeTimeFactory
-from ..models import Interviewer
+from ..factories import InterviewFactory
+from ..models import Interviewer, Interview
 
 
 class TestChooseInterviewView(TestCase):
@@ -20,7 +20,6 @@ class TestChooseInterviewView(TestCase):
         self.application_info = ApplicationInfoFactory()
         self.interviewer = Interviewer.objects.create_from_user(self.user)
         self.interview = InterviewFactory(application=self.application)
-        self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:choose-interview',
                            kwargs={
                                'application_id': self.application.id,
@@ -32,7 +31,12 @@ class TestChooseInterviewView(TestCase):
         self.interview.save()
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
-            self.assertEqual(302, response.status_code)
+            url = reverse('dashboard:interviews:confirm-interview',
+                          kwargs={
+                              'application_id': self.application.id,
+                              'interview_token': self.interview.uuid
+                          })
+            self.assertRedirects(response, expected_url=url)
 
     def test_get_forbidden_if_not_applicant_of_application(self):
         other_user = BaseUserFactory(password=self.test_password)
@@ -65,3 +69,28 @@ class TestChooseInterviewView(TestCase):
             response = self.post(self.url, data=data)
             self.assertEqual(200, response.status_code)
             self.assertIsNotNone(response.context['form'].errors)
+
+
+class TestInterviewsListView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.interview = InterviewFactory(interviewer=self.interviewer)
+        self.url = reverse('dashboard:interviews:user-interviews')
+
+    def test_access_is_forbidden_if_not_interviewer(self):
+        other_user = BaseUserFactory(password=self.test_password)
+        with self.login(email=other_user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_access_is_allowed_if_interviewer(self):
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_interviews_are_displayed_correctly_for_interviewer(self):
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(list(Interview.objects.all()), list(response.context['object_list']))

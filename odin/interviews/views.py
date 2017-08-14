@@ -74,7 +74,7 @@ class InterviewsListView(LoginRequiredMixin, IsInterviewerPermission, ListView):
     def get_queryset(self):
         interviewer = get_object_or_404(Interviewer, user=self.request.user)
 
-        return interviewer.interviews.all()
+        return Interview.objects.filter(interviewer__in=[interviewer])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
