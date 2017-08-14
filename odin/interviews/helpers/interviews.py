@@ -78,9 +78,6 @@ class GenerateInterviews:
         applications = iter(Application.objects.without_interviews_for(
                             application_info=self.application_info))
 
-        # remove this pls
-        print("APPLICATIONS")
-        print(list(applications))
         interviews = Interview.objects.free_slots_for(self.application_info)
         free_interview_slots = cycle_groups(interviews, key=lambda x: x.interviewer)
 
