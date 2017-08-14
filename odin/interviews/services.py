@@ -1,8 +1,9 @@
+from datetime import date, time
+
 from django.core.exceptions import ValidationError
 
 from odin.applications.models import Application
-
-from .models import Interview
+from .models import Interview, Interviewer, InterviewerFreeTime
 
 
 def create_new_interview_for_application(*,
@@ -22,3 +23,17 @@ def create_new_interview_for_application(*,
     new_interview.save()
 
     return new_interview
+
+
+def create_interviewer_free_time(*,
+                                 interviewer: Interviewer,
+                                 date: date,
+                                 start_time: time,
+                                 end_time: time,
+                                 buffer_time: bool) -> InterviewerFreeTime:
+
+    return InterviewerFreeTime.objects.create(interviewer=interviewer,
+                                              date=date,
+                                              start_time=start_time,
+                                              end_time=end_time,
+                                              buffer_time=buffer_time)

@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from odin.users.models import BaseUser
 
@@ -21,7 +22,7 @@ class Interviewer(BaseUser):
 
 
 class InterviewerFreeTime(models.Model):
-    interviewer = models.ForeignKey(Interviewer)
+    interviewer = models.ForeignKey(Interviewer, related_name='free_time_slots')
     date = models.DateField(blank=False, null=True)
     start_time = models.TimeField(blank=False, null=True)
     end_time = models.TimeField(blank=False, null=True)
@@ -32,6 +33,12 @@ class InterviewerFreeTime(models.Model):
 
     def has_generated_slots(self):
         return self.interviews.exists()
+
+    def clean(self):
+        if self.date <= timezone.now().date():
+            raise ValidationError("Your free time slot can not be in the past")
+        if self.start_time >= self.end_time:
+            raise ValidationError("The start time can not be the same or after the end time")
 
 
 class Interview(models.Model):

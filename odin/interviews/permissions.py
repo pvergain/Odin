@@ -29,3 +29,13 @@ class IsInterviewerPermission(BaseUserPassesTestMixin):
             return True and super().test_func()
 
         return False
+
+
+class CannotControlOtherInterviewerData(IsInterviewerPermission):
+    raise_exception = True
+
+    def test_func(self):
+        if not (self.request.user.interviewer == self.get_object().interviewer):
+            return False
+
+        return True and super().test_func()
