@@ -2,7 +2,6 @@ from django import forms
 
 from odin.users.models import BaseUser
 
-from odin.interviews.models import Interviewer
 from odin.education.models import Student, Course, Teacher
 
 
@@ -47,8 +46,3 @@ class AddTeacherToCourseForm(forms.Form):
 
     teacher = forms.ModelChoiceField(queryset=Teacher.objects.all())
     course = forms.ModelChoiceField(queryset=Course.objects.all())
-
-
-class AddCourseToInterviewerCoursesForm(forms.Form):
-    course = forms.ModelChoiceField(queryset=Course.objects.filter(application_info__isnull=False))
-    interviewer = forms.ModelChoiceField(queryset=Interviewer.objects.all())
