@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import FormView, View, ListView, DeleteView, UpdateView
+from django.views.generic import FormView, View, ListView, DeleteView, UpdateView, TemplateView
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 
@@ -34,8 +34,8 @@ class ChooseInterviewView(LoginRequiredMixin,
 
     def get(self, request, *args, **kwargs):
         if self.interview.has_confirmed:
-            return redirect(reverse('dashboard:interviews:confirm_interview',
-                            kwargs={'application_id': self.kwargs.application_id,
+            return redirect(reverse('dashboard:interviews:confirm-interview',
+                            kwargs={'application_id': self.kwargs.get('application_id'),
                                     'interview_token': self.interview.uuid}))
 
         return super().get(request, args, kwargs)
@@ -52,8 +52,11 @@ class ChooseInterviewView(LoginRequiredMixin,
 
         return context
 
+    def get_success_url(self):
+        return redirect(reverse('dashboard:education:user-courses'))
+
     def form_valid(self, form):
-        interview = Interview.objects.filter(id=form.cleaned_data.get('interviews')).first()
+        interview = form.cleaned_data.get('interviews')
         uuid = interview.uuid
         application = Application.objects.filter(id=self.kwargs.get('application_id')).first()
         service_kwargs = {
@@ -143,3 +146,8 @@ class UpdateFreeTimeView(LoginRequiredMixin,
             form_kwargs['data'] = data
 
         return form_kwargs
+
+
+class ConfirmInterviewView(CannotConfirmOthersInterviewPermission,
+                           TemplateView):
+    template_name = 'interviews/confirm_interview.html'
