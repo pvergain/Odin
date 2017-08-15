@@ -1,6 +1,7 @@
 from test_plus import TestCase
 
 from django.urls import reverse
+from django.utils import timezone
 
 from odin.common.faker import faker
 
@@ -8,8 +9,8 @@ from odin.users.factories import BaseUserFactory
 
 from odin.applications.factories import ApplicationFactory, ApplicationInfoFactory
 
-from ..factories import InterviewFactory
-from ..models import Interviewer, Interview
+from ..factories import InterviewFactory, InterviewerFreeTimeFactory
+from ..models import Interviewer, Interview, InterviewerFreeTime
 
 
 class TestChooseInterviewView(TestCase):
@@ -94,3 +95,74 @@ class TestInterviewsListView(TestCase):
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(list(Interview.objects.all()), list(response.context['object_list']))
+
+
+class TestCreateFreeTimeView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.url = reverse('dashboard:interviews:add-free-time')
+
+    def test_can_add_free_time_if_interviewer(self):
+        free_time_count = InterviewerFreeTime.objects.count()
+        start_time = faker.time_object()
+        end_time = (timezone.datetime.combine(timezone.now(), start_time) + timezone.timedelta(seconds=1)).time()
+        data = {
+            'date': (timezone.now() + timezone.timedelta(days=1)).date(),
+            'start_time': start_time,
+            'end_time': end_time,
+            'buffer_time': False
+        }
+
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertEqual(302, response.status_code)
+            self.assertEqual(free_time_count + 1, InterviewerFreeTime.objects.count())
+            self.assertIsNotNone(self.interviewer.free_time_slots)
+
+    def test_cant_add_free_time_if_not_interviewer(self):
+        other_user = BaseUserFactory(password=self.test_password)
+        with self.login(email=other_user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+
+class TestUpdateFreeTimeView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
+        self.url = reverse('dashboard:interviews:edit-free-time',
+                           kwargs={'free_time_id': self.interviewer_free_time.id})
+
+    def test_cannot_access_other_interviewer_free_time_details(self):
+        user = BaseUserFactory(password=self.test_password)
+        interviewer = Interviewer.objects.create_from_user(user)
+
+        with self.login(email=interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_cannot_update_other_interviewer_free_time(self):
+        user = BaseUserFactory(password=self.test_password)
+        interviewer = Interviewer.objects.create_from_user(user)
+
+        with self.login(email=interviewer.email, password=self.test_password):
+            response = self.post(self.url, data={})
+            self.assertEqual(403, response.status_code)
+
+    def test_can_update_personal_free_time_successfully(self):
+        old_date = self.interviewer_free_time.date
+        data = {
+            'date': old_date + timezone.timedelta(days=1),
+            'start_time': self.interviewer_free_time.start_time,
+            'end_time': self.interviewer_free_time.end_time,
+        }
+
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertEqual(302, response.status_code)
+            self.interviewer_free_time.refresh_from_db()
+            self.assertEqual(old_date + timezone.timedelta(days=1), self.interviewer_free_time.date)

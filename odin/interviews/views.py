@@ -110,7 +110,6 @@ class CreateFreeTimeView(LoginRequiredMixin,
             data = transfer_POST_data_to_dict(self.request.POST)
             data['interviewer'] = self.request.user.interviewer
             form_kwargs['data'] = data
-
         return form_kwargs
 
     def form_valid(self, form):
@@ -125,6 +124,7 @@ class DeleteFreeTimeView(LoginRequiredMixin,
     model = InterviewerFreeTime
     pk_url_kwarg = 'free_time_id'
     success_url = reverse_lazy('dashboard:interviews:user-interviews')
+    http_method_names = [u'post', u'delete', u'put']
 
 
 class UpdateFreeTimeView(LoginRequiredMixin,

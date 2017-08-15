@@ -40,6 +40,11 @@ class InterviewerFreeTime(models.Model):
         if self.start_time >= self.end_time:
             raise ValidationError("The start time can not be the same or after the end time")
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+
+        return super().save(*args, **kwargs)
+
 
 class Interview(models.Model):
     interviewer = models.ForeignKey(Interviewer)

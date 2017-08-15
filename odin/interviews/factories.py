@@ -1,9 +1,10 @@
 import factory
 
+from django.utils import timezone
+
 from odin.common.faker import faker
 from odin.applications.factories import ApplicationFactory
 from odin.users.factories import BaseUserFactory
-
 
 from .models import Interview, Interviewer, InterviewerFreeTime
 
@@ -17,9 +18,9 @@ class InterviewerFactory(BaseUserFactory):
 
 class InterviewerFreeTimeFactory(factory.DjangoModelFactory):
     interviewer = factory.SubFactory(InterviewerFactory)
-    date = factory.LazyAttribute(lambda _: faker.date_object())
-    start_time = factory.LazyAttribute(lambda _: faker.time_object())
-    end_time = factory.LazyAttribute(lambda _: faker.time_object())
+    date = factory.LazyAttribute(lambda _:  timezone.now().date() + timezone.timedelta(days=faker.pyint()))
+    start_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(seconds=2)).time())
+    end_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(seconds=3)).time())
     buffer_time = factory.LazyAttribute(lambda _: faker.boolean())
 
     class Meta:
