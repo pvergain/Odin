@@ -8,6 +8,8 @@ from odin.applications.models import Application
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
 
+from rest_framework import generics
+
 from .permissions import (
     CannotConfirmOthersInterviewPermission,
     IsInterviewerPermission,
@@ -18,6 +20,7 @@ from .models import Interview, Interviewer, InterviewerFreeTime
 from .services import create_new_interview_for_application, create_interviewer_free_time
 from .forms import FreeTimeModelForm
 from .tasks import generate_interview_slots
+from .serializers import InterviewSerializer
 
 
 class ChooseInterviewView(LoginRequiredMixin,
@@ -164,3 +167,11 @@ class ConfirmInterviewView(LoginRequiredMixin,
             self.interview.save()
 
         return super().get(request, *args, **kwargs)
+
+
+class FreeInterviewsListAPIView(generics.ListAPIView):
+    serializer_class = InterviewSerializer
+    queryset = Interview.objects.get_free_slots().order_by('date', 'start_time')
+
+    def get_serializer_context(self):
+        return {'application': self.request.GET.get('application_id')}

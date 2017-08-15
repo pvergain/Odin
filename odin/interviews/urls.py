@@ -8,6 +8,7 @@ from .views import (
     UpdateFreeTimeView,
     DeleteFreeTimeView,
     ConfirmInterviewView,
+    FreeInterviewsListAPIView
 )
 
 
@@ -47,4 +48,9 @@ urlpatterns = [
         view=ConfirmInterviewView.as_view(),
         name='confirm-interview'
     ),
+    url(
+        regex='^api/get-free-interviews/$',
+        view=FreeInterviewsListAPIView.as_view(),
+        name='get_free_interviews'
+    )
 ]
