@@ -16,17 +16,15 @@ from .permissions import (
 from .mixins import CheckInterviewDataMixin
 from .models import Interview, Interviewer, InterviewerFreeTime
 from .services import create_new_interview_for_application, create_interviewer_free_time
-from .forms import ChooseInterviewForm, FreeTimeModelForm
+from .forms import FreeTimeModelForm
 from .tasks import generate_interview_slots
 
 
 class ChooseInterviewView(LoginRequiredMixin,
                           CannotConfirmOthersInterviewPermission,
                           CallServiceMixin,
-                          ReadableFormErrorsMixin,
                           CheckInterviewDataMixin,
-                          FormView):
-    form_class = ChooseInterviewForm
+                          TemplateView):
     template_name = 'interviews/choose_interview.html'
 
     def get_service(self):
@@ -40,6 +38,20 @@ class ChooseInterviewView(LoginRequiredMixin,
 
         return super().get(request, args, kwargs)
 
+    def post(self, request, *args, **kwargs):
+        uuid = self.request.POST.get('uuid')
+        application = self.application
+
+        service_kwargs = {
+            'uuid': uuid,
+            'application': application,
+        }
+        self.call_service(service_kwargs=service_kwargs)
+
+        return redirect('dashboard:interviews:confirm_interview',
+                        kwargs={'application_id': self.application.id,
+                                'interview_token': uuid})
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -51,21 +63,6 @@ class ChooseInterviewView(LoginRequiredMixin,
         context['interviews'] = Interview.objects.free_slots_for(application.application_info)
 
         return context
-
-    def get_success_url(self):
-        return redirect(reverse('dashboard:education:user-courses'))
-
-    def form_valid(self, form):
-        interview = form.cleaned_data.get('interviews')
-        uuid = interview.uuid
-        application = Application.objects.filter(id=self.kwargs.get('application_id')).first()
-        service_kwargs = {
-            'uuid': uuid,
-            'application': application,
-        }
-        self.call_service(service_kwargs=service_kwargs)
-
-        return super().form_valid(form)
 
 
 class InterviewsListView(LoginRequiredMixin, IsInterviewerPermission, ListView):
@@ -148,6 +145,22 @@ class UpdateFreeTimeView(LoginRequiredMixin,
         return form_kwargs
 
 
-class ConfirmInterviewView(CannotConfirmOthersInterviewPermission,
+class ConfirmInterviewView(LoginRequiredMixin,
+                           CannotConfirmOthersInterviewPermission,
                            TemplateView):
     template_name = 'interviews/confirm_interview.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['interview'] = self.interview
+        context['application'] = self.application
+        context['interviewer'] = self.interviewer
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if not self.interview.has_confirmed:
+            self.interview.has_confirmed = True
+            self.interview.save()
+
+        return super().get(request, *args, **kwargs)

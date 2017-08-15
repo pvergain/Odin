@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Interview, InterviewerFreeTime
+from .models import InterviewerFreeTime
 
 
 class DateInput(forms.DateInput):
@@ -9,12 +9,6 @@ class DateInput(forms.DateInput):
 
 class TimeInput(forms.TimeInput):
     input_type = 'time'
-
-
-class ChooseInterviewForm(forms.Form):
-    interviews = forms.ModelChoiceField(
-        queryset=Interview.objects.get_free_slots().order_by('date', 'start_time')
-    )
 
 
 class FreeTimeModelForm(forms.ModelForm):
