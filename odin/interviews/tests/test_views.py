@@ -166,3 +166,41 @@ class TestUpdateFreeTimeView(TestCase):
             self.assertEqual(302, response.status_code)
             self.interviewer_free_time.refresh_from_db()
             self.assertEqual(old_date + timezone.timedelta(days=1), self.interviewer_free_time.date)
+
+
+class TestDeleteFreeTimeView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
+        self.url = reverse('dashboard:interviews:delete-free-time',
+                           kwargs={'free_time_id': self.interviewer_free_time.id})
+
+    def test_cannot_get_delete_free_time_view(self):
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(405, response.status_code)
+
+    def test_cannot_delete_free_time_if_not_interviewer(self):
+        user = BaseUserFactory(password=self.test_password)
+
+        with self.login(email=user.email, password=self.test_password):
+            response = self.post(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_cannot_delete_other_interviewer_free_time(self):
+        user = BaseUserFactory(password=self.test_password)
+        interviewer = Interviewer.objects.create_from_user(user)
+
+        with self.login(email=interviewer.email, password=self.test_password):
+            response = self.post(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_can_delete_personal_free_time_if_interviewer(self):
+        free_time_count = InterviewerFreeTime.objects.count()
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.post(self.url)
+            self.assertEqual(302, response.status_code)
+            self.assertEqual(free_time_count - 1, InterviewerFreeTime.objects.count())
+            self.assertEquals([], list(self.interviewer.free_time_slots.all()))
