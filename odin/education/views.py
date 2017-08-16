@@ -68,7 +68,7 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
 
         # TODO optimize this query
         select = ['description']
-        prefetch = ['students', 'teachers', 'weeks']
+        prefetch = ['students', 'teachers', 'weeks', 'lectures']
         qs = Course.objects.select_related(*select).prefetch_related(*prefetch)
 
         context['user_is_teacher_for'] = []
