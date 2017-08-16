@@ -6,6 +6,7 @@ from dateutil import rrule
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField
+from django.utils import timezone
 
 from odin.common.models import UpdatedAtCreatedAtModelMixin
 from odin.common.utils import get_now, json_field_default
@@ -13,7 +14,7 @@ from odin.common.utils import get_now, json_field_default
 from odin.users.models import BaseUser
 
 from .managers import StudentManager, TeacherManager
-from .query import TaskQuerySet, SolutionQuerySet
+from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet
 
 
 class Student(BaseUser):
@@ -26,6 +27,17 @@ class Teacher(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
 
     objects = TeacherManager()
+
+
+class CheckIn(models.Model):
+    mac = models.CharField(max_length=17)
+    user = models.ForeignKey(BaseUser, null=True, blank=True, related_name='checkins')
+    date = models.DateField(default=timezone.now)
+
+    objects = CheckInQuerySet.as_manager()
+
+    class Meta:
+        unique_together = (('user', 'date'), ('mac', 'date'))
 
 
 class Course(models.Model):

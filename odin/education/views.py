@@ -54,7 +54,8 @@ from .services import (
     create_included_task,
     create_test_for_task,
     create_gradable_solution,
-    create_non_gradable_solution
+    create_non_gradable_solution,
+    get_presence_for_course,
 )
 
 
@@ -65,8 +66,9 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
+        # TODO optimize this query
         select = ['description']
-        prefetch = ['students', 'teachers']
+        prefetch = ['students', 'teachers', 'weeks']
         qs = Course.objects.select_related(*select).prefetch_related(*prefetch)
 
         context['user_is_teacher_for'] = []
@@ -80,6 +82,11 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
 
         if student:
             context['user_is_student_for'] = qs.filter(students=student)
+
+        context['presence_for_student_courses'] = [get_presence_for_course(course=course, user=user)
+                                                   for course in context['user_is_student_for']]
+        context['presence_for_teacher_courses'] = [get_presence_for_course(course=course, user=user)
+                                                   for course in context['user_is_teacher_for']]
 
         return context
 

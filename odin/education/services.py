@@ -1,13 +1,17 @@
 from datetime import datetime, timedelta
 from typing import Dict, BinaryIO
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
+
+from odin.users.models import BaseUser
 
 from .models import (
     Course,
     CourseAssignment,
     Student,
     Teacher,
+    CheckIn,
     Week,
     Topic,
     IncludedMaterial,
@@ -19,6 +23,7 @@ from .models import (
     Test,
     IncludedTest
 )
+from .helper import get_dates_for_weeks, percentage_presence
 
 
 def add_student(course: Course, student: Student) -> CourseAssignment:
@@ -197,3 +202,21 @@ def create_non_gradable_solution(*,
     )
 
     return new_solution
+
+
+def get_presence_for_course(*,
+                            course: Course,
+                            user: BaseUser) -> dict:
+    presence_for_course = {}
+    if course.lectures.exists():
+        lecture_dates_for_weeks = get_dates_for_weeks(course)
+        user_dates = CheckIn.objects.get_user_dates(user, course)
+
+        presence_for_course = {
+            'weeks': list(lecture_dates_for_weeks.keys()),
+            'lecture_dates_for_weeks': lecture_dates_for_weeks,
+            'user_dates': user_dates,
+            'percentage_presence': percentage_presence(user_dates, course)
+        }
+
+        return presence_for_course

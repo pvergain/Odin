@@ -22,7 +22,8 @@ from .models import (
     Task,
     IncludedTask,
     ProgrammingLanguage,
-    Test
+    Test,
+    Lecture
 )
 from .services import create_course
 
@@ -69,6 +70,16 @@ class WeekFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Week
+
+
+class LectureFactory(factory.DjangoModelFactory):
+    date = factory.LazyAttribute(lambda _: faker.date_object())
+
+    week = factory.SubFactory(WeekFactory)
+    course = factory.SubFactory(CourseFactory)
+
+    class Meta:
+        model = Lecture
 
 
 class TopicFactory(factory.DjangoModelFactory):

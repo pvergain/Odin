@@ -1,3 +1,5 @@
+{% load education_extras %}
+
 <div class="row">
     <!-- BEGIN SAMPLE TABLE PORTLET-->
         <div class="portlet box green">
@@ -17,6 +19,7 @@
                                 <th> # </th>
                                 <th> Name </th>
                                 <th> Github </th>
+                                <th> Your presence </th>
                                 <th> Students </th>
                                 <th> Teachers </th>
                             </tr>
@@ -27,6 +30,7 @@
                                     <td>{{ course.id }}</td>
                                     <td><a href="{% url 'dashboard:education:user-course-detail' course.id %}">{{ course.name }}</a></td>
                                     <td>{{ course.repository }}</td>
+                                    <td>{{ course | get_presence:request.user }}</td>
                                     <td>{{ course.students.count }}</td>
                                     <td>{{ course.teachers.count }}</td>
                                 </tr>
