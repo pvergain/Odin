@@ -19,7 +19,7 @@ from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin
 from .models import Interview, Interviewer, InterviewerFreeTime
 from .services import create_new_interview_for_application, create_interviewer_free_time
 from .forms import FreeTimeModelForm
-from .tasks import generate_interview_slots
+from .tasks import generate_interview_slots, send_interview_confirmation_emails
 from .serializers import InterviewSerializer
 
 
@@ -169,3 +169,10 @@ class FreeInterviewsListAPIView(generics.ListAPIView):
 
     def get_serializer_context(self):
         return {'application': self.request.GET.get('application_id')}
+
+
+class SendInterviewConfirmationEmailsView(DashboardManagementPermission, View):
+    def post(self, request, *args, **kwargs):
+        send_interview_confirmation_emails.delay()
+
+        return redirect('dashboard:interviews:user-interviews')
