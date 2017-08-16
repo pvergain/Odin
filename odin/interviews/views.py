@@ -15,7 +15,7 @@ from .permissions import (
     IsInterviewerPermission,
     CannotControlOtherInterviewerData
 )
-from .mixins import CheckInterviewDataMixin
+from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin
 from .models import Interview, Interviewer, InterviewerFreeTime
 from .services import create_new_interview_for_application, create_interviewer_free_time
 from .forms import FreeTimeModelForm
@@ -25,6 +25,7 @@ from .serializers import InterviewSerializer
 
 class ChooseInterviewView(LoginRequiredMixin,
                           CannotConfirmOthersInterviewPermission,
+                          HasConfirmedInterviewRedirectMixin,
                           CallServiceMixin,
                           CheckInterviewDataMixin,
                           TemplateView):
@@ -33,27 +34,19 @@ class ChooseInterviewView(LoginRequiredMixin,
     def get_service(self):
         return create_new_interview_for_application
 
-    def get(self, request, *args, **kwargs):
-        if self.interview.has_confirmed:
-            return redirect(reverse('dashboard:interviews:confirm-interview',
-                            kwargs={'application_id': self.kwargs.get('application_id'),
-                                    'interview_token': self.interview.uuid}))
-
-        return super().get(request, args, kwargs)
-
     def post(self, request, *args, **kwargs):
-        uuid = self.request.POST.get('uuid')
+        uuid = kwargs.get('interview_token')
         application = self.application
 
         service_kwargs = {
             'uuid': uuid,
             'application': application,
         }
-        self.call_service(service_kwargs=service_kwargs)
+        interview = self.call_service(service_kwargs=service_kwargs)
 
-        return redirect('dashboard:interviews:confirm_interview',
-                        kwargs={'application_id': self.application.id,
-                                'interview_token': uuid})
+        return redirect(reverse('dashboard:interviews:confirm-interview',
+                                kwargs={'application_id': interview.application.id,
+                                        'interview_token': str(interview.uuid)}))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -162,7 +155,8 @@ class ConfirmInterviewView(LoginRequiredMixin,
         return context
 
     def post(self, request, *args, **kwargs):
-        if not self.interview.has_confirmed:
+        has_confirmed_interview_for_course = Interview.objects.filter(application=self.application, has_confirmed=True)
+        if not has_confirmed_interview_for_course.exists():
             self.interview.has_confirmed = True
             self.interview.save()
 

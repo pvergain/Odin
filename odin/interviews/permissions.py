@@ -16,7 +16,11 @@ class CannotConfirmOthersInterviewPermission(BaseUserPassesTestMixin):
         self.application = get_object_or_404(Application, id=application_id)
         self.interviewer = get_object_or_404(Interviewer, interview=self.interview)
 
-        if self.application.user != self.request.user or self.application.id != int(application_id):
+        if self.interview.application is not None:
+            if self.interview not in self.application.interview_set.all():
+                return False
+
+        if self.application not in self.request.user.applications.all():
             return False
 
         return True and super().test_func()

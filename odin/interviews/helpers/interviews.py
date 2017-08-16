@@ -5,7 +5,6 @@ from .groups_generator import cycle_groups
 
 
 class GenerateInterviewSlots:
-
     def __init__(self, interview_time_length, break_time):
         self.interview_time_length = interview_time_length
         self.break_time = break_time
