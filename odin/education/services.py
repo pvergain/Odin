@@ -228,6 +228,7 @@ def get_presence_for_course(*,
     presence_for_course = {
         'percentage_presence': 0
     }
+
     if course.lectures.exists():
         lecture_dates_for_weeks = get_dates_for_weeks(course)
         user_dates = CheckIn.objects.get_user_dates(user, course)

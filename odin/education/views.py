@@ -72,6 +72,7 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
+        # TODO optimize this query
         select = ['description']
         prefetch = ['students', 'teachers', 'weeks', 'lectures']
         qs = Course.objects.select_related(*select).prefetch_related(*prefetch)
