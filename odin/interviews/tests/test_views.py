@@ -289,3 +289,27 @@ class TestConfirmInterviewView(TestCase):
             new_interview.refresh_from_db()
             self.response_200(response)
             self.assertTrue(new_interview.has_confirmed)
+
+
+class TestRateInterviewView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.application_info = ApplicationInfoFactory()
+        self.application = ApplicationFactory(user=self.user, application_info=self.application_info)
+        self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.interview = InterviewFactory(application=self.application, interviewer=self.interviewer)
+        self.url = reverse('dashboard:interviews:rate-interview',
+                           kwargs={
+                               'interview_token': self.interview.uuid
+                           })
+
+    def test_interviewer_can_not_rate_interview_that_he_is_not_interviewer_for(self):
+        new_interviewer = Interviewer.objects.create_from_user(BaseUserFactory())
+        new_interview = InterviewFactory(interviewer=new_interviewer)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(reverse('dashboard:interviews:rate-interview',
+                                        kwargs={'interview_token': new_interview.uuid}))
+
+            self.response_403(response)

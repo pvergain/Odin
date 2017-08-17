@@ -13,7 +13,7 @@ from rest_framework import generics
 from .permissions import (
     CannotConfirmOthersInterviewPermission,
     IsInterviewerPermission,
-    CannotControlOtherInterviewerData
+    CannotControlOtherInterviewerDataPermission
 )
 from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin
 from .models import Interview, Interviewer, InterviewerFreeTime
@@ -112,7 +112,7 @@ class CreateFreeTimeView(LoginRequiredMixin,
 
 
 class DeleteFreeTimeView(LoginRequiredMixin,
-                         CannotControlOtherInterviewerData,
+                         CannotControlOtherInterviewerDataPermission,
                          DeleteView):
     model = InterviewerFreeTime
     pk_url_kwarg = 'free_time_id'
@@ -121,7 +121,7 @@ class DeleteFreeTimeView(LoginRequiredMixin,
 
 
 class UpdateFreeTimeView(LoginRequiredMixin,
-                         CannotControlOtherInterviewerData,
+                         CannotControlOtherInterviewerDataPermission,
                          ReadableFormErrorsMixin,
                          UpdateView):
     model = InterviewerFreeTime
@@ -176,3 +176,21 @@ class SendInterviewConfirmationEmailsView(DashboardManagementPermission, View):
         send_interview_confirmation_emails.delay()
 
         return redirect('dashboard:interviews:user-interviews')
+
+
+class RateInterviewView(LoginRequiredMixin,
+                        CannotControlOtherInterviewerDataPermission,
+                        ReadableFormErrorsMixin,
+                        UpdateView):
+    model = Interview
+    fields = [
+        'code_skills_rating',
+        'code_design_rating',
+        'fit_attitude_rating',
+        'interviewer_comment',
+        'is_accepted'
+    ]
+    slug_url_kwarg = 'interview_token'
+    slug_field = 'uuid'
+    template_name = "interviews/rate_interview.html"
+    success_url = reverse_lazy('dashboard:interviews:user-interviews')

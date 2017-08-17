@@ -73,23 +73,27 @@
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
-                  <th> # </th>
                   <th> Date </th>
                   <th> Start Time </th>
                   <th> End Time </th>
                   <th> Applicant name </th>
                   <th> Applicant skype </th>
+                  <th> Actions </th>
                 </tr>
               </thead>
               <tbody>
                 {% for obj in object_list %}
                   <tr>
-                    <td> {{ obj.id }} </td>
                     <td> {{ obj.date }} </td>
                     <td> {{ obj.start_time }} </td>
                     <td> {{ obj.end_time }} </td>
                     <td> {{ obj.application.user.get_full_name }} </td>
                     <td> {{ obj.application.skype }} </td>
+                    <td>
+                      <a href="{% url 'dashboard:interviews:rate-interview' obj.uuid %}">
+                        <button class="btn green uppercase" type="button">Rate</button>
+                      </a>
+                    </td>
                   </tr>
                 {% endfor %}
               </tbody>

@@ -36,7 +36,7 @@ class IsInterviewerPermission(BaseUserPassesTestMixin):
         return False
 
 
-class CannotControlOtherInterviewerData(IsInterviewerPermission):
+class CannotControlOtherInterviewerDataPermission(IsInterviewerPermission):
     raise_exception = True
 
     def test_func(self):
