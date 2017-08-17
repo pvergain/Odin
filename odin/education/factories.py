@@ -41,7 +41,7 @@ class CourseFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: f'{n}{faker.word()}')
     start_date = factory.LazyAttribute(lambda _: faker.date_object())
 
-    slug_url = factory.LazyAttribute(lambda _: faker.slug())
+    slug_url = factory.Sequence(lambda n: f'{n}{faker.slug()}')
 
     repository = factory.LazyAttribute(lambda _: faker.url())
     video_channel = factory.LazyAttribute(lambda _: faker.url())
