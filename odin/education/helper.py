@@ -5,7 +5,7 @@ from .models import Lecture
 
 def get_dates_for_weeks(course):
     week_dates = {}
-    lectures = course.lectures.filter(week__isnull=False).all()
+    lectures = course.lectures.select_related('week').filter(week__isnull=False).all()
 
     for lecture in lectures:
         week_number = lecture.week.number
