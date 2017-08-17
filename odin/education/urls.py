@@ -23,7 +23,8 @@ from .views import (
     StudentSolutionDetailView,
     EditIncludedTestView,
     MaterialDetailView,
-    AllStudentsSolutionsView
+    AllStudentsSolutionsView,
+    SetCheckInView,
 )
 
 
@@ -155,4 +156,9 @@ urlpatterns = [
         view=AllStudentsSolutionsView.as_view(),
         name='all-students-solutions'
     ),
+    url(
+        regex='^set-check-in/',
+        view=SetCheckInView.as_view(),
+        name='set-check-in',
+    )
 ]

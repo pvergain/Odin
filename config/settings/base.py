@@ -1,6 +1,9 @@
+import environ
+
+from celery.schedules import crontab
+
 from django.urls import reverse_lazy
 from django.apps import apps
-import environ
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
 APPS_DIR = ROOT_DIR.path('odin')
@@ -206,9 +209,6 @@ ADMIN_URL = r'^admin/'
 GH_OAUTH_CLIENT_ID = env('GH_OAUTH_CLIENT_ID', default='')
 GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY', default='')
 
-
-# Celery settings
-
 # Mandrill settings
 USE_DJANGO_EMAIL_BACKEND = True
 
@@ -237,3 +237,14 @@ GRADER_API_KEY = env('GRADER_API_KEY', default='')
 GRADER_API_SECRET = env('GRADER_API_SECRET', default='')
 GRADER_POLLING_COUNTDOWN = env.int('GRADER_POLLING_COUNTDOWN', default=2)
 GRADER_RESUBMIT_COUNTDOWN = env.int('GRADER_RESUBMIT_COUNTDOWN', default=10)
+
+# Celery settings
+CELERY_TIMEZONE = 'Europe/Sofia'
+CELERYBEAT_SCHEDULE = {
+    'calculate-presence-every-day': {
+        'task': 'calculate_presence',
+        'schedule': crontab(),
+    }
+}
+
+CHECKIN_TOKEN = env('CHECKIN_TOKEN', default='')

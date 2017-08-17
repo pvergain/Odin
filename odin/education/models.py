@@ -14,7 +14,7 @@ from odin.common.utils import get_now, json_field_default
 from odin.users.models import BaseUser
 
 from .managers import StudentManager, TeacherManager
-from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet
+from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet, CourseQuerySet
 
 
 class Student(BaseUser):
@@ -63,6 +63,8 @@ class Course(models.Model):
     public = models.BooleanField(default=True)
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
+
+    objects = CourseQuerySet.as_manager()
 
     def clean(self):
         if self.start_date > self.end_date:
@@ -128,6 +130,8 @@ class CourseAssignment(models.Model):
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
                                related_name='course_assignments')
+
+    student_presence = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
 
     hidden = models.BooleanField(default=False)
 

@@ -3,11 +3,15 @@ from django.views.generic import (
     ListView,
     DetailView,
     FormView,
-    UpdateView
+    UpdateView,
+    View
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.http import HttpResponse
+from django.db import IntegrityError
+from django.conf import settings
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
@@ -18,6 +22,7 @@ from .models import (
     Course,
     Teacher,
     Student,
+    CheckIn,
     Material,
     Task,
     IncludedTask,
@@ -630,3 +635,31 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
 
     def get_queryset(self):
         return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
+
+
+class SetCheckInView(View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        mac = request.POST['mac']
+        token = request.POST['token']
+
+        if settings.CHECKIN_TOKEN != token:
+            return HttpResponse(status=511)
+
+        try:
+            student = Student.objects.filter(mac__iexact=mac).first()
+            teacher = Teacher.objects.filter(mac__iexact=mac).first()
+            if student:
+                student_check = CheckIn.objects.create(mac=mac, user=student)
+                student_check.save()
+            if teacher:
+                teacher_check = CheckIn.objects.create(mac=mac, user=teacher)
+                teacher_check.save()
+            if not student and not teacher:
+                anonymous_user_check = CheckIn.objects.create(mac=mac, user=None)
+                anonymous_user_check.save()
+        except IntegrityError:
+            return HttpResponse(status=418)
+
+        return HttpResponse(status=200)
