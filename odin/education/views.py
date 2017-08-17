@@ -657,6 +657,7 @@ class SetCheckInView(View):
         try:
             student = Student.objects.filter(user__profile__mac__iexact=mac).first()
             teacher = Teacher.objects.filter(user__profile__mac__iexact=mac).first()
+
             if student:
                 CheckIn.objects.create(mac=mac, user=student.user)
             elif teacher:
