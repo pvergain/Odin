@@ -661,8 +661,7 @@ class SetCheckInView(View):
             elif teacher:
                 CheckIn.objects.create(mac=mac, user=teacher.user)
             if not student and not teacher:
-                anonymous_user_check = CheckIn.objects.create(mac=mac, user=None)
-                anonymous_user_check.save()
+                CheckIn.objects.create(mac=mac, user=None)
         except IntegrityError:
             return HttpResponse(status=418)
 

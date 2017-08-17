@@ -8,7 +8,6 @@ from odin.common.utils import json_field_default
 from odin.common.models import UpdatedAtCreatedAtModelMixin
 
 from .managers import UserManager
-from .validators import validate_mac
 
 
 class BaseUser(PermissionsMixin,
@@ -86,7 +85,7 @@ class Profile(models.Model):
     full_image = ImageCropField(upload_to='avatars/', blank=True, null=True)
     cropping = ImageRatioField('full_image', '300x300')
 
-    mac = models.CharField(max_length=17, blank=True, null=True, validators=[validate_mac])
+    mac = models.CharField(max_length=17, blank=True, null=True)
 
     def get_gh_profile_url(self):
         return self.social_accounts.get('GitHub')
