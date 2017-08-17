@@ -6,7 +6,7 @@
 
 {% block page_content %}
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="portlet box green">
         <div class="portlet-title">
           <div class="caption">
@@ -25,7 +25,7 @@
                   <th> Start Time </th>
                   <th> End Time </th>
                   <th> Actions </th>
-                 </tr>
+                </tr>
               </thead>
               <tbody>
                 {% for slot in free_time_slots %}
@@ -44,7 +44,7 @@
                         </form>
                       </div>
                     </td>
-                   </tr>
+                  </tr>
                 {% endfor %}
               </tbody>
             </table>
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="portlet box green">
         <div class="portlet-title">
           <div class="caption">
@@ -78,6 +78,10 @@
                   <th> End Time </th>
                   <th> Applicant name </th>
                   <th> Applicant skype </th>
+                  <th> Code Skills Rating </th>
+                  <th> Code Design Rating </th>
+                  <th> Fit Attitude Rating </th>
+                  <th> Accepted </th>
                   <th> Actions </th>
                 </tr>
               </thead>
@@ -89,6 +93,10 @@
                     <td> {{ obj.end_time }} </td>
                     <td> {{ obj.application.user.get_full_name }} </td>
                     <td> {{ obj.application.skype }} </td>
+                    <td> {{ obj.code_skills_rating }} </td>
+                    <td> {{ obj.code_design_rating }} </td>
+                    <td> {{ obj.fit_attitude_rating }} </td>
+                    <td> {{ obj.is_accepted }} </td>
                     <td>
                       <a href="{% url 'dashboard:interviews:rate-interview' obj.uuid %}">
                         <button class="btn green uppercase" type="button">Rate</button>
@@ -114,6 +122,66 @@
         </div>
       </div>
     </div>
+
+    {% if all_free_time_slots %}
+      <div class="col-md-12">
+        <div class="portlet box green">
+          <div class="portlet-title">
+            <div class="caption">
+              <i class="fa fa-comments"></i> All Intereviewer's time slots
+            </div>
+            <div class="tools">
+              <a href="javascript:;" class="expand"> </a>
+            </div>
+          </div>
+          <div class="portlet-body default-collapsed">
+            <div class="table-scrollable">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th> Interviewer </th>
+                    <th> Date </th>
+                    <th> Start Time </th>
+                    <th> End Time </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for obj in all_free_time_slots %}
+                    <tr>
+                      <td> {{ obj.interviewer.get_full_name}} </td>
+                      <td> {{ obj.date }} </td>
+                      <td> {{ obj.start_time }} </td>
+                      <td> {{ obj.end_time }} </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="row">
+              <form class="col-md-3" action="{% url 'dashboard:interviews:generate-interviews' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-actions">
+                  <input class="btn red uppercase" type="submit" value="Generate interviews" />
+                </div>
+              </form>
+              <form class="col-md-3" action="{% url 'dashboard:interviews:send-interview-confirmation-emails' %}" method="POST">
+                {% csrf_token %}
+                <input class="btn red uppercase" type="submit" name="submit" value="Send confirmation emails"/>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    {% if log %}
+      <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+        <div class="col-md-12">
+          {% for message in log %}
+            <h3>{{ message }}</h3>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 {% endblock page_content %}
 

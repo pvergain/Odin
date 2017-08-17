@@ -1,6 +1,6 @@
 from django.shortcuts import redirect
 from django.views.generic import View, ListView, FormView, UpdateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
 from odin.users.models import BaseUser
@@ -62,8 +62,9 @@ class PromoteUserToInterviewerView(DashboardManagementPermission,
                                    View):
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
-        Interviewer.objects.create_from_user(instance)
-        return redirect('dashboard:management:index')
+        interviewer = Interviewer.objects.create_from_user(instance)
+        return redirect(reverse('dashboard:management:add-interviewer-to-course-with-initial',
+                                kwargs={'interviewer_email': interviewer.email}))
 
 
 class CreateUserView(DashboardCreateUserMixin, FormView):
@@ -186,6 +187,13 @@ class AddCourseToInterviewerCoursesView(DashboardManagementPermission,
     template_name = 'dashboard/add_course_to_interviewer_courses.html'
     form_class = AddCourseToInterviewerCoursesForm
     success_url = reverse_lazy('dashboard:management:index')
+
+    def get_initial(self):
+        initial = super().get_initial()
+        interviewer_email = self.kwargs.get('interviewer_email')
+        if interviewer_email:
+            initial['interviewer'] = get_object_or_404(Interviewer, email=interviewer_email)
+        return initial
 
     def get_service(self):
         return add_course_to_interviewer_courses

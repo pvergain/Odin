@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import FormView, View, ListView, DeleteView, UpdateView, TemplateView
 from django.urls import reverse, reverse_lazy
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 
 from odin.management.permissions import DashboardManagementPermission
 from odin.applications.models import Application
@@ -15,11 +15,11 @@ from .permissions import (
     IsInterviewerPermission,
     CannotControlOtherInterviewerDataPermission
 )
-from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin
-from .models import Interview, Interviewer, InterviewerFreeTime
-from .services import create_new_interview_for_application, create_interviewer_free_time
+from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin, UserInterviewsListMixin
+from .models import Interview, InterviewerFreeTime
+from .services import create_new_interview_for_application, create_interviewer_free_time, generate_interview_slots
 from .forms import FreeTimeModelForm
-from .tasks import generate_interview_slots, send_interview_confirmation_emails
+from .tasks import send_interview_confirmation_emails
 from .serializers import InterviewSerializer
 
 
@@ -61,28 +61,26 @@ class ChooseInterviewView(LoginRequiredMixin,
         return context
 
 
-class InterviewsListView(LoginRequiredMixin, IsInterviewerPermission, ListView):
+class InterviewsListView(LoginRequiredMixin, IsInterviewerPermission, UserInterviewsListMixin, ListView):
     template_name = 'interviews/interviews_list.html'
 
-    def get_queryset(self):
-        interviewer = get_object_or_404(Interviewer, user=self.request.user)
-        related = 'application__user__profile'
 
-        return Interview.objects.filter(interviewer=interviewer, application__isnull=False).select_related(related)
+class GenerateInterviewsView(DashboardManagementPermission, UserInterviewsListMixin, TemplateView):
+    http_method_names = ['post', 'put']
+    template_name = 'interviews/interviews_list.html'
+
+    def post(self, request, *args, **kwargs):
+        context = generate_interview_slots()
+        kwargs['log'] = context['log']
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        interviewer = get_object_or_404(Interviewer, user=self.request.user)
-        context['free_time_slots'] = interviewer.free_time_slots.all()
+        context['log'] = kwargs['log']
+        context['object_list'] = self.get_queryset()
 
         return context
-
-
-class GenerateInterviewsView(DashboardManagementPermission, View):
-    def post(self, request, *args, **kwargs):
-        generate_interview_slots.delay()
-
-        return redirect('dashboard:interviews:user-interviews')
 
 
 class CreateFreeTimeView(LoginRequiredMixin,

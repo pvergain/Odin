@@ -6,4 +6,14 @@
 
 {% block page_content %}
   {% include "applications/partial/applications_table.html" with applications=object_list %}
+  {% if teached_courses %}
+    <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+      <div class="col-md-12">
+        <h2> Applications for each of your courses </h2>
+      </div>
+    </div>
+  {% endif %}
+  {% for course in teached_courses %}
+    {% include "applications/partial/applications_for_course.html" with course=course%}
+  {% endfor %}
 {% endblock page_content %}

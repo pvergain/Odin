@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
+from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
 from .models import Application, ApplicationTask
 from .forms import (
@@ -167,6 +168,15 @@ class UserApplicationsListView(LoginRequiredMixin,
             'application_info__tasks',
         ]
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_teacher():
+            teacher = self.request.user.teacher
+            prefetch = 'application_info__applications__user__profile'
+            courses = Course.objects.filter(teachers__in=[teacher]).prefetch_related(prefetch).order_by('-start_date')
+            context['teached_courses'] = courses
+        return context
 
 
 class EditApplicationView(LoginRequiredMixin,

@@ -1,8 +1,8 @@
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 
-from .models import Interview
+from .models import Interview, Interviewer, InterviewerFreeTime
 
 
 class CheckInterviewDataMixin:
@@ -26,3 +26,20 @@ class HasConfirmedInterviewRedirectMixin:
                                     'interview_token': interview.uuid}))
 
         return super().dispatch(request, *args, **kwargs)
+
+
+class UserInterviewsListMixin:
+    def get_queryset(self):
+        interviewer = get_object_or_404(Interviewer, user=self.request.user)
+        related = 'application__user__profile'
+
+        return Interview.objects.filter(interviewer=interviewer, application__isnull=False).select_related(related)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        interviewer = get_object_or_404(Interviewer, user=self.request.user)
+        context['free_time_slots'] = interviewer.free_time_slots.all()
+        if self.request.user.is_superuser:
+            context['all_free_time_slots'] = InterviewerFreeTime.objects.select_related('interviewer__user__profile')
+
+        return context

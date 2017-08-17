@@ -78,8 +78,8 @@ urlpatterns = [
 
     ),
     url(
-        regex='^promote/interviewer/(?P<id>[0-9]+)/$',
-        view=PromoteUserToInterviewerView.as_view(),
-        name='promote-to-interviewer'
+        regex='^add-interviewer-to-course/(?P<interviewer_email>[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/$',
+        view=AddCourseToInterviewerCoursesView.as_view(),
+        name='add-interviewer-to-course-with-initial'
     ),
 ]
