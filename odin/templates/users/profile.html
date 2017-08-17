@@ -22,6 +22,9 @@
                 <div class="profile-usertitle">
                     <div class="profile-usertitle-name"> {{ object.full_name }} </div>
                     <div class="profile-usertitle-job"> {{ object.user.email }} </div>
+                    {% if object.mac %}
+                        <div class="profile-usertitle-job"> {{ object.mac }} </div>
+                    {% endif %}
                 </div>
                 <!-- END SIDEBAR USER TITLE -->
                 <!-- SIDEBAR MENU -->

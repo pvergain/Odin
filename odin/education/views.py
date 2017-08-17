@@ -648,13 +648,13 @@ class SetCheckInView(View):
             return HttpResponse(status=511)
 
         try:
-            student = Student.objects.filter(mac__iexact=mac).first()
-            teacher = Teacher.objects.filter(mac__iexact=mac).first()
+            student = Student.objects.filter(user__profile__mac__iexact=mac).first()
+            teacher = Teacher.objects.filter(user__profile__mac__iexact=mac).first()
             if student:
-                student_check = CheckIn.objects.create(mac=mac, user=student)
+                student_check = CheckIn.objects.create(mac=mac, user=student.user)
                 student_check.save()
             if teacher:
-                teacher_check = CheckIn.objects.create(mac=mac, user=teacher)
+                teacher_check = CheckIn.objects.create(mac=mac, user=teacher.user)
                 teacher_check.save()
             if not student and not teacher:
                 anonymous_user_check = CheckIn.objects.create(mac=mac, user=None)

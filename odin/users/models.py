@@ -82,5 +82,7 @@ class Profile(models.Model):
     full_image = ImageCropField(upload_to='avatars/', blank=True, null=True)
     cropping = ImageRatioField('full_image', '300x300')
 
+    mac = models.CharField(max_length=17, blank=True, null=True)
+
     def get_gh_profile_url(self):
         return self.social_accounts.get('GitHub')
