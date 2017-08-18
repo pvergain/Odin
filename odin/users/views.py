@@ -5,7 +5,9 @@ from django.urls import reverse_lazy
 
 from odin.common.mixins import ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
+
 from .models import Profile, BaseUser
+from .helper import check_macs_for_student
 
 
 class PersonalProfileView(LoginRequiredMixin, DetailView):
@@ -33,3 +35,10 @@ class EditProfileView(LoginRequiredMixin, ReadableFormErrorsMixin, UpdateView):
     def get_object(self, queryset=None):
         instance = get_object_or_404(Profile, user=self.request.user)
         return instance
+
+    def form_valid(self, form):
+        user = BaseUser.objects.filter(profile=self.get_object())
+        if user.exists():
+            user = user.first()
+            check_macs_for_student(user, form.cleaned_data['mac'])
+        return super().form_valid(form)

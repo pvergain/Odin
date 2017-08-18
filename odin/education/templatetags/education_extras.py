@@ -2,7 +2,7 @@ import mistune
 
 from django import template
 
-from odin.education.services import get_presence_for_course
+from ..models import Student, Teacher, CourseAssignment
 
 register = template.Library()
 
@@ -15,7 +15,17 @@ def convert_from_markdown(text):
 
 @register.filter(name='get_presence')
 def get_course_presence(course, user):
-    presence = get_presence_for_course(course=course, user=user)
-    if presence:
-        return presence.get('percentage_presence')
-    return f'0 %'
+    student = Student.objects.filter(user=user)
+    teacher = Teacher.objects.filter(user=user)
+
+    if student.exists():
+        student = student.first()
+        course_assignment = CourseAssignment.objects.filter(course=course, student=student)
+        if course_assignment.exists():
+            return f'{course_assignment.first().student_presence} %'
+
+    if teacher.exists():
+        teacher = teacher.first()
+        course_assignment = CourseAssignment.objects.filter(course=course, teacher=teacher)
+        if course_assignment.exists():
+            return f'{course_assignment.first().student_presence} %'
