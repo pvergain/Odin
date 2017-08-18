@@ -1,3 +1,5 @@
+{% load application_extras %}
+
 <div class="row">
   <div class="portlet box green">
     <div class="portlet-title">
@@ -15,6 +17,11 @@
             <tr>
               <th> # </th>
               <th> Applicant </th>
+               {% for task in course.application_info.tasks.all %}
+                <th id="{{ task.name }}">
+                  {{ task.name }}
+                </th>
+              {% endfor %}
               <th> View Profile </th>
             </tr>
           </thead>
@@ -23,6 +30,17 @@
               <tr>
                 <td>{{ app.id }}</td>
                 <td> <a href="{% url 'dashboard:applications:application-detail' app.id %}">{{ app.user.get_full_name }}</a> </td>
+                {% for task in course.application_info.tasks.all %}
+                  <td>
+                    <div class="list-icon-container">
+                      {% if task|has_solution_for_task:app %}
+                        <i class="icon-check"></i>
+                      {% else %}
+                        <i class="icon-close"></i>
+                      {% endif  %}
+                    </div>
+                 </td>
+                {% endfor %}
 		<td>
                   <a href="{% url 'dashboard:users:profile-by-email' user_email=app.user.email %}">
                     <button class="btn green uppercase">View profile</button>
