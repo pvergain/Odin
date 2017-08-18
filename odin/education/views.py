@@ -651,11 +651,9 @@ class SetCheckInView(View):
             student = Student.objects.filter(user__profile__mac__iexact=mac).first()
             teacher = Teacher.objects.filter(user__profile__mac__iexact=mac).first()
             if student:
-                student_check = CheckIn.objects.create(mac=mac, user=student.user)
-                student_check.save()
+                CheckIn.objects.create(mac=mac, user=student.user)
             if teacher:
-                teacher_check = CheckIn.objects.create(mac=mac, user=teacher.user)
-                teacher_check.save()
+                CheckIn.objects.create(mac=mac, user=teacher.user)
             if not student and not teacher:
                 anonymous_user_check = CheckIn.objects.create(mac=mac, user=None)
                 anonymous_user_check.save()
