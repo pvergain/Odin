@@ -5,6 +5,11 @@ from test_plus import TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
+from django.conf import settings
+
+from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
+from odin.common.faker import faker
+
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -24,6 +29,7 @@ from ..factories import (
 from ..models import (
     Student,
     Teacher,
+    CheckIn,
     Topic,
     IncludedMaterial,
     Material,
@@ -32,10 +38,6 @@ from ..models import (
     Solution,
     IncludedTest
 )
-
-from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
-
-from odin.common.faker import faker
 
 
 class TestUserCoursesView(TestCase):
@@ -873,3 +875,59 @@ class TestSubmitNotGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+
+class TestSetCheckInView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.student = StudentFactory(password=self.test_password)
+        self.teacher = TeacherFactory(password=self.test_password)
+        self.student_profile = ProfileFactory(user=self.student.user)
+        self.teacher_profile = ProfileFactory(user=self.teacher.user)
+        self.student.is_active = True
+        self.teacher.is_active = True
+        self.student.save()
+        self.teacher.save()
+        self.url = reverse('dashboard:education:set-check-in')
+
+    def test_get_is_on_set_check_in_view_is_forbidden(self):
+        response = self.get(self.url)
+        self.response_405(response)
+
+    def test_post_with_invalid_token_is_not_allowed(self):
+        data = {
+            'mac': self.student_profile.mac,
+            'token': faker.word()
+        }
+
+        response = self.post(url_name=self.url, data=data)
+        self.assertEqual(511, response.status_code)
+
+    def test_check_in_for_user_with_valid_token_and_data_is_created_on_post(self):
+        checkin_count = CheckIn.objects.count()
+        student_checkins = CheckIn.objects.filter(user=self.student.user).count()
+        data = {
+            'mac': self.student_profile.mac,
+            'token': settings.CHECKIN_TOKEN
+        }
+
+        response = self.post(url_name=self.url, data=data)
+        self.response_200(response)
+
+        self.assertEqual(checkin_count + 1, CheckIn.objects.count())
+        self.assertEqual(student_checkins + 1, CheckIn.objects.filter(user=self.student.user).count())
+
+    def test_regular_user_mac_is_registered(self):
+        regular_user = BaseUserFactory(password=self.test_password)
+        checkin_count = CheckIn.objects.count()
+        checkins_without_user = CheckIn.objects.filter(user__isnull=True).count()
+        data = {
+            'mac': regular_user.profile.mac,
+            'token': settings.CHECKIN_TOKEN
+        }
+
+        response = self.post(url_name=self.url, data=data)
+        self.response_200(response)
+
+        self.assertEqual(checkin_count + 1, CheckIn.objects.count())
+        self.assertEqual(checkins_without_user + 1, CheckIn.objects.filter(user__isnull=True).count())

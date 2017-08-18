@@ -47,3 +47,33 @@ class TestUserProfileView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(url_name=url)
             self.assertEqual(200, response.status_code)
+
+
+class TestProfileEditView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.url = reverse('dashboard:users:edit-profile')
+
+    def test_mac_address_is_validated_correctly_on_invalid_input(self):
+        data = {
+            'mac': faker.word()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.response_200(response)
+            self.assertIsNotNone(response.context['form'].errors)
+            self.assertIsNone(self.user.profile.mac)
+
+    def test_mac_address_is_validated_correctly_on_valid_input(self):
+        data = {
+            'mac': faker.mac_address()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.response_302(response)
+            self.user.profile.refresh_from_db()
+            self.assertIsNotNone(self.user.profile.mac)
