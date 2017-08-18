@@ -31,7 +31,8 @@ THIRD_PARTY_APPS = [
     'captcha',
     'widget_tweaks',
     'django_filters',
-    'easy_thumbnails'
+    'easy_thumbnails',
+    'django_celery_beat',
 ]
 
 LOCAL_APPS = [
@@ -237,14 +238,5 @@ GRADER_API_KEY = env('GRADER_API_KEY', default='')
 GRADER_API_SECRET = env('GRADER_API_SECRET', default='')
 GRADER_POLLING_COUNTDOWN = env.int('GRADER_POLLING_COUNTDOWN', default=2)
 GRADER_RESUBMIT_COUNTDOWN = env.int('GRADER_RESUBMIT_COUNTDOWN', default=10)
-
-# Celery settings
-CELERY_TIMEZONE = 'Europe/Sofia'
-CELERYBEAT_SCHEDULE = {
-    'calculate-presence-every-day': {
-        'task': 'calculate_presence',
-        'schedule': crontab(),
-    }
-}
 
 CHECKIN_TOKEN = env('CHECKIN_TOKEN', default='')

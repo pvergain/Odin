@@ -46,6 +46,7 @@ django-filter==1.0.4
 
 # Celery
 celery==4.0.2
+django-celery-beat==1.0.1
 
 # Email services
 mandrill==1.0.57
