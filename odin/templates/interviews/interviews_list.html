@@ -75,7 +75,6 @@
                 <tr>
                   <th> Date </th>
                   <th> Start Time </th>
-                  <th> End Time </th>
                   <th> Applicant name </th>
                   <th> Applicant skype </th>
                   <th> Code Skills Rating </th>
@@ -90,8 +89,7 @@
                   <tr>
                     <td> {{ obj.date }} </td>
                     <td> {{ obj.start_time }} </td>
-                    <td> {{ obj.end_time }} </td>
-                    <td> {{ obj.application.user.get_full_name }} </td>
+                    <td> <a href="{% url 'dashboard:applications:application-detail' obj.application.id %}">{{ obj.application.user.get_full_name }}</a> </td>
                     <td> {{ obj.application.skype }} </td>
                     <td> {{ obj.code_skills_rating }} </td>
                     <td> {{ obj.code_design_rating }} </td>

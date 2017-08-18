@@ -1,4 +1,4 @@
-from django.views.generic import FormView, UpdateView, ListView
+from django.views.generic import FormView, UpdateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -8,6 +8,7 @@ from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
+from odin.interviews.permissions import IsInterviewerPermission
 from .models import Application, ApplicationTask
 from .forms import (
     ApplicationInfoModelForm,
@@ -224,3 +225,11 @@ class EditApplicationView(LoginRequiredMixin,
                 self.call_service(service=create_application_solution, service_kwargs=create_solution_kwargs)
 
         return super().form_valid(form)
+
+
+class ApplicationDetailView(LoginRequiredMixin,
+                            IsInterviewerPermission,
+                            DetailView):
+    model = Application
+    template_name = 'applications/application_detail.html'
+    pk_url_kwarg = 'application_id'

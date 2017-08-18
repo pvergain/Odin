@@ -22,7 +22,7 @@
             {% for app in course.application_info.applications.all %}
               <tr>
                 <td>{{ app.id }}</td>
-                <td>{{ app.user.get_full_name }}</td>
+                <td> <a href="{% url 'dashboard:applications:application-detail' app.id %}">{{ app.user.get_full_name }}</a> </td>
 		<td>
                   <a href="{% url 'dashboard:users:profile-by-email' user_email=app.user.email %}">
                     <button class="btn green uppercase">View profile</button>
