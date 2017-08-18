@@ -160,18 +160,6 @@
                 </tbody>
               </table>
             </div>
-            <div class="row">
-              <form class="col-md-3" action="{% url 'dashboard:interviews:generate-interviews' %}" method="POST">
-                {% csrf_token %}
-                <div class="form-actions">
-                  <input class="btn red uppercase" type="submit" value="Generate interviews" />
-                </div>
-              </form>
-              <form class="col-md-3" action="{% url 'dashboard:interviews:send-interview-confirmation-emails' %}" method="POST">
-                {% csrf_token %}
-                <input class="btn red uppercase" type="submit" name="submit" value="Send confirmation emails"/>
-              </form>
-            </div>
           </div>
         </div>
       </div>

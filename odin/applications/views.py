@@ -174,10 +174,18 @@ class UserApplicationsListView(LoginRequiredMixin,
         context = super().get_context_data(**kwargs)
         if self.request.user.is_teacher():
             teacher = self.request.user.teacher
-            prefetch = 'application_info__applications__user__profile'
-            courses = Course.objects.filter(teachers__in=[teacher]).prefetch_related(prefetch).order_by('-start_date')
-            context['teached_courses'] = courses
-        return context
+            prefetch = [
+                'application_info__applications__user__profile',
+                'application_info__tasks',
+            ]
+            filters = {
+                'teachers__in': [teacher]
+            }
+
+            courses = Course.objects.get_active_for_interview().filter(**filters)
+            context['teached_courses'] = courses.prefetch_related(*prefetch).order_by('-start_date')
+
+            return context
 
 
 class EditApplicationView(LoginRequiredMixin,

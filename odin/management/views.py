@@ -39,6 +39,7 @@ class DashboardManagementView(DashboardManagementPermission,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.prefetch_related('students', 'teachers')
+
         return context
 
 
@@ -47,6 +48,7 @@ class PromoteUserToStudentView(DashboardManagementPermission,
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
         Student.objects.create_from_user(instance)
+
         return redirect('dashboard:management:index')
 
 
@@ -55,6 +57,7 @@ class PromoteUserToTeacherView(DashboardManagementPermission,
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
         Teacher.objects.create_from_user(instance)
+
         return redirect('dashboard:management:index')
 
 
@@ -63,6 +66,7 @@ class PromoteUserToInterviewerView(DashboardManagementPermission,
     def get(self, request, *args, **kwargs):
         instance = BaseUser.objects.get(id=kwargs.get('id'))
         interviewer = Interviewer.objects.create_from_user(instance)
+
         return redirect(reverse('dashboard:management:add-interviewer-to-course-with-initial',
                                 kwargs={'interviewer_email': interviewer.email}))
 
@@ -71,6 +75,7 @@ class CreateUserView(DashboardCreateUserMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user_type'] = 'user'
+
         return context
 
     def form_valid(self, form):
@@ -83,12 +88,13 @@ class CreateStudentView(DashboardCreateUserMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user_type'] = 'student'
+
         return context
 
     def form_valid(self, form):
         instance = create_user(**form.cleaned_data)
-
         Student.objects.create_from_user(instance)
+
         return super().form_valid(form)
 
 
@@ -96,12 +102,13 @@ class CreateTeacherView(DashboardCreateUserMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user_type'] = 'teacher'
+
         return context
 
     def form_valid(self, form):
         instance = create_user(**form.cleaned_data)
-
         Teacher.objects.create_from_user(instance)
+
         return super().form_valid(form)
 
 
@@ -193,6 +200,7 @@ class AddCourseToInterviewerCoursesView(DashboardManagementPermission,
         interviewer_email = self.kwargs.get('interviewer_email')
         if interviewer_email:
             initial['interviewer'] = get_object_or_404(Interviewer, email=interviewer_email)
+
         return initial
 
     def get_service(self):

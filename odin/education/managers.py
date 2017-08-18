@@ -1,5 +1,7 @@
+from django.db.models import Manager, Q
 from django.apps import apps
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from odin.users.managers import UserManager
 from odin.users.models import BaseUser
@@ -50,3 +52,18 @@ class TeacherManager(BaseEducationUserManager):
         student.save()
 
         return Teacher.objects.get(id=student.id)
+
+
+class CourseManager(Manager):
+    def get_active_for_interview(self):
+        current_date = timezone.now().date()
+        conditions = (
+            {
+                'application_info__start_interview_date__lte': current_date
+            },
+            {
+                'application_info__end_interview_date__gte': current_date
+            }
+        )
+
+        return self.filter(Q(**conditions[0]) & Q(**conditions[1]))
