@@ -213,9 +213,9 @@ class AcceptedApplicantsListView(LoginRequiredMixin,
         return [info for info in queryset if info.interview_is_active()]
 
 
-class PromoteAcceptedUsersToStudents(LoginRequiredMixin,
-                                     DashboardManagementPermission,
-                                     View):
+class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
+                                         DashboardManagementPermission,
+                                         View):
     def post(self, request, *args, **kwargs):
         promote_accepted_users_to_students.delay()
 

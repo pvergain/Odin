@@ -12,7 +12,7 @@ from .views import (
     SendInterviewConfirmationEmailsView,
     RateInterviewView,
     AcceptedApplicantsListView,
-    PromoteAcceptedUsersToStudents
+    PromoteAcceptedUsersToStudentsView
 )
 
 
@@ -74,7 +74,7 @@ urlpatterns = [
     ),
     url(
         regex='^assign-accepted-users/$',
-        view=PromoteAcceptedUsersToStudents.as_view(),
+        view=PromoteAcceptedUsersToStudentsView.as_view(),
         name='assign-accepted-users'
     )
 ]

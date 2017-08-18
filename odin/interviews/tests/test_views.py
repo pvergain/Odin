@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from odin.common.faker import faker
 
-from odin.users.factories import BaseUserFactory
+from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.applications.factories import ApplicationFactory, ApplicationInfoFactory
 from odin.applications.models import Application
 from odin.interviews.factories import InterviewFactory, InterviewerFreeTimeFactory
@@ -312,4 +312,30 @@ class TestRateInterviewView(TestCase):
             response = self.get(reverse('dashboard:interviews:rate-interview',
                                         kwargs={'interview_token': new_interview.uuid}))
 
+            self.response_403(response)
+
+
+class TestPromoteAcceptedUsersToStudentsView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        Interviewer.objects.create_from_user(self.user)
+        self.application_info = ApplicationInfoFactory(
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            start_interview_date=timezone.now().date(),
+            end_interview_date=timezone.now().date() + timezone.timedelta(days=faker.pyint()))
+        self.url = reverse('dashboard:interviews:assign-accepted-users')
+
+    def test_get_not_allowed(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_405(response)
+
+    def test_post_forbidden_when_user_not_superuser(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        Interviewer.objects.create_from_user(new_user)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.post(self.url)
             self.response_403(response)
