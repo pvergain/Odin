@@ -48,7 +48,7 @@ urlpatterns = [
         name='add-application-task-from-existing'
     ),
     url(
-        regex='^/application-details/(?P<application_id>[0-9]+)$',
+        regex='^application-details/(?P<application_id>[0-9]+)$',
         view=ApplicationDetailView.as_view(),
         name='application-detail'
     ),

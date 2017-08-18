@@ -5,6 +5,9 @@ from django.contrib.sites.models import Site
 from django.urls import reverse
 
 from odin.common.services import send_email
+from odin.applications.models import ApplicationInfo
+from odin.education.services import add_student
+from odin.education.models import Student
 
 from .models import Interview
 
@@ -39,3 +42,17 @@ def send_interview_confirmation_emails(self):
 
         interview.has_received_email = True
         interview.save()
+
+
+@shared_task(bind=True)
+def promote_accepted_users_to_students(self):
+    active_application_infos = ApplicationInfo.objects.get_open_for_interview()
+    for info in active_application_infos:
+        accepted = info.accepted_applicants
+        for application in accepted:
+            if not application.user.is_student():
+                student = Student.objects.create_from_user(application.user)
+            else:
+                student = application.user.student
+
+            add_student(course=info.course, student=student)

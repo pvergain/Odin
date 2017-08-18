@@ -4,7 +4,7 @@ from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect
 
 from odin.management.permissions import DashboardManagementPermission
-from odin.applications.models import Application
+from odin.applications.models import Application, ApplicationInfo
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
 
@@ -19,7 +19,7 @@ from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin,
 from .models import Interview, InterviewerFreeTime
 from .services import create_new_interview_for_application, create_interviewer_free_time, generate_interview_slots
 from .forms import FreeTimeModelForm
-from .tasks import send_interview_confirmation_emails
+from .tasks import send_interview_confirmation_emails, promote_accepted_users_to_students
 from .serializers import InterviewSerializer
 
 
@@ -193,3 +193,30 @@ class RateInterviewView(LoginRequiredMixin,
     slug_field = 'uuid'
     template_name = "interviews/rate_interview.html"
     success_url = reverse_lazy('dashboard:interviews:user-interviews')
+
+    def form_valid(self, form):
+        application = self.get_object().application
+        application.is_accepted = form.cleaned_data.get('is_accepted')
+        application.save()
+
+        return super().form_valid(form)
+
+
+class AcceptedApplicantsListView(LoginRequiredMixin,
+                                 IsInterviewerPermission,
+                                 ListView):
+    template_name = 'interviews/accepted_applicants.html'
+
+    def get_queryset(self):
+        queryset = ApplicationInfo.objects.all()
+
+        return [info for info in queryset if info.interview_is_active()]
+
+
+class PromoteAcceptedUsersToStudents(LoginRequiredMixin,
+                                     DashboardManagementPermission,
+                                     View):
+    def post(self, request, *args, **kwargs):
+        promote_accepted_users_to_students.delay()
+
+        return redirect('dashboard:interviews:accepted-applicants')

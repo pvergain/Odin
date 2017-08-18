@@ -10,7 +10,9 @@ from .views import (
     ConfirmInterviewView,
     FreeInterviewsListAPIView,
     SendInterviewConfirmationEmailsView,
-    RateInterviewView
+    RateInterviewView,
+    AcceptedApplicantsListView,
+    PromoteAcceptedUsersToStudents
 )
 
 
@@ -64,5 +66,15 @@ urlpatterns = [
         regex='^rate-interview/(?P<interview_token>[-\w]+)/$',
         view=RateInterviewView.as_view(),
         name='rate-interview'
+    ),
+    url(
+        regex='^accepted-applicants/$',
+        view=AcceptedApplicantsListView.as_view(),
+        name='accepted-applicants'
+    ),
+    url(
+        regex='^assign-accepted-users/$',
+        view=PromoteAcceptedUsersToStudents.as_view(),
+        name='assign-accepted-users'
     )
 ]

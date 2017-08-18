@@ -1,0 +1,57 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load interview_extras %}
+
+{% block content_title %}
+  Accepted applicants
+{% endblock content_title %}
+
+{% block page_content %}
+  {% for info in object_list %}
+    <div clas="row">
+      <form  action="{% url 'dashboard:interviews:assign-accepted-users' %}" method="POST">
+        {% csrf_token %}
+        <button class="btn red uppercase" type="submit">
+          Assign applicants to courses
+        </button>
+      </form>
+      <div class="portlet box green">
+        <div class="portlet-title">
+          <div class="caption">
+            <i class="fa fa-comments"></i> {{ info.course.name }}
+          </div>
+          <div class="tools">
+            <a href="javascript:;" class="collapse"> </a>
+          </div>
+        </div>
+        <div class="portlet-body">
+          <div class="table-scrollable">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th> # </th>
+                  <th> Applicant </th>
+                  <th> Interviewer </th>
+                  <th> Average Rating </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for app in info.accepted_applicants %}
+                  <tr>
+                    <td>{{ app.id }}</td>
+                    <td> <a href="{% url 'dashboard:applications:application-detail' app.id %}">{{ app.user.get_full_name }}</a> </td>
+                    {% with interview=app.get_interview%}
+                    <td>
+                     {{ interview.interviewer.get_full_name }}
+                    </td>
+                    <td> {{ interview | calculate_average_rating }}</td>
+                    {% endwith %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock page_content %}
