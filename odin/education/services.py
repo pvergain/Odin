@@ -225,6 +225,7 @@ def create_non_gradable_solution(*,
 def get_presence_for_course(*,
                             course: Course,
                             user: BaseUser) -> dict:
+
     presence_for_course = {
         'percentage_presence': 0
     }
