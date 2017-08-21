@@ -1,0 +1,39 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+  <h1><center>Confirm Interview for</center></h1>
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+    <div class="col-md-12">
+      <h2>{{ application.application_info.course.name }}</h2>
+    </div>
+  </div>
+  <div class="row margin-bottom-40 stories-header">
+    {% if interview.has_confirmed %}
+      <h2>You have already confirmed your interview</h2>
+      <h3>Your interview date is {{ interview.date }}</h3>
+      <h3>Your interview starts at {{ interview.start_time }}</h3>
+      <h3>Your interviewer's skype is {{ interviewer.skype }}</h3>
+    {% else %}
+      <h3>Your interview date is {{ interview.date }}</h3>
+      <h3>Your interview starts at {{ interview.start_time }}</h3>
+      <form  action="" method="POST">
+        {% csrf_token %}
+        <div class="form-actions">
+          <div class="row">
+            <div class="col-md-12">
+              <input class="btn-lg btn green uppercase" type="submit" name="submit" value="Confirm current date"/>
+              <a  href="{% url 'dashboard:interviews:choose-interview' application.id interview.uuid %}">
+                <button class=" btn-lg btn green uppercase" type="button">Choose another date</button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+  </div>
+
+{% endblock page_content %}

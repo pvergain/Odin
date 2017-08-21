@@ -2,11 +2,22 @@
 {% load static %}
 
 {% block content_title %}
-  Course detail
+  {% if public_page %}
+    <div class="container">
+  {% else %}
+    <div>
+  {% endif  %}
+    Course detail
+    </div>
 {% endblock content_title %}
 
 {% block page_content %}
-  <div class="row">
+  {% if public_page %}
+    <div class="container">
+  {% else %}
+    <div>
+  {% endif %}
+    <div class="row">
     <div class="col-md-12">
       {% include "education/partial/teachers_table.html" with course=course teachers=course.visible_teachers.all %}
     </div>
@@ -40,6 +51,7 @@
           </div>
         {% endif %}
       {% endif %}
+    </div>
     </div>
   </div>
 {% endblock page_content %}

@@ -87,15 +87,21 @@
         <!-- END HEADER & CONTENT DIVIDER -->
         <!-- BEGIN CONTAINER -->
         <div class="page-container">
-            <!-- BEGIN CONTENT -->
+          <div class="page-sidebar-wrapper">
+            <div class="page-sidebar navbar-collapse collapse">
+              <!-- Empty sidebar in order to maintain page height -->
+            </div>
+          </div>
+          <!-- BEGIN CONTENT -->
                 <!-- BEGIN CONTENT BODY -->
                 <div class="page-content">
                     <!-- BEGIN PAGE HEADER-->
-                    <h1 class="page-title">
+                    <h1 class="page-title public-page-title" >
                     {% block  content_title %}
                     {% endblock content_title%}
                     </h1>
                     {% block page_content %}
+
                     {% endblock page_content %}
                     <!-- END PAGE HEADER-->
                     <!-- END CONTENT BODY -->

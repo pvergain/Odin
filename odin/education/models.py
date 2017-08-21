@@ -13,8 +13,8 @@ from odin.common.utils import get_now, json_field_default
 
 from odin.users.models import BaseUser
 
-from .managers import StudentManager, TeacherManager
-from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet, CourseQuerySet
+from .managers import StudentManager, TeacherManager, CourseManager
+from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet
 
 
 class Student(BaseUser):
@@ -64,7 +64,7 @@ class Course(models.Model):
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
 
-    objects = CourseQuerySet.as_manager()
+    objects = CourseManager()
 
     def clean(self):
         if self.start_date > self.end_date:

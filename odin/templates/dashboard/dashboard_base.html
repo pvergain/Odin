@@ -114,6 +114,14 @@
                 </a>
               </li>
             {% endif %}
+            {% if user.is_interviewer %}
+              <li class="nav-item start ">
+                <a href="{% url 'dashboard:interviews:user-interviews' %}" class="nav-link nav-toggle">
+                  <i class="icon-layers"></i>
+                  <span class="title">Interviews</span>
+                </a>
+              </li>
+            {% endif  %}
           </ul>
           <!-- END SIDEBAR MENU -->
         </div>
