@@ -83,6 +83,12 @@ class Interview(models.Model):
     def __str__(self):
         return f"Interview on {self.date}, starting at {self.start_time} and ending on {self.end_time}"
 
+    def delete(self, *args, **kwargs):
+        if self.has_confirmed:
+            raise ValidationError("Can not delete an already confirmed interview")
+
+        return super().delete(*args, **kwargs)
+
     def reset(self):
         self.application = None
         self.has_received_email = False

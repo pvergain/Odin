@@ -12,7 +12,8 @@ from .views import (
     SendInterviewConfirmationEmailsView,
     RateInterviewView,
     AcceptedApplicantsListView,
-    PromoteAcceptedUsersToStudentsView
+    PromoteAcceptedUsersToStudentsView,
+    DeleteInterviewView
 )
 
 
@@ -76,5 +77,10 @@ urlpatterns = [
         regex='^assign-accepted-users/$',
         view=PromoteAcceptedUsersToStudentsView.as_view(),
         name='assign-accepted-users'
+    ),
+    url(
+        regex='^delete/(?P<interview_token>[-\w]+)$',
+        view=DeleteInterviewView.as_view(),
+        name='delete-interview'
     )
 ]

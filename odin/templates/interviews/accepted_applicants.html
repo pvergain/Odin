@@ -32,6 +32,7 @@
                   <th> Applicant </th>
                   <th> Interviewer </th>
                   <th> Average Rating </th>
+                  <th> Actions </th>
                 </tr>
               </thead>
               <tbody>
@@ -44,6 +45,12 @@
                      {{ interview.interviewer.get_full_name }}
                     </td>
                     <td> {{ interview | calculate_average_rating }}</td>
+                    <td>
+                      <a href="{% url 'dashboard:interviews:rate-interview' interview.uuid %}">
+                        <button class="btn green uppercase" type="button">Rate</button>
+                      </a>
+                    </td>
+
                     {% endwith %}
                   </tr>
                 {% endfor %}

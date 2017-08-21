@@ -206,7 +206,9 @@ class AcceptedApplicantsListView(LoginRequiredMixin,
                                  IsInterviewerPermission,
                                  ListView):
     template_name = 'interviews/accepted_applicants.html'
-    queryset = ApplicationInfo.objects.get_open_for_interview()
+
+    def get_queryset(self):
+        return ApplicationInfo.objects.get_open_for_interview()
 
 
 class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
@@ -216,3 +218,13 @@ class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
         assign_accepted_users_to_courses.delay()
 
         return redirect('dashboard:interviews:accepted-applicants')
+
+
+class DeleteInterviewView(LoginRequiredMixin,
+                          CannotControlOtherInterviewerDataPermission,
+                          DeleteView):
+    model = Interview
+    slug_url_kwarg = 'interview_token'
+    slug_field = 'uuid'
+    success_url = reverse_lazy('dashboard:interviews:user-interviews')
+    http_method_names = [u'post', u'delete', u'put']

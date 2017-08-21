@@ -38,7 +38,7 @@
                         <a href="{% url 'dashboard:interviews:edit-free-time' slot.id %}">
                           <button class="btn green uppercase"> Edit </button>
                         </a>
-                        <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" onClick="confirmDeleteRequest()">
+                        <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" onClick="confirmDeleteRequest(this, 'Free Time Slot')">
                           {% csrf_token %}
                           <button class="btn green uppercase" type="button" >delete</button>
                         </form>
@@ -62,7 +62,7 @@
       <div class="portlet box green">
         <div class="portlet-title">
           <div class="caption">
-            <i class="fa fa-comments"></i> Your interviews
+            <i class="fa fa-comments"></i> Your confirmed interviews
           </div>
           <div class="tools">
             <a href="javascript:;" class="expand"> </a>
@@ -126,6 +126,46 @@
       </div>
     </div>
 
+    <div class="col-md-12">
+      <div class="portlet box green">
+        <div class="portlet-title">
+          <div class="caption">
+            <i class="fa fa-comments"></i> Your free interviews
+          </div>
+          <div class="tools">
+            <a href="javascript:;" class="expand"> </a>
+          </div>
+        </div>
+        <div class="portlet-body default-collapsed">
+          <div class="table-scrollable">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th> Date </th>
+                  <th> Start Time </th>
+                  <th> Actions </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in free_interview_dates %}
+                  <tr>
+                    <td> {{ obj.date }} </td>
+                    <td> {{ obj.start_time }} </td>
+                    <td>
+                      <form id="delete-interview-form" action="{% url 'dashboard:interviews:delete-interview' obj.uuid  %}" method="POST" onClick="confirmDeleteRequest(this, 'Interview date')">
+                        {% csrf_token %}
+                        <button class="btn green uppercase" type="button" onClick>Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     {% if all_free_time_slots %}
       <div class="col-md-12">
         <div class="portlet box green">
@@ -178,9 +218,9 @@
 
 {% block extra_scripts %}
   <script>
-   function confirmDeleteRequest() {
-       if(confirm("Do you really want to delete this time slot?")){
-           $('#delete_slot_form')[0].submit();
+   function confirmDeleteRequest(inputField, objectType) {
+       if(confirm("Do you really want to delete this " + objectType + " ?")){
+           inputField.submit();
        } else return false;
    }
   </script>
