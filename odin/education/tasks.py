@@ -18,7 +18,7 @@ def calculate_presence():
 
                 if teacher:
                     user = teacher.user
-                if student:
+                elif student:
                     user = student.user
                 all_user_checkins = CheckIn.objects.get_user_dates(user=user, course=course).filter(
                                                                             date__in=lectures)

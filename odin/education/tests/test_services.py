@@ -8,6 +8,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 
 from ..services import (
+    add_student,
+    add_teacher,
     create_course,
     create_topic,
     create_included_material,
@@ -18,6 +20,7 @@ from ..services import (
 )
 from ..models import (
     Course,
+    CourseAssignment,
     Week,
     Topic,
     Material,
@@ -25,18 +28,79 @@ from ..models import (
     Task,
     IncludedTask,
     Solution,
-    IncludedTest
+    IncludedTest,
+    Student,
+    Teacher
 )
 from ..factories import (
     CourseFactory,
+    StudentFactory,
+    TeacherFactory,
     WeekFactory,
     TopicFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
-    StudentFactory,
 )
 
 from odin.common.faker import faker
+
+
+class TestAddTeacher(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.student = StudentFactory()
+        self.teacher = TeacherFactory()
+
+    def test_teacher_is_added_to_course_when_not_already_in_it(self):
+        course_assignment_count = CourseAssignment.objects.count()
+        teacher_course_assignment_count = CourseAssignment.objects.filter(
+                                                course=self.course,
+                                                teacher=self.teacher).count()
+        add_teacher(self.course, self.teacher)
+        self.assertEqual(course_assignment_count + 1, CourseAssignment.objects.count())
+        self.assertEqual(teacher_course_assignment_count + 1, CourseAssignment.objects.filter(
+                                                course=self.course,
+                                                teacher=self.teacher).count())
+
+    def test_teacher_can_not_be_added_to_course_if_already_student_in_it(self):
+        add_student(self.course, self.student)
+        teacher = Teacher.objects.create_from_user(self.student.user)
+        with self.assertRaises(ValidationError):
+            add_teacher(self.course, teacher)
+
+    def test_teacher_can_not_be_added_to_course_if_already_teacher_in_it(self):
+        add_teacher(self.course, self.teacher)
+        with self.assertRaises(ValidationError):
+            add_teacher(self.course, self.teacher)
+
+
+class TestAddStudent(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.student = StudentFactory()
+        self.teacher = TeacherFactory()
+
+    def test_student_is_added_to_course_when_not_already_in_it(self):
+        course_assignment_count = CourseAssignment.objects.count()
+        student_course_assignment_count = CourseAssignment.objects.filter(
+                                                course=self.course,
+                                                student=self.student).count()
+        add_student(self.course, self.student)
+        self.assertEqual(course_assignment_count + 1, CourseAssignment.objects.count())
+        self.assertEqual(student_course_assignment_count + 1, CourseAssignment.objects.filter(
+                                                course=self.course,
+                                                student=self.student).count())
+
+    def test_student_can_not_be_added_to_course_if_already_teacher_in_it(self):
+        add_teacher(self.course, self.teacher)
+        student = Student.objects.create_from_user(self.teacher.user)
+        with self.assertRaises(ValidationError):
+            add_student(self.course, student)
+
+    def test_student_can_not_be_added_to_course_if_already_student_in_it(self):
+        add_student(self.course, self.student)
+        with self.assertRaises(ValidationError):
+            add_student(self.course, self.student)
 
 
 class TestCreateCourse(TestCase):

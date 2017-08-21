@@ -27,10 +27,28 @@ from .helper import get_dates_for_weeks, percentage_presence
 
 
 def add_student(course: Course, student: Student) -> CourseAssignment:
+    teacher = Teacher.objects.filter(user=student.user)
+    if teacher:
+        course_assignment = CourseAssignment.objects.filter(course=course, teacher=teacher)
+        if course_assignment:
+            raise ValidationError("User is already a teacher for this course!")
+    s = CourseAssignment.objects.filter(course=course, student=student)
+    if s:
+        raise ValidationError("User is already a student for this course!")
+
     return CourseAssignment.objects.create(course=course, student=student)
 
 
 def add_teacher(course: Course, teacher: Teacher, hidden: bool=False) -> CourseAssignment:
+    student = Student.objects.filter(user=teacher.user)
+    if student:
+        course_assignment = CourseAssignment.objects.filter(course=course, student=student)
+        if course_assignment:
+            raise ValidationError("User is already a student for this course!")
+    t = CourseAssignment.objects.filter(course=course, teacher=teacher)
+    if t:
+        raise ValidationError("User is already a student for this course!")
+
     return CourseAssignment.objects.create(course=course, teacher=teacher, hidden=hidden)
 
 
