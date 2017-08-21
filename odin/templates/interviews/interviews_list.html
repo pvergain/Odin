@@ -38,9 +38,9 @@
                         <a href="{% url 'dashboard:interviews:edit-free-time' slot.id %}">
                           <button class="btn green uppercase"> Edit </button>
                         </a>
-                        <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" onClick="confirmDeleteRequest(this, 'Free Time Slot')">
+                        <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" >
                           {% csrf_token %}
-                          <button class="btn green uppercase" type="button" >delete</button>
+                          <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete_slot_form', 'Free Time Slot')">delete</button>
                         </form>
                       </div>
                     </td>
@@ -152,9 +152,9 @@
                     <td> {{ obj.date }} </td>
                     <td> {{ obj.start_time }} </td>
                     <td>
-                      <form id="delete-interview-form" action="{% url 'dashboard:interviews:delete-interview' obj.uuid  %}" method="POST" onClick="confirmDeleteRequest(this, 'Interview date')">
+                      <form id="delete-interview-form" action="{% url 'dashboard:interviews:delete-interview' obj.uuid  %}" method="POST">
                         {% csrf_token %}
-                        <button class="btn green uppercase" type="button" onClick>Delete</button>
+                        <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete-interview-form', 'Inteview date')">Delete</button>
                       </form>
                     </td>
                   </tr>
@@ -218,9 +218,9 @@
 
 {% block extra_scripts %}
   <script>
-   function confirmDeleteRequest(inputField, objectType) {
+   function confirmDeleteRequest(inputFieldId, objectType) {
        if(confirm("Do you really want to delete this " + objectType + " ?")){
-           inputField.submit();
+           $(inputFieldId)[0].submit();
        } else return false;
    }
   </script>
