@@ -932,7 +932,7 @@ class TestSetCheckInView(TestCase):
         self.assertEqual(checkin_count + 1, CheckIn.objects.count())
         self.assertEqual(checkins_without_user + 1, CheckIn.objects.filter(user__isnull=True).count())
 
-    def test_breaks_when_student_is_teacher_for_same_course(self):
+    def test_checks_in_once_when_student_is_teacher_with_same_mac_address(self):
         regular_user = BaseUserFactory(password=self.test_password)
         regular_user.profile.mac = faker.mac_address()
         regular_user.save()
@@ -943,8 +943,8 @@ class TestSetCheckInView(TestCase):
         teacher.user.profile.save()
         student.user.profile.save()
 
-        # checkin_count = CheckIn.objects.count()
-        # checkins_without_user = CheckIn.objects.filter(user__isnull=True).count()
+        checkin_count = CheckIn.objects.count()
+
         data = {
             'mac': regular_user.profile.mac,
             'token': settings.CHECKIN_TOKEN
@@ -953,5 +953,4 @@ class TestSetCheckInView(TestCase):
         response = self.post(url_name=self.url, data=data)
         self.response_200(response)
 
-        # self.assertEqual(checkin_count + 1, CheckIn.objects.count())
-        # self.assertEqual(checkins_without_user + 1, CheckIn.objects.filter(user__isnull=True).count())
+        self.assertEqual(checkin_count + 1, CheckIn.objects.count())
