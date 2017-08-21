@@ -254,11 +254,6 @@ class TestConfirmInterviewView(TestCase):
         self.application = ApplicationFactory(user=self.user, application_info=self.application_info)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
         self.interview = InterviewFactory(application=self.application, interviewer=self.interviewer)
-        self.url = reverse('dashboard:interviews:confirm-interview',
-                           kwargs={
-                               'application_id': self.application.id,
-                               'interview_token': self.interview.uuid
-                           })
 
     def test_post_does_not_confirm_given_interview_if_user_already_has_a_confirmed_interview(self):
         self.interview.has_confirmed = True

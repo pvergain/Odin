@@ -19,7 +19,7 @@ from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin,
 from .models import Interview, InterviewerFreeTime
 from .services import create_new_interview_for_application, create_interviewer_free_time, generate_interview_slots
 from .forms import FreeTimeModelForm
-from .tasks import send_interview_confirmation_emails, promote_accepted_users_to_students
+from .tasks import send_interview_confirmation_emails, assign_accepted_users_to_courses
 from .serializers import InterviewSerializer
 
 
@@ -206,17 +206,13 @@ class AcceptedApplicantsListView(LoginRequiredMixin,
                                  IsInterviewerPermission,
                                  ListView):
     template_name = 'interviews/accepted_applicants.html'
-
-    def get_queryset(self):
-        queryset = ApplicationInfo.objects.all()
-
-        return [info for info in queryset if info.interview_is_active()]
+    queryset = ApplicationInfo.objects.get_open_for_interview()
 
 
 class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
                                          DashboardManagementPermission,
                                          View):
     def post(self, request, *args, **kwargs):
-        promote_accepted_users_to_students.delay()
+        assign_accepted_users_to_courses.delay()
 
         return redirect('dashboard:interviews:accepted-applicants')

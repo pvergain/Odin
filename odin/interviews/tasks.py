@@ -45,7 +45,7 @@ def send_interview_confirmation_emails(self):
 
 
 @shared_task(bind=True)
-def promote_accepted_users_to_students(self):
+def assign_accepted_users_to_courses(self):
     active_application_infos = ApplicationInfo.objects.get_open_for_interview()
     for info in active_application_infos:
         accepted = info.accepted_applicants

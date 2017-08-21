@@ -343,7 +343,7 @@ class TestAddTeacherToCourseView(TestCase):
             self.assertIn(self.user.teacher, self.course.visible_teachers)
 
 
-class TestAdddCourseToInterViewerCoursesView(TestCase):
+class TestAddCourseToInterViewerCoursesView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
         self.test_password = faker.password()

@@ -29,7 +29,7 @@ class InterviewerFreeTime(models.Model):
     buffer_time = models.BooleanField(default=False)
 
     def __str__(self):
-        return "On " + str(self.date) + " - from " + str(self.start_time) + " to " + str(self.end_time)
+        return f'On {self.date} - from {self.start_time} to {self.end_time}'
 
     def has_generated_slots(self):
         return self.interviews.exists()
