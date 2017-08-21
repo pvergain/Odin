@@ -67,3 +67,10 @@ class CourseManager(Manager):
         )
 
         return self.filter(Q(**conditions[0]) & Q(**conditions[1]))
+
+    def get_active_courses(self):
+        return self.filter(start_date__lte=timezone.now().date(),
+                           end_date__gte=timezone.now().date())
+
+    def get_closed_courses(self):
+        return self.filter(end_date__lte=timezone.now().date())

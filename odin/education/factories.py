@@ -6,7 +6,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from django.utils import timezone
 
-
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
 
@@ -158,7 +157,7 @@ class BinaryFileTestFactory(TaskTestFactory):
 class CheckInFactory(factory.DjangoModelFactory):
     mac = factory.LazyAttribute(lambda _: faker.mac_address())
     user = factory.SubFactory(BaseUserFactory)
-    date = factory.LazyAttribute(lambda _: now().date() + timedelta(days=faker.pyint()))
+    date = factory.LazyAttribute(lambda _: timezone.now().date() + timezone.timedelta(days=faker.pyint()))
 
     class Meta:
         model = CheckIn
