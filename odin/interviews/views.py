@@ -116,7 +116,7 @@ class DeleteFreeTimeView(LoginRequiredMixin,
     model = InterviewerFreeTime
     pk_url_kwarg = 'free_time_id'
     success_url = reverse_lazy('dashboard:interviews:user-interviews')
-    http_method_names = [u'post', u'delete', u'put']
+    http_method_names = ['post', 'delete', 'put']
 
 
 class UpdateFreeTimeView(LoginRequiredMixin,
@@ -227,4 +227,4 @@ class DeleteInterviewView(LoginRequiredMixin,
     slug_url_kwarg = 'interview_token'
     slug_field = 'uuid'
     success_url = reverse_lazy('dashboard:interviews:user-interviews')
-    http_method_names = [u'post', u'delete', u'put']
+    http_method_names = ['post', 'delete', 'put']
