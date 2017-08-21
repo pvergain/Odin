@@ -2160,3 +2160,7 @@ Page Loading
 .default-collapsed {
   display: none;
 }
+
+.public-page-title {
+    padding-top: 15px;
+}

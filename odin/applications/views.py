@@ -1,4 +1,4 @@
-from django.views.generic import FormView, UpdateView, ListView
+from django.views.generic import FormView, UpdateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -6,7 +6,9 @@ from django.shortcuts import get_object_or_404
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
+from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
+from odin.interviews.permissions import IsInterviewerPermission
 from .models import Application, ApplicationTask
 from .forms import (
     ApplicationInfoModelForm,
@@ -168,6 +170,23 @@ class UserApplicationsListView(LoginRequiredMixin,
         ]
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_teacher():
+            teacher = self.request.user.teacher
+            prefetch = [
+                'application_info__applications__user__profile',
+                'application_info__tasks',
+            ]
+            filters = {
+                'teachers__in': [teacher]
+            }
+
+            courses = Course.objects.get_active_for_interview().filter(**filters)
+            context['teached_courses'] = courses.prefetch_related(*prefetch).order_by('-start_date')
+
+            return context
+
 
 class EditApplicationView(LoginRequiredMixin,
                           CourseViewMixin,
@@ -214,3 +233,11 @@ class EditApplicationView(LoginRequiredMixin,
                 self.call_service(service=create_application_solution, service_kwargs=create_solution_kwargs)
 
         return super().form_valid(form)
+
+
+class ApplicationDetailView(LoginRequiredMixin,
+                            IsInterviewerPermission,
+                            DetailView):
+    model = Application
+    template_name = 'applications/application_detail.html'
+    pk_url_kwarg = 'application_id'

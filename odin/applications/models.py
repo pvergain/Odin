@@ -26,6 +26,10 @@ class ApplicationInfo(models.Model):
     def __str__(self):
         return "{0}".format(self.course)
 
+    @property
+    def accepted_applicants(self):
+        return self.applications.select_related('user__profile').filter(is_accepted=True)
+
     def apply_is_active(self):
         return self.end_date >= timezone.now().date()
 
@@ -60,8 +64,12 @@ class Application(models.Model):
     works_at = models.CharField(null=True, blank=True, max_length=255)
     studies_at = models.CharField(blank=True, null=True, max_length=255)
     has_interview_date = models.BooleanField(default=False)
+    is_accepted = models.BooleanField(default=False)
 
     objects = ApplicationQuerySet.as_manager()
+
+    def get_interview(self):
+        return self.interview_set.select_related('interviewer__profile').first()
 
     def __str__(self):
         return "{0} applying to {1}".format(self.user, self.application_info)
