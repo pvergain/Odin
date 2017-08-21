@@ -24,4 +24,4 @@ def percentage_presence(user_dates, course):
 
     percentage = int((len(user_dates) / len(lecture_dates)) * 100)
 
-    return f'{percentage} %'
+    return f'{percentage}'

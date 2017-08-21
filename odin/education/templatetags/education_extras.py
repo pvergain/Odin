@@ -2,7 +2,7 @@ import mistune
 
 from django import template
 
-from ..models import Student, Teacher, CourseAssignment
+from ..services import get_presence_for_course
 
 register = template.Library()
 
@@ -15,17 +15,7 @@ def convert_from_markdown(text):
 
 @register.filter(name='get_presence')
 def get_course_presence(course, user):
-    student = Student.objects.filter(user=user)
-    teacher = Teacher.objects.filter(user=user)
-
-    if student.exists():
-        student = student.first()
-        course_assignment = CourseAssignment.objects.filter(course=course, student=student)
-        if course_assignment.exists():
-            return f'{course_assignment.first().student_presence} %'
-
-    if teacher.exists():
-        teacher = teacher.first()
-        course_assignment = CourseAssignment.objects.filter(course=course, teacher=teacher)
-        if course_assignment.exists():
-            return f'{course_assignment.first().student_presence} %'
+    presence = get_presence_for_course(course=course, user=user)
+    if presence:
+        presence = presence.get('percentage_presence')
+        return f'{presence} %'

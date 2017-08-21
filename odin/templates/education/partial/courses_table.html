@@ -30,7 +30,7 @@
                                     <td>{{ course.id }}</td>
                                     <td><a href="{% url 'dashboard:education:user-course-detail' course.id %}">{{ course.name }}</a></td>
                                     <td>{{ course.repository }}</td>
-                                    <td>{{ course | get_presence:request.user }}</td>
+                                    <td>{{ course | get_presence:user }}</td>
                                     <td>{{ course.students.count }}</td>
                                     <td>{{ course.teachers.count }}</td>
                                 </tr>
