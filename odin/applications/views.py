@@ -168,6 +168,7 @@ class UserApplicationsListView(LoginRequiredMixin,
             'application_info__course',
             'application_info__tasks',
         ]
+
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
 
     def get_context_data(self, **kwargs):
@@ -185,7 +186,7 @@ class UserApplicationsListView(LoginRequiredMixin,
             courses = Course.objects.get_active_for_interview().filter(**filters)
             context['teached_courses'] = courses.prefetch_related(*prefetch).order_by('-start_date')
 
-            return context
+        return context
 
 
 class EditApplicationView(LoginRequiredMixin,
