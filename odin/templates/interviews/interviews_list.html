@@ -34,15 +34,13 @@
                     <td> {{ slot.start_time }} </td>
                     <td> {{ slot.end_time }} </td>
                     <td>
-                      <div class="btn-group">
-                        <a href="{% url 'dashboard:interviews:edit-free-time' slot.id %}">
-                          <button class="btn green uppercase"> Edit </button>
-                        </a>
-                        <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" >
-                          {% csrf_token %}
+                      <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" >
+                        {% csrf_token %}
+                        <div class="form-actions">
+                          <a href="{% url 'dashboard:interviews:edit-free-time' slot.id %}"><button type="button" class="btn green uppercase">Edit</button></a>
                           <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete_slot_form', 'Free Time Slot')">delete</button>
-                        </form>
-                      </div>
+                        </div>
+                      </form>
                     </td>
                   </tr>
                 {% endfor %}

@@ -10,12 +10,8 @@
         </div>
         <div class="actions">
           <div class="btn-group">
-            <a href="#tasks_tab{{ topic.id }}" data-toggle="tab">
-              <button class="btn green uppercase"> Tasks </button>
-            </a>
-            <a href="#materials_tab{{ topic.id }}" data-toggle="tab">
-              <button class="btn green uppercase"> Materials </button>
-            </a>
+            <a href="#tasks_tab{{ topic.id }}" data-toggle="tab"><button class="btn green uppercase"> Tasks </button></a>
+            <a href="#materials_tab{{ topic.id }}" data-toggle="tab"><button class="btn green uppercase"> Materials </button></a>
           </div>
         </div>
       </div>
@@ -78,11 +74,9 @@
                       <td>
                         {% if request.user.is_teacher %}
                           <a href="{% url 'dashboard:education:course-management:edit-included-task' course.id task.id%}">
-                            <button class="btn green uppercase" type="button" name="button">Edit</button>
-                          </a>
+                            <button class="btn green uppercase" type="button" name="button">Edit</button></a>
                           <a href="{% url 'dashboard:education:all-students-solutions' course.id task.id%}">
-                            <button class="btn green uppercase" type="button" name="button">View all solutions</button>
-                          </a>
+                            <button class="btn green uppercase" type="button" name="button">View all solutions</button></a>
                         {% endif %}
                       </td>
                     </tr>

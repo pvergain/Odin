@@ -68,19 +68,13 @@
                                 <td>
                                     <div class="btn-group">
                                         {% if not obj.is_student %}
-                                          <a href="{% url 'dashboard:management:promote-to-student' id=obj.id %}">
-                                              <button type="button" class="btn btn-default">Make Student</button>
-                                          </a>
+                                          <a href="{% url 'dashboard:management:promote-to-student' id=obj.id %}"><button type="button" class="btn btn-default">Make Student</button></a>
                                         {% endif %}
                                         {% if not obj.is_teacher %}
-                                          <a href="{% url 'dashboard:management:promote-to-teacher' id=obj.id %}">
-                                              <button type="button" class="btn btn-default">Make Teacher</button>
-                                          </a>
+                                          <a href="{% url 'dashboard:management:promote-to-teacher' id=obj.id %}"><button type="button" class="btn btn-default">Make Teacher</button></a>
                             		  {% endif %}
                                           {% if not obj.is_interviewer %}
-                                            <a href="{% url 'dashboard:management:promote-to-interviewer' id=obj.id %}">
-                                              <button type="button" class="btn btn-default">Make Interviewer</button>
-                                            </a>
+                                            <a href="{% url 'dashboard:management:promote-to-interviewer' id=obj.id %}"><button type="button" class="btn btn-default">Make Interviewer</button></a>
                                           {% endif %}
                                     </div>
                                 </td>
