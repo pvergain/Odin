@@ -156,7 +156,7 @@ class BinaryFileTestFactory(TaskTestFactory):
 class CheckInFactory(factory.DjangoModelFactory):
     mac = factory.LazyAttribute(lambda _: faker.mac_address())
     user = factory.SubFactory(BaseUserFactory)
-    date = factory.LazyAttribute(lambda _: now().date() + timedelta(days=1))
+    date = factory.LazyAttribute(lambda _: now().date() + timedelta(days=faker.pyint()))
 
     class Meta:
         model = CheckIn

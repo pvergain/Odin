@@ -85,3 +85,26 @@ class TestCalculatePresenceTask(TestCase):
 
         self.other_course_assignment.refresh_from_db()
         self.assertEqual(self.other_course_assignment.student_presence, 25)
+
+    def test_calculate_presence_when_student_has_changed_mac_address_at_some_point(self):
+        CheckInFactory(mac=self.profile.mac,
+                       user=self.student.user,
+                       date=timezone.now().date() - timezone.timedelta(days=9))
+        CheckInFactory(mac=self.profile.mac,
+                       user=self.student.user,
+                       date=timezone.now().date() - timezone.timedelta(days=7))
+
+        self.profile.mac = faker.mac_address()
+        self.profile.save()
+
+        CheckInFactory(mac=self.profile.mac,
+                       user=self.student.user,
+                       date=timezone.now().date() - timezone.timedelta(days=5))
+        CheckInFactory(mac=self.profile.mac,
+                       user=self.student.user,
+                       date=timezone.now().date() - timezone.timedelta(days=3))
+
+        calculate_presence()
+
+        self.course_assignment.refresh_from_db()
+        self.assertEqual(self.course_assignment.student_presence, 100)

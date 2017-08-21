@@ -3,6 +3,9 @@ from django.urls import reverse
 from test_plus import TestCase
 
 from odin.common.faker import faker
+
+from odin.education.factories import CheckInFactory
+
 from odin.users.factories import BaseUserFactory
 
 
@@ -77,3 +80,17 @@ class TestProfileEditView(TestCase):
             self.response_302(response)
             self.user.profile.refresh_from_db()
             self.assertIsNotNone(self.user.profile.mac)
+
+    def test_checkins_are_updates_correctly_on_mac_address_change(self):
+        mac = faker.mac_address()
+        CheckInFactory.create_batch(5, mac=mac, user=None)
+
+        data = {
+            'mac': mac
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.response_302(response)
+            self.user.refresh_from_db()
+            self.assertEqual(5, self.user.checkins.count())
