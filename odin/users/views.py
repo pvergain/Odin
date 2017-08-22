@@ -3,11 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
-from odin.common.mixins import ReadableFormErrorsMixin
+from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 from odin.management.permissions import DashboardManagementPermission
 
 from .models import Profile, BaseUser
-from .helper import check_macs_for_student
+# from .helper import check_macs_for_student
+from .services import update_user_profile
 
 
 class PersonalProfileView(LoginRequiredMixin, DetailView):
@@ -26,11 +27,17 @@ class UserProfileView(LoginRequiredMixin, DashboardManagementPermission, DetailV
         return Profile.objects.get(user=user_instance)
 
 
-class EditProfileView(LoginRequiredMixin, ReadableFormErrorsMixin, UpdateView):
+class EditProfileView(LoginRequiredMixin,
+                      ReadableFormErrorsMixin,
+                      CallServiceMixin,
+                      UpdateView):
     model = Profile
     fields = ['full_name', 'description', 'avatar', 'cropping', 'mac']
     success_url = reverse_lazy('dashboard:users:profile')
     template_name = 'users/edit_profile.html'
+
+    def get_service(self):
+        return update_user_profile
 
     def get_object(self, queryset=None):
         instance = get_object_or_404(Profile, user=self.request.user)
@@ -40,5 +47,10 @@ class EditProfileView(LoginRequiredMixin, ReadableFormErrorsMixin, UpdateView):
         user = BaseUser.objects.filter(profile=self.get_object())
         if user.exists():
             user = user.first()
-            check_macs_for_student(user, form.cleaned_data['mac'])
+            service_kwargs = {
+                'user': user,
+                'data': form.cleaned_data
+            }
+            self.call_service(service_kwargs=service_kwargs)
+
         return super().form_valid(form)

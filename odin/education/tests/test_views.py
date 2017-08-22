@@ -919,6 +919,8 @@ class TestSetCheckInView(TestCase):
 
     def test_regular_user_mac_is_registered(self):
         regular_user = BaseUserFactory(password=self.test_password)
+        regular_user.profile.mac = faker.mac_address()
+        regular_user.profile.save()
         checkin_count = CheckIn.objects.count()
         checkins_without_user = CheckIn.objects.filter(user__isnull=True).count()
         data = {
@@ -954,3 +956,17 @@ class TestSetCheckInView(TestCase):
         self.response_200(response)
 
         self.assertEqual(checkin_count + 1, CheckIn.objects.count())
+
+    def test_check_in_for_user_with_valid_token_and_invalid_mac_is_not_created_on_post(self):
+        checkin_count = CheckIn.objects.count()
+        student_checkins = CheckIn.objects.filter(user=self.student.user).count()
+        data = {
+            'mac': '',
+            'token': settings.CHECKIN_TOKEN
+        }
+
+        response = self.post(url_name=self.url, data=data)
+        self.response_403(response)
+
+        self.assertEqual(checkin_count, CheckIn.objects.count())
+        self.assertEqual(student_checkins, CheckIn.objects.filter(user=self.student.user).count())

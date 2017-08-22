@@ -3,12 +3,29 @@ from typing import Dict
 from django.core.exceptions import ValidationError
 
 from .models import BaseUser, Profile
+from .helper import check_macs_for_student
 
 
 def update_user_profile(*,
                         user: BaseUser,
                         data: Dict[str, str]) -> Profile:
-    pass
+    if data:
+        mac = data.get('mac')
+
+        user.profile.full_name = data.get('full_name')
+        user.profile.description = data.get('description')
+        user.profile.avatar = data.get('avatar')
+        user.profile.cropping = data.get('cropping')
+        user.profile.mac = mac
+        user.social_accounts = data.get('social_accounts')
+
+        user.profile.full_clean()
+        user.profile.save()
+
+        if mac:
+            check_macs_for_student(user, mac)
+
+    return user.profile
 
 
 def create_user(*,

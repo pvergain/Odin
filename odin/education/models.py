@@ -12,6 +12,7 @@ from odin.common.models import UpdatedAtCreatedAtModelMixin
 from odin.common.utils import get_now, json_field_default
 
 from odin.users.models import BaseUser
+from odin.users.validators import validate_mac
 
 from .managers import StudentManager, TeacherManager, CourseManager
 from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet
@@ -35,6 +36,15 @@ class CheckIn(models.Model):
     date = models.DateField(default=timezone.now)
 
     objects = CheckInQuerySet.as_manager()
+
+    def clean(self):
+        if not validate_mac(self.mac):
+            raise ValidationError(f'{self.mac} is not a valid mac address', 'invalid_mac_address')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+
+        return super().save(*args, **kwargs)
 
     class Meta:
         unique_together = (('user', 'date'), ('mac', 'date'))

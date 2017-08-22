@@ -7,6 +7,7 @@ from django.views.generic import (
     View
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.http import HttpResponse
@@ -71,7 +72,6 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # TODO optimize this query
         select = ['description']
         prefetch = ['students', 'teachers', 'weeks', 'lectures']
         qs = Course.objects.select_related(*select).prefetch_related(*prefetch)
@@ -664,5 +664,7 @@ class SetCheckInView(View):
                 CheckIn.objects.create(mac=mac, user=None)
         except IntegrityError:
             return HttpResponse(status=418)
+        except ValidationError:
+            return HttpResponse(status=403)
 
         return HttpResponse(status=200)

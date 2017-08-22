@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
@@ -76,7 +77,7 @@ class Profile(models.Model):
     full_name = models.CharField(blank=True, max_length=255)
     description = models.TextField(blank=True, null=True)
 
-    social_accounts = JSONField(default=json_field_default)
+    social_accounts = JSONField(default=json_field_default, blank=True, null=True)
 
     works_at = models.CharField(blank=True, null=True, max_length=255)
     studies_at = models.CharField(blank=True, null=True, max_length=255)
@@ -89,3 +90,7 @@ class Profile(models.Model):
 
     def get_gh_profile_url(self):
         return self.social_accounts.get('GitHub')
+
+    def clean(self):
+        if self.mac and not validate_mac(self.mac):
+            raise ValidationError(f'{self.mac} is an invalid mac address!', 'invalid_mac_address')
