@@ -87,4 +87,4 @@ def generate_interview_slots():
             interview_generator.get_applications_without_interviews()))
         context['log'].append('All free interview slots: {0}'.format(free_interview_slots))
 
-        return context
+    return context

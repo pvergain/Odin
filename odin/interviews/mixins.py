@@ -30,16 +30,18 @@ class HasConfirmedInterviewRedirectMixin:
 
 class UserInterviewsListMixin:
     def get_queryset(self):
-        interviewer = get_object_or_404(Interviewer, user=self.request.user)
-        related = 'application__user__profile'
-
-        return Interview.objects.filter(interviewer=interviewer, application__isnull=False).select_related(related)
+        if self.request.user.is_interviewer():
+            interviewer = get_object_or_404(Interviewer, user=self.request.user)
+            related = 'application__user__profile'
+            return Interview.objects.filter(interviewer=interviewer, application__isnull=False).select_related(related)
+        return []
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        interviewer = get_object_or_404(Interviewer, user=self.request.user)
-        context['free_interview_dates'] = Interview.objects.filter(interviewer=interviewer, has_confirmed=False)
-        context['free_time_slots'] = interviewer.free_time_slots.all()
+        if self.request.user.is_interviewer():
+            interviewer = get_object_or_404(Interviewer, user=self.request.user)
+            context['free_interview_dates'] = Interview.objects.filter(interviewer=interviewer, has_confirmed=False)
+            context['free_time_slots'] = interviewer.free_time_slots.all()
         if self.request.user.is_superuser:
             context['all_free_time_slots'] = InterviewerFreeTime.objects.select_related('interviewer__user__profile')
 
