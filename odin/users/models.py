@@ -9,6 +9,7 @@ from odin.common.utils import json_field_default
 from odin.common.models import UpdatedAtCreatedAtModelMixin
 
 from .managers import UserManager
+from .validators import validate_mac
 
 
 class BaseUser(PermissionsMixin,
