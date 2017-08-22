@@ -7,7 +7,6 @@ from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 from odin.management.permissions import DashboardManagementPermission
 
 from .models import Profile, BaseUser
-# from .helper import check_macs_for_student
 from .services import update_user_profile
 
 
