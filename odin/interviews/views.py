@@ -100,6 +100,14 @@ class CreateFreeTimeView(LoginRequiredMixin,
     def get_service(self):
         return create_interviewer_free_time
 
+    def get_initial(self):
+        self.initial = super().get_initial()
+        field_names = ('interview_time_length', 'break_time')
+        self.initial[field_names[0]] = InterviewerFreeTime._meta.get_field(field_names[0]).get_default()
+        self.initial[field_names[1]] = InterviewerFreeTime._meta.get_field(field_names[1]).get_default()
+
+        return self.initial
+
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 

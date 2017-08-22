@@ -20,7 +20,8 @@ class FreeTimeModelForm(forms.ModelForm):
             'date',
             'start_time',
             'end_time',
-            'buffer_time'
+            'interview_time_length',
+            'break_time'
         ]
 
         widgets = {

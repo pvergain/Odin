@@ -5,9 +5,7 @@ from .groups_generator import cycle_groups
 
 
 class GenerateInterviewSlots:
-    def __init__(self, interview_time_length, break_time):
-        self.interview_time_length = interview_time_length
-        self.break_time = break_time
+    def __init__(self):
         self.__slots_generated = 0
 
     def __inc_slots_generated(self):
@@ -36,29 +34,21 @@ class GenerateInterviewSlots:
             # starting time of the first interview
             interview_start_time = slot.start_time
 
-            while free_time >= self.interview_time_length:
-                if slot.buffer_time:
-                    Interview.objects.create(
-                        interviewer=slot.interviewer,
-                        interviewer_time_slot=slot,
-                        date=slot.date,
-                        start_time=interview_start_time,
-                        buffer_time=True)
-                else:
-                    Interview.objects.create(
-                        interviewer=slot.interviewer,
-                        interviewer_time_slot=slot,
-                        date=slot.date,
-                        start_time=interview_start_time,
-                        buffer_time=False)
+            while free_time >= slot.interview_time_length:
+                Interview.objects.create(
+                    interviewer=slot.interviewer,
+                    interviewer_time_slot=slot,
+                    date=slot.date,
+                    start_time=interview_start_time
+                )
 
                 self.__inc_slots_generated()
 
                 # Decrease the free time and change the starting time of the next interview
-                free_time -= (self.interview_time_length + self.break_time)
+                free_time -= (slot.interview_time_length + slot.break_time)
                 next_interview_date_and_time = datetime.combine(
                         slot.date, interview_start_time) + timedelta(
-                        minutes=(self.interview_time_length + self.break_time))
+                        minutes=(slot.interview_time_length + slot.break_time))
                 interview_start_time = next_interview_date_and_time.time()
 
     def get_generated_slots(self):

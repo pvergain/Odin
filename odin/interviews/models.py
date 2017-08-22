@@ -22,11 +22,26 @@ class Interviewer(BaseUser):
 
 
 class InterviewerFreeTime(models.Model):
+    INTERVIEW_TIME_CHOICES = (
+        (20, '20 minutes'),
+        (25, '25 minutes'),
+        (30, '30 minutes'),
+    )
+
+    BREAK_TIME_CHOICES = (
+        (5, '5 minutes'),
+        (10, '10 minutes'),
+        (15, '15 minutes'),
+    )
+
     interviewer = models.ForeignKey(Interviewer, related_name='free_time_slots')
     date = models.DateField(blank=False, null=True)
     start_time = models.TimeField(blank=False, null=True)
     end_time = models.TimeField(blank=False, null=True)
-    buffer_time = models.BooleanField(default=False)
+    interview_time_length = models.SmallIntegerField(choices=INTERVIEW_TIME_CHOICES,
+                                                     default=20)
+    break_time = models.SmallIntegerField(choices=BREAK_TIME_CHOICES,
+                                          default=5)
 
     def __str__(self):
         return f'On {self.date} - from {self.start_time} to {self.end_time}'
@@ -53,7 +68,6 @@ class Interview(models.Model):
     start_time = models.TimeField(blank=False, null=True)
     end_time = models.TimeField(blank=False, null=True)
     interviewer_time_slot = models.ForeignKey(InterviewerFreeTime, related_name="interviews", default=False)
-    buffer_time = models.BooleanField(default=False)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     interviewer_comment = models.TextField(null=True, blank=True, help_text="Коментар от интервюиращия")
 

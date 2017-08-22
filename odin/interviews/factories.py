@@ -21,7 +21,6 @@ class InterviewerFreeTimeFactory(factory.DjangoModelFactory):
     date = factory.LazyAttribute(lambda _:  timezone.now().date() + timezone.timedelta(days=faker.pyint()))
     start_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(seconds=2)).time())
     end_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(seconds=3)).time())
-    buffer_time = factory.LazyAttribute(lambda _: faker.boolean())
 
     class Meta:
         model = InterviewerFreeTime
@@ -34,7 +33,6 @@ class InterviewFactory(factory.DjangoModelFactory):
     start_time = factory.LazyAttribute(lambda _: faker.time_object())
     end_time = factory.LazyAttribute(lambda _: faker.time_object())
     interviewer_time_slot = factory.SubFactory(InterviewerFreeTimeFactory)
-    buffer_time = factory.LazyAttribute(lambda _: faker.boolean())
     uuid = factory.LazyAttribute(lambda _: faker.uuid4())
     interviewer_comment = factory.LazyAttribute(lambda _: faker.text())
 

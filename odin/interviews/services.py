@@ -33,13 +33,15 @@ def create_interviewer_free_time(*,
                                  date: date,
                                  start_time: time,
                                  end_time: time,
-                                 buffer_time: bool) -> InterviewerFreeTime:
+                                 interview_time_length: int,
+                                 break_time: int) -> InterviewerFreeTime:
 
     return InterviewerFreeTime.objects.create(interviewer=interviewer,
                                               date=date,
                                               start_time=start_time,
                                               end_time=end_time,
-                                              buffer_time=buffer_time)
+                                              interview_time_length=interview_time_length,
+                                              break_time=break_time)
 
 
 def add_course_to_interviewer_courses(*,
@@ -54,11 +56,8 @@ def add_course_to_interviewer_courses(*,
 def generate_interview_slots():
     context = {'log': []}
     context['log'].append("Start generating interviews...\n")
-    interview_length = 20
-    break_between_interviews = 10
 
-    interview_slots_generator = GenerateInterviewSlots(
-        interview_length, break_between_interviews)
+    interview_slots_generator = GenerateInterviewSlots()
 
     interview_slots_generator.generate_interview_slots()
     interview_slots_generator.get_generated_slots()
