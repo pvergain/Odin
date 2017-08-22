@@ -114,7 +114,7 @@
                 </a>
               </li>
             {% endif %}
-            {% if user.is_interviewer %}
+            {% if user.is_interviewer or user.is_superuser %}
               <li class="nav-item start ">
                 <a href="{% url 'dashboard:interviews:user-interviews' %}" class="nav-link nav-toggle">
                   <i class="icon-layers"></i>

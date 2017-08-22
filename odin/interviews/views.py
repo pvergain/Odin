@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from odin.management.permissions import DashboardManagementPermission
 from odin.applications.models import Application, ApplicationInfo
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
+from odin.common.permissions import IsSuperuserPermission
 from odin.common.utils import transfer_POST_data_to_dict
 
 from rest_framework import generics
@@ -61,7 +62,11 @@ class ChooseInterviewView(LoginRequiredMixin,
         return context
 
 
-class InterviewsListView(LoginRequiredMixin, IsInterviewerPermission, UserInterviewsListMixin, ListView):
+class InterviewsListView(LoginRequiredMixin,
+                         IsSuperuserPermission,
+                         IsInterviewerPermission,
+                         UserInterviewsListMixin,
+                         ListView):
     template_name = 'interviews/interviews_list.html'
 
 
@@ -203,6 +208,7 @@ class RateInterviewView(LoginRequiredMixin,
 
 
 class AcceptedApplicantsListView(LoginRequiredMixin,
+                                 IsSuperuserPermission,
                                  IsInterviewerPermission,
                                  ListView):
     template_name = 'interviews/accepted_applicants.html'
