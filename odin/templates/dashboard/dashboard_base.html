@@ -25,29 +25,11 @@
           <!-- BEGIN TOP NAVIGATION MENU -->
           <div class="top-menu">
             <ul class="nav navbar-nav pull-right">
-              <!-- BEGIN NOTIFICATION DROPDOWN -->
               {% if request.user.is_authenticated %}
-                <!-- The following list item is a temporary sample -->
-                <li class="dropdown dropdown-extended dropdown-notification" id="header_notification_bar">
-                  <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                    <i class="icon-bell"></i>
-                    <span class="badge badge-default"> 0 </span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li class="external">
-                      <a href="page_user_profile_1.html">view all</a>
-                    </li>
-                    <li>
-                      <ul class="dropdown-menu-list scroller" style="height: 250px;" data-handle-color="#637283">
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
-                <!-- END NOTIFICATION DROPDOWN -->
                 <!-- BEGIN USER LOGIN DROPDOWN -->
                 <li class="dropdown dropdown-user">
                   <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                    <img src="{{ MEDIA_URL }}{{ request.user.profile.full_image.name }}" alt="" class="img-circle" src="" />
+                    <img src="{{ MEDIA_URL }}{{ request.user.profile.full_image.name }}" alt="" class="user-pic" src="" />
                     <span class="username username-hide-on-mobile"></span>
                     <i class="fa fa-angle-down"></i>
                   </a>
