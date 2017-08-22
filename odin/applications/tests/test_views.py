@@ -240,7 +240,8 @@ class TestApplyToCourseView(TestCase):
         current_app_count = Application.objects.count()
         data = {
             'phone': faker.phone_number(),
-            'works_at': faker.job()
+            'works_at': faker.job(),
+            'skype': faker.word()
         }
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -270,7 +271,7 @@ class TestApplyToCourseView(TestCase):
         self.app_info.end_date = timezone.now().date() + timezone.timedelta(days=2)
         self.app_info.save()
 
-        create_application(user=self.user, application_info=self.app_info)
+        create_application(user=self.user, application_info=self.app_info, skype=faker.word())
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertRedirects(response,
@@ -284,10 +285,11 @@ class TestApplyToCourseView(TestCase):
 
         data = {
             'phone': faker.phone_number(),
-            'works_at': faker.job()
+            'works_at': faker.job(),
+            'skype': faker.word()
         }
 
-        create_application(user=self.user, application_info=self.app_info)
+        create_application(user=self.user, application_info=self.app_info, skype=data.get('skype'))
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
             expected_url = reverse('dashboard:applications:edit-application',
@@ -313,7 +315,8 @@ class TestApplyToCourseView(TestCase):
 
         data = {
             'phone': faker.phone_number(),
-            'works_at': faker.job()
+            'works_at': faker.job(),
+            'skype': faker.word
         }
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
@@ -345,7 +348,8 @@ class TestEditApplicationView(TestCase):
 
         data = {
             'phone': faker.phone_number(),
-            'works_at': new_works_at
+            'works_at': new_works_at,
+            'skype': faker.word()
         }
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -363,6 +367,7 @@ class TestEditApplicationView(TestCase):
         data = {task.name: faker.url() for task in app_tasks}
         data['phone'] = faker.phone_number()
         data['works_at'] = faker.job()
+        data['skype'] = faker.word()
 
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)

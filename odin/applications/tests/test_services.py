@@ -156,7 +156,7 @@ class TestCreateApplicationService(TestCase):
     def test_create_application_creates_application_when_application_is_active_and_user_has_not_applied(self):
         current_application_count = Application.objects.count()
 
-        create_application(application_info=self.app_info, user=self.user)
+        create_application(application_info=self.app_info, user=self.user, skype=faker.word())
 
         self.assertEqual(current_application_count + 1, Application.objects.count())
 
