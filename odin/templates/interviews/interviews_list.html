@@ -6,6 +6,7 @@
 
 {% block page_content %}
   <div class="row">
+  {% if user.is_interviewer %}
     <div class="col-md-12">
       <div class="portlet box green">
         <div class="portlet-title">
@@ -55,7 +56,9 @@
         </div>
       </div>
     </div>
+    {% endif %}
 
+    {% if user.is_interviewer %}
     <div class="col-md-12">
       <div class="portlet box green">
         <div class="portlet-title">
@@ -103,27 +106,12 @@
               </tbody>
             </table>
           </div>
-          <div class="row">
-            <form class="col-md-3" action="{% url 'dashboard:interviews:generate-interviews' %}" method="POST">
-              {% csrf_token %}
-              <div class="form-actions">
-                <input class="btn red uppercase" type="submit" value="Generate interviews" />
-              </div>
-            </form>
-            <form class="col-md-3" action="{% url 'dashboard:interviews:send-interview-confirmation-emails' %}" method="POST">
-              {% csrf_token %}
-              <input class="btn red uppercase" type="submit" name="submit" value="Send confirmation emails"/>
-            </form>
-            <a href="{% url 'dashboard:interviews:accepted-applicants' %}">
-              <button type="button" class="btn red uppercase">
-                View accepted
-              </button>
-            </a>
-          </div>
-        </div>
+       </div>
       </div>
     </div>
+    {% endif %}
 
+    {% if user.is_interviewer %}
     <div class="col-md-12">
       <div class="portlet box green">
         <div class="portlet-title">
@@ -163,13 +151,14 @@
         </div>
       </div>
     </div>
+    {% endif %}
 
     {% if all_free_time_slots %}
       <div class="col-md-12">
         <div class="portlet box green">
           <div class="portlet-title">
             <div class="caption">
-              <i class="fa fa-comments"></i> All Intereviewer's time slots
+              <i class="fa fa-comments"></i> All Interviewer's time slots
             </div>
             <div class="tools">
               <a href="javascript:;" class="expand"> </a>
@@ -198,6 +187,25 @@
                 </tbody>
               </table>
             </div>
+
+              <div class="row">
+                <form class="col-md-3" action="{% url 'dashboard:interviews:generate-interviews' %}" method="POST">
+                  {% csrf_token %}
+                  <div class="form-actions">
+                    <input class="btn red uppercase" type="submit" value="Generate interviews" />
+                  </div>
+                </form>
+                <form class="col-md-3" action="{% url 'dashboard:interviews:send-interview-confirmation-emails' %}" method="POST">
+                  {% csrf_token %}
+                  <input class="btn red uppercase" type="submit" name="submit" value="Send confirmation emails"/>
+                </form>
+                <a href="{% url 'dashboard:interviews:accepted-applicants' %}">
+                  <button type="button" class="btn red uppercase">
+                    View accepted
+                  </button>
+                </a>
+              </div>
+ 
           </div>
         </div>
       </div>
