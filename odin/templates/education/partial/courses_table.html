@@ -32,7 +32,7 @@
                                     <td>{{ course.repository }}</td>
                                     <td>{{ course | get_presence:user }}</td>
                                     <td>{{ course.students.count }}</td>
-                                    <td>{{ course.teachers.count }}</td>
+                                    <td>{{ course.visible_teachers.count }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

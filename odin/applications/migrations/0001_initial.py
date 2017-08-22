@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('phone', models.CharField(blank=True, max_length=255, null=True)),
-                ('skype', models.CharField(blank=True, max_length=255, null=True)),
+                ('skype', models.CharField(max_length=255)),
                 ('works_at', models.CharField(blank=True, max_length=255, null=True)),
                 ('studies_at', models.CharField(blank=True, max_length=255, null=True)),
                 ('has_interview_date', models.BooleanField(default=False)),

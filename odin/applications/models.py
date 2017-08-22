@@ -60,7 +60,7 @@ class Application(models.Model):
     user = models.ForeignKey(BaseUser, related_name='applications')
 
     phone = models.CharField(null=True, blank=True, max_length=255)
-    skype = models.CharField(null=True, blank=True, max_length=255)
+    skype = models.CharField(max_length=255)
     works_at = models.CharField(null=True, blank=True, max_length=255)
     studies_at = models.CharField(blank=True, null=True, max_length=255)
     has_interview_date = models.BooleanField(default=False)
