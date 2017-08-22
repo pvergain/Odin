@@ -126,6 +126,21 @@ class TestInterviewsListView(TestCase):
             response = self.get(self.url)
             self.assertEqual(403, response.status_code)
 
+    def test_access_is_allowed_if_superuser(self):
+        superuser = SuperUserFactory(password=self.test_password)
+
+        with self.login(email=superuser.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_access_is_allowed_if_superuser_and_interviewer(self):
+        self.interviewer.is_superuser = True
+        self.interviewer.save()
+
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
     def test_access_is_allowed_if_interviewer(self):
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
