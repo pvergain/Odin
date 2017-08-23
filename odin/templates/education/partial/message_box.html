@@ -1,7 +1,9 @@
+{% load common_extras %}
+
 {% if messages %}
   {% for message in messages %}
-    <div class="alert" role="alert">
-      {{ message }}
+    <div class="alert alert-warning">
+      {{ message|render_message }}
     </div>
   {% endfor %}
 {% endif %}
