@@ -237,6 +237,7 @@ class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
 
 
 class DeleteInterviewView(LoginRequiredMixin,
+                          IsInterviewerPermission,
                           CannotControlOtherInterviewerDataPermission,
                           DeleteView):
     model = Interview
