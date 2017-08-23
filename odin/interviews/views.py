@@ -18,9 +18,14 @@ from .permissions import (
 )
 from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin, UserInterviewsListMixin
 from .models import Interview, InterviewerFreeTime
-from .services import create_new_interview_for_application, create_interviewer_free_time, generate_interview_slots
+from .services import (
+    create_new_interview_for_application,
+    create_interviewer_free_time,
+    generate_interview_slots,
+    send_interview_confirmation_emails
+)
 from .forms import FreeTimeModelForm
-from .tasks import send_interview_confirmation_emails, assign_accepted_users_to_courses
+from .tasks import assign_accepted_users_to_courses
 from .serializers import InterviewSerializer
 
 
@@ -177,7 +182,7 @@ class FreeInterviewsListAPIView(generics.ListAPIView):
 
 class SendInterviewConfirmationEmailsView(DashboardManagementPermission, View):
     def post(self, request, *args, **kwargs):
-        send_interview_confirmation_emails.delay()
+        send_interview_confirmation_emails()
 
         return redirect('dashboard:interviews:user-interviews')
 
