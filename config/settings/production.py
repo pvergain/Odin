@@ -175,6 +175,8 @@ ADMIN_URL = env('DJANGO_ADMIN_URL')
 # ------------------------------------------------------------------------------
 
 # Mandrill settings for templates are required in production
+USE_DJANGO_EMAIL_BACKEND = False
+
 EMAIL_TEMPLATES = {
     key: f()
     for key, f in templates.items()
