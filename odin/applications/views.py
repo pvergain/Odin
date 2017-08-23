@@ -183,7 +183,7 @@ class UserApplicationsListView(LoginRequiredMixin,
                 'teachers__in': [teacher]
             }
 
-            courses = Course.objects.get_active_for_interview().filter(**filters)
+            courses = Course.objects.get_in_application_period().filter(**filters)
             context['teached_courses'] = courses.prefetch_related(*prefetch).order_by('-start_date')
 
         return context
