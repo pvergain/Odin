@@ -25,6 +25,7 @@ from .serializers import InterviewSerializer
 
 
 class ChooseInterviewView(LoginRequiredMixin,
+                          IsInterviewerPermission,
                           CannotConfirmOthersInterviewPermission,
                           HasConfirmedInterviewRedirectMixin,
                           CallServiceMixin,
@@ -116,6 +117,7 @@ class CreateFreeTimeView(LoginRequiredMixin,
 
 
 class DeleteFreeTimeView(LoginRequiredMixin,
+                         IsInterviewerPermission,
                          CannotControlOtherInterviewerDataPermission,
                          DeleteView):
     model = InterviewerFreeTime
@@ -125,6 +127,7 @@ class DeleteFreeTimeView(LoginRequiredMixin,
 
 
 class UpdateFreeTimeView(LoginRequiredMixin,
+                         IsInterviewerPermission,
                          CannotControlOtherInterviewerDataPermission,
                          ReadableFormErrorsMixin,
                          UpdateView):
@@ -146,6 +149,7 @@ class UpdateFreeTimeView(LoginRequiredMixin,
 
 
 class ConfirmInterviewView(LoginRequiredMixin,
+                           IsInterviewerPermission,
                            CannotConfirmOthersInterviewPermission,
                            TemplateView):
     template_name = 'interviews/confirm_interview.html'
@@ -183,6 +187,7 @@ class SendInterviewConfirmationEmailsView(DashboardManagementPermission, View):
 
 
 class RateInterviewView(LoginRequiredMixin,
+                        IsInterviewerPermission,
                         CannotControlOtherInterviewerDataPermission,
                         ReadableFormErrorsMixin,
                         UpdateView):
