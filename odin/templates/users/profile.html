@@ -13,10 +13,12 @@
         <div class="profile-sidebar">
             <!-- PORTLET MAIN -->
             <div class="portlet light profile-sidebar-portlet ">
-                <!-- SIDEBAR USERPIC -->
-                <div class="profile-userpic">
-                    <img src="{{MEDIA_URL}}{{object.full_image.name}}" alt="{% static 'hackman.png' %}" class="img-responsive" alt="">
-                </div>
+              <!-- SIDEBAR USERPIC -->
+              <ul class="list-unstyled profile-nav">
+                <li>
+                    <img src="{{MEDIA_URL}}{{object.full_image.name}}" alt="{% static 'hackman.png' %}" class="img-responsive pic-bordered" alt="">
+                </li>
+              </ul>
                 <!-- END SIDEBAR USERPIC -->
                 <!-- SIDEBAR USER TITLE -->
                 <div class="profile-usertitle">
