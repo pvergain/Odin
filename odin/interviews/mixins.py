@@ -33,16 +33,25 @@ class UserInterviewsListMixin:
         if self.request.user.is_interviewer():
             interviewer = get_object_or_404(Interviewer, user=self.request.user)
             related = 'application__user__profile'
-            return Interview.objects.filter(interviewer=interviewer, application__isnull=False).select_related(related)
+            filters = {
+                'interviewer': interviewer,
+                'application__isnull': False
+            }
+            return Interview.objects.filter(**filters).select_related(related).order_by('date', 'start_time')
         return []
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_interviewer():
             interviewer = get_object_or_404(Interviewer, user=self.request.user)
-            context['free_interview_dates'] = Interview.objects.filter(interviewer=interviewer, has_confirmed=False)
-            context['free_time_slots'] = interviewer.free_time_slots.all()
+            filters = {
+                'interviewer': interviewer,
+                'application__isnull': True
+            }
+            context['free_interview_dates'] = Interview.objects.filter(**filters).order_by('date', 'start_time')
+            context['free_time_slots'] = interviewer.free_time_slots.all().order_by('date', 'start_time')
         if self.request.user.is_superuser:
-            context['all_free_time_slots'] = InterviewerFreeTime.objects.select_related('interviewer__user__profile')
+            free_time_slots = InterviewerFreeTime.objects.select_related('interviewer__user__profile')
+            context['all_free_time_slots'] = free_time_slots.order_by('date', 'start_time')
 
         return context

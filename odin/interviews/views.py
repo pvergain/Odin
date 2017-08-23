@@ -30,6 +30,7 @@ from .serializers import InterviewSerializer
 
 
 class ChooseInterviewView(LoginRequiredMixin,
+                          IsInterviewerPermission,
                           CannotConfirmOthersInterviewPermission,
                           HasConfirmedInterviewRedirectMixin,
                           CallServiceMixin,
@@ -105,6 +106,14 @@ class CreateFreeTimeView(LoginRequiredMixin,
     def get_service(self):
         return create_interviewer_free_time
 
+    def get_initial(self):
+        self.initial = super().get_initial()
+        field_names = ('interview_time_length', 'break_time')
+        self.initial[field_names[0]] = InterviewerFreeTime._meta.get_field(field_names[0]).get_default()
+        self.initial[field_names[1]] = InterviewerFreeTime._meta.get_field(field_names[1]).get_default()
+
+        return self.initial
+
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
@@ -121,6 +130,7 @@ class CreateFreeTimeView(LoginRequiredMixin,
 
 
 class DeleteFreeTimeView(LoginRequiredMixin,
+                         IsInterviewerPermission,
                          CannotControlOtherInterviewerDataPermission,
                          DeleteView):
     model = InterviewerFreeTime
@@ -130,6 +140,7 @@ class DeleteFreeTimeView(LoginRequiredMixin,
 
 
 class UpdateFreeTimeView(LoginRequiredMixin,
+                         IsInterviewerPermission,
                          CannotControlOtherInterviewerDataPermission,
                          ReadableFormErrorsMixin,
                          UpdateView):
@@ -151,6 +162,7 @@ class UpdateFreeTimeView(LoginRequiredMixin,
 
 
 class ConfirmInterviewView(LoginRequiredMixin,
+                           IsInterviewerPermission,
                            CannotConfirmOthersInterviewPermission,
                            TemplateView):
     template_name = 'interviews/confirm_interview.html'
@@ -188,6 +200,7 @@ class SendInterviewConfirmationEmailsView(DashboardManagementPermission, View):
 
 
 class RateInterviewView(LoginRequiredMixin,
+                        IsInterviewerPermission,
                         CannotControlOtherInterviewerDataPermission,
                         ReadableFormErrorsMixin,
                         UpdateView):
@@ -232,6 +245,7 @@ class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
 
 
 class DeleteInterviewView(LoginRequiredMixin,
+                          IsInterviewerPermission,
                           CannotControlOtherInterviewerDataPermission,
                           DeleteView):
     model = Interview
