@@ -55,11 +55,11 @@ class TeacherManager(BaseEducationUserManager):
 
 
 class CourseManager(Manager):
-    def get_active_for_interview(self):
+    def get_in_application_period(self):
         current_date = timezone.now().date()
         conditions = (
             {
-                'application_info__start_interview_date__lte': current_date
+                'application_info__start_date__lte': current_date
             },
             {
                 'application_info__end_interview_date__gte': current_date

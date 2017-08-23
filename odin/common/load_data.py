@@ -264,8 +264,8 @@ class CourseAssignmentLoader(BaseLoader):
                             cs = course_assignment_qs.first()
                             cs.hidden = False
                             cs.save()
-                    else:
-                        add_teacher(course, teacher)
+                        else:
+                            add_teacher(course, teacher)
 
 
 class TopicLoader(BaseLoader):
