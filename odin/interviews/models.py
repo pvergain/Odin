@@ -50,10 +50,17 @@ class InterviewerFreeTime(models.Model):
         return self.interviews.exists()
 
     def clean(self):
-        if self.date <= timezone.now().date():
+        if self.date < timezone.now().date():
             raise ValidationError("Your free time slot can not be in the past")
         if self.start_time >= self.end_time:
             raise ValidationError("The start time can not be the same or after the end time")
+
+        user_timeslots_for_date = InterviewerFreeTime.objects.filter(interviewer=self.interviewer, date=self.date)
+        if not user_timeslots_for_date.exists():
+            return
+        for slot in user_timeslots_for_date:
+            if max(slot.start_time, self.start_time) <= min(slot.end_time, self.end_time):
+                raise ValidationError("Times are overlapping with an already existing Free Time Slot")
 
     def save(self, *args, **kwargs):
         self.full_clean()

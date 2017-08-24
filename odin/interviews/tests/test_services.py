@@ -2,14 +2,16 @@ from test_plus import TestCase
 
 from django.core.exceptions import ValidationError
 
+from odin.users.factories import BaseUserFactory
 from odin.education.factories import CourseFactory
 from odin.applications.factories import ApplicationInfoFactory
 from odin.interviews.services import add_course_to_interviewer_courses
 from odin.interviews.factories import InterviewerFactory
 from odin.applications.factories import ApplicationFactory
 
-from ..services import create_new_interview_for_application
-from ..factories import InterviewFactory
+from ..services import create_new_interview_for_application, create_interviewer_free_time
+from ..factories import InterviewFactory, InterviewerFreeTimeFactory
+from ..models import Interviewer
 
 
 class TestAddCourseToInterViewerCourses(TestCase):
@@ -49,3 +51,18 @@ class TestCreateNewInterviewForApplication(TestCase):
 
         self.new_interview.refresh_from_db()
         self.assertEqual(self.new_interview.application, self.application)
+
+
+class TestCreateInterviewFreeTimeSlot(TestCase):
+    def setUp(self):
+        self.interviewer = Interviewer.objects.create_from_user(BaseUserFactory())
+        self.slot = InterviewerFreeTimeFactory(interviewer=self.interviewer)
+
+    def test_create_instance_with_overlapping_time_interval_for_same_interviewer_raises_validation_error(self):
+        with self.assertRaises(ValidationError):
+            create_interviewer_free_time(interviewer=self.interviewer,
+                                         date=self.slot.date,
+                                         start_time=self.slot.start_time,
+                                         end_time=self.slot.end_time,
+                                         interview_time_length=20,
+                                         break_time=5)
