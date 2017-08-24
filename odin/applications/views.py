@@ -8,7 +8,7 @@ from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
-from odin.interviews.permissions import IsInterviewerPermission
+from .permissions import ViewApplicationDetailPermission
 from .models import Application, ApplicationTask
 from .forms import (
     ApplicationInfoModelForm,
@@ -237,7 +237,7 @@ class EditApplicationView(LoginRequiredMixin,
 
 
 class ApplicationDetailView(LoginRequiredMixin,
-                            IsInterviewerPermission,
+                            ViewApplicationDetailPermission,
                             DetailView):
     model = Application
     template_name = 'applications/application_detail.html'
