@@ -147,15 +147,39 @@ class TestInterviewsListView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    def test_access_is_allowed_if_interviewer(self):
+    def test_access_is_allowed_if_interviewer_for_active_course(self):
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    def test_interviews_are_displayed_correctly_for_interviewer(self):
+    def test_interviews_are_displayed_correctly_for_interviewer_when_he_is_interviewer_for_course(self):
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(list(Interview.objects.all()), list(response.context['object_list']))
+
+    def test_access_is_forbidden_for_interviewer_who_is_not_interviewer_for_course(self):
+        other_user = BaseUserFactory(password=self.test_password)
+        other_interviewer = Interviewer.objects.create_from_user(other_user)
+        with self.login(email=other_interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_access_is_forbidden_when_interviewer_for_already_passed_course(self):
+        old_app_info = ApplicationInfoFactory(
+            start_date=timezone.now() - timezone.timedelta(days=10),
+            end_date=timezone.now() - timezone.timedelta(days=5),
+            start_interview_date=timezone.now() - timezone.timedelta(days=4),
+            end_interview_date=timezone.now() - timezone.timedelta(days=2),
+        )
+
+        other_user = BaseUserFactory(password=self.test_password)
+        other_interviewer = Interviewer.objects.create_from_user(other_user)
+
+        add_course_to_interviewer_courses(interviewer=other_interviewer, course=old_app_info.course)
+
+        with self.login(email=other_interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
 
 
 class TestCreateFreeTimeView(TestCase):
