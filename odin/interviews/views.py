@@ -30,7 +30,6 @@ from .serializers import InterviewSerializer
 
 
 class ChooseInterviewView(LoginRequiredMixin,
-                          IsInterviewerPermission,
                           CannotConfirmOthersInterviewPermission,
                           HasConfirmedInterviewRedirectMixin,
                           CallServiceMixin,
@@ -162,7 +161,6 @@ class UpdateFreeTimeView(LoginRequiredMixin,
 
 
 class ConfirmInterviewView(LoginRequiredMixin,
-                           IsInterviewerPermission,
                            CannotConfirmOthersInterviewPermission,
                            TemplateView):
     template_name = 'interviews/confirm_interview.html'

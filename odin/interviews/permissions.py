@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.db.models import Q
 
 from odin.common.mixins import BaseUserPassesTestMixin
 from odin.applications.models import Application
@@ -30,8 +32,21 @@ class IsInterviewerPermission(BaseUserPassesTestMixin):
     raise_exception = True
 
     def test_func(self):
+        current_date = timezone.now().date()
         if self.request.user.is_interviewer():
-            return True and super().test_func()
+
+            conditions = (
+                {
+                    'start_date__lte': current_date
+                },
+                {
+                    'end_interview_date__gte': current_date
+                }
+            )
+
+            qs = self.request.user.interviewer.courses_to_interview.filter(Q(**conditions[0]) & Q(**conditions[1]))
+            if qs.exists():
+                return True and super().test_func()
 
         return False
 

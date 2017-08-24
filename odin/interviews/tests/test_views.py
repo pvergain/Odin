@@ -118,6 +118,11 @@ class TestInterviewsListView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
         self.interview = InterviewFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:user-interviews')
 
@@ -158,6 +163,12 @@ class TestCreateFreeTimeView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
+
         self.url = reverse('dashboard:interviews:add-free-time')
 
     def test_can_add_free_time_if_interviewer(self):
@@ -192,6 +203,12 @@ class TestUpdateFreeTimeView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
+
         self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:edit-free-time',
                            kwargs={'free_time_id': self.interviewer_free_time.id})
@@ -235,6 +252,12 @@ class TestDeleteFreeTimeView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
+
         self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:delete-free-time',
                            kwargs={'free_time_id': self.interviewer_free_time.id})
