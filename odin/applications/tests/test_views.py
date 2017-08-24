@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.test.utils import override_settings
 
 from odin.common.faker import faker
-from odin.users.factories import BaseUserFactory
+from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.education.models import Teacher, Course
 from odin.education.factories import CourseFactory
 from odin.education.services import add_teacher
@@ -403,3 +403,40 @@ class TestEditApplicationView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.response_403(response)
+
+
+class TestUserApplicationsListView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.course = CourseFactory(
+            start_date=timezone.now() + timezone.timedelta(days=10),
+            end_date=timezone.now() + timezone.timedelta(days=20)
+        )
+        self.app_info = ApplicationInfoFactory(
+            start_date=timezone.now(),
+            end_date=timezone.now() + timezone.timedelta(days=4),
+            start_interview_date=timezone.now() + timezone.timedelta(days=5),
+            end_interview_date=timezone.now() + timezone.timedelta(days=6),
+            course=self.course
+        )
+        self.application = ApplicationFactory(application_info=self.app_info, user=self.user)
+        self.url = reverse('dashboard:applications:user-applications')
+
+    def test_user_sees_his_applications_on_get(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual([self.application], list(response.context['object_list']))
+
+    def test_superuser_can_see_all_student_applications(self):
+        superuser = SuperUserFactory(password=self.test_password)
+        superuser.is_active = True
+        superuser.save()
+
+        with self.login(email=superuser.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(self.course, response.context['teached_courses'].first())
