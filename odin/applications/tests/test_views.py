@@ -7,23 +7,26 @@ from django.test.utils import override_settings
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
+from odin.interviews.models import Interviewer
+from odin.interviews.services import add_course_to_interviewer_courses
 from odin.education.models import Teacher, Course
 from odin.education.factories import CourseFactory
 from odin.education.services import add_teacher
-from odin.applications.models import (
+
+from ..models import (
     ApplicationInfo,
     ApplicationTask,
     IncludedApplicationTask,
     Application
 )
-from odin.applications.factories import (
+from ..factories import (
     ApplicationInfoFactory,
     IncludedApplicationTaskFactory,
     ApplicationFactory,
     ApplicationTaskFactory,
     ApplicationSolutionFactory
 )
-from odin.applications.services import create_application
+from ..services import create_application
 
 
 class TestCreateApplicationInfoView(TestCase):
@@ -440,3 +443,53 @@ class TestUserApplicationsListView(TestCase):
             response = self.get(self.url)
             self.response_200(response)
             self.assertEqual(self.course, response.context['teached_courses'].first())
+
+
+class TestApplicationDetailView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.course = CourseFactory(
+            start_date=timezone.now() + timezone.timedelta(days=10),
+            end_date=timezone.now() + timezone.timedelta(days=20)
+        )
+        self.app_info = ApplicationInfoFactory(
+            start_date=timezone.now(),
+            end_date=timezone.now() + timezone.timedelta(days=4),
+            start_interview_date=timezone.now() + timezone.timedelta(days=5),
+            end_interview_date=timezone.now() + timezone.timedelta(days=6),
+            course=self.course
+        )
+        self.application = ApplicationFactory(application_info=self.app_info, user=self.user)
+        self.url = reverse('dashboard:applications:application-detail',
+                           kwargs={'application_id': self.application.id})
+
+    def test_can_not_view_application_detail_if_regular_user(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_can_view_application_detail_if_only_teacher_and_not_interviewer_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(self.application, response.context['object'])
+
+    def test_can_view_application_detail_if_superuser_and_not_interviewer_for_course(self):
+        superuser = SuperUserFactory(password=self.test_password)
+        with self.login(email=superuser.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(self.application, response.context['object'])
+
+    def test_can_view_application_detail_if_interviewer_for_course(self):
+        interviewer = Interviewer.objects.create_from_user(self.user)
+        add_course_to_interviewer_courses(interviewer=interviewer, course=self.course)
+        with self.login(email=interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(self.application, response.context['object'])
