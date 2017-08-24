@@ -35,11 +35,11 @@
                     <td> {{ slot.start_time }} </td>
                     <td> {{ slot.end_time }} </td>
                     <td>
-                      <form id="delete_slot_form" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" >
+                      <form id="delete_slot_form_for_{{slot.id}}" action="{% url 'dashboard:interviews:delete-free-time' slot.id %}"  method="POST" >
                         {% csrf_token %}
                         <div class="form-actions">
                           <a href="{% url 'dashboard:interviews:edit-free-time' slot.id %}"><button type="button" class="btn green uppercase">Edit</button></a>
-                          <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete_slot_form', 'Free Time Slot')">delete</button>
+                          <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete_slot_form_for_{{slot.id}}', 'Free Time Slot')">delete</button>
                         </div>
                       </form>
                     </td>
@@ -138,9 +138,9 @@
                     <td> {{ obj.date }} </td>
                     <td> {{ obj.start_time }} </td>
                     <td>
-                      <form id="delete-interview-form" action="{% url 'dashboard:interviews:delete-interview' obj.uuid  %}" method="POST">
+                      <form id="delete-interview-form-for-{{obj.uuid}}" action="{% url 'dashboard:interviews:delete-interview' obj.uuid  %}" method="POST">
                         {% csrf_token %}
-                        <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete-interview-form', 'Inteview date')">Delete</button>
+                        <button class="btn green uppercase" type="button" onClick="confirmDeleteRequest('#delete-interview-form-for-{{obj.uuid}}', 'Inteview date')">Delete</button>
                       </form>
                     </td>
                   </tr>
@@ -205,7 +205,7 @@
                   </button>
                 </a>
               </div>
- 
+
           </div>
         </div>
       </div>
