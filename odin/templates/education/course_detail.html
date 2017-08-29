@@ -5,21 +5,25 @@
   {% if public_page %}
     <div class="container">
   {% else %}
-    <div>
+      <div>
   {% endif  %}
-    Course detail
-    </div>
+  Course detail
+      </div>
 {% endblock content_title %}
 
 {% block page_content %}
   {% if public_page %}
     <div class="container">
   {% else %}
-    <div>
+      <div>
   {% endif %}
-    <div class="row">
-    <div class="col-md-12">
-      {% include "education/partial/teachers_table.html" with course=course teachers=course.visible_teachers.all %}
+  <div class="row">
+    <div class="col-md-6">
+      {% include 'education/partial/progress_bar.html' with progress_title="Valid Solutions" progress_value=tasks_ratio %}
+    </div>
+    <div class="col-md-6">
+      <!-- Course attendance is hardcoded until mac-checking and attendance back-end logic is implemented -->
+      {% include 'education/partial/progress_bar.html' with progress_title="Lecture attendance" progress_value=0 %}
     </div>
     <div class="col-md-12">
       {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page tasks=course_tasks%}
@@ -52,6 +56,6 @@
         {% endif %}
       {% endif %}
     </div>
-    </div>
   </div>
+      </div>
 {% endblock page_content %}

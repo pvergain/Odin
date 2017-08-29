@@ -54,7 +54,8 @@ from .services import (
     create_included_task,
     create_test_for_task,
     create_gradable_solution,
-    create_non_gradable_solution
+    create_non_gradable_solution,
+    calculate_student_valid_solutions_for_course
 )
 
 
@@ -89,6 +90,13 @@ class CourseDetailView(LoginRequiredMixin,
                        TemplateView):
 
     template_name = 'education/course_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_student():
+            student = self.request.user.student
+            context['tasks_ratio'] = calculate_student_valid_solutions_for_course(student=student, course=self.course)
+        return context
 
 
 class PublicCourseListView(PublicViewContextMixin, ListView):
