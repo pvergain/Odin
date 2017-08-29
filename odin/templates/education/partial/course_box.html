@@ -1,22 +1,43 @@
-<div class="row">
-    <!-- BEGIN SAMPLE TABLE PORTLET-->
-        <div class="portlet box green">
-            <div class="portlet-title">
-                <div class="caption">
-                    <i class="fa fa-comments"></i> {{ course.name }}
-                </div>
-                <div class="tools">
-                    <a href="javascript:;" class="collapse"> </a>
-                </div>
-            </div>
-            <div class="portlet-body">
-              <p>
-                {% autoescape off %}
-                  {{ course.description }}
-                {% endautoescape %}
-                <a href="{% url 'public:course_detail' course_slug=course.slug_url %}"><button type="button" class="btn green uppercase">Details</button></a>
-              </p>
-            </div>
+{% load static %}
+
+<div class="portlet box green">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-comments"></i>{{ course.name }} </div>
+  </div>
+  <div class="portlet-body">
+    <div class="row">
+      <div class="col-md-3">
+        <img src="{% static 'hackman.png' %}" class="img-responsive"/>
+        <div class="socicons">
+          <center>
+            <a href="{{ course.repository }}" class="socicon-btn socicon-github tooltips border-white" data-original-title="Github"></a>
+            <a href="{{ course.facebook_group }}" class="socicon-btn socicon-facebook tooltips border-white" data-original-title="Facebook"></a>
+          </center>
         </div>
-        <!-- END SAMPLE TABLE PORTLET-->
+      </div>
+
+      <div class="col-md-9">
+        <div class="scrollable-content">
+          <!-- Course attendance is hardcoded until mac-checking and attendance back-end logic is implemented -->
+          <p>
+            <strong> You have attended 0% of this course's lectures :)</strong>
+          </p>
+          <p>
+            <strong> Start date</strong>: {{ course.start_date }}<br>
+            <strong> End date</strong>: {{ course.end_date }}<br>
+            <strong> Duration</strong>: {{ course.weeks.count }} weeks
+          </p>
+          <p>
+            <strong> Teachers:</strong>
+            <ul class="list-unstyled">
+              {% for teacher in course.visible_teachers %}
+                <li>{{ teacher.profile.full_name }} - {{ teacher.email }}</li>
+              {% endfor %}
+            </ul>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

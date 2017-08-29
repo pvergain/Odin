@@ -64,7 +64,7 @@ class Course(models.Model):
 
     @property
     def visible_teachers(self):
-        return self.teachers.filter(course_assignments__hidden=False)
+        return self.teachers.filter(course_assignments__hidden=False).select_related('profile')
 
     @property
     def duration_in_weeks(self):
