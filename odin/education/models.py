@@ -232,8 +232,6 @@ class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
     description = models.TextField(blank=True, null=True)
     gradable = models.BooleanField(default=False)
 
-    objects = TaskQuerySet.as_manager()
-
     class Meta:
         abstract = True
 
@@ -256,6 +254,8 @@ class IncludedTask(BaseTask):
     topic = models.ForeignKey(Topic,
                               on_delete=models.CASCADE,
                               related_name='tasks')
+
+    objects = TaskQuerySet.as_manager()
 
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
