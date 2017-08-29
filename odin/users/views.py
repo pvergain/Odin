@@ -5,7 +5,8 @@ from django.urls import reverse_lazy
 
 from odin.common.mixins import ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
-from odin.education.models import Course, IncludedTask
+from odin.education.models import Course
+from odin.education.services import calculate_student_valid_solutions_for_course
 
 from .models import Profile, BaseUser
 
@@ -21,19 +22,9 @@ class PersonalProfileView(LoginRequiredMixin, DetailView):
             student = user.student
             courses = Course.objects.filter(students__in=[student])
             for course in courses:
-                tasks = IncludedTask.objects.get_tasks_for(course=course)
-                task_count = tasks.count()
-                solved_task_count = 0
-                for task in tasks:
-                    if task.solutions:
-                        for solution in task.solutions.all():
-                            if solution.status == 6 or solution.status == 2:
-                                solved_task_count += 1
-
-                if task_count > 0:
-                    course_data.append((course, ((solved_task_count / task_count) * 100)))
-                else:
-                    course_data.append((course, 0))
+                course_data.append((course, calculate_student_valid_solutions_for_course(
+                    course=course,
+                    student=student)))
 
         context['course_data'] = course_data
 

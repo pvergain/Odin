@@ -207,5 +207,5 @@ def calculate_student_valid_solutions_for_course(*,
             return 0
         solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
 
-        ratio = solved_tasks/total_tasks * 100
-        return f'{ratio:.{3}}'
+        ratio = (solved_tasks/total_tasks) * 100
+        return f'{ratio:.1f}'
