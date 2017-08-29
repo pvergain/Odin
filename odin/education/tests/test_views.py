@@ -126,16 +126,6 @@ class TestCourseDetailView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    def test_course_teachers_appear_if_there_is_any(self):
-        ProfileFactory(user=self.teacher.user)
-        add_teacher(self.course, self.teacher)
-        add_student(self.course, self.student)
-        with self.login(email=self.student.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, self.teacher.get_full_name())
-            self.assertContains(response, self.teacher.profile.description)
-
     def test_course_teachers_do_not_appear_if_there_is_none(self):
         ProfileFactory(user=self.teacher.user)
         add_student(self.course, self.student)
