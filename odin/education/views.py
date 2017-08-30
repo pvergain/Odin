@@ -1,3 +1,5 @@
+import json
+
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -57,6 +59,7 @@ from .services import (
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course
 )
+from .serializers import TopicSerializer
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -93,6 +96,10 @@ class CourseDetailView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        topics = TopicSerializer(self.course.topics.all(), many=True)
+        course_topics = {}
+        course_topics['data'] = topics.data
+        context['course_topics'] = json.dumps(course_topics)
         if self.request.user.is_student():
             student = self.request.user.student
             context['tasks_ratio'] = calculate_student_valid_solutions_for_course(student=student, course=self.course)

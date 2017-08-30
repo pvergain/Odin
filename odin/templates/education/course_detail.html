@@ -44,5 +44,8 @@
 {% endblock page_content %}
 
 {% block extra_scripts %}
+  <script>
+    window.props = {{ course_topics|safe }}
+  </script>
   <script src="{% static 'bundle.js' %}"></script>
 {% endblock extra_scripts %}

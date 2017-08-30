@@ -76,3 +76,5 @@ captcha_env.sh
 */bower_components/*
 
 dump.json
+
+dist/
