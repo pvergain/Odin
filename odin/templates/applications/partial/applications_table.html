@@ -1,38 +1,54 @@
 <div class="row">
-        <div class="portlet box green">
-            <div class="portlet-title">
-                <div class="caption">
-                    <i class="fa fa-comments"></i> Your Applications
-                </div>
-                <div class="tools">
-                    <a href="javascript:;" class="collapse"> </a>
-                </div>
-            </div>
-            <div class="portlet-body">
-               <div class="table-scrollable">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th> # </th>
-                                <th> Course </th>
-                                <th> Submited tasks</th>
-                                <th>  </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for app in applications %}
-                                <tr>
-                                    <td>{{ app.id }}</td>
-                                    <td>{{ app.application_info.course.name }}</td>
-				    {% if not app.application_info.external_application_form %}
-                                    <td>{{ app.solutions.count }} / {{app.application_info.tasks.count}}</td>
-				    <td><a href="{% url 'dashboard:applications:edit-application' app.application_info.course.id %}"><button class="btn green uppercase" type="button" name="button">Edit application</button></a></td>
-				    {% endif %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-              </div>
+  {% for course in courses_open_for_application %}
+    <div class="col-md-4">
+      <div class="col-md-8">
+        {% include 'applications/partial/courses_to_apply.html' with course=course %} 
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="portlet light">
+      <div class="portlet-title">
+        <div class="caption">
+          <i class="icon-share font-red-sunglo"></i>
+          <span class="caption-subject font-blue-sunglo bold uppercase">My applications</span>
         </div>
+      </div>
+      <div class="portlet-body">
+        {% for application in applications %}
+          <div class="well well-lg">
+            <div class="row">
+            <h4 class="block">{{ application.application_info.course.name }}
+              {% if application.is_completed %}
+                <i class="icon-check"></i>
+                <p>Your application is completed!</p>
+              {% else %}
+                <i class="icon-close"></i>
+                <p>Your application is not completed!</p>
+              {% endif %}
+            </h4>
+            <h4> Application tasks: </h4>
+            <ul>
+              {% for task in application.application_info.tasks.all %}
+                {% if task.solutions.exists %}
+                  <li><p>{{ task.name }} <i class="icon-check"></i></p></li>
+                {% else %}
+                  <li><p>{{ task.name }} <i class="icon-close"></i></p></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+            <div class="col-md-4 col-md-offset-10">
+              <a href={% url 'dashboard:applications:edit-application' application.application_info.course.id %}>
+                <button type="button" class="btn-lg btn green uppercase">Edit application</button>
+              </a>
+            </div>
+          </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
