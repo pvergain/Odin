@@ -9,3 +9,8 @@ register = template.Library()
 def convert_from_markdown(text):
     md = mistune.Markdown()
     return md(text)
+
+
+@register.filter(name='iterable_from_difference')
+def iterable_from_difference(x, subtract_from):
+    return range(subtract_from-x)
