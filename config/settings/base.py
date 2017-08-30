@@ -157,6 +157,7 @@ STATICFILES_DIRS = [
     str(ROOT_DIR.path('ui/images')),
     str(ROOT_DIR.path('ui/bower_components')),
     str(ROOT_DIR.path('ui/assets')),
+    str(ROOT_DIR.path('dist')),
 ]
 
 

@@ -26,42 +26,23 @@
       {% include 'education/partial/progress_bar.html' with progress_title="Lecture attendance" progress_value=0 %}
     </div>
     <div class="row">
-      <div class="col-md-6">
-        {% include 'education/partial/course_schedule.html' with course=course %}
-      </div>
-      <div class="col-md-6">
-        {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page tasks=course_tasks%}
-
-        {% if course.application_info.apply_is_active and public_page %}
-          {% if request.user.student not in course.students.all and not user_applied %}
-            <a href="{% url 'dashboard:applications:apply-to-course' course.id %}">
-              <button class="btn green uppercase" type="button" name="button">Apply to course</button>
-            </a>
-          {% endif %}
-        {% endif %}
-        {% if not public_page %}
-          <div class="col-md-4">
-            <a href="{% url 'public:course_detail' course_slug=course.slug_url %}">
-              <button type="button" name="button" class="btn green uppercase">View public version of this course</button>
-            </a>
+      <div class="col-md-12">
+        <div class="col-md-6">
+          {% include 'education/partial/course_schedule.html' with course=course %}
+        </div>
+        <div class="col-md-6">
+          <div id="root">
           </div>
-          {% if request.user.teacher in course.teachers.all %}
-            <div class="col-md-4">
-              {% if not course.application_info %}
-                <a href="{% url 'dashboard:applications:create-application-info' course.id %}">
-                  <button class="btn green uppercase" type="button" name="button">Create application info</button>
-                </a>
-              {% else %}
-                <a href="{% url 'dashboard:applications:edit-application-info' course.id %}">
-                  <button class="btn green uppercase" type="button" name="button">Edit application info</button>
-                </a>
-              {% endif %}
-            </div>
-          {% endif %}
-        {% endif %}
+        </div>
+
       </div>
+
     </div>
 
   </div>
       </div>
 {% endblock page_content %}
+
+{% block extra_scripts %}
+  <script src="{% static 'bundle.js' %}"></script>
+{% endblock extra_scripts %}
