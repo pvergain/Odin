@@ -16,5 +16,4 @@ class SolutionQuerySet(models.QuerySet):
     def get_solved_solutions_for_student_and_course(self, student, course):
         q_expression = Q(task__gradable=True, status=2) | Q(task__gradable=False, status=6)
 
-        return self.filter(q_expression, task__topic__course=course, student=student)\
-            .values_list('task', flat=True).distinct()
+        return self.filter(q_expression, task__topic__course=course, student=student).distinct('task')

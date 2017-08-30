@@ -12,32 +12,32 @@
     <div class="table-scrollable">
       {% with course.weeks.first as first_week %}
         {% with first_week.lectures.count as first_week_lecture_count %}
-        <table class="table table-striped table-hover">
-          <thead>
-            <tr>
-              <th>Week</th>
-              {% for lecture in first_week.lectures.all %}
-                <th>{{ lecture.date|date:"l" }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tr>
-            {% for week in course.weeks.all %}
+          <table class="table table-striped table-hover">
+            <thead>
               <tr>
-                <td>
-                  {{ week }}
-                </td>
-
-                {% for lecture in week.lectures.all %}
-                  <td>{{ lecture.date }}</td>
-                {% endfor %}
-                {% for _ in week.lectures.count|iterable_from_difference:first_week_lecture_count %}
-                  <td> No lecture </td>
+                <th>Week</th>
+                {% for lecture in first_week.lectures.all %}
+                  <th>{{ lecture.date|date:"l" }}</th>
                 {% endfor %}
               </tr>
-            {% endfor %}
-          </tr>
-        </table>
+            </thead>
+            <tr>
+              {% for week in course.weeks.all %}
+                <tr>
+                  <td>
+                    {{ week }}
+                  </td>
+
+                  {% for lecture in week.lectures.all %}
+                    <td>{{ lecture.date }}</td>
+                  {% endfor %}
+                  {% for _ in week.lectures.count|iterable_from_difference:first_week_lecture_count %}
+                    <td> No lecture </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tr>
+          </table>
         {% endwith %}
       {% endwith %}
     </div>
