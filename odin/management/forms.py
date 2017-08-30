@@ -22,6 +22,7 @@ class ManagementAddCourseForm(forms.ModelForm):
             'facebook_group',
             'slug_url',
             'public',
+            'logo'
         )
         widgets = {
             'start_date': DateInput(),

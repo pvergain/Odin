@@ -8,7 +8,13 @@
   <div class="portlet-body">
     <div class="row">
       <div class="col-md-3">
-        <img src="{% static 'hackman.png' %}" class="img-responsive"/>
+        {% if course.logo %}
+          <a href="{% url 'dashboard:education:user-course-detail' course.id %}">
+            <img src="{{ MEDIA_URL }}{{ course.logo }}" class="img-responsive"/></a>
+        {% else %}
+            <a href="{% url 'dashboard:education:user-course-detail' course.id %}">
+              <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
+        {% endif %}
         <div class="socicons">
           <center>
             <a href="{{ course.repository }}" class="socicon-btn socicon-github tooltips border-white" data-original-title="Github"></a>

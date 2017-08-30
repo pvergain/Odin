@@ -38,6 +38,7 @@ def create_course(*,
                   facebook_group: str=None,
                   video_channel: str=None,
                   slug_url: str=None,
+                  logo: BinaryIO=None,
                   public: bool=True) -> Course:
 
     if Course.objects.filter(name=name).exists():
@@ -51,6 +52,7 @@ def create_course(*,
         facebook_group=facebook_group,
         video_channel=video_channel,
         slug_url=slug_url,
+        logo=logo,
         public=public
     )
 

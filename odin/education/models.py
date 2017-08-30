@@ -48,6 +48,8 @@ class Course(models.Model):
     video_channel = models.URLField(blank=True, null=True)
     facebook_group = models.URLField(blank=True, null=True)
 
+    logo = models.ImageField(blank=True, null=True)
+
     public = models.BooleanField(default=True)
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
