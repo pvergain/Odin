@@ -1,5 +1,5 @@
-import React from 'react';
-import AccordionPanel from './AccordionPanel';
+import React from "react";
+import AccordionPanel from "./AccordionPanel";
 
 export class Accordion extends React.Component {
   render() {
@@ -7,8 +7,8 @@ export class Accordion extends React.Component {
       <div className="portlet box green">
         <div className="portlet-title">
           <div className="caption">
-            <i className="fa fa-gift" />Accordions
-          </div>{' '}
+            <i className="fa fa-gift" />Course assets
+          </div>
           <div className="tools">
             <a
               href="javascript:;"

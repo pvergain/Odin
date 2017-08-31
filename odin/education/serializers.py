@@ -7,7 +7,7 @@ class SolutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solution
         fields = ('id', 'url', 'code', 'check_status_location', 'build_id',
-                  'status', 'test_output', 'return_code', 'file')
+                  'status', 'test_output', 'return_code', 'file', 'student')
 
 
 class MaterialSerializer(serializers.ModelSerializer):

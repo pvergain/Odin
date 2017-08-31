@@ -46,7 +46,8 @@
 {% block extra_scripts %}
   <script src="{% url 'js_reverse' %}"></script>
   <script>
-    window.props = {{ course_topics|safe }}
+   window.props = {{ course_topics|safe }}
+   window.props.studentID = {{ request.user.student.id }}
   </script>
   <script src="{% static 'bundle.js' %}"></script>
 {% endblock extra_scripts %}

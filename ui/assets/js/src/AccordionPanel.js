@@ -1,5 +1,6 @@
 import React from "react";
 import MaterialsList from "./MaterialsList";
+import TasksList from "./TasksList";
 
 const AccordionPanel = props => {
   const collapseID = `collapse_${props.topic.id}`;
@@ -31,6 +32,16 @@ const AccordionPanel = props => {
               </div>
               <div className="ribbon-content">
                 <MaterialsList materials={props.topic.materials} />
+              </div>
+            </div>
+          </div>
+          <div className="col-md-8">
+            <div className="mt-element-ribbon bg-grey-steel">
+              <div className="ribbon ribbon-shadow ribbon-clip ribbon-color-success uppercase">
+                <div className="ribbon-sub ribbon-clip" />Tasks
+              </div>
+              <div className="ribbon-content">
+                <TasksList tasks={props.topic.tasks} />
               </div>
             </div>
           </div>
