@@ -28,7 +28,8 @@ THIRD_PARTY_APPS = [
     'captcha',
     'widget_tweaks',
     'django_filters',
-    'easy_thumbnails'
+    'easy_thumbnails',
+    'django_js_reverse'
 ]
 
 LOCAL_APPS = [

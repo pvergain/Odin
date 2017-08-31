@@ -44,6 +44,7 @@
 {% endblock page_content %}
 
 {% block extra_scripts %}
+  <script src="{% url 'js_reverse' %}"></script>
   <script>
     window.props = {{ course_topics|safe }}
   </script>

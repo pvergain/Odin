@@ -1,25 +1,28 @@
-import React from 'react';
+import React from "react";
+
+const ListItem = props => {
+  const materialUrl = Urls["dashboard:education:material-detail"]({
+    material_id: props.material.id
+  });
+
+  return (
+    <a href={materialUrl} className="list-group-item">
+      {props.material.identifier}
+    </a>
+  );
+};
 
 class MaterialsList extends React.Component {
   render() {
-    const {materials} = this.props;
+    const { materials } = this.props;
 
-    return materials.length > 0 ? (
-      <div className="list-group">
-        {materials.map(material => {
-          return (
-            <a
-              href={material.url}
-              key={material.ObjectID}
-              className="list-group-item">
-              {material.identifier}
-            </a>
-          );
-        })}
-      </div>
-    ) : (
-      <div />
-    );
+    return materials.length > 0
+      ? <div className="list-group">
+          {materials.map(material => {
+            return <ListItem material={material} key={material.id} />;
+          })}
+        </div>
+      : <div />;
   }
 }
 

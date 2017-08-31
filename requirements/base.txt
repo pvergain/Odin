@@ -55,3 +55,6 @@ djangorestframework==3.6.3
 
 # Markdown parsing
 mistune==0.7.4
+
+# Urls
+django-js-reverse==0.7.3
