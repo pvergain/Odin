@@ -5,10 +5,10 @@
     <div class="caption">
       <i class="fa fa-comments"></i> Course schedule </div>
     <div class="tools">
-      <a href="javascript:;" class="expand"> </a>
+      <a href="javascript:;" class="collapse"> </a>
     </div>
   </div>
-  <div class="portlet-body default-collapsed">
+  <div class="portlet-body default-expand">
     <div class="table-scrollable">
       {% with course.weeks.first as first_week %}
         {% with first_week.lectures.count as first_week_lecture_count %}

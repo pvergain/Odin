@@ -1,5 +1,5 @@
-import React from 'react';
-import MaterialsList from './MaterialsList';
+import React from "react";
+import MaterialsList from "./MaterialsList";
 
 const AccordionPanel = props => {
   const collapseID = `collapse_${props.topic.id}`;
@@ -12,7 +12,8 @@ const AccordionPanel = props => {
             data-toggle="collapse"
             data-parent="#accordion1"
             href={`#${collapseID}`}
-            aria-expanded="true">
+            aria-expanded="true"
+          >
             {props.topic.name}
           </a>
         </h4>
@@ -20,10 +21,18 @@ const AccordionPanel = props => {
       <div
         id={collapseID}
         className="panel-collapse collapse in"
-        aria-expanded="true">
+        aria-expanded="true"
+      >
         <div className="panel-body">
-          <div className="col-md-5">
-            <MaterialsList materials={props.topic.materials} />
+          <div className="col-md-4">
+            <div className="mt-element-ribbon bg-grey-steel">
+              <div className="ribbon ribbon-shadow ribbon-clip ribbon-color-success uppercase">
+                <div className="ribbon-sub ribbon-clip" />Materials
+              </div>
+              <div className="ribbon-content">
+                <MaterialsList materials={props.topic.materials} />
+              </div>
+            </div>
           </div>
         </div>
       </div>

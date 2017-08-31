@@ -18,19 +18,19 @@
       <div>
   {% endif %}
   <div class="row">
-    <div class="col-md-6">
-      {% include 'education/partial/progress_bar.html' with progress_title="Valid Solutions" progress_value=tasks_ratio %}
-    </div>
-    <div class="col-md-6">
-      <!-- Course attendance is hardcoded until mac-checking and attendance back-end logic is implemented -->
+    <div class="col-md-5">
       {% include 'education/partial/progress_bar.html' with progress_title="Lecture attendance" progress_value=0 %}
+    </div>
+    <div class="col-md-7">
+      <!-- Course attendance is hardcoded until mac-checking and attendance back-end logic is implemented -->
+      {% include 'education/partial/progress_bar.html' with progress_title="Valid Solutions" progress_value=tasks_ratio %}
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div class="col-md-6">
+        <div class="col-md-5">
           {% include 'education/partial/course_schedule.html' with course=course %}
         </div>
-        <div class="col-md-6">
+        <div class="col-md-7">
           <div id="root">
           </div>
         </div>
