@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
+import MaterialsList from './MaterialsList';
 
 const AccordionPanel = props => {
-  console.log(props.topic);
   const collapseID = `collapse_${props.topic.id}`;
   return (
     <div className="panel panel-default">
@@ -12,19 +12,19 @@ const AccordionPanel = props => {
             data-toggle="collapse"
             data-parent="#accordion1"
             href={`#${collapseID}`}
-            aria-expanded="true"
-          >
-            {" "}{props.topic.name}{" "}
+            aria-expanded="true">
+            {props.topic.name}
           </a>
         </h4>
       </div>
       <div
         id={collapseID}
         className="panel-collapse collapse in"
-        aria-expanded="true"
-      >
+        aria-expanded="true">
         <div className="panel-body">
-          <p>Sample Accordion</p>
+          <div className="col-md-5">
+            <MaterialsList materials={props.topic.materials} />
+          </div>
         </div>
       </div>
     </div>
