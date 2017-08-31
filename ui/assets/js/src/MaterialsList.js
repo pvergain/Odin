@@ -4,11 +4,7 @@ class MaterialsList extends React.Component {
   render() {
     const {materials} = this.props;
 
-    // <a key={material.ObjectID} href={material.url} classNameName="list-group-item">
-    //   material.name
-    // </a>;
-
-    return (
+    return materials.length > 0 ? (
       <div className="list-group">
         {materials.map(material => {
           return (
@@ -21,6 +17,8 @@ class MaterialsList extends React.Component {
           );
         })}
       </div>
+    ) : (
+      <div />
     );
   }
 }
