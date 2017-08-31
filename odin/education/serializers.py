@@ -6,14 +6,14 @@ from odin.education.models import Topic, IncludedTask, Solution, IncludedMateria
 class SolutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solution
-        fields = ('url', 'code', 'check_status_location', 'build_id',
+        fields = ('id', 'url', 'code', 'check_status_location', 'build_id',
                   'status', 'test_output', 'return_code', 'file')
 
 
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncludedMaterial
-        fields = ('identifier', 'url', 'content')
+        fields = ('id', 'identifier', 'url', 'content')
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IncludedTask
-        fields = ('name', 'description', 'gradable', 'solutions')
+        fields = ('id', 'name', 'description', 'gradable', 'solutions')
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -30,4 +30,4 @@ class TopicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Topic
-        fields = ('name', 'tasks', 'materials')
+        fields = ('id', 'name', 'tasks', 'materials')
