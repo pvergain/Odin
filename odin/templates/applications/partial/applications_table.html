@@ -19,19 +19,23 @@
       </div>
       <div class="portlet-body">
         {% for application in applications %}
-          <div class="well well-lg">
-            <div class="row">
-            <h4 class="block">{{ application.application_info.course.name }}
-              {% if application.is_completed %}
-                <i class="icon-check"></i>
-                <p>Your application is completed!</p>
-              {% else %}
-                <i class="icon-close"></i>
-                <p>Your application is not completed!</p>
-              {% endif %}
+          <div class="mt-element-ribbon bg-grey-steel">
+            {% if application.is_completed %}
+            <div class="ribbon ribbon-shadow ribbon-color-success uppercase">
+              {{ application.application_info.course.name }}       <i class="icon-check"></i>
+            </div>
+            <h4 class="ribbon-content"><strong>Your application is completed!</strong></h4>
+            {% else %}
+            <div class="ribbon ribbon-shadow ribbon-color-success uppercase">
+              {{ application.application_info.course.name }}       <i class="icon-close"></i>
+            </div>
+            <h4 class="ribbon-content"><strong>Your application is not completed!</strong></h4>
+            {% endif %}
+            <h4 class="ribbon-content">
+              <strong>Application Tasks:</strong>
             </h4>
-            <h4> Application tasks: </h4>
-            <ul>
+            <h4 class="ribbon-content">
+              <ul>
               {% for task in application.application_info.tasks.all %}
                 {% if task.solutions.exists %}
                   <li><p>{{ task.name }} <i class="icon-check"></i></p></li>
@@ -40,15 +44,11 @@
                 {% endif %}
               {% endfor %}
             </ul>
-            <div class="col-md-4 col-md-offset-10">
-              <a href={% url 'dashboard:applications:edit-application' application.application_info.course.id %}>
-                <button type="button" class="btn-lg btn green uppercase">Edit application</button>
-              </a>
-            </div>
-          </div>
+          </h4>
           </div>
         {% endfor %}
       </div>
     </div>
   </div>
 </div>
+
