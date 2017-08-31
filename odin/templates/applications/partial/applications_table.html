@@ -22,12 +22,12 @@
           <div class="mt-element-ribbon bg-grey-steel">
             {% if application.is_completed %}
             <div class="ribbon ribbon-shadow ribbon-color-success uppercase">
-              {{ application.application_info.course.name }}       <i class="icon-check"></i>
+              <h4>{{ application.application_info.course.name }}       <i class="icon-check"></i></h4>
             </div>
             <h4 class="ribbon-content"><strong>Your application is completed!</strong></h4>
             {% else %}
             <div class="ribbon ribbon-shadow ribbon-color-success uppercase">
-              {{ application.application_info.course.name }}       <i class="icon-close"></i>
+              <h4>{{ application.application_info.course.name }}       <i class="icon-close"></i></h4>
             </div>
             <h4 class="ribbon-content"><strong>Your application is not completed!</strong></h4>
             {% endif %}
@@ -43,8 +43,13 @@
                   <li><p>{{ task.name }} <i class="icon-close"></i></p></li>
                 {% endif %}
               {% endfor %}
-            </ul>
-          </h4>
+              <p class="ribbon-content">
+                <a href="{% url 'dashboard:applications:edit-application' application.application_info.course.id %}">
+                  <button class="pull-right btn btn-lg green uppercase">Edit application</button>
+                </a>
+              </p>
+              </ul>
+            </h4>
           </div>
         {% endfor %}
       </div>
