@@ -6,10 +6,16 @@ export const filterSolutions = solution => {
   );
 };
 
+export const getCountOfPassedTasks = tasks => {
+  const passed_tasks = tasks.map(
+    task => (hasPassingSolutionForTask(task) ? 1 : 0),
+  );
+  return passed_tasks.reduce((x, y) => x + y, 0);
+};
+
 export const hasPassingSolutionForTask = task => {
   const solutions = task.solutions;
-  console.log(solutions.filter(this.filterSolutions));
-  if (solutions.filter(this.filterSolutions).length > 0) {
+  if (solutions.filter(filterSolutions).length > 0) {
     return true;
   }
   return false;
