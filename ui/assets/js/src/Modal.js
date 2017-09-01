@@ -1,16 +1,16 @@
-import React from 'react';
-import SubmitFooter from './SubmitFooter';
+import React from "react";
+import SubmitFooter from "./SubmitFooter";
 
-import CodeMirror from 'react-codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/neat.css';
-import 'codemirror/mode/python/python';
+import CodeMirror from "react-codemirror";
+import "codemirror/lib/codemirror.css";
+import "codemirror/theme/neat.css";
+import "codemirror/mode/python/python";
 
 class Modal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {code: ''};
+    this.state = { code: "" };
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -19,18 +19,31 @@ class Modal extends React.Component {
   }
 
   handleChange(newCode) {
-    this.setState({code: newCode});
+    this.setState({ code: newCode });
+  }
+
+  getSubmitSolutionUrl(course, task) {
+    return task.gradable
+      ? Urls["dashboard:education:add-gradable-solution"]({
+          course_id: course,
+          task_id: task.id
+        })
+      : Urls["dashboard:education:add-not-gradable-solution"]({
+          course_id: course,
+          task_id: task.id
+        });
   }
 
   render() {
-    const {modalID, task} = this.props;
-    const {code} = this.state;
+    const { modalID, task, course } = this.props;
+    const { code } = this.state;
+    const submitSolutionUrl = this.getSubmitSolutionUrl(course, task);
     const options = {
       lineNumbers: true,
       matchBrackets: true,
       indentUnit: 4,
-      theme: 'neat',
-      mode: 'python',
+      theme: "neat",
+      mode: "python"
     };
 
     return (
@@ -38,14 +51,21 @@ class Modal extends React.Component {
         id={`${modalID}`}
         className="modal fade"
         aria-hidden="true"
-        style={{display: 'none'}}>
+        style={{ display: "none" }}
+      >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h4 className="modal-title">{task.name}</h4>
+              <h4 className="modal-title">
+                {task.name}
+              </h4>
             </div>
             <div className="modal-body">
-              <form method="POST" action="">
+              <form
+                id="submit_solution_form"
+                method="POST"
+                action={submitSolutionUrl}
+              >
                 <CodeMirror
                   value={code}
                   onChange={this.handleChange}

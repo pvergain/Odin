@@ -32,18 +32,18 @@ const ListItem = props => {
           </div>
         </div>
       </div>
-      <Modal modalID={modalID} task={props.task} />
+      <Modal modalID={modalID} task={props.task} course={props.course} />
     </div>
   );
 };
 
 class TasksList extends React.Component {
   render() {
-    const { tasks } = this.props;
+    const { tasks, course } = this.props;
     return (
       <div className="list-group">
         {tasks.map(task => {
-          return <ListItem key={task.id} task={task} />;
+          return <ListItem key={task.id} task={task} course={course} />;
         })}
       </div>
     );
