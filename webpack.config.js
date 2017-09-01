@@ -1,22 +1,26 @@
-var path = require("path");
-var APP_DIR = path.resolve(__dirname, "./ui/assets/js/src");
-var BUILD_DIR = path.resolve(__dirname, "./dist");
+var path = require('path');
+var APP_DIR = path.resolve(__dirname, './ui/assets/js/src');
+var BUILD_DIR = path.resolve(__dirname, './dist');
 
 module.exports = {
-  entry: APP_DIR + "/App.js",
+  entry: APP_DIR + '/App.js',
   output: {
     path: BUILD_DIR,
-    filename: "bundle.js"
+    filename: 'bundle.js',
   },
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        use: "babel-loader"
-      }
-    ]
+        use: 'babel-loader',
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
   },
   resolve: {
-    extensions: [".js", ".jsx"]
-  }
+    extensions: ['.js', '.jsx', '.css'],
+  },
 };
