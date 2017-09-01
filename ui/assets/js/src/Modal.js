@@ -2,10 +2,9 @@ import React from 'react';
 import SubmitFooter from './SubmitFooter';
 
 import CodeMirror from 'react-codemirror';
-import '../../../bower_components/codemirror/lib/codemirror.css';
-import '../../../bower_components/codemirror/theme/neat.css';
-import '../../../bower_components/codemirror/mode/python/python';
-import '../../../bower_components/codemirror/lib/codemirror.js';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/neat.css';
+import 'codemirror/mode/python/python';
 
 class Modal extends React.Component {
   constructor(props) {
@@ -29,6 +28,7 @@ class Modal extends React.Component {
     const options = {
       lineNumbers: true,
       matchBrackets: true,
+      indentUnit: 4,
       theme: 'neat',
       mode: 'python',
     };
