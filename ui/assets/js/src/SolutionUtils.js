@@ -8,7 +8,7 @@ export const filterSolutions = solution => {
 
 export const getCountOfPassedTasks = tasks => {
   const passed_tasks = tasks.map(
-    task => (hasPassingSolutionForTask(task) ? 1 : 0),
+    task => (hasPassingSolutionForTask(task) ? 1 : 0)
   );
   return passed_tasks.reduce((x, y) => x + y, 0);
 };
