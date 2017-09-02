@@ -43,6 +43,10 @@ class Modal extends React.Component {
       data: {
         code: this.state.code,
         csrfmiddlewaretoken: this.csrfTokenInput.value
+      },
+      dataType: "json",
+      success: data => {
+        console.log(data);
       }
     });
   }

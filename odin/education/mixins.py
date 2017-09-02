@@ -51,11 +51,16 @@ class SubmitSolutionMixin:
     template_name = 'education/submit_solution.html'
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:student-solution-detail',
-                            kwargs={'course_id': self.course.id,
-                                    'task_id': self.kwargs.get('task_id'),
-                                    'solution_id': self.solution_id})
+        if not self.request.is_ajax():
+            return reverse_lazy('dashboard:education:student-solution-detail',
+                                kwargs={'course_id': self.course.id,
+                                        'task_id': self.kwargs.get('task_id'),
+                                        'solution_id': self.solution_id})
 
+        return reverse_lazy('dashboard:education:student-solution-detail-api',
+                            kwargs={
+                                'solution_id': self.solution_id
+                            })
 
 class TaskViewMixin:
     def get_context_data(self, **kwargs):

@@ -23,7 +23,8 @@ from .views import (
     StudentSolutionDetailView,
     EditIncludedTestView,
     MaterialDetailView,
-    AllStudentsSolutionsView
+    AllStudentsSolutionsView,
+    SolutionDetailAPIView
 )
 
 
@@ -155,4 +156,10 @@ urlpatterns = [
         view=AllStudentsSolutionsView.as_view(),
         name='all-students-solutions'
     ),
+    url(
+        regex='^solutions/(?P<solution_id>[0-9]+)/$',
+        view=SolutionDetailAPIView.as_view(),
+        name='student-solution-detail-api'
+    ),
+
 ]

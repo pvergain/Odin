@@ -1,5 +1,6 @@
 import json
 
+from rest_framework import generics
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -31,6 +32,7 @@ from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
     IsStudentInCoursePermission,
+    IsStudentOrTeacherInCourseAPIPermission
 )
 from .mixins import (
     CourseViewMixin,
@@ -59,7 +61,7 @@ from .services import (
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course
 )
-from .serializers import TopicSerializer
+from .serializers import TopicSerializer, SolutionSerializer
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -96,7 +98,8 @@ class CourseDetailView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        topics = TopicSerializer(self.course.topics.all(), many=True)
+        topic_queryset = self.course.topics.prefetch_related('tasks__solutions', 'materials')
+        topics = TopicSerializer(topic_queryset, many=True)
         course_topics = {}
         course_topics['data'] = topics.data
         context['course_topics'] = json.dumps(course_topics)
@@ -643,3 +646,10 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
 
     def get_queryset(self):
         return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
+
+
+class SolutionDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = SolutionSerializer
+    permission_classes = (IsStudentOrTeacherInCourseAPIPermission, )
+    queryset = Solution.objects.all()
+    lookup_url_kwarg = 'solution_id'
