@@ -66,7 +66,13 @@ class Modal extends React.Component {
                 method="POST"
                 action={submitSolutionUrl}
               >
+                <input
+                  type="hidden"
+                  name="csrfmiddlewaretoken"
+                  value={window.props.csrfToken}
+                />
                 <CodeMirror
+                  name="code"
                   value={code}
                   onChange={this.handleChange}
                   options={options}

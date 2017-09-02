@@ -41,13 +41,16 @@
 
   </div>
       </div>
+
 {% endblock page_content %}
 
 {% block extra_scripts %}
+  {% csrf_token %}
   <script src="{% url 'js_reverse' %}"></script>
   <script>
-   window.props = {{ course_topics|safe }}
-   window.props.studentID = {{ request.user.student.id }}
+   window.props = {{ course_topics|safe }};
+   window.props.studentID = {{ request.user.student.id }};
+   window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   </script>
   <script src="{% static 'bundle.js' %}"></script>
 {% endblock extra_scripts %}
