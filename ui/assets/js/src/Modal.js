@@ -12,10 +12,11 @@ class Modal extends React.Component {
 
     this.state = { code: "" };
     this.handleChange = this.handleChange.bind(this);
+    this.performSubmitSolution = this.performSubmitSolution.bind(this);
   }
 
   componentDidMount() {
-    this.textInput.getCodeMirror().refresh();
+    this.codeInput.getCodeMirror().refresh();
   }
 
   handleChange(newCode) {
@@ -32,6 +33,18 @@ class Modal extends React.Component {
           course_id: course,
           task_id: task.id
         });
+  }
+
+  performSubmitSolution(event) {
+    event.preventDefault();
+    $.ajax({
+      type: event.target.method,
+      url: event.target.action,
+      data: {
+        code: this.state.code,
+        csrfmiddlewaretoken: this.csrfTokenInput.value
+      }
+    });
   }
 
   render() {
@@ -62,7 +75,7 @@ class Modal extends React.Component {
             </div>
             <div className="modal-body">
               <form
-                id="submit_solution_form"
+                onSubmit={this.performSubmitSolution}
                 method="POST"
                 action={submitSolutionUrl}
               >
@@ -70,6 +83,9 @@ class Modal extends React.Component {
                   type="hidden"
                   name="csrfmiddlewaretoken"
                   value={window.props.csrfToken}
+                  ref={input => {
+                    this.csrfTokenInput = input;
+                  }}
                 />
                 <CodeMirror
                   name="code"
@@ -77,12 +93,12 @@ class Modal extends React.Component {
                   onChange={this.handleChange}
                   options={options}
                   ref={input => {
-                    this.textInput = input;
+                    this.codeInput = input;
                   }}
                 />
+                <SubmitFooter />
               </form>
             </div>
-            <SubmitFooter />
           </div>
         </div>
       </div>
