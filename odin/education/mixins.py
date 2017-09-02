@@ -62,6 +62,7 @@ class SubmitSolutionMixin:
                                 'solution_id': self.solution_id
                             })
 
+
 class TaskViewMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
