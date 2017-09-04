@@ -1,6 +1,6 @@
-import React from "react";
-import SolutionStatus from "./SolutionStatus";
-import SubmitSolutionModal from "./SubmitSolutionModal";
+import React from 'react';
+import SolutionStatus from './SolutionStatus';
+import SubmitSolutionModal from './SubmitSolutionModal';
 
 const ListItem = props => {
   const modalID = `submit_${props.task.id}`;
@@ -8,9 +8,7 @@ const ListItem = props => {
     <div>
       <div className="list-group-item">
         <div className="row">
-          <div className="col-md-6">
-            {props.task.name}
-          </div>
+          <div className="col-md-6">{props.task.name}</div>
           <div className="col-md-1">
             <SolutionStatus task={props.task} />
           </div>
@@ -24,8 +22,7 @@ const ListItem = props => {
               <a
                 href={`#${modalID}`}
                 data-toggle="modal"
-                className="btn btn-default uppercase"
-              >
+                className="btn btn-default uppercase">
                 Submit
               </a>
             </div>
@@ -37,13 +34,14 @@ const ListItem = props => {
         task={props.task}
         course={props.course}
       />
+      <div id="solution-detail-modal" />
     </div>
   );
 };
 
 class TasksList extends React.Component {
   render() {
-    const { tasks, course } = this.props;
+    const {tasks, course} = this.props;
     return (
       <div className="list-group">
         {tasks.map(task => {
