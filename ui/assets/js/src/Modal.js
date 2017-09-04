@@ -1,71 +1,10 @@
 import React from "react";
-import SubmitFooter from "./SubmitFooter";
-
-import CodeMirror from "react-codemirror";
-import "codemirror/lib/codemirror.css";
-import "codemirror/theme/neat.css";
-import "codemirror/mode/python/python";
 
 class Modal extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = { code: "" };
-    this.handleChange = this.handleChange.bind(this);
-    this.performSubmitSolution = this.performSubmitSolution.bind(this);
-  }
-
-  componentDidMount() {
-    this.codeInput.getCodeMirror().refresh();
-  }
-
-  handleChange(newCode) {
-    this.setState({ code: newCode });
-  }
-
-  getSubmitSolutionUrl(course, task) {
-    return task.gradable
-      ? Urls["dashboard:education:add-gradable-solution"]({
-          course_id: course,
-          task_id: task.id
-        })
-      : Urls["dashboard:education:add-not-gradable-solution"]({
-          course_id: course,
-          task_id: task.id
-        });
-  }
-
-  performSubmitSolution(event) {
-    event.preventDefault();
-    $.ajax({
-      type: event.target.method,
-      url: event.target.action,
-      data: {
-        code: this.state.code,
-        csrfmiddlewaretoken: this.csrfTokenInput.value
-      },
-      dataType: "json",
-      success: data => {
-        console.log(data);
-      }
-    });
-  }
-
   render() {
-    const { modalID, task, course } = this.props;
-    const { code } = this.state;
-    const submitSolutionUrl = this.getSubmitSolutionUrl(course, task);
-    const options = {
-      lineNumbers: true,
-      matchBrackets: true,
-      indentUnit: 4,
-      theme: "neat",
-      mode: "python"
-    };
-
     return (
       <div
-        id={`${modalID}`}
+        id={`${this.props.modalID}`}
         className="modal fade"
         aria-hidden="true"
         style={{ display: "none" }}
@@ -74,34 +13,11 @@ class Modal extends React.Component {
           <div className="modal-content">
             <div className="modal-header">
               <h4 className="modal-title">
-                {task.name}
+                {this.props.modalTitle}
               </h4>
             </div>
             <div className="modal-body">
-              <form
-                onSubmit={this.performSubmitSolution}
-                method="POST"
-                action={submitSolutionUrl}
-              >
-                <input
-                  type="hidden"
-                  name="csrfmiddlewaretoken"
-                  value={window.props.csrfToken}
-                  ref={input => {
-                    this.csrfTokenInput = input;
-                  }}
-                />
-                <CodeMirror
-                  name="code"
-                  value={code}
-                  onChange={this.handleChange}
-                  options={options}
-                  ref={input => {
-                    this.codeInput = input;
-                  }}
-                />
-                <SubmitFooter />
-              </form>
+              {this.props.children}
             </div>
           </div>
         </div>

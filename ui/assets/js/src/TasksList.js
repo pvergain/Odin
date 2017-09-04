@@ -1,6 +1,6 @@
 import React from "react";
 import SolutionStatus from "./SolutionStatus";
-import Modal from "./Modal";
+import SubmitSolutionModal from "./SubmitSolutionModal";
 
 const ListItem = props => {
   const modalID = `submit_${props.task.id}`;
@@ -32,7 +32,11 @@ const ListItem = props => {
           </div>
         </div>
       </div>
-      <Modal modalID={modalID} task={props.task} course={props.course} />
+      <SubmitSolutionModal
+        modalID={modalID}
+        task={props.task}
+        course={props.course}
+      />
     </div>
   );
 };
