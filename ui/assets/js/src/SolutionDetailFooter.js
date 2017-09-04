@@ -1,28 +1,27 @@
 import React from "react";
 
-class SubmitFooter extends React.Component {
+class SolutionDetailFooter extends React.Component {
   render() {
-    const closeButtonID = `close_${this.props.modalID}`;
     return (
       <div className="modal-footer">
         <button
-          id={closeButtonID}
           type="button"
-          className="btn dark btn-outline"
           data-dismiss="modal"
+          className="btn dark btn-outline"
+          onClick={() => this.props.handleCloseClick()}
         >
           Close
         </button>
         <button
-          type="submit"
+          type="button"
           className="btn green uppercase"
-          onClick={() => this.props.handleModalExchange(closeButtonID)}
+          onClick={() => this.props.handleResubmitClick()}
         >
-          Submit
+          Resubmit
         </button>
       </div>
     );
   }
 }
 
-export default SubmitFooter;
+export default SolutionDetailFooter;
