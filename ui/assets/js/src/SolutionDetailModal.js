@@ -7,7 +7,7 @@ class SolutionDetailModal extends React.Component {
     return (
       <Modal modalID={modalID} modalTitle={task} styles={{display: 'block'}}>
         <div className="portlet light">
-          <div className="portlet-body">IVAN</div>
+          <div className="portlet-body" />
         </div>
       </Modal>
     );
