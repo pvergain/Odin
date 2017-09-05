@@ -15,7 +15,7 @@ class SolutionDetailModal extends React.Component {
   }
 
   render() {
-    const { modalID, submitSolutionModalID, modalTitle } = this.props;
+    const { modalID, submitSolutionModalID, modalTitle, task } = this.props;
     return (
       <Modal
         modalID={modalID}
@@ -25,7 +25,11 @@ class SolutionDetailModal extends React.Component {
         <div className="portlet light">
           <div className="portlet-body">
             <p>
-              {this.props.solution.id}
+              {task.gradable
+                ? this.props.solution.id
+                : <a target="_blank" href={this.props.solution.url}>
+                    {this.props.solution.url}
+                  </a>}
             </p>
           </div>
         </div>
