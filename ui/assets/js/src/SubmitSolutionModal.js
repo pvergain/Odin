@@ -16,7 +16,7 @@ class SubmitSolutionModal extends React.Component {
     this.state = { code: "" };
     this.handleChange = this.handleChange.bind(this);
     this.performSubmitSolution = this.performSubmitSolution.bind(this);
-    this.closeModal = this.closeModal.bind(this);
+    this.focusDetailModal = this.focusDetailModal.bind(this);
   }
 
   componentDidMount() {
@@ -41,6 +41,10 @@ class SubmitSolutionModal extends React.Component {
 
   performSubmitSolution(event) {
     event.preventDefault();
+    //TODO: Add adequate validation and representation
+    if (this.state.code.length < 1) return;
+    const closeButtonID = `close_${this.props.modalID}`;
+
     $.ajax({
       type: event.target.method,
       url: event.target.action,
@@ -50,13 +54,25 @@ class SubmitSolutionModal extends React.Component {
       },
       dataType: "json",
       success: data => {
-        return;
+        this.props.setResponseData(data);
+        this.focusDetailModal(closeButtonID, this.props.solutionDetailModalID);
       }
     });
   }
 
-  closeModal(closeButtonID) {
+  focusDetailModal(closeButtonID, solutionDetailModalID) {
     $(`#${closeButtonID}`).click();
+    ReactDOM.render(
+      <a
+        id={`anchor${solutionDetailModalID}`}
+        href={`#${solutionDetailModalID}`}
+        data-toggle="modal"
+      />,
+      document.getElementById(`anchor_root_${solutionDetailModalID}`)
+    );
+    const anchor = $(`#anchor${solutionDetailModalID}`);
+    anchor.click();
+    anchor.remove();
   }
 
   render() {

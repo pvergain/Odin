@@ -13,11 +13,7 @@ class SubmitFooter extends React.Component {
         >
           Close
         </button>
-        <button
-          type="submit"
-          className="btn green uppercase"
-          onClick={() => this.props.handleModalExchange(closeButtonID)}
-        >
+        <button type="submit" className="btn green uppercase">
           Submit
         </button>
       </div>
