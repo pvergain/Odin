@@ -9,7 +9,7 @@ class Modal extends React.Component {
         aria-hidden="true"
         style={this.props.styles}
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-full">
           <div className="modal-content">
             <div className="modal-header">
               <h4 className="modal-title">
