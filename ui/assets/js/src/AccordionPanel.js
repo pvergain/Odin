@@ -22,8 +22,8 @@ const AccordionPanel = props => {
       </div>
       <div
         id={collapseID}
-        className="panel-collapse collapse in"
-        aria-expanded="true"
+        className="panel-collapse collapse"
+        aria-expanded="false"
       >
         <div className="panel-body">
           <div className="col-md-4">
