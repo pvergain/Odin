@@ -1,20 +1,20 @@
-import React from "react";
-import SolutionStatus from "./SolutionStatus";
-import SubmitSolutionModal from "./SubmitSolutionModal";
-import SolutionDetailModal from "./SolutionDetailModal";
+import React from 'react';
+import SolutionStatus from './SolutionStatus';
+import SubmitSolutionModal from './SubmitSolutionModal';
+import SolutionDetailModal from './SolutionDetailModal';
 
 class ListItem extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      responseData: {}
+      responseData: {},
     };
     this.setResponseData = this.setResponseData.bind(this);
   }
 
   setResponseData(data) {
-    this.setState({ responseData: data });
+    this.setState({responseData: data});
   }
 
   render() {
@@ -25,9 +25,7 @@ class ListItem extends React.Component {
       <div>
         <div className="list-group-item">
           <div className="row">
-            <div className="col-md-6">
-              {this.props.task.name}
-            </div>
+            <div className="col-md-6">{this.props.task.name}</div>
             <div className="col-md-1">
               <SolutionStatus task={this.props.task} />
             </div>
@@ -39,10 +37,10 @@ class ListItem extends React.Component {
                   </button>
                 </a>
                 <a
+                  id={`anchor_${modalID}`}
                   href={`#${modalID}`}
                   data-toggle="modal"
-                  className="btn btn-default uppercase"
-                >
+                  className="btn btn-default uppercase">
                   Submit
                 </a>
               </div>
@@ -58,6 +56,7 @@ class ListItem extends React.Component {
         />
         <SolutionDetailModal
           modalID={solutionDetailModalID}
+          submitSolutionModalID={modalID}
           modalTitle={this.props.task.name}
           solution={this.state.responseData}
         />
@@ -68,7 +67,7 @@ class ListItem extends React.Component {
 
 class TasksList extends React.Component {
   render() {
-    const { tasks, course } = this.props;
+    const {tasks, course} = this.props;
     return (
       <div className="list-group">
         {tasks.map(task => {
