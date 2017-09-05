@@ -1,3 +1,5 @@
+const MAX_REQUEST_COUNT = 25;
+
 export const filterSolutions = solution => {
   const studentID = window.props.studentID;
   return (
@@ -8,7 +10,7 @@ export const filterSolutions = solution => {
 
 export const getCountOfPassedTasks = tasks => {
   const passed_tasks = tasks.map(
-    task => (hasPassingSolutionForTask(task) ? 1 : 0)
+    task => (hasPassingSolutionForTask(task) ? 1 : 0),
   );
   return passed_tasks.reduce((x, y) => x + y, 0);
 };
@@ -19,4 +21,29 @@ export const hasPassingSolutionForTask = task => {
     return true;
   }
   return false;
+};
+
+export const pollSolution = (solution_id, setResponseData) => {
+  let requestCount = 0;
+  const pollingURL = Urls['dashboard:education:student-solution-detail-api']({
+    solution_id: solution_id,
+  });
+  const interval = setInterval(() => {
+    $.ajax({
+      type: 'GET',
+      url: pollingURL,
+      dataType: 'json',
+      success: data => {
+        requestCount++;
+        setResponseData(data);
+        if (
+          data.status === 2 ||
+          data.status === 3 ||
+          requestCount > MAX_REQUEST_COUNT
+        ) {
+          clearInterval(interval);
+        }
+      },
+    });
+  }, 2000);
 };

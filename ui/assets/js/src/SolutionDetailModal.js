@@ -1,6 +1,6 @@
-import React from "react";
-import Modal from "./Modal";
-import SolutionDetailFooter from "./SolutionDetailFooter";
+import React from 'react';
+import Modal from './Modal';
+import SolutionDetailFooter from './SolutionDetailFooter';
 
 class SolutionDetailModal extends React.Component {
   constructor(props) {
@@ -15,21 +15,22 @@ class SolutionDetailModal extends React.Component {
   }
 
   render() {
-    const { modalID, submitSolutionModalID, modalTitle, task } = this.props;
+    const {modalID, submitSolutionModalID, modalTitle, task} = this.props;
     return (
       <Modal
         modalID={modalID}
         modalTitle={modalTitle}
-        styles={{ display: "none" }}
-      >
+        styles={{display: 'none'}}>
         <div className="portlet light">
           <div className="portlet-body">
             <p>
-              {task.gradable
-                ? this.props.solution.id
-                : <a target="_blank" href={this.props.solution.url}>
-                    {this.props.solution.url}
-                  </a>}
+              {task.gradable ? (
+                this.props.solution.test_output
+              ) : (
+                <a target="_blank" href={this.props.solution.url}>
+                  {this.props.solution.url}
+                </a>
+              )}
             </p>
           </div>
         </div>
