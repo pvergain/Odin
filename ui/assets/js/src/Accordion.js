@@ -1,5 +1,5 @@
-import React from "react";
-import AccordionPanel from "./AccordionPanel";
+import React from 'react';
+import AccordionPanel from './AccordionPanel';
 
 export class Accordion extends React.Component {
   render() {
@@ -20,7 +20,11 @@ export class Accordion extends React.Component {
         </div>
         <div className="portlet-body">
           <div className="panel-group accordion" id="accordion1">
-            <AccordionPanel topic={this.props.data[1]} />
+            {this.props.data.map(item => (
+              <div key={item.id}>
+                <AccordionPanel topic={item} />
+              </div>
+            ))}
           </div>
         </div>
       </div>

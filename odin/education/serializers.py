@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from odin.education.models import Topic, IncludedTask, Solution, IncludedMaterial
+from odin.education.models import (
+    Topic,
+    IncludedTask,
+    Solution,
+    IncludedMaterial,
+    IncludedTest
+)
 
 
 class SolutionSerializer(serializers.ModelSerializer):
@@ -16,12 +22,21 @@ class MaterialSerializer(serializers.ModelSerializer):
         fields = ('id', 'identifier', 'url', 'content')
 
 
+class TestSerializer(serializers.ModelSerializer):
+    language = serializers.StringRelatedField()
+
+    class Meta:
+        model = IncludedTest
+        fields = ('language', )
+
+
 class TaskSerializer(serializers.ModelSerializer):
     solutions = SolutionSerializer(many=True)
+    test = TestSerializer()
 
     class Meta:
         model = IncludedTask
-        fields = ('id', 'name', 'description', 'gradable', 'solutions')
+        fields = ('id', 'test', 'name', 'description', 'gradable', 'solutions')
 
 
 class TopicSerializer(serializers.ModelSerializer):

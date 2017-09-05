@@ -8,6 +8,8 @@ import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neat.css';
 import 'codemirror/mode/python/python';
+import 'codemirror/mode/ruby/ruby';
+import 'codemirror/mode/javascript/javascript';
 
 class SubmitSolutionModal extends React.Component {
   constructor(props) {
@@ -79,13 +81,18 @@ class SubmitSolutionModal extends React.Component {
     const {modalID, task, course} = this.props;
     const {code} = this.state;
     const submitSolutionUrl = this.getSubmitSolutionUrl(course, task);
-    const options = {
-      lineNumbers: true,
-      matchBrackets: true,
-      indentUnit: 4,
-      theme: 'neat',
-      mode: 'python',
-    };
+
+    let options = {};
+
+    if (task.gradable) {
+      options = {
+        lineNumbers: true,
+        matchBrackets: true,
+        indentUnit: 4,
+        theme: 'neat',
+        mode: task.test.language,
+      };
+    }
 
     return (
       <Modal
