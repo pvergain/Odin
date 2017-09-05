@@ -19,7 +19,7 @@
       </div>
     <div class="portlet-body">
       <div class="panel-group accordion" id="accordion3">
-        {% for solution in object_list %}
+        {% for solution in object_list reversed %}
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
@@ -28,8 +28,8 @@
           </div>
           <div id="collapse_{{ solution.id }}" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
           <div class="panel-body">
-            {% if task.is_gradable %}
-              <h4>Result: </h4>
+            {% if task.gradable %}
+              <h4>Test output: </h4>
               <p>{{ solution.test_output }}</p>
             {% else %}
               <h4>URL: </h4>

@@ -1,19 +1,19 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import SubmitFooter from "./SubmitFooter";
-import Modal from "./Modal";
-import SolutionDetailModal from "./SolutionDetailModal";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import SubmitFooter from './SubmitFooter';
+import Modal from './Modal';
+import SolutionDetailModal from './SolutionDetailModal';
 
-import CodeMirror from "react-codemirror";
-import "codemirror/lib/codemirror.css";
-import "codemirror/theme/neat.css";
-import "codemirror/mode/python/python";
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/neat.css';
+import 'codemirror/mode/python/python';
 
 class SubmitSolutionModal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { code: "" };
+    this.state = {code: ''};
     this.handleChange = this.handleChange.bind(this);
     this.performSubmitSolution = this.performSubmitSolution.bind(this);
     this.focusDetailModal = this.focusDetailModal.bind(this);
@@ -24,18 +24,18 @@ class SubmitSolutionModal extends React.Component {
   }
 
   handleChange(newCode) {
-    this.setState({ code: newCode });
+    this.setState({code: newCode});
   }
 
   getSubmitSolutionUrl(course, task) {
     return task.gradable
-      ? Urls["dashboard:education:add-gradable-solution"]({
+      ? Urls['dashboard:education:add-gradable-solution']({
           course_id: course,
-          task_id: task.id
+          task_id: task.id,
         })
-      : Urls["dashboard:education:add-not-gradable-solution"]({
+      : Urls['dashboard:education:add-not-gradable-solution']({
           course_id: course,
-          task_id: task.id
+          task_id: task.id,
         });
   }
 
@@ -50,13 +50,13 @@ class SubmitSolutionModal extends React.Component {
       url: event.target.action,
       data: {
         code: this.state.code,
-        csrfmiddlewaretoken: this.csrfTokenInput.value
+        csrfmiddlewaretoken: this.csrfTokenInput.value,
       },
-      dataType: "json",
+      dataType: 'json',
       success: data => {
         this.props.setResponseData(data);
         this.focusDetailModal(closeButtonID, this.props.solutionDetailModalID);
-      }
+      },
     });
   }
 
@@ -68,7 +68,7 @@ class SubmitSolutionModal extends React.Component {
         href={`#${solutionDetailModalID}`}
         data-toggle="modal"
       />,
-      document.getElementById(`anchor_root_${solutionDetailModalID}`)
+      document.getElementById(`anchor_root_${solutionDetailModalID}`),
     );
     const anchor = $(`#anchor${solutionDetailModalID}`);
     anchor.click();
@@ -76,28 +76,26 @@ class SubmitSolutionModal extends React.Component {
   }
 
   render() {
-    const { modalID, task, course } = this.props;
-    const { code } = this.state;
+    const {modalID, task, course} = this.props;
+    const {code} = this.state;
     const submitSolutionUrl = this.getSubmitSolutionUrl(course, task);
     const options = {
       lineNumbers: true,
       matchBrackets: true,
       indentUnit: 4,
-      theme: "neat",
-      mode: "python"
+      theme: 'neat',
+      mode: 'python',
     };
 
     return (
       <Modal
         modalID={modalID}
         modalTitle={task.name}
-        styles={{ display: "none" }}
-      >
+        styles={{display: 'none'}}>
         <form
           onSubmit={this.performSubmitSolution}
           method="POST"
-          action={submitSolutionUrl}
-        >
+          action={submitSolutionUrl}>
           <input
             type="hidden"
             name="csrfmiddlewaretoken"

@@ -31,7 +31,11 @@ class ListItem extends React.Component {
             </div>
             <div className="col-md-5">
               <div className="btn-group pull-right">
-                <a>
+                <a
+                  href={Urls['dashboard:education:user-task-solutions']({
+                    course_id: this.props.course,
+                    task_id: this.props.task.id,
+                  })}>
                   <button className="btn btn-default uppercase" type="button">
                     Solutions
                   </button>
