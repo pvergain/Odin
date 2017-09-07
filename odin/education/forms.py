@@ -98,6 +98,8 @@ class SubmitGradableSolutionForm(forms.ModelForm):
 
 
 class SubmitNonGradableSolutionForm(forms.ModelForm):
+    url = forms.URLField(required=True)
+
     class Meta:
         model = Solution
         fields = ('url', )

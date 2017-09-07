@@ -646,6 +646,15 @@ class SubmitNonGradableSolutionView(LoginRequiredMixin,
 
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        if not self.request.is_ajax():
+            return super().form_invalid(form)
+        else:
+            data = {
+                'errors': form.errors
+            }
+            return JsonResponse(data=data)
+
 
 class AllStudentsSolutionsView(LoginRequiredMixin,
                                CourseViewMixin,
