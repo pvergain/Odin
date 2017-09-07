@@ -28,6 +28,7 @@ class GradableSolutionModal extends React.Component {
         modalID={this.props.modalID}
         modalTitle={this.props.modalTitle}
         styles={{ display: "none" }}
+        errors={this.props.errors}
       >
         <form
           onSubmit={this.props.performSubmitSolution}

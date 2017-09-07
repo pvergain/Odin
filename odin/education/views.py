@@ -11,6 +11,7 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
@@ -608,6 +609,15 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
             start_grader_communication(solution.id)
 
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if not self.request.is_ajax():
+            return super().form_invalid(form)
+        else:
+            data = {
+                'errors': form.errors
+            }
+            return JsonResponse(data=data)
 
 
 class SubmitNonGradableSolutionView(LoginRequiredMixin,

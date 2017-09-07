@@ -1,25 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import SubmitFooter from './SubmitFooter';
-import Modal from './Modal';
-import SolutionDetailModal from './SolutionDetailModal';
-import GradableSolutionModal from './GradableSolutionModal';
-import NonGradableSolutionModal from './NonGradableSolutionModal';
+import React from "react";
+import ReactDOM from "react-dom";
+import SubmitFooter from "./SubmitFooter";
+import Modal from "./Modal";
+import SolutionDetailModal from "./SolutionDetailModal";
+import GradableSolutionModal from "./GradableSolutionModal";
+import NonGradableSolutionModal from "./NonGradableSolutionModal";
 
-import CodeMirror from 'react-codemirror';
-import {pollSolution} from './SolutionUtils';
+import CodeMirror from "react-codemirror";
+import { pollSolution } from "./SolutionUtils";
 
 class SubmitSolutionModal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {code: ''};
+    this.state = { code: "", submitSolutionErrors: {} };
     this.handleChange = this.handleChange.bind(this);
     this.performSubmitGradableSolution = this.performSubmitGradableSolution.bind(
-      this,
+      this
     );
     this.performSubmitNonGradableSolution = this.performSubmitNonGradableSolution.bind(
-      this,
+      this
     );
     this.focusDetailModal = this.focusDetailModal.bind(this);
   }
@@ -29,46 +29,46 @@ class SubmitSolutionModal extends React.Component {
   }
 
   handleChange(newCode) {
-    this.setState({code: newCode});
+    this.setState({ code: newCode });
   }
 
   getSubmitSolutionUrl(course, task) {
     return task.gradable
-      ? Urls['dashboard:education:add-gradable-solution']({
+      ? Urls["dashboard:education:add-gradable-solution"]({
           course_id: course,
-          task_id: task.id,
+          task_id: task.id
         })
-      : Urls['dashboard:education:add-not-gradable-solution']({
+      : Urls["dashboard:education:add-not-gradable-solution"]({
           course_id: course,
-          task_id: task.id,
+          task_id: task.id
         });
   }
 
   performSubmitGradableSolution(event) {
     event.preventDefault();
-    //TODO: Add adequate validation and representation
-    if (this.state.code.length < 1) return;
     const closeButtonID = `close_${this.props.modalID}`;
-
     $.ajax({
       type: event.target.method,
       url: event.target.action,
       data: {
         code: this.state.code,
-        csrfmiddlewaretoken: this.csrfTokenInput.value,
+        csrfmiddlewaretoken: this.csrfTokenInput.value
       },
-      dataType: 'json',
+      dataType: "json",
       success: data => {
+        if (data.errors) {
+          this.setState({ submitSolutionErrors: data.errors });
+          return;
+        }
         this.props.setResponseData(data);
         this.focusDetailModal(closeButtonID, this.props.solutionDetailModalID);
         pollSolution(data.id, this.props.setResponseData);
-      },
+      }
     });
   }
 
   performSubmitNonGradableSolution(event) {
     event.preventDefault();
-    //TODO: Add adequate validation and representation
     const closeButtonID = `close_${this.props.modalID}`;
 
     $.ajax({
@@ -76,13 +76,13 @@ class SubmitSolutionModal extends React.Component {
       url: event.target.action,
       data: {
         url: this.solutionURL.value,
-        csrfmiddlewaretoken: this.csrfTokenInput.value,
+        csrfmiddlewaretoken: this.csrfTokenInput.value
       },
-      dataType: 'json',
+      dataType: "json",
       success: data => {
         this.props.setResponseData(data);
         this.focusDetailModal(closeButtonID, this.props.solutionDetailModalID);
-      },
+      }
     });
   }
 
@@ -94,7 +94,7 @@ class SubmitSolutionModal extends React.Component {
         href={`#${solutionDetailModalID}`}
         data-toggle="modal"
       />,
-      document.getElementById(`anchor_root_${solutionDetailModalID}`),
+      document.getElementById(`anchor_root_${solutionDetailModalID}`)
     );
     const anchor = $(`#anchor${solutionDetailModalID}`);
     anchor.click();
@@ -114,33 +114,32 @@ class SubmitSolutionModal extends React.Component {
   }
 
   render() {
-    const {modalID, task, course} = this.props;
-    const {code} = this.state;
+    const { modalID, task, course } = this.props;
+    const { code } = this.state;
     const submitSolutionUrl = this.getSubmitSolutionUrl(course, task);
 
-    return task.gradable ? (
-      <GradableSolutionModal
-        modalID={modalID}
-        modalTitle={task.name}
-        performSubmitSolution={this.performSubmitGradableSolution}
-        submitSolutionUrl={submitSolutionUrl}
-        handleChange={this.handleChange}
-        closeModal={this.focusDetailModal}
-        task={task}
-        setCodeInput={this.setCodeInput.bind(this)}
-        setCSRF={this.setCSRFTokenValue.bind(this)}
-      />
-    ) : (
-      <NonGradableSolutionModal
-        modalID={modalID}
-        modalTitle={task.name}
-        performSubmitSolution={this.performSubmitNonGradableSolution}
-        submitSolutionUrl={submitSolutionUrl}
-        closeModal={this.focusDetailModal}
-        setSolutionURL={this.setSolutionURL.bind(this)}
-        setCSRF={this.setCSRFTokenValue.bind(this)}
-      />
-    );
+    return task.gradable
+      ? <GradableSolutionModal
+          modalID={modalID}
+          modalTitle={task.name}
+          performSubmitSolution={this.performSubmitGradableSolution}
+          submitSolutionUrl={submitSolutionUrl}
+          handleChange={this.handleChange}
+          closeModal={this.focusDetailModal}
+          task={task}
+          setCodeInput={this.setCodeInput.bind(this)}
+          setCSRF={this.setCSRFTokenValue.bind(this)}
+          errors={this.state.submitSolutionErrors}
+        />
+      : <NonGradableSolutionModal
+          modalID={modalID}
+          modalTitle={task.name}
+          performSubmitSolution={this.performSubmitNonGradableSolution}
+          submitSolutionUrl={submitSolutionUrl}
+          closeModal={this.focusDetailModal}
+          setSolutionURL={this.setSolutionURL.bind(this)}
+          setCSRF={this.setCSRFTokenValue.bind(this)}
+        />;
   }
 }
 
