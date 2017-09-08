@@ -325,7 +325,8 @@ class AddNewIncludedTaskView(LoginRequiredMixin,
             create_test_kwargs = {
                 'task': task,
                 'language': form.cleaned_data.get('language'),
-                'code': form.cleaned_data.get('code')
+                'code': form.cleaned_data.get('code'),
+                'file': form.cleaned_data.get('file')
             }
 
             self.call_service(service=create_test_for_task, service_kwargs=create_test_kwargs)

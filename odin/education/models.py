@@ -283,10 +283,10 @@ class IncludedTest(BaseTest):
                              related_name='included_tests')
 
     def is_source(self):
-        return getattr(self, 'code', None) is not None
+        return bool(getattr(self, 'code', None))
 
     def is_binary(self):
-        return getattr(self, 'file', None) is not None
+        return bool(getattr(self, 'file', None))
 
     def test_mode(self):
         if self.is_binary:

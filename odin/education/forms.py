@@ -44,6 +44,7 @@ class IncludedMaterialFromExistingForm(forms.ModelForm):
 class IncludedTaskModelForm(forms.ModelForm):
     language = forms.ModelChoiceField(queryset=ProgrammingLanguage.objects.all(), required=False)
     code = forms.CharField(widget=forms.Textarea(), required=False)
+    file = forms.FileField(required=False)
 
     def __init__(self, course, *args, **kwargs):
         super().__init__(*args, **kwargs)
