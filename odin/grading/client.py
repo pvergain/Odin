@@ -123,7 +123,7 @@ class GraderClient:
             elif data['result_status'] == 'not_ok':
                 solution.status = self.solution_model.NOT_OK
 
-            solution.test_output = data['output']['test_output']
+            solution.test_output = data['output']
             solution.save()
         else:
             raise PollingError("Grading not finished yet")

@@ -31,7 +31,7 @@ def create_plain_problem(*,
 
 def create_binary_problem(*,
                           language: str='',
-                          test_type: int=GraderBinaryProblem.UNITTEST,
+                          test_type: int=GraderBinaryProblem.OUTPUT_CHECKING,
                           file_type: int=GraderBinaryProblem.BINARY,
                           solution: BinaryIO=None,
                           test: BinaryIO=None,

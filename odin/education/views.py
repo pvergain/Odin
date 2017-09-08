@@ -307,7 +307,7 @@ class AddNewIncludedTaskView(LoginRequiredMixin,
             create_test_kwargs = {
                 'task': task,
                 'language': form.cleaned_data.get('language'),
-                'code': form.cleaned_data.get('code'),
+                'code': form.cleaned_data.get('code') if form.cleaned_data.get('code') != '' else None,
                 'file': form.cleaned_data.get('file')
             }
 
