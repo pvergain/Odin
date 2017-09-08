@@ -51,7 +51,9 @@
   <script src="{% url 'js_reverse' %}"></script>
   <script>
    window.props = {{ course_topics|safe }};
-   window.props.studentID = {{ request.user.student.id }};
+   {% if request.user.is_student %}
+      window.props.studentID = {{ request.user.student.id }};
+   {% endif %}
    window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   </script>
   <script src="{% static 'bundle.js' %}"></script>
