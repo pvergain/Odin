@@ -52,7 +52,9 @@ class SubmitSolutionModal extends React.Component {
       url: event.target.action,
       data: {
         code: this.state.code,
-        csrfmiddlewaretoken: this.csrfTokenInput.value,
+      },
+      headers: {
+        'X-CSRFToken': this.csrfTokenInput.value,
       },
       dataType: 'json',
       success: data => {
@@ -109,6 +111,10 @@ class SubmitSolutionModal extends React.Component {
     this.codeInput = input;
   }
 
+  setFileInput(input) {
+    this.fileInput = input;
+  }
+
   setCSRFTokenValue(input) {
     this.csrfTokenInput = input;
   }
@@ -132,6 +138,7 @@ class SubmitSolutionModal extends React.Component {
         closeModal={this.focusDetailModal}
         task={task}
         setCodeInput={this.setCodeInput.bind(this)}
+        setFileInput={this.setFileInput.bind(this)}
         setCSRF={this.setCSRFTokenValue.bind(this)}
         errors={this.state.submitSolutionErrors}
       />

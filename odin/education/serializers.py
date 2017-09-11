@@ -24,10 +24,11 @@ class MaterialSerializer(serializers.ModelSerializer):
 
 class TestSerializer(serializers.ModelSerializer):
     language = serializers.StringRelatedField()
+    source = serializers.BooleanField(source='is_source')
 
     class Meta:
         model = IncludedTest
-        fields = ('language', )
+        fields = ('language', 'source')
 
 
 class TaskSerializer(serializers.ModelSerializer):

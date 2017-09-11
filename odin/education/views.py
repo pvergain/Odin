@@ -577,15 +577,15 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
     def get_service(self):
         return create_gradable_solution
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         res = self.has_test()
 
-        return res or super().get(*args, **kwargs)
+        return res or super().get(request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         res = self.has_test()
 
-        return res or super().post(*args, **kwargs)
+        return res or super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
