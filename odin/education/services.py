@@ -140,7 +140,6 @@ def create_test_for_task(*,
                          extra_options: Dict={},
                          code: str=None,
                          file: BinaryIO=None):
-
     new_test = IncludedTest(task=task)
     if existing_test is None:
         existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)

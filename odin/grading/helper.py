@@ -35,6 +35,7 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
         problem = services.create_plain_problem(**data)
         grader_ready_data = GraderPlainProblemSerializer(problem).data
     else:
+        data['test_type'] = GraderBinaryProblem.OUTPUT_CHECKING
         data['solution'] = solution.file
         problem = services.create_binary_problem(**data)
         grader_ready_data = GraderBinaryProblemSerializer(problem).data
