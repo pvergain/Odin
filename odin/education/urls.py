@@ -24,7 +24,7 @@ from .views import (
     EditIncludedTestView,
     MaterialDetailView,
     AllStudentsSolutionsView,
-    SolutionDetailAPIView
+    SolutionDetailAPIView,
 )
 
 
@@ -161,5 +161,4 @@ urlpatterns = [
         view=SolutionDetailAPIView.as_view(),
         name='student-solution-detail-api'
     ),
-
 ]

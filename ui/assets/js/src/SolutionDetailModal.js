@@ -30,15 +30,15 @@ class SolutionDetailModal extends React.Component {
             </div>
             <div className="row">
               <div className="col-md-12">
-                <p style={{ fontSize: 20 }}>
-                  <center>
+                <center>
+                  <p style={{ fontSize: 20 }}>
                     {task.gradable
                       ? this.props.solution.test_output
                       : <a target="_blank" href={this.props.solution.url}>
                           {this.props.solution.url}
                         </a>}
-                  </center>
-                </p>
+                  </p>
+                </center>
               </div>
             </div>
           </div>

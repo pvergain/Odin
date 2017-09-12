@@ -1,6 +1,7 @@
 import json
 
 from rest_framework import generics
+
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -99,7 +100,7 @@ class CourseDetailView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        topic_queryset = self.course.topics.prefetch_related('tasks__solutions', 'materials')
+        topic_queryset = self.course.topics.prefetch_related('tasks__solutions', 'materials', 'tasks__test__language')
         topics = TopicSerializer(topic_queryset, many=True)
         course_topics = {}
         course_topics['data'] = topics.data

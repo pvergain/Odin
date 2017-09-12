@@ -1,6 +1,9 @@
 from rest_framework.permissions import BasePermission
 
+from django.shortcuts import get_object_or_404
+
 from odin.common.mixins import BaseUserPassesTestMixin
+from odin.education.models import Course
 
 
 class IsStudentOrTeacherInCoursePermission(BaseUserPassesTestMixin):
@@ -49,7 +52,11 @@ class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
         if request.user.is_anonymous:
             return False
 
-        course = view.get_object().task.topic.course
+        course_id = view.kwargs.get('course_id')
+        if course_id:
+            course = get_object_or_404(Course, id=course_id)
+        else:
+            course = view.get_object().task.topic.course
         email = request.user.email
         is_student = course.students.filter(email=email).exists()
         is_teacher = course.teachers.filter(email=email).exists()
