@@ -334,7 +334,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     check_status_location = models.CharField(max_length=128, null=True, blank=True)
     build_id = models.IntegerField(blank=True, null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
-    test_output = models.TextField(blank=True, null=True)
+    test_output = JSONField(blank=True, null=True)
     return_code = models.IntegerField(blank=True, null=True)
     file = models.FileField(upload_to="solutions", blank=True, null=True)
 
