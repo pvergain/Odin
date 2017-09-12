@@ -2,13 +2,17 @@ import React from 'react';
 
 const SolutionTestOutput = props => {
   <div class="well well-sm">
-    <h4 class="block">I am a small well</h4>
+    <h4 class="block">Test results</h4>
     <p>
       {props.testOutput.map(item => {
         item.test_status === 'ok' ? (
-          <span className="glyphicon glyphicon-ok-sign" />
+          <div class="col-md-1">
+            <span className="glyphicon glyphicon-ok-sign" />
+          </div>
         ) : (
-          <span className="glyphicon glyphicon-remove-sign" />
+          <div class="col-md-1">
+            <span className="glyphicon glyphicon-remove-sign" />
+          </div>
         );
       })}
     </p>
