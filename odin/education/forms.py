@@ -76,13 +76,13 @@ class IncludedTaskFromExistingForm(forms.ModelForm):
 class SourceCodeTestForm(forms.ModelForm):
     class Meta:
         model = IncludedTest
-        fields = ('language', 'task', 'code')
+        fields = ('language', 'task', 'code', 'extra_options')
 
 
 class BinaryFileTestForm(forms.ModelForm):
     class Meta:
         model = IncludedTest
-        fields = ('language', 'task', 'file')
+        fields = ('language', 'task', 'file', 'extra_options')
 
 
 class SubmitGradableSolutionForm(forms.ModelForm):
