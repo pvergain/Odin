@@ -108,11 +108,14 @@ class TestCourseDetailView(TestCase):
     def setUp(self):
         self.test_password = faker.password()
         self.course = CourseFactory()
+        self.user = BaseUserFactory(password=self.test_password)
         self.student = StudentFactory(password=self.test_password)
         self.teacher = TeacherFactory(password=self.test_password)
         self.url = reverse('dashboard:education:user-course-detail', kwargs={'course_id': self.course.pk})
+        self.user.is_active = True
         self.student.is_active = True
         self.teacher.is_active = True
+        self.user.save()
         self.student.save()
         self.teacher.save()
 

@@ -54,6 +54,8 @@ class Course(models.Model):
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
 
+    is_competition = models.BooleanField(default=False)
+
     objects = CourseManager()
 
     def clean(self):

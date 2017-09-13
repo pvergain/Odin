@@ -104,3 +104,12 @@ class SubmitNonGradableSolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
         fields = ('url', )
+
+
+class CompetitionRegisterForm(forms.Form):
+    full_name = forms.CharField(max_length=256)
+    email = forms.EmailField()
+
+
+class CompetitionSetPasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput())

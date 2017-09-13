@@ -25,6 +25,9 @@ from .views import (
     MaterialDetailView,
     AllStudentsSolutionsView,
     SolutionDetailAPIView,
+    CompetitionRegisterView,
+    CompetitionSetPasswordView,
+    CompetitionLoginView,
 )
 
 
@@ -160,5 +163,20 @@ urlpatterns = [
         regex='^solutions/(?P<solution_id>[0-9]+)/$',
         view=SolutionDetailAPIView.as_view(),
         name='student-solution-detail-api'
+    ),
+    url(
+        regex='^competition-register/(?P<course_id>[0-9]+)/$',
+        view=CompetitionRegisterView.as_view(),
+        name='register-for-competition'
+    ),
+    url(
+        regex='^competition-set-password/(?P<course_id>[0-9]+)/(?P<registration_uuid>[-\w]+)/$',
+        view=CompetitionSetPasswordView.as_view(),
+        name='set-password-for-competition'
+    ),
+    url(
+        regex='^competition-login/(?P<course_id>[0-9]+)/(?P<registration_uuid>[-\w]+)/$',
+        view=CompetitionLoginView.as_view(),
+        name='competition-login'
     ),
 ]

@@ -1,6 +1,9 @@
 import json
+import uuid
 
 from rest_framework import generics
+
+from allauth.account.utils import send_email_confirmation
 
 from django.views.generic import (
     TemplateView,
@@ -9,15 +12,20 @@ from django.views.generic import (
     FormView,
     UpdateView
 )
+from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
+from odin.users.models import BaseUser
+from odin.users.services import create_user
+from odin.authentication.views import LoginWrapperView
 
 from .models import (
     Course,
@@ -34,7 +42,8 @@ from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
     IsStudentInCoursePermission,
-    IsStudentOrTeacherInCourseAPIPermission
+    CourseIsCompetitionPermission,
+    IsStudentOrTeacherInCourseAPIPermission,
 )
 from .mixins import (
     CourseViewMixin,
@@ -53,8 +62,11 @@ from .forms import (
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
+    CompetitionRegisterForm,
+    CompetitionSetPasswordForm,
 )
 from .services import (
+    add_student,
     create_topic,
     create_included_material,
     create_included_task,
@@ -684,3 +696,98 @@ class SolutionDetailAPIView(generics.RetrieveAPIView):
     permission_classes = (IsStudentOrTeacherInCourseAPIPermission, )
     queryset = Solution.objects.all()
     lookup_url_kwarg = 'solution_id'
+
+
+class CompetitionRegisterView(CourseIsCompetitionPermission,
+                              ReadableFormErrorsMixin,
+                              FormView):
+    form_class = CompetitionRegisterForm
+    template_name = 'education/competition_registration.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:competition-login',
+                            kwargs={
+                                'course_id': self.kwargs.get('course_id'),
+                                'registration_uuid': self.registration_uuid
+                            })
+
+    def form_valid(self, form):
+        if self.request.user.is_authenticated():
+            if not self.request.user.email == form.cleaned_data.get('email'):
+                raise PermissionDenied('You are trying to register an email that is different than yours!')
+        email = form.cleaned_data.get('email')
+        full_name = form.cleaned_data.get('full_name')
+        user = BaseUser.objects.filter(email=email)
+        self.registration_uuid = uuid.uuid4()
+        if user.exists():
+            user = user.first()
+            user.registration_uuid = self.registration_uuid
+            user.save()
+            return super().form_valid(form)
+        else:
+            user = create_user(email=email,
+                               registration_uuid=self.registration_uuid,
+                               profile_data={'full_name': full_name})
+
+            return redirect(reverse('dashboard:education:set-password-for-competition',
+                            kwargs={
+                                'course_id': self.kwargs.get('course_id'),
+                                'registration_uuid': self.registration_uuid
+                            }))
+
+
+class CompetitionLoginView(CourseIsCompetitionPermission,
+                           CallServiceMixin,
+                           LoginWrapperView):
+    def get_service(self):
+        return add_student
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            logout(request)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+        user = get_object_or_404(BaseUser, email=form.cleaned_data.get('login'))
+        if not self.kwargs.get('registration_uuid') == user.registration_uuid:
+            raise PermissionDenied('Token mismatch')
+        if not user.is_student():
+            student = Student.objects.create_from_user(user)
+        else:
+            student = user.student
+
+        user.registration_uuid = None
+        user.save()
+        self.call_service(service_kwargs={'course': course, 'student': student})
+
+        return super().form_valid(form)
+
+
+class CompetitionSetPasswordView(CourseIsCompetitionPermission,
+                                 CallServiceMixin,
+                                 ReadableFormErrorsMixin,
+                                 FormView):
+    form_class = CompetitionSetPasswordForm
+    template_name = 'authentication/password_set.html'
+    success_url = reverse_lazy('account_email_verification_sent')
+
+    def get_service(self):
+        return add_student
+
+    def form_valid(self, form):
+        registration_uuid = self.kwargs.get('registration_uuid')
+        user = get_object_or_404(BaseUser, registration_uuid=registration_uuid)
+        user.set_password(form.cleaned_data.get('password'))
+        user.registration_uuid = None
+        user.save()
+
+        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+
+        student = Student.objects.create_from_user(user)
+        self.call_service(service_kwargs={'course': course, 'student': student})
+
+        send_email_confirmation(self.request, user, signup=True)
+
+        return super().form_valid(form)
