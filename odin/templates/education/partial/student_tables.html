@@ -26,7 +26,7 @@
                   {% if solution.task == task %}
                     <tr>
                       <td>{{ solution.id }}</td>
-                      <td>{{ solution.status }}</td>
+                      <td>{{ solution.verbose_status }}</td>
                       <td>
                         <a href="{% url 'dashboard:education:student-solution-detail' course.id task.id solution.id %}">
                           <button class="btn green uppercase" type="button">

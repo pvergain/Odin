@@ -342,6 +342,4 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
 
     @property
     def verbose_status(self):
-        for status_index, status in self.STATUS_CHOICE:
-            if status_index == self.status:
-                return status
+        return self.STATUS_CHOICE[self.status][1]

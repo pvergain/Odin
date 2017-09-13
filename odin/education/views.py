@@ -563,6 +563,16 @@ class StudentSolutionDetailView(LoginRequiredMixin,
     pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        solution = self.get_object()
+        if not solution.task.test.is_source():
+            try:
+                context['solution_file'] = solution.file.read().decode('utf-8')
+            except UnicodeDecodeError as e:
+                context['solution_file'] = "Invalid file format"
+        return context
+
 
 class SubmitGradableSolutionView(LoginRequiredMixin,
                                  CourseViewMixin,
