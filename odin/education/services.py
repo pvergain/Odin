@@ -245,7 +245,8 @@ def handle_competition_registration(*,
     return (handle_existing_user, registration_uuid)
 
 
-def handle_competition_login(course: Course,
+def handle_competition_login(*,
+                             course: Course,
                              user: BaseUser,
                              registration_token: str) -> BaseUser:
     if not registration_token == str(user.registration_uuid):
@@ -257,6 +258,9 @@ def handle_competition_login(course: Course,
 
     user.registration_uuid = None
     user.save()
-    add_student(course=course, student=student)
+    try:
+        add_student(course=course, student=student)
+    except ValidationError:
+        raise ValidationError("Already a student in this course!")
 
     return user
