@@ -1,7 +1,12 @@
+import uuid
 from datetime import datetime, timedelta
-from typing import Dict, BinaryIO
+from typing import Dict, BinaryIO, Tuple
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
+
+from odin.users.models import BaseUser
+from odin.users.services import create_user
 
 from .models import (
     Course,
@@ -210,3 +215,48 @@ def calculate_student_valid_solutions_for_course(*,
 
         ratio = (solved_tasks/total_tasks) * 100
         return f'{ratio:.1f}'
+
+
+def handle_competition_registration(*,
+                                    email: str,
+                                    full_name: str,
+                                    session_user: BaseUser) -> Tuple[bool, str]:
+    """
+    Handles competition registration and returns the registration token and True or
+    False depending on whether further handling should be for an existing user or a
+    new one.
+    """
+    if session_user.is_authenticated and not session_user.email == email:
+        raise ValidationError('You are trying to register an email that is different than yours!')
+
+    user = BaseUser.objects.filter(email=email)
+    registration_uuid = uuid.uuid4()
+    if user.exists():
+        user = user.first()
+        user.registration_uuid = registration_uuid
+        user.save()
+        handle_existing_user = True
+    else:
+        user = create_user(email=email,
+                           registration_uuid=registration_uuid,
+                           profile_data={'full_name': full_name})
+        handle_existing_user = False
+
+    return (handle_existing_user, registration_uuid)
+
+
+def handle_competition_login(course: Course,
+                             user: BaseUser,
+                             registration_token: str) -> BaseUser:
+    if not registration_token == user.registration_uuid:
+        raise ValidationError('Token mismatch')
+    if not user.is_student():
+        student = Student.objects.create_from_user(user)
+    else:
+        student = user.student
+
+    user.registration_uuid = None
+    user.save()
+    add_student(course=course, student=student)
+
+    return user

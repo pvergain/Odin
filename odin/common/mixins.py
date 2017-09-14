@@ -22,7 +22,7 @@ class ReadableFormErrorsMixin:
 
 class CallServiceMixin:
     def get_service(self):
-        raise ImproperlyConfigured('CallSerivceMixin requires service.')
+        raise ImproperlyConfigured('CallServiceMixin requires service.')
 
     def call_service(self,
                      *,

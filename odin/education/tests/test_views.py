@@ -1,5 +1,4 @@
 from unittest.mock import patch
-
 from test_plus import TestCase
 
 from django.urls import reverse
@@ -33,6 +32,7 @@ from ..models import (
     IncludedTest
 )
 
+from odin.users.models import BaseUser
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
 
 from odin.common.faker import faker
@@ -866,3 +866,50 @@ class TestSubmitNotGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+
+class TestCompetitionRegisterView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.course.is_competition = True
+        self.course.save()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.full_name = faker.name()
+        self.url = reverse('dashboard:education:register-for-competition',
+                           kwargs={'course_id': self.course.id})
+
+    def test_register_with_already_existing_user_when_not_logged_in_redirects_to_competition_login(self):
+        data = {
+            'email': self.user.email,
+            'full_name': self.full_name
+        }
+        response = self.post(self.url, data=data, follow=False)
+        registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
+        self.assertRedirects(response, expected_url=reverse('dashboard:education:competition-login',
+                                                            kwargs={'registration_uuid': registration_uuid,
+                                                                    'course_id': self.course.id}))
+
+    def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_competition_login(self):
+        data = {
+            'email': self.user.email,
+            'full_name': self.full_name
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data, follow=False)
+            registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:competition-login',
+                                                                kwargs={'registration_uuid': registration_uuid,
+                                                                        'course_id': self.course.id}))
+
+    def test_register_with_already_existing_user_when_logged_in_with_different_user_redirects_competition_login(self):
+        data = {
+            'email': self.user.email + str(faker.pyint()),
+            'full_name': faker.name()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data, follow=False)
+            self.assertRedirects(response, expected_url=self.url)
