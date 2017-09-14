@@ -47,16 +47,24 @@ ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['academy.hacksoft.io',
 
 INSTALLED_APPS += ['gunicorn', ]
 
-# URL that handles the media served from MEDIA_ROOT, used for managing
-# stored files.
 
-#  See:http://stackoverflow.com/questions/10390244/
-MEDIA_URL = '/media/'
+# Storages, static, media, AWS
+# ------------------------------------------------------------------------------
 
-# Static Assets
-# ------------------------
-STATIC_URL = '/static/'
-STATIC_ROOT = 'staticfiles/'
+from .aws import *
+
+MEDIA_LOCATION = 'media'
+MEDIA_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, MEDIA_LOCATION)
+MEDIA_S3_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
+
+DEFAULT_FILE_STORAGE = 'config.settings.storages.MediaStorage'
+
+STATIC_LOCATION = 'static'
+STATIC_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, STATIC_LOCATION)
+STATIC_CDN_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
+
+STATICFILES_STORAGE = 'config.settings.storages.StaticStorage'
+
 
 # EMAIL
 # ------------------------------------------------------------------------------
