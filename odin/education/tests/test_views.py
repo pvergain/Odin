@@ -1016,6 +1016,18 @@ class TestCompetitionLoginView(TestCase):
         self.user.refresh_from_db()
         self.assertIsNone(self.user.registration_uuid)
 
+    def test_redirects_to_same_page_when_user_is_already_student_in_competition_course(self):
+        student = Student.objects.create_from_user(self.user)
+        add_student(course=self.course, student=student)
+
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=self.url)
+
 
 class TestCompetitionSetPasswordView(TestCase):
     def setUp(self):
