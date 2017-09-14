@@ -1,4 +1,5 @@
 var path = require("path");
+var webpack = require("webpack");
 var APP_DIR = path.resolve(__dirname, "./ui/assets/js/src");
 var BUILD_DIR = path.resolve(__dirname, "./dist");
 
@@ -22,5 +23,6 @@ module.exports = {
   },
   resolve: {
     extensions: [".js", ".jsx", ".css"]
-  }
+  },
+  plugins: [new webpack.optimize.UglifyJsPlugin({ minimize: true })]
 };
