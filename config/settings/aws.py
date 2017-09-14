@@ -1,3 +1,4 @@
+import six
 import environ
 
 env = environ.Env()
@@ -11,7 +12,6 @@ AWS_S3_HOST = env('DJANGO_AWS_S3_HOST', default='s3-%s.amazonaws.com' % AWS_S3_R
 AWS_S3_SIGNATURE_VERSION = env('DJANGO_AWS_S3_SIGNATURE_VERSION', default='s3v4')
 AWS_AUTO_CREATE_BUCKET = True
 AWS_QUERYSTRING_AUTH = False
-AWS_S3_CALLING_FORMAT = OrdinaryCallingFormat()
 AWS_PRELOAD_METADATA = True
 
 AWS_EXPIRY = 60 * 60 * 24 * 7
