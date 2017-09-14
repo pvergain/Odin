@@ -722,11 +722,8 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
             'full_name': form.cleaned_data.get('full_name'),
             'session_user': self.request.user
         }
-        try:
-            handle_existing_user, self.registration_uuid = handle_competition_registration(**service_kwargs)
-        except ValidationError as e:
-            messages.warning(request=self.request, message=str(e))
-            return redirect(self.get_failure_url())
+
+        handle_existing_user, self.registration_uuid = handle_competition_registration(**service_kwargs)
 
         if handle_existing_user:
             return super().form_valid(form)

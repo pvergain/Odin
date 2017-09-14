@@ -915,15 +915,6 @@ class TestCompetitionRegisterView(TestCase):
                                                                 kwargs={'registration_uuid': registration_uuid,
                                                                         'course_id': self.course.id}))
 
-    def test_register_with_existing_user_when_logged_in_with_different_user_redirects_to_competition_login(self):
-        data = {
-            'email': self.user.email + str(faker.pyint()),
-            'full_name': faker.name()
-        }
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data, follow=False)
-            self.assertRedirects(response, expected_url=self.url)
-
     def test_register_with_new_user_redirects_to_competition_set_password(self):
         data = {
             'email': faker.email(),
