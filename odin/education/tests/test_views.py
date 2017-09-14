@@ -1017,6 +1017,9 @@ class TestCompetitionSetPasswordView(TestCase):
                                'course_id': self.course.id,
                                'registration_uuid': self.registration_uuid
                            })
+        self.user = BaseUserFactory()
+        self.user.registration_uuid = self.registration_uuid
+        self.user.save()
 
     def test_can_not_access_competition_set_password_if_course_not_competition(self):
         self.course.is_competition = False
@@ -1042,10 +1045,6 @@ class TestCompetitionSetPasswordView(TestCase):
         self.response_404(response)
 
     def test_redirects_to_confirmation_email_sent_on_successful_registration(self):
-        user = BaseUserFactory()
-        user.registration_uuid = self.registration_uuid
-        user.save()
-
         data = {
             'password': faker.password()
         }
@@ -1056,10 +1055,6 @@ class TestCompetitionSetPasswordView(TestCase):
     @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
     @patch('odin.common.tasks.send_template_mail.delay')
     def test_sends_email_on_successful_registration(self, mock_send_mail):
-        user = BaseUserFactory()
-        user.registration_uuid = self.registration_uuid
-        user.save()
-
         data = {
             'password': faker.password()
         }
@@ -1068,31 +1063,23 @@ class TestCompetitionSetPasswordView(TestCase):
         self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
         self.assertEqual(mock_send_mail.called, True)
         (template_name, recipients, context), kwargs = mock_send_mail.call_args
-        self.assertEqual([user.email], recipients)
+        self.assertEqual([self.user.email], recipients)
 
     def test_adds_student_to_course_on_successful_registration(self):
-        user = BaseUserFactory()
-        user.registration_uuid = self.registration_uuid
-        user.save()
-
         data = {
             'password': faker.password()
         }
 
         self.post(self.url, data=data)
-        user.refresh_from_db()
-        self.assertTrue(user.is_student())
-        self.assertIn(user.student, self.course.students.all())
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_student())
+        self.assertIn(self.user.student, self.course.students.all())
 
     def test_resets_user_registration_token_on_successful_competition_login(self):
-        user = BaseUserFactory()
-        user.registration_uuid = self.registration_uuid
-        user.save()
-
         data = {
             'password': faker.password()
         }
 
         self.post(self.url, data=data)
-        user.refresh_from_db()
-        self.assertIsNone(user.registration_uuid)
+        self.user.refresh_from_db()
+        self.assertIsNone(self.user.registration_uuid)
