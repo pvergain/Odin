@@ -739,10 +739,14 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
 
 
 class CompetitionLoginView(CourseIsCompetitionPermission,
-                           CallServiceMixin,
                            LoginWrapperView):
-    def get_service(self):
-        return handle_competition_login
+
+    def get_failure_url(self):
+        return reverse_lazy('dashboard:education:competition-login',
+                            kwargs={
+                                'course_id': self.kwargs.get('course_id'),
+                                'registration_uuid': self.kwargs.get('registration_uuid')
+                             })
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated():
@@ -753,10 +757,17 @@ class CompetitionLoginView(CourseIsCompetitionPermission,
     def form_valid(self, form):
         course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
         user = get_object_or_404(BaseUser, email=form.cleaned_data.get('login'))
-        self.call_service(service_kwargs={'course': course,
-                                          'user': user,
-                                          'registration_token': self.kwargs.get('registration_uuid')})
-        return super().form_valid()
+        service_kwargs = {'course': course,
+                          'user': user,
+                          'registration_token': self.kwargs.get('registration_uuid')}
+
+        try:
+            handle_competition_login(**service_kwargs)
+        except ValidationError as e:
+            messages.warning(request=self.request, message=str(e))
+            return redirect(self.get_failure_url())
+
+        return super().form_valid(form)
 
 
 class CompetitionSetPasswordView(CourseIsCompetitionPermission,

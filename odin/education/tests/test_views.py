@@ -1,6 +1,8 @@
 from unittest.mock import patch
 from test_plus import TestCase
 
+from allauth.account.models import EmailAddress
+
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
@@ -881,6 +883,13 @@ class TestCompetitionRegisterView(TestCase):
         self.url = reverse('dashboard:education:register-for-competition',
                            kwargs={'course_id': self.course.id})
 
+    def test_can_not_access_competition_registration_when_course_is_not_competition(self):
+        self.course.is_competition = False
+        self.course.save()
+
+        response = self.get(self.url)
+        self.response_403(response)
+
     def test_register_with_already_existing_user_when_not_logged_in_redirects_to_competition_login(self):
         data = {
             'email': self.user.email,
@@ -892,7 +901,7 @@ class TestCompetitionRegisterView(TestCase):
                                                             kwargs={'registration_uuid': registration_uuid,
                                                                     'course_id': self.course.id}))
 
-    def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_competition_login(self):
+    def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_to_competition_login(self):
         data = {
             'email': self.user.email,
             'full_name': self.full_name
@@ -905,7 +914,7 @@ class TestCompetitionRegisterView(TestCase):
                                                                 kwargs={'registration_uuid': registration_uuid,
                                                                         'course_id': self.course.id}))
 
-    def test_register_with_already_existing_user_when_logged_in_with_different_user_redirects_competition_login(self):
+    def test_register_with_existing_user_when_logged_in_with_different_user_redirects_to_competition_login(self):
         data = {
             'email': self.user.email + str(faker.pyint()),
             'full_name': faker.name()
@@ -913,3 +922,88 @@ class TestCompetitionRegisterView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data, follow=False)
             self.assertRedirects(response, expected_url=self.url)
+
+    def test_register_with_new_user_redirects_to_competition_set_password(self):
+        data = {
+            'email': faker.email(),
+            'full_name': faker.name()
+        }
+
+        response = self.post(self.url, data=data)
+        registration_uuid = BaseUser.objects.last().registration_uuid
+        self.assertRedirects(response, expected_url=reverse('dashboard:education:set-password-for-competition',
+                                                            kwargs={
+                                                                'course_id': self.course.id,
+                                                                'registration_uuid': registration_uuid
+                                                            }))
+
+
+class TestCompetitionLoginView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.course.is_competition = True
+        self.course.save()
+        self.registration_uuid = faker.uuid4()
+        self.url = reverse('dashboard:education:competition-login',
+                           kwargs={'registration_uuid': self.registration_uuid,
+                                   'course_id': self.course.id})
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.registration_uuid = self.registration_uuid
+        self.user.is_active = True
+        self.user.save()
+        EmailAddress.objects.create(user=self.user, email=self.user.email, verified=True, primary=True)
+
+    def test_can_not_access_competition_login_if_course_is_not_competition(self):
+        self.course.is_competition = False
+        self.course.save()
+
+        response = self.get(self.url)
+        self.response_403(response)
+
+    def test_redirects_to_same_page_when_trying_to_login_with_credentials_for_different_user(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        new_user.registration_uuid = faker.uuid4()
+        new_user.save()
+
+        data = {
+            'login': new_user.email,
+            'password': self.test_password
+        }
+
+        response = self.post(self.url, data=data, follow=False)
+        self.assertRedirects(response, expected_url=self.url)
+
+    def test_redirects_to_profile_page_on_successful_competition_login(self):
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=reverse('dashboard:users:profile'))
+
+    def test_adds_student_to_course_on_successful_competition_login(self):
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+
+        self.post(self.url, data=data)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_student())
+        self.assertIn(self.user.student, self.course.students.all())
+
+    def test_resets_user_registration_token_on_successful_competition_login(self):
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+
+        self.post(self.url, data=data)
+        self.user.refresh_from_db()
+        self.assertIsNone(self.user.registration_uuid)
+
+
+class TestCompetitionSetPasswordView(TestCase):
+    pass

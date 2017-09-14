@@ -248,7 +248,7 @@ def handle_competition_registration(*,
 def handle_competition_login(course: Course,
                              user: BaseUser,
                              registration_token: str) -> BaseUser:
-    if not registration_token == user.registration_uuid:
+    if not registration_token == str(user.registration_uuid):
         raise ValidationError('Token mismatch')
     if not user.is_student():
         student = Student.objects.create_from_user(user)
