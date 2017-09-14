@@ -6,6 +6,7 @@ from allauth.account.models import EmailAddress
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
+from django.test.utils import override_settings
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -1006,4 +1007,92 @@ class TestCompetitionLoginView(TestCase):
 
 
 class TestCompetitionSetPasswordView(TestCase):
-    pass
+    def setUp(self):
+        self.course = CourseFactory()
+        self.course.is_competition = True
+        self.course.save()
+        self.registration_uuid = faker.uuid4()
+        self.url = reverse('dashboard:education:set-password-for-competition',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'registration_uuid': self.registration_uuid
+                           })
+
+    def test_can_not_access_competition_set_password_if_course_not_competition(self):
+        self.course.is_competition = False
+        self.course.save()
+
+        response = self.get(self.url)
+        self.response_403(response)
+
+    def test_raises_404_when_registration_token_does_not_exist(self):
+        fake_token = faker.uuid4()
+
+        url = reverse('dashboard:education:set-password-for-competition',
+                      kwargs={
+                        'course_id': self.course.id,
+                        'registration_uuid': fake_token
+                      })
+
+        data = {
+            'password': faker.password()
+        }
+
+        response = self.post(url, data=data)
+        self.response_404(response)
+
+    def test_redirects_to_confirmation_email_sent_on_successful_registration(self):
+        user = BaseUserFactory()
+        user.registration_uuid = self.registration_uuid
+        user.save()
+
+        data = {
+            'password': faker.password()
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
+
+    @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
+    @patch('odin.common.tasks.send_template_mail.delay')
+    def test_sends_email_on_successful_registration(self, mock_send_mail):
+        user = BaseUserFactory()
+        user.registration_uuid = self.registration_uuid
+        user.save()
+
+        data = {
+            'password': faker.password()
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
+        self.assertEqual(mock_send_mail.called, True)
+        (template_name, recipients, context), kwargs = mock_send_mail.call_args
+        self.assertEqual([user.email], recipients)
+
+    def test_adds_student_to_course_on_successful_registration(self):
+        user = BaseUserFactory()
+        user.registration_uuid = self.registration_uuid
+        user.save()
+
+        data = {
+            'password': faker.password()
+        }
+
+        self.post(self.url, data=data)
+        user.refresh_from_db()
+        self.assertTrue(user.is_student())
+        self.assertIn(user.student, self.course.students.all())
+
+    def test_resets_user_registration_token_on_successful_competition_login(self):
+        user = BaseUserFactory()
+        user.registration_uuid = self.registration_uuid
+        user.save()
+
+        data = {
+            'password': faker.password()
+        }
+
+        self.post(self.url, data=data)
+        user.refresh_from_db()
+        self.assertIsNone(user.registration_uuid)
