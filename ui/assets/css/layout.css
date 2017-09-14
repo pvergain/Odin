@@ -55,19 +55,22 @@ Page Header
   .page-header.navbar.navbar-static-top {
     z-index: 9995; }
   .page-header.navbar .page-logo {
+    background-color: #26344B !important;
     float: left;
     display: block;
-    width: 250px;
+    width: 195px;
     height: 68px;
-    padding-left: 20px;
+    padding-left: 72.5px;
     padding-right: 20px; }
     .page-header.navbar .page-logo > .logo-image,
     .page-header.navbar .page-logo > a {
       display: block;
       float: left; }
     .page-header.navbar .page-logo .logo-default {
-      width: 160px;
-      margin: 27px 0 0 0; }
+      margin-top: 10px;
+      width: 50px;
+      height: 50px;
+    }
     .page-header.navbar .page-logo .logo-mini {
       display: none;
       margin-left: 5px; }
