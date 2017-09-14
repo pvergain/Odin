@@ -1,3 +1,5 @@
+import os
+
 from unittest.mock import patch
 from test_plus import TestCase
 
@@ -873,6 +875,8 @@ class TestSubmitNotGradableSolutionView(TestCase):
 
 class TestCompetitionRegisterView(TestCase):
     def setUp(self):
+        os.environ['RECAPTCHA_TESTING'] = 'True'
+
         self.course = CourseFactory()
         self.course.is_competition = True
         self.course.save()
@@ -884,6 +888,9 @@ class TestCompetitionRegisterView(TestCase):
         self.url = reverse('dashboard:education:register-for-competition',
                            kwargs={'course_id': self.course.id})
 
+    def tearDown(self):
+        del os.environ['RECAPTCHA_TESTING']
+
     def test_can_not_access_competition_registration_when_course_is_not_competition(self):
         self.course.is_competition = False
         self.course.save()
@@ -894,7 +901,8 @@ class TestCompetitionRegisterView(TestCase):
     def test_register_with_already_existing_user_when_not_logged_in_redirects_to_competition_login(self):
         data = {
             'email': self.user.email,
-            'full_name': self.full_name
+            'full_name': self.full_name,
+            'g-recaptcha-response': 'PASSED'
         }
         response = self.post(self.url, data=data, follow=False)
         registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
@@ -905,7 +913,8 @@ class TestCompetitionRegisterView(TestCase):
     def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_to_competition_login(self):
         data = {
             'email': self.user.email,
-            'full_name': self.full_name
+            'full_name': self.full_name,
+            'g-recaptcha-response': 'PASSED'
         }
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -918,7 +927,8 @@ class TestCompetitionRegisterView(TestCase):
     def test_register_with_new_user_redirects_to_competition_set_password(self):
         data = {
             'email': faker.email(),
-            'full_name': faker.name()
+            'full_name': faker.name(),
+            'g-recaptcha-response': 'PASSED'
         }
 
         response = self.post(self.url, data=data)
