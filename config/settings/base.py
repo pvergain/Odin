@@ -28,7 +28,8 @@ THIRD_PARTY_APPS = [
     'captcha',
     'widget_tweaks',
     'django_filters',
-    'easy_thumbnails'
+    'easy_thumbnails',
+    'django_js_reverse'
 ]
 
 LOCAL_APPS = [
@@ -157,6 +158,7 @@ STATICFILES_DIRS = [
     str(ROOT_DIR.path('ui/images')),
     str(ROOT_DIR.path('ui/bower_components')),
     str(ROOT_DIR.path('ui/assets')),
+    str(ROOT_DIR.path('dist')),
 ]
 
 

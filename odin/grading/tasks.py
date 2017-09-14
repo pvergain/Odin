@@ -11,7 +11,7 @@ from .helper import get_grader_ready_data
 from .exceptions import PollingError
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, max_retries=None)
 def poll_solution(self, solution_id):
     solution_model = apps.get_model(settings.GRADER_SOLUTION_MODEL)
     grader_ready_data = get_grader_ready_data(solution_id, solution_model)
@@ -21,10 +21,10 @@ def poll_solution(self, solution_id):
     try:
         grader_client.poll_grader(solution_id)
     except PollingError as exc:
-        self.retry(exc=exc, countdown=settings.GRADER_POLLING_COUNTDOWN)
+        raise self.retry(exc=exc, countdown=settings.GRADER_POLLING_COUNTDOWN)
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, max_retries=None)
 def submit_solution(self, solution_id):
     solution_model = apps.get_model(settings.GRADER_SOLUTION_MODEL)
     grader_ready_data = get_grader_ready_data(solution_id, solution_model)
@@ -34,4 +34,4 @@ def submit_solution(self, solution_id):
     try:
         grader_client.submit_request_to_grader(solution_id, poll_solution)
     except (Timeout, ConnectionError) as exc:
-        self.retry(exc=exc, countdown=settings.GRADER_RESUBMIT_COUNTDOWN)
+        raise self.retry(exc=exc, countdown=settings.GRADER_RESUBMIT_COUNTDOWN)

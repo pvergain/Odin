@@ -31,7 +31,7 @@ class ApplicationInfo(models.Model):
         return self.applications.select_related('user__profile').filter(is_accepted=True)
 
     def apply_is_active(self):
-        return self.end_date >= timezone.now().date()
+        return self.start_date <= timezone.now().date() <= self.end_date
 
     def interview_is_active(self):
         return self.start_interview_date <= timezone.now().date() and \
@@ -67,6 +67,9 @@ class Application(models.Model):
     is_accepted = models.BooleanField(default=False)
 
     objects = ApplicationQuerySet.as_manager()
+
+    def is_completed(self):
+        return self.solutions.count() == self.application_info.tasks.count()
 
     def get_interview(self):
         return self.interview_set.select_related('interviewer__profile').first()

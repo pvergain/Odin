@@ -5,11 +5,30 @@ from django.urls import reverse_lazy
 
 from odin.common.mixins import ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
+from odin.education.models import Course
+from odin.education.services import calculate_student_valid_solutions_for_course
+
 from .models import Profile, BaseUser
 
 
 class PersonalProfileView(LoginRequiredMixin, DetailView):
     template_name = 'users/profile.html'
+
+    def get_context_data(self, **kwargs):
+        user = self.request.user
+        context = super().get_context_data(**kwargs)
+        course_data = []
+        if user.is_student():
+            student = user.student
+            courses = Course.objects.filter(students__in=[student])
+            for course in courses:
+                course_data.append((course, calculate_student_valid_solutions_for_course(
+                    course=course,
+                    student=student)))
+
+        context['course_data'] = course_data
+
+        return context
 
     def get_object(self, *args, **kwargs):
         return Profile.objects.get(user=self.request.user)

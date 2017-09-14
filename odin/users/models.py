@@ -18,6 +18,8 @@ class BaseUser(PermissionsMixin,
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    registration_uuid = models.UUIDField(blank=True, null=True)
+
     USERNAME_FIELD = 'email'
 
     objects = UserManager()
@@ -76,7 +78,7 @@ class Profile(models.Model):
     full_name = models.CharField(blank=True, max_length=255)
     description = models.TextField(blank=True, null=True)
 
-    social_accounts = JSONField(default=json_field_default)
+    social_accounts = JSONField(default=json_field_default, blank=True, null=True)
 
     works_at = models.CharField(blank=True, null=True, max_length=255)
     studies_at = models.CharField(blank=True, null=True, max_length=255)

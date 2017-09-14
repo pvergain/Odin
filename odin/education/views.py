@@ -1,3 +1,9 @@
+import json
+
+from rest_framework import generics
+
+from allauth.account.utils import send_email_confirmation
+
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -5,14 +11,20 @@ from django.views.generic import (
     FormView,
     UpdateView
 )
+from django.core.exceptions import ValidationError
+from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
+from django.http import JsonResponse
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
+from odin.users.models import BaseUser
+from odin.authentication.views import LoginWrapperView
 
 from .models import (
     Course,
@@ -29,6 +41,8 @@ from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
     IsStudentInCoursePermission,
+    CourseIsCompetitionPermission,
+    IsStudentOrTeacherInCourseAPIPermission,
 )
 from .mixins import (
     CourseViewMixin,
@@ -47,15 +61,22 @@ from .forms import (
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
+    CompetitionRegisterForm,
+    CompetitionSetPasswordForm,
 )
 from .services import (
+    add_student,
     create_topic,
     create_included_material,
     create_included_task,
     create_test_for_task,
     create_gradable_solution,
-    create_non_gradable_solution
+    create_non_gradable_solution,
+    calculate_student_valid_solutions_for_course,
+    handle_competition_registration,
+    handle_competition_login
 )
+from .serializers import TopicSerializer, SolutionSerializer
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -65,9 +86,8 @@ class UserCoursesView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        select = ['description']
-        prefetch = ['students', 'teachers']
-        qs = Course.objects.select_related(*select).prefetch_related(*prefetch)
+        prefetch = ['students', 'teachers', 'weeks']
+        qs = Course.objects.prefetch_related(*prefetch)
 
         context['user_is_teacher_for'] = []
         context['user_is_student_for'] = []
@@ -91,13 +111,25 @@ class CourseDetailView(LoginRequiredMixin,
 
     template_name = 'education/course_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        topic_queryset = self.course.topics.prefetch_related('tasks__solutions', 'materials', 'tasks__test__language')
+        topics = TopicSerializer(topic_queryset, many=True)
+        course_topics = {}
+        course_topics['data'] = topics.data
+        context['course_topics'] = json.dumps(course_topics)
+        if self.request.user.is_student():
+            student = self.request.user.student
+            context['tasks_ratio'] = calculate_student_valid_solutions_for_course(student=student, course=self.course)
+        return context
+
 
 class PublicCourseListView(PublicViewContextMixin, ListView):
 
     template_name = 'education/all_courses.html'
 
     def get_queryset(self):
-        return Course.objects.filter(public=True).select_related('description')
+        return Course.objects.filter(public=True).select_related('description').prefetch_related('weeks')
 
 
 class PublicCourseDetailView(CourseViewMixin, PublicViewContextMixin, DetailView):
@@ -544,6 +576,16 @@ class StudentSolutionDetailView(LoginRequiredMixin,
     pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        solution = self.get_object()
+        if solution.task.gradable and not solution.task.test.is_source():
+            try:
+                context['solution_file'] = solution.file.read().decode('utf-8')
+            except UnicodeDecodeError as e:
+                context['solution_file'] = "Invalid file format"
+        return context
+
 
 class SubmitGradableSolutionView(LoginRequiredMixin,
                                  CourseViewMixin,
@@ -559,15 +601,15 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
     def get_service(self):
         return create_gradable_solution
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         res = self.has_test()
 
-        return res or super().get(*args, **kwargs)
+        return res or super().get(request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         res = self.has_test()
 
-        return res or super().post(*args, **kwargs)
+        return res or super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -592,6 +634,15 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
             start_grader_communication(solution.id)
 
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if not self.request.is_ajax():
+            return super().form_invalid(form)
+        else:
+            data = {
+                'errors': form.errors
+            }
+            return JsonResponse(data=data)
 
 
 class SubmitNonGradableSolutionView(LoginRequiredMixin,
@@ -620,6 +671,15 @@ class SubmitNonGradableSolutionView(LoginRequiredMixin,
 
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        if not self.request.is_ajax():
+            return super().form_invalid(form)
+        else:
+            data = {
+                'errors': form.errors
+            }
+            return JsonResponse(data=data)
+
 
 class AllStudentsSolutionsView(LoginRequiredMixin,
                                CourseViewMixin,
@@ -630,3 +690,109 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
 
     def get_queryset(self):
         return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
+
+
+class SolutionDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = SolutionSerializer
+    permission_classes = (IsStudentOrTeacherInCourseAPIPermission, )
+    queryset = Solution.objects.all()
+    lookup_url_kwarg = 'solution_id'
+
+
+class CompetitionRegisterView(CourseIsCompetitionPermission,
+                              ReadableFormErrorsMixin,
+                              FormView):
+    form_class = CompetitionRegisterForm
+    template_name = 'education/competition_registration.html'
+
+    def get_failure_url(self):
+        return reverse('dashboard:education:register-for-competition',
+                       kwargs={'course_id': self.kwargs.get('course_id')})
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:competition-login',
+                            kwargs={
+                                'course_id': self.kwargs.get('course_id'),
+                                'registration_uuid': self.registration_uuid
+                            })
+
+    def form_valid(self, form):
+        service_kwargs = {
+            'email': form.cleaned_data.get('email'),
+            'full_name': form.cleaned_data.get('full_name'),
+            'session_user': self.request.user
+        }
+        try:
+            handle_existing_user, self.registration_uuid = handle_competition_registration(**service_kwargs)
+        except ValidationError as e:
+            messages.warning(request=self.request, message=str(e))
+            return redirect(self.get_failure_url())
+
+        if handle_existing_user:
+            return super().form_valid(form)
+
+        return redirect(reverse('dashboard:education:set-password-for-competition',
+                                kwargs={
+                                    'course_id': self.kwargs.get('course_id'),
+                                    'registration_uuid': self.registration_uuid
+                                }))
+
+
+class CompetitionLoginView(CourseIsCompetitionPermission,
+                           LoginWrapperView):
+
+    def get_failure_url(self):
+        return reverse_lazy('dashboard:education:competition-login',
+                            kwargs={
+                                'course_id': self.kwargs.get('course_id'),
+                                'registration_uuid': self.kwargs.get('registration_uuid')
+                             })
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            logout(request)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+        user = get_object_or_404(BaseUser, email=form.cleaned_data.get('login'))
+        service_kwargs = {'course': course,
+                          'user': user,
+                          'registration_token': self.kwargs.get('registration_uuid')}
+
+        try:
+            handle_competition_login(**service_kwargs)
+        except ValidationError as e:
+            messages.warning(request=self.request, message=str(e))
+            return redirect(self.get_failure_url())
+
+        return super().form_valid(form)
+
+
+class CompetitionSetPasswordView(CourseIsCompetitionPermission,
+                                 CallServiceMixin,
+                                 ReadableFormErrorsMixin,
+                                 FormView):
+    form_class = CompetitionSetPasswordForm
+    template_name = 'authentication/password_set.html'
+    success_url = reverse_lazy('account_email_verification_sent')
+
+    def get_service(self):
+        return add_student
+
+    def form_valid(self, form):
+        registration_uuid = self.kwargs.get('registration_uuid')
+        user = get_object_or_404(BaseUser, registration_uuid=registration_uuid)
+        user.set_password(form.cleaned_data.get('password'))
+        user.registration_uuid = None
+        user.save()
+
+        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+
+        student = Student.objects.create_from_user(user)
+        self.call_service(service_kwargs={'course': course, 'student': student})
+
+        send_email_confirmation(self.request, user, signup=True)
+
+        return super().form_valid(form)

@@ -32,6 +32,10 @@
                 {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="code_area" placeholder="Enter your tests here" %}
 	      </div>
               <div class="form-group form-md-line-input">
+                {{ form.extra_options.label }} - Must be valid JSON
+                {% render_field form.extra_options class="form-control form-control-solid placeholder-no-fix" %}
+	      </div>
+              <div class="form-group form-md-line-input">
                 {{ form.file.label }}
                 {% render_field form.file class="form-control form-control-solid" id="form_control_1" %}
 	      </div>

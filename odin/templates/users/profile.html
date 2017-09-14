@@ -1,95 +1,53 @@
-{% extends "dashboard/dashboard_base.html" %}
-{% load socialaccount %}
-{% load static %}
+{% extends 'dashboard/dashboard_base.html' %}
 
 {% block content_title %}
-  User Profile
+  Your profile
 {% endblock content_title %}
 
 {% block page_content %}
-<div class="row">
-    <div class="col-md-12">
-        <!-- BEGIN PROFILE SIDEBAR -->
-        <div class="profile-sidebar">
-            <!-- PORTLET MAIN -->
-            <div class="portlet light profile-sidebar-portlet ">
-              <!-- SIDEBAR USERPIC -->
-              <ul class="list-unstyled profile-nav">
-                <li>
-                    <img src="{{MEDIA_URL}}{{object.full_image.name}}" alt="{% static 'hackman.png' %}" class="img-responsive pic-bordered" alt="">
-                </li>
-              </ul>
-                <!-- END SIDEBAR USERPIC -->
-                <!-- SIDEBAR USER TITLE -->
-                <div class="profile-usertitle">
-                    <div class="profile-usertitle-name"> {{ object.full_name }} </div>
-                    <div class="profile-usertitle-job"> {{ object.user.email }} </div>
-                </div>
-                <!-- END SIDEBAR USER TITLE -->
-                <!-- SIDEBAR MENU -->
-                <div class="profile-usermenu">
-                    <ul class="nav">
-                        <li class="active">
-                            <a href="">
-                                <i class="icon-home"></i> Overview </a>
-                        </li>
-                        {% if request.user == object.user%}
-                        <li>
-                            <a href="{% url 'dashboard:users:edit-profile' %}">
-                                <i class="icon-settings"></i> Account Settings </a>
-                        </li>
-                        {% endif %}
-                        <li>
-                            <a href="">
-                                <i class="icon-info"></i> Help </a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- END MENU -->
+  <div class="row">
+    <div class="col-md-4">
+      {% include "users/partial/profile_portlet.html" %}
+    </div>
+    {% if request.user.is_student %}
+      <div class="col-md-8">
+      <!-- BEGIN SAMPLE TABLE PORTLET-->
+        <div class="portlet box green">
+          <div class="portlet-title">
+            <div class="caption">
+              <i class="fa fa-comments"></i> Course Information </div>
+            <div class="tools">
+              <a href="javascript:;" class="collapse"> </a>
             </div>
-            <!-- END PORTLET MAIN -->
-            <!-- PORTLET MAIN -->
-            <div class="portlet light ">
-                <!-- STAT -->
-                <div class="row list-separated profile-stat">
-                    <div class="col-md-4 col-sm-4 col-xs-6">
-                        <div class="uppercase profile-stat-title"> 0 </div>
-                        <div class="uppercase profile-stat-text"> Courses </div>
-                    </div>
-                    <div class="col-md-4 col-sm-4 col-xs-6">
-                        <div class="uppercase profile-stat-title"> 0 </div>
-                        <div class="uppercase profile-stat-text"> Tasks </div>
-                    </div>
-                    <div class="col-md-4 col-sm-4 col-xs-6">
-                        <div class="uppercase profile-stat-title"> 0 </div>
-                        <div class="uppercase profile-stat-text"> Passed tasks </div>
-                    </div>
+          </div>
+            <div class="portlet-body">
+               <div class="table-scrollable">
+                  <table class="table table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th> Course Name </th>
+                        <th> Attended </th>
+                        <th> Solved Tasks </th>
+                        <th> Certificate </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for course in course_data %}
+                        <tr>
+                          <td><a href="{% url 'dashboard:education:user-course-detail' course.0.id %}">{{ course.0.name }}</a></td>
+                          <td>100%</td>
+                          <td>{{ course.1 }}%</td>
+                          <td><a href="#">Link</a></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
                 </div>
-                <!-- END STAT -->
-                <div>
-                    <h4 class="profile-desc-title">About {{ object.full_name }}</h4>
-                    <span class="profile-desc-text"> {{ object.description }} </span>
-                    <div class="margin-top-20 profile-desc-link">
-                      {% if object.user == request.user %}
-                        <i class="fa fa-github"></i>
-                        {% if not object.get_gh_profile_url %}
-                          <a href="{% provider_login_url "github" process="connect" %}">Add Github account</a>
-                        {% else %}
-                          <a href="{{ object.get_gh_profile_url }}">{{ object.get_gh_profile_url }}</a>
-                        {% endif %}
-                      {% endif %}
-                    </div>
-                </div>
+              </div>
             </div>
-            <!-- END PORTLET MAIN -->
-            <div class="">
-              <a href="{% url 'account_logout'%}"><button type="button" name="button" class="btn btn-green">Sign out</button></a>
-            </div>
+      <!-- END SAMPLE TABLE PORTLET-->
         </div>
       </div>
-    </div>
-        <!-- END BEGIN PROFILE SIDEBAR -->
-
-
-  </p>
-{% endblock page_content%}
+    {% endif %}
+  </div>
+{% endblock page_content %}

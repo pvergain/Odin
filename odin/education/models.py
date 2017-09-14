@@ -48,9 +48,13 @@ class Course(models.Model):
     video_channel = models.URLField(blank=True, null=True)
     facebook_group = models.URLField(blank=True, null=True)
 
+    logo = models.ImageField(blank=True, null=True)
+
     public = models.BooleanField(default=True)
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
+
+    is_competition = models.BooleanField(default=False)
 
     objects = CourseManager()
 
@@ -64,7 +68,7 @@ class Course(models.Model):
 
     @property
     def visible_teachers(self):
-        return self.teachers.filter(course_assignments__hidden=False)
+        return self.teachers.filter(course_assignments__hidden=False).select_related('profile')
 
     @property
     def duration_in_weeks(self):
@@ -232,8 +236,6 @@ class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
     description = models.TextField(blank=True, null=True)
     gradable = models.BooleanField(default=False)
 
-    objects = TaskQuerySet.as_manager()
-
     class Meta:
         abstract = True
 
@@ -256,6 +258,8 @@ class IncludedTask(BaseTask):
     topic = models.ForeignKey(Topic,
                               on_delete=models.CASCADE,
                               related_name='tasks')
+
+    objects = TaskQuerySet.as_manager()
 
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
@@ -332,7 +336,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     check_status_location = models.CharField(max_length=128, null=True, blank=True)
     build_id = models.IntegerField(blank=True, null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
-    test_output = models.TextField(blank=True, null=True)
+    test_output = JSONField(blank=True, null=True)
     return_code = models.IntegerField(blank=True, null=True)
     file = models.FileField(upload_to="solutions", blank=True, null=True)
 
@@ -340,6 +344,4 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
 
     @property
     def verbose_status(self):
-        for status_index, status in self.STATUS_CHOICE:
-            if status_index == self.status:
-                return status
+        return self.STATUS_CHOICE[self.status][1]

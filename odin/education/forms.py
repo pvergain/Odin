@@ -76,13 +76,13 @@ class IncludedTaskFromExistingForm(forms.ModelForm):
 class SourceCodeTestForm(forms.ModelForm):
     class Meta:
         model = IncludedTest
-        fields = ('language', 'task', 'code')
+        fields = ('language', 'task', 'code', 'extra_options')
 
 
 class BinaryFileTestForm(forms.ModelForm):
     class Meta:
         model = IncludedTest
-        fields = ('language', 'task', 'file')
+        fields = ('language', 'task', 'file', 'extra_options')
 
 
 class SubmitGradableSolutionForm(forms.ModelForm):
@@ -99,6 +99,17 @@ class SubmitGradableSolutionForm(forms.ModelForm):
 
 
 class SubmitNonGradableSolutionForm(forms.ModelForm):
+    url = forms.URLField(required=True)
+
     class Meta:
         model = Solution
         fields = ('url', )
+
+
+class CompetitionRegisterForm(forms.Form):
+    full_name = forms.CharField(max_length=256)
+    email = forms.EmailField()
+
+
+class CompetitionSetPasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput())

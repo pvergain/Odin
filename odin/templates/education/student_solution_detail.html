@@ -20,14 +20,14 @@
               <p>
                   {% if solution.task.test.is_source %}
                   <h3>Code:</h3> <br />
-                    {{ solution.code }} 
+                    {{ solution.code }}
                   {% else %}
-                    {{ solution.file }} 
+                    {{ solution_file }}
                   {% endif %}<br /><br />
                   <h3>Status:</h3> <br /> {{ solution.get_status_display }}
               </p>
             </div>
         </div>
         <!-- END SAMPLE TABLE PORTLET-->
-</div>   
+</div>
 {% endblock page_content %}

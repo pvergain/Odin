@@ -9,7 +9,7 @@ from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
 from .permissions import ViewApplicationDetailPermission
-from .models import Application, ApplicationTask
+from .models import Application, ApplicationTask, ApplicationInfo
 from .forms import (
     ApplicationInfoModelForm,
     IncludedApplicationTaskForm,
@@ -185,6 +185,8 @@ class UserApplicationsListView(LoginRequiredMixin,
 
             courses = Course.objects.get_in_application_period().filter(**filters)
             context['teached_courses'] = courses.prefetch_related(*prefetch).order_by('-start_date')
+        courses_open_for_application = [app_info.course for app_info in ApplicationInfo.objects.get_open_for_apply()]
+        context['courses_open_for_application'] = courses_open_for_application
 
         return context
 

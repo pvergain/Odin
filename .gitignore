@@ -73,6 +73,14 @@ bootstrap.sh
 # Export recaptcha env variables
 captcha_env.sh
 
+# Bower components
 */bower_components/*
 
+# Previous DB dump
 dump.json
+
+# Webpack bundle
+dist/
+
+# Editor specific
+.tern-port

@@ -17,7 +17,9 @@ class CourseViewMixin:
             'teachers__profile',
             'topics__week',
             'topics__materials',
-            'topics__tasks'
+            'topics__tasks',
+            'weeks__lectures',
+
         )
         if course_id:
             self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch)
@@ -49,10 +51,16 @@ class SubmitSolutionMixin:
     template_name = 'education/submit_solution.html'
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:student-solution-detail',
-                            kwargs={'course_id': self.course.id,
-                                    'task_id': self.kwargs.get('task_id'),
-                                    'solution_id': self.solution_id})
+        if not self.request.is_ajax():
+            return reverse_lazy('dashboard:education:student-solution-detail',
+                                kwargs={'course_id': self.course.id,
+                                        'task_id': self.kwargs.get('task_id'),
+                                        'solution_id': self.solution_id})
+
+        return reverse_lazy('dashboard:education:student-solution-detail-api',
+                            kwargs={
+                                'solution_id': self.solution_id
+                            })
 
 
 class TaskViewMixin:

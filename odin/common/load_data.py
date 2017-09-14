@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from datetime import datetime
 
 from datetime import timedelta
 from dateutil import parser
@@ -454,5 +455,32 @@ class SolutionLoader(BaseLoader):
 
                 instance = self.django_model(**kwargs)
                 instance_list.append(instance)
+
+        self.django_model.objects.bulk_create(instance_list)
+
+
+class LectureLoader(BaseLoader):
+    django_model = apps.get_model('education.Lecture')
+    json_model = 'education.lecture'
+    json_fields = ['week', 'course', 'date']
+    model_fields = json_fields
+
+    def generate_orm_objects(self):
+        instance_list = []
+
+        for kwargs in self.get_field_mapping():
+            course_qs = Course.objects.filter(id=kwargs.get('course'))
+
+            if course_qs.exists():
+                course = course_qs.first()
+                target_week = None
+
+                for week in course.weeks.all():
+                    if week.start_date <= datetime.strptime(kwargs.get('date'), '%Y-%m-%d').date() < week.end_date:
+                        target_week = week
+                        break
+                kwargs['course'] = course
+                kwargs['week'] = target_week
+                instance_list.append(self.django_model(**kwargs))
 
         self.django_model.objects.bulk_create(instance_list)

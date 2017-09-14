@@ -5,53 +5,56 @@
   {% if public_page %}
     <div class="container">
   {% else %}
-    <div>
+      <div>
   {% endif  %}
-    Course detail
-    </div>
+  Course detail
+      </div>
 {% endblock content_title %}
 
 {% block page_content %}
   {% if public_page %}
     <div class="container">
   {% else %}
-    <div>
+      <div>
   {% endif %}
+  <div class="row">
+    <div class="col-md-5">
+      {% include 'education/partial/progress_bar.html' with progress_title="Lecture attendance" progress_value=0 %}
+    </div>
+    <div class="col-md-7">
+      <!-- Course attendance is hardcoded until mac-checking and attendance back-end logic is implemented -->
+      {% include 'education/partial/progress_bar.html' with progress_title="Valid Solutions" progress_value=tasks_ratio %}
+    </div>
     <div class="row">
-    <div class="col-md-12">
-      {% include "education/partial/teachers_table.html" with course=course teachers=course.visible_teachers.all %}
-    </div>
-    <div class="col-md-12">
-      {% include "education/partial/topics_table.html" with course=course topics=course.topics.all public_page=public_page tasks=course_tasks%}
-
-      {% if course.application_info.apply_is_active and public_page %}
-        {% if request.user.student not in course.students.all and not user_applied %}
-          <a href="{% url 'dashboard:applications:apply-to-course' course.id %}">
-            <button class="btn green uppercase" type="button" name="button">Apply to course</button>
-          </a>
-        {% endif %}
-      {% endif %}
-      {% if not public_page %}
-        <div class="col-md-4">
-          <a href="{% url 'public:course_detail' course_slug=course.slug_url %}">
-            <button type="button" name="button" class="btn green uppercase">View public version of this course</button>
-          </a>
+      <div class="col-md-12">
+        <div class="col-md-5">
+          {% include 'education/partial/course_schedule.html' with course=course %}
         </div>
-        {% if request.user.teacher in course.teachers.all %}
-          <div class="col-md-4">
-            {% if not course.application_info %}
-              <a href="{% url 'dashboard:applications:create-application-info' course.id %}">
-                <button class="btn green uppercase" type="button" name="button">Create application info</button>
-              </a>
-            {% else %}
-              <a href="{% url 'dashboard:applications:edit-application-info' course.id %}">
-                <button class="btn green uppercase" type="button" name="button">Edit application info</button>
-              </a>
-            {% endif %}
+        <div class="col-md-7">
+          <div id="root">
           </div>
-        {% endif %}
-      {% endif %}
+          <div id="modal-root">
+          </div>
+        </div>
+
+      </div>
+
     </div>
-    </div>
+
   </div>
+      </div>
+
 {% endblock page_content %}
+
+{% block extra_scripts %}
+  {% csrf_token %}
+  <script src="{% url 'js_reverse' %}"></script>
+  <script>
+   window.props = {{ course_topics|safe }};
+   {% if request.user.is_student %}
+      window.props.studentID = {{ request.user.student.id }};
+   {% endif %}
+   window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  </script>
+  <script src="{% static 'bundle.js' %}"></script>
+{% endblock extra_scripts %}
