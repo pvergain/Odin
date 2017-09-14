@@ -1,5 +1,5 @@
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -89,3 +89,18 @@ class SocialSignupWrapperView(ReadableFormErrorsMixin, socialauth_views.SignupVi
 
 class EmailVerificationSentWrapperView(auth_views.EmailVerificationSentView):
     template_name = 'authentication/email_confirm_msg.html'
+
+
+class ConfirmEmailWrapperView(auth_views.ConfirmEmailView):
+    def get_redirect_url(self):
+        emailconfirmation = self.get_object()
+        user = get_object_or_404(BaseUser, email=emailconfirmation.email_address.email)
+
+        if user.registration_uuid:
+            return reverse_lazy('dashboard:education:competition-login',
+                                kwargs={
+                                    'course_id': user.registering_for.id,
+                                    'registration_uuid': user.registration_uuid
+                                })
+
+        return super().get_redirect_url()

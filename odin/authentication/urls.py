@@ -15,8 +15,9 @@ from .views import (
     PasswordResetFromKeyWrapperView,
     PasswordResetFromKeyDoneWrapperView,
     SocialConnectionsWrapperView,
-    EmailVerificationSentWrapperView
-    )
+    EmailVerificationSentWrapperView,
+    ConfirmEmailWrapperView
+)
 
 
 urlpatterns = [
@@ -84,4 +85,10 @@ urlpatterns = [
         view=EmailVerificationSentWrapperView.as_view(),
         name='account_email_verification_sent'
     ),
+    url(
+        regex='^confirm-email/(?P<key>[-:\w]+)/$',
+        view=ConfirmEmailWrapperView.as_view(),
+        name='account_confirm_email'
+    ),
+
 ] + allauth_urls

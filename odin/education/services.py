@@ -253,6 +253,7 @@ def handle_competition_login(course: Course,
         student = user.student
 
     user.registration_uuid = None
+    user.registering_for = None
     user.save()
     add_student(course=course, student=student)
 

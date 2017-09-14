@@ -966,14 +966,17 @@ class TestCompetitionLoginView(TestCase):
         response = self.post(self.url, data=data, follow=False)
         self.assertRedirects(response, expected_url=self.url)
 
-    def test_redirects_to_profile_page_on_successful_competition_login(self):
+    def test_redirects_to_competition_detail_on_successful_competition_login(self):
         data = {
             'login': self.user.email,
             'password': self.test_password
         }
 
         response = self.post(self.url, data=data)
-        self.assertRedirects(response, expected_url=reverse('dashboard:users:profile'))
+        self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
+                                                            kwargs={
+                                                                'course_id': self.course.id
+                                                            }))
 
     def test_adds_student_to_course_on_successful_competition_login(self):
         data = {
@@ -1056,21 +1059,11 @@ class TestCompetitionSetPasswordView(TestCase):
         (template_name, recipients, context), kwargs = mock_send_mail.call_args
         self.assertEqual([self.user.email], recipients)
 
-    def test_adds_student_to_course_on_successful_registration(self):
+    def test_sets_registration_for_on_successful_registration(self):
         data = {
             'password': faker.password()
         }
 
         self.post(self.url, data=data)
         self.user.refresh_from_db()
-        self.assertTrue(self.user.is_student())
-        self.assertIn(self.user.student, self.course.students.all())
-
-    def test_resets_user_registration_token_on_successful_competition_login(self):
-        data = {
-            'password': faker.password()
-        }
-
-        self.post(self.url, data=data)
-        self.user.refresh_from_db()
-        self.assertIsNone(self.user.registration_uuid)
+        self.assertIsNotNone(self.user.registering_for)
