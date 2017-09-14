@@ -1,5 +1,7 @@
 from django import forms
 
+from captcha.fields import ReCaptchaField
+
 from .models import (
     Topic,
     IncludedMaterial,
@@ -109,6 +111,8 @@ class SubmitNonGradableSolutionForm(forms.ModelForm):
 class CompetitionRegisterForm(forms.Form):
     full_name = forms.CharField(max_length=256)
     email = forms.EmailField()
+
+    captcha = ReCaptchaField(label='', attrs={'theme': 'clean'})
 
 
 class CompetitionSetPasswordForm(forms.Form):
