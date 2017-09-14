@@ -1,17 +1,4 @@
-"""
-Production Configurations
-
-- Use Amazon's S3 for storing static files and uploaded media
-- Use mailgun to send emails
-- Use Redis for cache
-
-- Use sentry for error logging
-
-
-"""
-
 import logging
-
 
 from .base import *  # noqa
 
