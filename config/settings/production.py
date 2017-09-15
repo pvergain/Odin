@@ -1,17 +1,4 @@
-"""
-Production Configurations
-
-- Use Amazon's S3 for storing static files and uploaded media
-- Use mailgun to send emails
-- Use Redis for cache
-
-- Use sentry for error logging
-
-
-"""
-
 import logging
-
 
 from .base import *  # noqa
 
@@ -55,21 +42,29 @@ X_FRAME_OPTIONS = 'DENY'
 # ------------------------------------------------------------------------------
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['academy.hacksoft.io', ])
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['localhost', 'academy.hacksoft.io', ])
 # END SITE CONFIGURATION
 
 INSTALLED_APPS += ['gunicorn', ]
 
-# URL that handles the media served from MEDIA_ROOT, used for managing
-# stored files.
 
-#  See:http://stackoverflow.com/questions/10390244/
-MEDIA_URL = '/media/'
+# Storages, static, media, AWS
+# ------------------------------------------------------------------------------
 
-# Static Assets
-# ------------------------
-STATIC_URL = '/static/'
-STATIC_ROOT = 'staticfiles/'
+from .aws import *
+
+MEDIA_LOCATION = 'media'
+MEDIA_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, MEDIA_LOCATION)
+MEDIA_S3_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
+
+DEFAULT_FILE_STORAGE = 'config.settings.storages.MediaStorage'
+
+STATIC_LOCATION = 'static'
+STATIC_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, STATIC_LOCATION)
+STATIC_CDN_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
+
+STATICFILES_STORAGE = 'config.settings.storages.StaticStorage'
+
 
 # EMAIL
 # ------------------------------------------------------------------------------
@@ -93,24 +88,6 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
 # Use the Heroku-style specification
 # Raises ImproperlyConfigured exception if DATABASE_URL not in os.environ
 DATABASES['default'] = env.db('DATABASE_URL')
-
-# CACHING
-# ------------------------------------------------------------------------------
-
-REDIS_LOCATION = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 0)
-# Heroku URL does not pass the DB number, so we parse it in
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_LOCATION,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'IGNORE_EXCEPTIONS': True,  # mimics memcache behavior.
-                                        # http://niwinz.github.io/django-redis/latest/#_memcached_exceptions_behavior
-        }
-    }
-}
-
 
 # Sentry Configuration
 SENTRY_DSN = env('DJANGO_SENTRY_DSN')
