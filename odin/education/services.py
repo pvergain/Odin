@@ -208,13 +208,13 @@ def create_non_gradable_solution(*,
 def calculate_student_valid_solutions_for_course(*,
                                                  student: Student,
                                                  course: Course) -> str:
-        total_tasks = IncludedTask.objects.filter(topic__course=course).count()
-        if not total_tasks:
-            return 0
-        solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
+    total_tasks = IncludedTask.objects.filter(topic__course=course).count()
+    if not total_tasks:
+        return 0
+    solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
 
-        ratio = (solved_tasks/total_tasks) * 100
-        return f'{ratio:.1f}'
+    ratio = (solved_tasks/total_tasks) * 100
+    return f'{ratio:.1f}'
 
 
 def handle_competition_registration(*,
