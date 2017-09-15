@@ -109,7 +109,7 @@ class CourseDetailView(LoginRequiredMixin,
                        IsStudentOrTeacherInCoursePermission,
                        TemplateView):
 
-    template_name = 'education/course_detail.html'
+    template_name = 'education/course_detail_container.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -133,7 +133,7 @@ class PublicCourseListView(PublicViewContextMixin, ListView):
 
 
 class PublicCourseDetailView(CourseViewMixin, PublicViewContextMixin, DetailView):
-    template_name = 'education/course_detail.html'
+    template_name = 'education/course_detail_container.html'
 
     def get_object(self):
 

@@ -1,17 +1,5 @@
-{% extends public_page|yesno:'partial/public_base.html,dashboard/dashboard_base.html' %}
 {% load static %}
 
-{% block content_title %}
-  {% if public_page %}
-    <div class="container">
-  {% else %}
-      <div>
-  {% endif  %}
-  Course detail
-      </div>
-{% endblock content_title %}
-
-{% block page_content %}
   {% if public_page %}
     <div class="container">
   {% else %}
@@ -43,8 +31,6 @@
 
   </div>
       </div>
-
-{% endblock page_content %}
 
 {% block extra_scripts %}
   {% csrf_token %}
