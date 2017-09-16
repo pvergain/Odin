@@ -248,6 +248,7 @@ def handle_competition_login(*,
                              registration_token: str) -> BaseUser:
     if not registration_token == str(user.registration_uuid):
         raise ValidationError('Token mismatch')
+
     if not user.is_student():
         student = Student.objects.create_from_user(user)
     else:
@@ -256,9 +257,10 @@ def handle_competition_login(*,
     user.registration_uuid = None
     user.registering_for = None
     user.save()
+
     try:
         add_student(course=course, student=student)
     except ValidationError:
-        raise ValidationError("Already a student in this course!")
+        pass
 
     return user
