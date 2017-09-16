@@ -66,7 +66,8 @@ class TestLogInView(TestCase):
         }
         response = self.post(url_name=self.url, data=data, follow=True)
 
-        self.assertRedirects(response=response, expected_url=self.reverse('dashboard:users:profile'))
+        expected_url = reverse('dashboard:education:user-courses')
+        self.assertRedirects(response=response, expected_url=expected_url)
 
 
 class TestSignUpView(TestCase):
