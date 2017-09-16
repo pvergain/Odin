@@ -705,6 +705,13 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
     form_class = CompetitionRegisterForm
     template_name = 'education/competition_registration.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['competition'] = get_object_or_404(Course, id=self.kwargs['course_id'])
+
+        return context
+
     def get_failure_url(self):
         return reverse('dashboard:education:register-for-competition',
                        kwargs={'course_id': self.kwargs.get('course_id')})
