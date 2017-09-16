@@ -226,9 +226,6 @@ def handle_competition_registration(*,
     False depending on whether further handling should be for an existing user or a
     new one.
     """
-    if session_user.is_authenticated and not session_user.email == email:
-        raise ValidationError('You are trying to register an email that is different than yours!')
-
     user = BaseUser.objects.filter(email=email)
     registration_uuid = uuid.uuid4()
     if user.exists():
@@ -257,6 +254,7 @@ def handle_competition_login(*,
         student = user.student
 
     user.registration_uuid = None
+    user.registering_for = None
     user.save()
     try:
         add_student(course=course, student=student)

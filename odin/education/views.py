@@ -109,7 +109,7 @@ class CourseDetailView(LoginRequiredMixin,
                        IsStudentOrTeacherInCoursePermission,
                        TemplateView):
 
-    template_name = 'education/course_detail.html'
+    template_name = 'education/course_detail_container.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -133,7 +133,7 @@ class PublicCourseListView(PublicViewContextMixin, ListView):
 
 
 class PublicCourseDetailView(CourseViewMixin, PublicViewContextMixin, DetailView):
-    template_name = 'education/course_detail.html'
+    template_name = 'education/course_detail_container.html'
 
     def get_object(self):
 
@@ -722,11 +722,8 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
             'full_name': form.cleaned_data.get('full_name'),
             'session_user': self.request.user
         }
-        try:
-            handle_existing_user, self.registration_uuid = handle_competition_registration(**service_kwargs)
-        except ValidationError as e:
-            messages.warning(request=self.request, message=str(e))
-            return redirect(self.get_failure_url())
+
+        handle_existing_user, self.registration_uuid = handle_competition_registration(**service_kwargs)
 
         if handle_existing_user:
             return super().form_valid(form)
@@ -740,6 +737,12 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
 
 class CompetitionLoginView(CourseIsCompetitionPermission,
                            LoginWrapperView):
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.kwargs.get('course_id')
+                            })
 
     def get_failure_url(self):
         return reverse_lazy('dashboard:education:competition-login',
@@ -781,16 +784,17 @@ class CompetitionSetPasswordView(CourseIsCompetitionPermission,
         return add_student
 
     def form_valid(self, form):
+        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+
         registration_uuid = self.kwargs.get('registration_uuid')
         user = get_object_or_404(BaseUser, registration_uuid=registration_uuid)
         user.set_password(form.cleaned_data.get('password'))
-        user.registration_uuid = None
+        user.registering_for = course
+
+        if not user.is_active:
+            user.is_active = True
+
         user.save()
-
-        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
-
-        student = Student.objects.create_from_user(user)
-        self.call_service(service_kwargs={'course': course, 'student': student})
 
         send_email_confirmation(self.request, user, signup=True)
 

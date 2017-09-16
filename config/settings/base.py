@@ -114,41 +114,8 @@ TEMPLATES = [
     },
 ]
 
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-)
-
-LOGIN_URL = reverse_lazy('account_login')
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard:users:profile')
-ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
-ACCOUNT_LOGOUT_ON_GET = True
-SOCIALACCOUNT_QUERY_EMAIL = True
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_ADAPTER = 'odin.authentication.adapter.CustomAccountAdapter'
-SOCIALACCOUNT_ADAPTER = "odin.authentication.adapter.CustomAdapter"
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-
-SOCIALACCOUNT_PROVIDERS = {
-    'github': {
-        'SCOPE': [
-            'user:email',
-        ],
-    }
-}
-
-
-# Recaptcha settings
-NOCAPTCHA = True
-RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default='')
-RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_SECRET_KEY', default='')
-RECAPTCHA_USE_SSL = True
+from .allauth import *
+from .captcha import *
 
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
@@ -230,14 +197,4 @@ EMAIL_TEMPLATES = {
     for key, f in templates.items()
 }
 
-# Grader client settings
-GRADER_SOLUTION_MODEL = 'education.Solution'
-
-GRADER_GRADE_PATH = "/grade"
-GRADER_CHECK_PATH = "/check_result/{build_id}/"
-GRADER_GET_NONCE_PATH = "/nonce"
-GRADER_ADDRESS = env('GRADER_ADDRESS', default='https://grader.hackbulgaria.com')
-GRADER_API_KEY = env('GRADER_API_KEY', default='')
-GRADER_API_SECRET = env('GRADER_API_SECRET', default='')
-GRADER_POLLING_COUNTDOWN = env.int('GRADER_POLLING_COUNTDOWN', default=2)
-GRADER_RESUBMIT_COUNTDOWN = env.int('GRADER_RESUBMIT_COUNTDOWN', default=10)
+from .grader import *

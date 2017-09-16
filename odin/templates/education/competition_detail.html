@@ -1,0 +1,30 @@
+{% load static %}
+
+{% if public_page %}
+    <h1>work pls</h1>
+    <div class="container">
+  {% else %}
+      <div>
+  {% endif %}
+  <div class="row">
+    <div class="col-md-12">
+      <div id="root">
+      </div>
+      <div id="modal-root">
+      </div>
+    </div>
+  </div>
+      </div>
+
+{% block extra_scripts %}
+  {% csrf_token %}
+  <script src="{% url 'js_reverse' %}"></script>
+  <script>
+   window.props = {{ course_topics|safe }};
+   {% if request.user.is_student %}
+      window.props.studentID = {{ request.user.student.id }};
+   {% endif %}
+   window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  </script>
+  <script src="{% static 'bundle.js' %}"></script>
+{% endblock extra_scripts %}
