@@ -776,7 +776,6 @@ class CompetitionLoginView(CourseIsCompetitionPermission,
         except ValidationError as e:
             messages.warning(request=self.request, message=str(e))
             return redirect(self.get_failure_url())
-
         return super().form_valid(form)
 
 
