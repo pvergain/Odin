@@ -16,7 +16,7 @@ from .forms import SignUpWithReCaptchaForm, OnboardingForm, PasswordResetForm
 
 class LoginWrapperView(ReadableFormErrorsMixin, auth_views.LoginView):
     template_name = 'authentication/login.html'
-    success_url = reverse_lazy('dashboard:users:profile')
+    success_url = reverse_lazy('dashboard:education:user-courses')
 
 
 class SignUpWrapperView(ReadableFormErrorsMixin, auth_views.SignupView):
