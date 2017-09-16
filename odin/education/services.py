@@ -208,13 +208,13 @@ def create_non_gradable_solution(*,
 def calculate_student_valid_solutions_for_course(*,
                                                  student: Student,
                                                  course: Course) -> str:
-        total_tasks = IncludedTask.objects.filter(topic__course=course).count()
-        if not total_tasks:
-            return 0
-        solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
+    total_tasks = IncludedTask.objects.filter(topic__course=course).count()
+    if not total_tasks:
+        return 0
+    solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
 
-        ratio = (solved_tasks/total_tasks) * 100
-        return f'{ratio:.1f}'
+    ratio = (solved_tasks/total_tasks) * 100
+    return f'{ratio:.1f}'
 
 
 def handle_competition_registration(*,
@@ -242,7 +242,8 @@ def handle_competition_registration(*,
     return (handle_existing_user, registration_uuid)
 
 
-def handle_competition_login(course: Course,
+def handle_competition_login(*,
+                             course: Course,
                              user: BaseUser,
                              registration_token: str) -> BaseUser:
     if not registration_token == str(user.registration_uuid):
@@ -255,6 +256,9 @@ def handle_competition_login(course: Course,
     user.registration_uuid = None
     user.registering_for = None
     user.save()
-    add_student(course=course, student=student)
+    try:
+        add_student(course=course, student=student)
+    except ValidationError:
+        raise ValidationError("Already a student in this course!")
 
     return user

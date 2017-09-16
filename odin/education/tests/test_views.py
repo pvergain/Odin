@@ -924,6 +924,23 @@ class TestCompetitionRegisterView(TestCase):
                                                                 kwargs={'registration_uuid': registration_uuid,
                                                                         'course_id': self.course.id}))
 
+    def test_register_with_existing_user_when_logged_in_with_different_user_redirects_to_competition_login(self):
+        existing_user = BaseUserFactory(password=self.test_password)
+        data = {
+            'email': existing_user.email,
+            'full_name': faker.name(),
+            'g-recaptcha-response': 'PASSED'
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data, follow=False)
+            existing_user.refresh_from_db()
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:competition-login',
+                                                                kwargs={
+                                                                    'registration_uuid':
+                                                                    existing_user.registration_uuid,
+                                                                    'course_id': self.course.id
+                                                                }))
+
     def test_register_with_new_user_redirects_to_competition_set_password(self):
         data = {
             'email': faker.email(),
@@ -1008,6 +1025,18 @@ class TestCompetitionLoginView(TestCase):
         self.post(self.url, data=data)
         self.user.refresh_from_db()
         self.assertIsNone(self.user.registration_uuid)
+
+    def test_redirects_to_same_page_when_user_is_already_student_in_competition_course(self):
+        student = Student.objects.create_from_user(self.user)
+        add_student(course=self.course, student=student)
+
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=self.url)
 
 
 class TestCompetitionSetPasswordView(TestCase):
