@@ -1,11 +1,11 @@
 from django.conf.urls import url, include
 
-from .views import DashboardIndexView
+from .views import TempDashboardIndexView
 
 urlpatterns = [
     url(
         regex='^$',
-        view=DashboardIndexView.as_view(),
+        view=TempDashboardIndexView.as_view(),
         name='index'
     ),
     url(

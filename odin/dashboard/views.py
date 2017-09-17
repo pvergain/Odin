@@ -9,3 +9,7 @@ class RedirectToDashboardIndexView(RedirectView):
 
 class DashboardIndexView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/index.html'
+
+
+class TempDashboardIndexView(LoginRequiredMixin, RedirectView):
+    url = reverse_lazy('dashboard:education:user-courses')
