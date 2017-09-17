@@ -1036,7 +1036,8 @@ class TestCompetitionLoginView(TestCase):
         }
 
         response = self.post(self.url, data=data)
-        self.assertRedirects(response, expected_url=self.url)
+        expected_url = reverse('dashboard:education:user-course-detail', kwargs={'course_id': self.course.id})
+        self.assertRedirects(response, expected_url=expected_url)
 
 
 class TestCompetitionSetPasswordView(TestCase):

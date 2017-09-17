@@ -16,19 +16,19 @@
               <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
         {% endif %}
         <div class="socicons">
-          <center>
-            <a href="{{ course.repository }}" class="socicon-btn socicon-github tooltips border-white" data-original-title="Github"></a>
-            <a href="{{ course.facebook_group }}" class="socicon-btn socicon-facebook tooltips border-white" data-original-title="Facebook"></a>
-          </center>
+          <a href="{{ course.repository }}" class="socicon-btn socicon-github tooltips border-white" data-original-title="Github"></a>
+          <a href="{{ course.facebook_group }}" class="socicon-btn socicon-facebook tooltips border-white" data-original-title="Facebook"></a>
         </div>
+        <section style="margin-top: 15px">
+          <a class="btn btn-success"
+             href="{% url 'dashboard:education:user-course-detail' course.id %}">
+            Go to course
+          </a>
+        </section>
       </div>
 
       <div class="col-md-9">
         <div class="scrollable-content">
-          <!-- Course attendance is hardcoded until mac-checking and attendance back-end logic is implemented -->
-          <p>
-            <strong> You have attended 0% of this course's lectures :)</strong>
-          </p>
           <p>
             <strong> Start date</strong>: {{ course.start_date }}<br>
             <strong> End date</strong>: {{ course.end_date }}<br>
