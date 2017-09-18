@@ -65,11 +65,11 @@ class GraderBinaryProblem(GraderReadableTypesMixin, models.Model):
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
 
     def read_binary_file(self):
-        encoded = base64.b64encode(self.solution.read())
+        encoded = base64.b64encode(self.solution.file.read())
 
         return encoded.decode('ascii')
 
     def read_binary_test(self):
-        encoded = base64.b64encode(self.test.read())
+        encoded = base64.b64encode(self.test.file.read())
 
         return encoded.decode('ascii')
