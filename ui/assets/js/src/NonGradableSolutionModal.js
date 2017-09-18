@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-import Modal from './Modal';
-import SubmitFooter from './SubmitFooter';
+import Modal from "./Modal";
+import SubmitFooter from "./SubmitFooter";
 
 class NonGradableSolutionModal extends React.Component {
   render() {
@@ -9,12 +9,17 @@ class NonGradableSolutionModal extends React.Component {
       <Modal
         modalID={this.props.modalID}
         modalTitle={this.props.modalTitle}
-        styles={{display: 'none'}}
-        errors={this.props.errors}>
+        styles={{
+          display: "none",
+          "margin-top": "20%"
+        }}
+        errors={this.props.errors}
+      >
         <form
           onSubmit={this.props.performSubmitSolution}
           method="POST"
-          action={this.props.submitSolutionUrl}>
+          action={this.props.submitSolutionUrl}
+        >
           <input
             type="hidden"
             name="csrfmiddlewaretoken"

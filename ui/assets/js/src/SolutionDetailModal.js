@@ -25,7 +25,10 @@ class SolutionDetailModal extends React.Component {
       <Modal
         modalID={modalID}
         modalTitle={modalTitle}
-        styles={{ display: "none" }}
+        styles={{
+          display: "none",
+          "margin-top": "20%"
+        }}
       >
         <div className="portlet light">
           <div className="portlet-body">
