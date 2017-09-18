@@ -11,6 +11,7 @@ from odin.users.services import create_user
 from .models import (
     Course,
     CourseAssignment,
+    CourseDescription,
     Student,
     Teacher,
     Week,
@@ -44,7 +45,8 @@ def create_course(*,
                   video_channel: str=None,
                   slug_url: str=None,
                   logo: BinaryIO=None,
-                  public: bool=True) -> Course:
+                  public: bool=True,
+                  description: str="") -> Course:
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -75,6 +77,7 @@ def create_course(*,
         week_instances.append(current)
 
     Week.objects.bulk_create(week_instances)
+    CourseDescription.objects.create(course=course, verbose=description)
 
     return course
 
