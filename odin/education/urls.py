@@ -164,18 +164,21 @@ urlpatterns = [
         view=SolutionDetailAPIView.as_view(),
         name='student-solution-detail-api'
     ),
+]
+
+competition_url_patterns = [
     url(
-        regex='^competition-register/(?P<course_id>[0-9]+)/$',
+        regex='^(?P<competition_slug>[-\w]+)/register/$',
         view=CompetitionRegisterView.as_view(),
         name='register-for-competition'
     ),
     url(
-        regex='^competition-set-password/(?P<course_id>[0-9]+)/(?P<registration_uuid>[-\w]+)/$',
+        regex='^(?P<competition_slug>[-\w]+)/set-password/(?P<registration_uuid>[-\w]+)/$',
         view=CompetitionSetPasswordView.as_view(),
         name='set-password-for-competition'
     ),
     url(
-        regex='^competition-login/(?P<course_id>[0-9]+)/(?P<registration_uuid>[-\w]+)/$',
+        regex='^(?P<competition_slug>[-\w]+)/login/(?P<registration_uuid>[-\w]+)/$',
         view=CompetitionLoginView.as_view(),
         name='competition-login'
     ),

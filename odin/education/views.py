@@ -708,18 +708,18 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['competition'] = get_object_or_404(Course, id=self.kwargs['course_id'])
+        context['competition'] = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
 
         return context
 
     def get_failure_url(self):
-        return reverse('dashboard:education:register-for-competition',
-                       kwargs={'course_id': self.kwargs.get('course_id')})
+        return reverse('competition:register-for-competition',
+                       kwargs={'competition_slug': self.kwargs.get('competition_slug')})
 
     def get_success_url(self):
-        return reverse_lazy('dashboard:education:competition-login',
+        return reverse_lazy('competition:competition-login',
                             kwargs={
-                                'course_id': self.kwargs.get('course_id'),
+                                'competition_slug': self.kwargs.get('competition_slug'),
                                 'registration_uuid': self.registration_uuid
                             })
 
@@ -735,9 +735,9 @@ class CompetitionRegisterView(CourseIsCompetitionPermission,
         if handle_existing_user:
             return super().form_valid(form)
 
-        return redirect(reverse('dashboard:education:set-password-for-competition',
+        return redirect(reverse('competition:set-password-for-competition',
                                 kwargs={
-                                    'course_id': self.kwargs.get('course_id'),
+                                    'competition_slug': self.kwargs.get('competition_slug'),
                                     'registration_uuid': self.registration_uuid
                                 }))
 
@@ -746,15 +746,16 @@ class CompetitionLoginView(CourseIsCompetitionPermission,
                            LoginWrapperView):
 
     def get_success_url(self):
+        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
         return reverse_lazy('dashboard:education:user-course-detail',
                             kwargs={
-                                'course_id': self.kwargs.get('course_id')
+                                'course_id': course.id
                             })
 
     def get_failure_url(self):
-        return reverse_lazy('dashboard:education:competition-login',
+        return reverse_lazy('competition:competition-login',
                             kwargs={
-                                'course_id': self.kwargs.get('course_id'),
+                                'competition_slug': self.kwargs.get('competition_slug'),
                                 'registration_uuid': self.kwargs.get('registration_uuid')
                              })
 
@@ -765,7 +766,7 @@ class CompetitionLoginView(CourseIsCompetitionPermission,
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
         user = get_object_or_404(BaseUser, email=form.cleaned_data.get('login'))
         service_kwargs = {'course': course,
                           'user': user,
@@ -798,7 +799,7 @@ class CompetitionSetPasswordView(CourseIsCompetitionPermission,
         return add_student
 
     def form_valid(self, form):
-        course = get_object_or_404(Course, pk=self.kwargs.get('course_id'))
+        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
 
         registration_uuid = self.kwargs.get('registration_uuid')
         user = get_object_or_404(BaseUser, registration_uuid=registration_uuid)
