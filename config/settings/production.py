@@ -53,11 +53,11 @@ INSTALLED_APPS += ['gunicorn', ]
 
 from .aws import *
 
-MEDIA_LOCATION = 'media'
-MEDIA_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, MEDIA_LOCATION)
-MEDIA_S3_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
+# MEDIA_LOCATION = 'media'
+# MEDIA_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, MEDIA_LOCATION)
+# MEDIA_S3_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
 
-DEFAULT_FILE_STORAGE = 'config.settings.storages.MediaStorage'
+# DEFAULT_FILE_STORAGE = 'config.settings.storages.MediaStorage'
 
 STATIC_LOCATION = 'static'
 STATIC_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, STATIC_LOCATION)
