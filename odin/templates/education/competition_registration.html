@@ -14,7 +14,7 @@
         <!-- BEGIN REGISTRATION FORM -->
         <form class="signup-form" action="" method="post">
             {% csrf_token %}
-            <h3 class="font-green">Register for {{ competition.name }} competition</h3>
+            <h3 class="font-green">Register for {{ competition.name }}</h3>
           {% include 'education/partial/message_box.html' %}
             {% if not form.is_valid %}
             {% for error in readable_errors %}
