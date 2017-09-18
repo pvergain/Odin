@@ -14,10 +14,9 @@ from .exceptions import PollingError
 @shared_task(bind=True, max_retries=None)
 def poll_solution(self, solution_id):
     solution_model = apps.get_model(settings.GRADER_SOLUTION_MODEL)
-    grader_ready_data = get_grader_ready_data(solution_id, solution_model)
     grader_client = GraderClient(solution_model=solution_model,
                                  settings_module=settings,
-                                 grader_ready_data=grader_ready_data)
+                                 grader_ready_data={})
     try:
         grader_client.poll_grader(solution_id)
     except PollingError as exc:
