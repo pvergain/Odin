@@ -779,6 +779,12 @@ class CompetitionLoginView(CourseIsCompetitionPermission,
 
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_competition'] = True
+
+        return context
+
 
 class CompetitionSetPasswordView(CourseIsCompetitionPermission,
                                  CallServiceMixin,
