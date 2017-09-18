@@ -1,4 +1,4 @@
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect, get_object_or_404
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +7,7 @@ from allauth.account import views as auth_views
 from allauth.socialaccount import views as socialauth_views
 
 from odin.users.models import BaseUser
+from odin.education.models import Course
 from odin.common.utils import get_gh_email_address
 
 from odin.common.mixins import ReadableFormErrorsMixin
@@ -23,6 +24,12 @@ class SignUpWrapperView(ReadableFormErrorsMixin, auth_views.SignupView):
     template_name = 'authentication/signup.html'
     form_class = SignUpWithReCaptchaForm
     success_url = reverse_lazy('account_email_verification_sent')
+
+    def dispatch(self, request, *args, **kwargs):
+        return redirect(reverse('dashboard:education:register-for-competition',
+                                kwargs={
+                                    'course_id': Course.objects.filter(is_competition=True).last().id
+                                }))
 
 
 class LogoutWrapperView(LoginRequiredMixin, auth_views.LogoutView):

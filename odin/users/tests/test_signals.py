@@ -1,5 +1,6 @@
 import os
 
+from unittest import skip
 from test_plus import TestCase
 
 from ..models import Profile, BaseUser
@@ -24,6 +25,7 @@ class ProfileSignalTests(TestCase):
         BaseUserFactory()
         self.assertEqual(profile_count + 1, Profile.objects.count())
 
+    @skip("Temporary for competition")
     def test_sign_up_request_creates_profile(self):
         url = self.reverse('account_signup')
         password = "1234asdf"
