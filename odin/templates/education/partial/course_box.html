@@ -16,8 +16,12 @@
               <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
         {% endif %}
         <div class="socicons">
-          <a href="{{ course.repository }}" class="socicon-btn socicon-github tooltips border-white" data-original-title="Github"></a>
-          <a href="{{ course.facebook_group }}" class="socicon-btn socicon-facebook tooltips border-white" data-original-title="Facebook"></a>
+          {% if course.repository %}
+            <a href="{{ course.repository }}" class="socicon-btn socicon-github tooltips border-white" data-original-title="Github"></a>
+          {% endif %}
+          {% if course.facebook_group %}
+            <a href="{{ course.facebook_group }}" class="socicon-btn socicon-facebook tooltips border-white" data-original-title="Facebook"></a>
+          {% endif %}
         </div>
         <section style="margin-top: 15px">
           <a class="btn btn-success"

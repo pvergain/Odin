@@ -885,8 +885,8 @@ class TestCompetitionRegisterView(TestCase):
         self.user.is_active = True
         self.user.save()
         self.full_name = faker.name()
-        self.url = reverse('dashboard:education:register-for-competition',
-                           kwargs={'course_id': self.course.id})
+        self.url = reverse('competition:register-for-competition',
+                           kwargs={'competition_slug': self.course.slug_url})
 
     def tearDown(self):
         del os.environ['RECAPTCHA_TESTING']
@@ -906,9 +906,9 @@ class TestCompetitionRegisterView(TestCase):
         }
         response = self.post(self.url, data=data, follow=False)
         registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
-        self.assertRedirects(response, expected_url=reverse('dashboard:education:competition-login',
+        self.assertRedirects(response, expected_url=reverse('competition:competition-login',
                                                             kwargs={'registration_uuid': registration_uuid,
-                                                                    'course_id': self.course.id}))
+                                                                    'competition_slug': self.course.slug_url}))
 
     def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_to_competition_login(self):
         data = {
@@ -920,9 +920,9 @@ class TestCompetitionRegisterView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data, follow=False)
             registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
-            self.assertRedirects(response, expected_url=reverse('dashboard:education:competition-login',
+            self.assertRedirects(response, expected_url=reverse('competition:competition-login',
                                                                 kwargs={'registration_uuid': registration_uuid,
-                                                                        'course_id': self.course.id}))
+                                                                        'competition_slug': self.course.slug_url}))
 
     def test_register_with_existing_user_when_logged_in_with_different_user_redirects_to_competition_login(self):
         existing_user = BaseUserFactory(password=self.test_password)
@@ -934,11 +934,11 @@ class TestCompetitionRegisterView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data, follow=False)
             existing_user.refresh_from_db()
-            self.assertRedirects(response, expected_url=reverse('dashboard:education:competition-login',
+            self.assertRedirects(response, expected_url=reverse('competition:competition-login',
                                                                 kwargs={
                                                                     'registration_uuid':
                                                                     existing_user.registration_uuid,
-                                                                    'course_id': self.course.id
+                                                                    'competition_slug': self.course.slug_url
                                                                 }))
 
     def test_register_with_new_user_redirects_to_competition_set_password(self):
@@ -950,9 +950,9 @@ class TestCompetitionRegisterView(TestCase):
 
         response = self.post(self.url, data=data)
         registration_uuid = BaseUser.objects.last().registration_uuid
-        self.assertRedirects(response, expected_url=reverse('dashboard:education:set-password-for-competition',
+        self.assertRedirects(response, expected_url=reverse('competition:set-password-for-competition',
                                                             kwargs={
-                                                                'course_id': self.course.id,
+                                                                'competition_slug': self.course.slug_url,
                                                                 'registration_uuid': registration_uuid
                                                             }))
 
@@ -963,9 +963,9 @@ class TestCompetitionLoginView(TestCase):
         self.course.is_competition = True
         self.course.save()
         self.registration_uuid = faker.uuid4()
-        self.url = reverse('dashboard:education:competition-login',
+        self.url = reverse('competition:competition-login',
                            kwargs={'registration_uuid': self.registration_uuid,
-                                   'course_id': self.course.id})
+                                   'competition_slug': self.course.slug_url})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.user.registration_uuid = self.registration_uuid
@@ -1046,9 +1046,9 @@ class TestCompetitionSetPasswordView(TestCase):
         self.course.is_competition = True
         self.course.save()
         self.registration_uuid = faker.uuid4()
-        self.url = reverse('dashboard:education:set-password-for-competition',
+        self.url = reverse('competition:set-password-for-competition',
                            kwargs={
-                               'course_id': self.course.id,
+                               'competition_slug': self.course.slug_url,
                                'registration_uuid': self.registration_uuid
                            })
         self.user = BaseUserFactory()
@@ -1065,9 +1065,9 @@ class TestCompetitionSetPasswordView(TestCase):
     def test_raises_404_when_registration_token_does_not_exist(self):
         fake_token = faker.uuid4()
 
-        url = reverse('dashboard:education:set-password-for-competition',
+        url = reverse('competition:set-password-for-competition',
                       kwargs={
-                        'course_id': self.course.id,
+                        'competition_slug': self.course.slug_url,
                         'registration_uuid': fake_token
                       })
 
