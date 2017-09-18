@@ -27,7 +27,7 @@ class SolutionDetailModal extends React.Component {
         modalTitle={modalTitle}
         styles={{
           display: "none",
-          "margin-top": "20%"
+          "margin-top": "15%"
         }}
       >
         <div className="portlet light">
