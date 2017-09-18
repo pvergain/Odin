@@ -97,9 +97,9 @@ class ConfirmEmailWrapperView(auth_views.ConfirmEmailView):
         user = get_object_or_404(BaseUser, email=emailconfirmation.email_address.email)
 
         if user.registration_uuid:
-            return reverse_lazy('dashboard:education:competition-login',
+            return reverse_lazy('competition:competition-login',
                                 kwargs={
-                                    'course_id': user.registering_for.id,
+                                    'competition_slug': user.registering_for.slug_url,
                                     'registration_uuid': user.registration_uuid
                                 })
 
