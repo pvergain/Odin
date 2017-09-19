@@ -267,3 +267,17 @@ def handle_competition_login(*,
         pass
 
     return user
+
+
+def get_all_student_solution_statistics(*,
+                                        task: IncludedTask) -> Dict:
+    result = {}
+    course = task.topic.course
+    result['total_student_count'] = course.students.count()
+
+    filters = {'solutions__task': task, 'solutions__isnull': False}
+    result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
+    filters = {'solutions__task': task, 'solutions__status': Solution.OK}
+    result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
+
+    return result

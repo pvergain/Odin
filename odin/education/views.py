@@ -74,7 +74,8 @@ from .services import (
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course,
     handle_competition_registration,
-    handle_competition_login
+    handle_competition_login,
+    get_all_student_solution_statistics
 )
 from .serializers import TopicSerializer, SolutionSerializer
 
@@ -719,6 +720,12 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
 
     def get_queryset(self):
         return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        context['solution_statistics'] = get_all_student_solution_statistics(task=task)
+        return context
 
 
 class SolutionDetailAPIView(generics.RetrieveAPIView):
