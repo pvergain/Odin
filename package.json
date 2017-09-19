@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack -d",
-    "postinstall": "cd ui && ./node_modules/.bin/bower install && cd ../ && npm run build"
+    "postinstall": "cd ui && ../node_modules/.bin/bower install && cd ../ && npm run build"
   },
   "repository": {
     "type": "git",
