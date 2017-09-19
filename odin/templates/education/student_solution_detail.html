@@ -18,11 +18,9 @@
     <div class="portlet-body">
       <section>
         {% if solution.task.test.is_source %}
-          <pre>
-            {{ solution.code }}
-          </pre>
+          <pre>{{ solution.code }}</pre>
         {% else %}
-          {{ solution_file }}
+          <pre>{{ solution_file }}</pre>
         {% endif %}
       </section>
       <section>
