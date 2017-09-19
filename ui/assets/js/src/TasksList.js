@@ -21,6 +21,15 @@ class ListItem extends React.Component {
     const modalID = `submit_${this.props.task.id}`;
 
     const solutionDetailModalID = `solution_detail_${this.props.task.id}`;
+    const solutionsUrl = window.props.isUserTeacher
+      ? Urls["dashboard:education:all-students-solutions"]({
+          task_id: this.props.task.id,
+          course_id: this.props.course
+        })
+      : Urls["dashboard:education:user-task-solutions"]({
+          course_id: this.props.course,
+          task_id: this.props.task.id
+        });
     return (
       <div>
         <div className="list-group-item">
@@ -33,12 +42,7 @@ class ListItem extends React.Component {
             </div>
             <div className="col-md-5">
               <div className="btn-group pull-right">
-                <a
-                  href={Urls["dashboard:education:user-task-solutions"]({
-                    course_id: this.props.course,
-                    task_id: this.props.task.id
-                  })}
-                >
+                <a href={solutionsUrl}>
                   <button className="btn btn-default uppercase" type="button">
                     Solutions
                   </button>
