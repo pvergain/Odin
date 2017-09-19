@@ -345,3 +345,6 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     @property
     def verbose_status(self):
         return self.STATUS_CHOICE[self.status][1]
+
+    class Meta:
+        ordering = ['-id']
