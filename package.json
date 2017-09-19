@@ -4,7 +4,8 @@
   "description": "Odin is the new Loki. LMS for HackSoft Academy",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -d"
+    "build": "webpack -d",
+    "poistinstall": "npm run build"
   },
   "repository": {
     "type": "git",
