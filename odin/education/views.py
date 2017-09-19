@@ -276,6 +276,35 @@ class AddNewIncludedMaterialView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
+class EditIncludedMaterialView(LoginRequiredMixin,
+                               CourseViewMixin,
+                               ReadableFormErrorsMixin,
+                               IsTeacherInCoursePermission,
+                               UpdateView):
+
+    model = IncludedMaterial
+    form_class = IncludedMaterialModelForm
+    pk_url_kwarg = 'material_id'
+    template_name = 'education/add_material.html'
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+
+        return form_kwargs
+
+    def get_initial(self):
+        instance = self.get_object()
+        self.initial = super().get_initial()
+        self.initial['topic'] = instance.topic.id
+
+        return self.initial
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+
 class ExistingTasksView(LoginRequiredMixin,
                         CourseViewMixin,
                         IsTeacherInCoursePermission,
