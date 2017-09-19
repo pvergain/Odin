@@ -285,7 +285,7 @@ class EditIncludedMaterialView(LoginRequiredMixin,
     model = IncludedMaterial
     form_class = IncludedMaterialModelForm
     pk_url_kwarg = 'material_id'
-    template_name = 'education/add_material.html'
+    template_name = 'education/edit_included_material.html'
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
