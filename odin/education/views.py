@@ -26,6 +26,7 @@ from odin.grading.services import start_grader_communication
 from odin.users.models import BaseUser
 from odin.authentication.views import LoginWrapperView
 
+from .filters import SolutionsFilter
 from .models import (
     Course,
     Teacher,
@@ -717,14 +718,20 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
                                IsTeacherInCoursePermission,
                                ListView):
     template_name = "education/all_students_solutions.html"
+    filter_class = SolutionsFilter
 
     def get_queryset(self):
-        return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        queryset = self.course.students.select_related('profile').prefetch_related('solutions__task').distinct().all()
+        self.filter = self.filter_class(self.request.GET, queryset=queryset, task=task)
+
+        return self.filter.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
         context['solution_statistics'] = get_all_student_solution_statistics(task=task)
+
         return context
 
 

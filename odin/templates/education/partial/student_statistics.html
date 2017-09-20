@@ -16,6 +16,7 @@
                 <th>People in {{ course.name }}</th>
                 <th>People with at least one submitted solution</th>
                 <th>People with a correct solution</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -28,6 +29,15 @@
                 </td>
                 <td>
                   {{ statistics.students_with_a_passing_solution_count }}
+                </td>
+                <td>
+                  <form action"" method="GET">
+                    <div class="form-actions">
+                      <button class="btn green uppercase" type="submit" name="status" value="correct">
+                        View correct
+                      </button>
+                    </div>
+                  </form>
                 </td>
               </tr>
             </tbody>
