@@ -25,7 +25,7 @@ MIDDLEWARE = RAVEN_MIDDLEWARE + MIDDLEWARE
 # and https://docs.djangoproject.com/en/dev/howto/deployment/checklist/#run-manage-py-check-deploy
 
 # set this to 60 seconds and then to 518400 when you can prove it works
-# SECURE_HSTS_SECONDS = 60
+SECURE_HSTS_SECONDS = 60
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
 #     'DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True)
 # SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
@@ -90,7 +90,7 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
 DATABASES['default'] = env.db('DATABASE_URL')
 
 # Sentry Configuration
-# SENTRY_DSN = env('DJANGO_SENTRY_DSN')
+SENTRY_DSN = env('DJANGO_SENTRY_DSN', default='')
 # SENTRY_CLIENT = env('DJANGO_SENTRY_CLIENT', default='raven.contrib.django.raven_compat.DjangoClient')
 # LOGGING = {
 #     'version': 1,
