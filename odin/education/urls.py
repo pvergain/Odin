@@ -9,6 +9,7 @@ from .views import (
     AddNewIncludedMaterialView,
     AddIncludedMaterialFromExistingView,
     ExistingMaterialListView,
+    EditIncludedMaterialView,
     AddNewIncludedTaskView,
     AddIncludedTaskFromExistingView,
     ExistingTasksView,
@@ -84,6 +85,11 @@ course_management_urlpatterns = [
         regex='^(?P<course_id>[0-9]+)/edit-included-task/(?P<task_id>[0-9]+)/$',
         view=EditIncludedTaskView.as_view(),
         name='edit-included-task'
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/edit-included-material/(?P<material_id>[0-9]+)/$',
+        view=EditIncludedMaterialView.as_view(),
+        name='edit-included-material'
     ),
     url(
         regex='^(?P<course_id>[0-9]+)/add-source-test/(?P<task_id>[0-9]+)$',

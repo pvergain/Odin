@@ -11,6 +11,7 @@ from odin.users.services import create_user
 from .models import (
     Course,
     CourseAssignment,
+    CourseDescription,
     Student,
     Teacher,
     Week,
@@ -46,6 +47,8 @@ def create_course(*,
                   logo: BinaryIO=None,
                   is_competition: bool=False,
                   public: bool=True) -> Course:
+                  public: bool=True,
+                  description: str="") -> Course:
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -77,6 +80,7 @@ def create_course(*,
         week_instances.append(current)
 
     Week.objects.bulk_create(week_instances)
+    CourseDescription.objects.create(course=course, verbose=description)
 
     return course
 
@@ -266,3 +270,17 @@ def handle_competition_login(*,
         pass
 
     return user
+
+
+def get_all_student_solution_statistics(*,
+                                        task: IncludedTask) -> Dict:
+    result = {}
+    course = task.topic.course
+    result['total_student_count'] = course.students.count()
+
+    filters = {'solutions__task': task, 'solutions__isnull': False}
+    result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
+    filters = {'solutions__task': task, 'solutions__status': Solution.OK}
+    result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
+
+    return result

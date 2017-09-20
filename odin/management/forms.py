@@ -11,6 +11,8 @@ class DateInput(forms.DateInput):
 
 
 class ManagementAddCourseForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea, required=False)
+
     class Meta:
         model = Course
         fields = (

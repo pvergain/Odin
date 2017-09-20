@@ -14,7 +14,11 @@
               <!-- SIDEBAR USERPIC -->
               <ul class="list-unstyled profile-nav">
                 <li>
-                    <img src="{{MEDIA_URL}}{{object.full_image.name}}" alt="{% static 'hackman.png' %}" class="img-responsive pic-bordered" alt="">
+                    {% if object.full_image.name %}
+                    <img src="{{MEDIA_URL}}{{object.full_image.name}}" class="img-responsive pic-bordered" alt="">
+                    {% else %}
+                    <img src="{% static 'hackman.png' %}" class="img-responsive pic-bordered" alt="">
+                    {% endif %}
                 </li>
               </ul>
                 <!-- END SIDEBAR USERPIC -->

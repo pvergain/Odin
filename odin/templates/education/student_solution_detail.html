@@ -6,28 +6,28 @@
 
 {% block page_content %}
  <div class="row">
-    <!-- BEGIN SAMPLE TABLE PORTLET-->
-        <div class="portlet box green">
-            <div class="portlet-title">
-                <div class="caption">
-                    <i class="fa fa-comments"></i> Solution
-                </div>
-                <div class="tools">
-                    <a href="javascript:;" class="collapse"> </a>
-                </div>
-            </div>
-            <div class="portlet-body">
-              <p>
-                  {% if solution.task.test.is_source %}
-                  <h3>Code:</h3> <br />
-                    {{ solution.code }}
-                  {% else %}
-                    {{ solution_file }}
-                  {% endif %}<br /><br />
-                  <h3>Status:</h3> <br /> {{ solution.get_status_display }}
-              </p>
-            </div>
-        </div>
-        <!-- END SAMPLE TABLE PORTLET-->
+  <div class="portlet box green">
+    <div class="portlet-title">
+      <div class="caption">
+        <i class="fa fa-comments"></i> Solution
+      </div>
+      <div class="tools">
+        <a href="javascript:;" class="collapse"> </a>
+      </div>
+    </div>
+    <div class="portlet-body">
+      <section>
+        {% if solution.task.test.is_source %}
+          <pre>{{ solution.code }}</pre>
+        {% else %}
+          <pre>{{ solution_file }}</pre>
+        {% endif %}
+      </section>
+      <section>
+        <h3>Status:</h3>
+          {{ solution.get_status_display }}
+      </section>
+    </div>
+  </div>
 </div>
 {% endblock page_content %}

@@ -1,4 +1,4 @@
-const MAX_REQUEST_COUNT = 25;
+const MAX_REQUEST_COUNT = 100;
 
 export const filterSolutions = solution => {
   const studentID = window.props.studentID;

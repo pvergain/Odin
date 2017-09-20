@@ -8,6 +8,9 @@
   {% endif %}
   <div class="row">
     <div class="col-md-12">
+      <div class="alert alert-warning">
+        <h4>If you click the accordion below, you will see the task description in the "Materials" tab. You can click the submit button and upload a ".java" file in the "Tasks" tab.</h4>
+      </div>
       <div id="root">
       </div>
       <div id="modal-root">
@@ -21,8 +24,11 @@
   <script src="{% url 'js_reverse' %}"></script>
   <script>
    window.props = {{ course_topics|safe }};
+   {% if request.user.is_teacher %}
+     window.props.isUserTeacher = true;
+   {% endif %}
    {% if request.user.is_student %}
-      window.props.studentID = {{ request.user.student.id }};
+     window.props.studentID = {{ request.user.student.id }};
    {% endif %}
    window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   </script>
