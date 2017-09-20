@@ -46,7 +46,6 @@ def create_course(*,
                   slug_url: str=None,
                   logo: BinaryIO=None,
                   is_competition: bool=False,
-                  public: bool=True) -> Course:
                   public: bool=True,
                   description: str="") -> Course:
 
