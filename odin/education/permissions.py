@@ -72,7 +72,7 @@ class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
         is_teacher = course.teachers.filter(email=email).exists()
         is_solution_author = False
 
-        if request.user.is_student:
+        if request.user.is_student():
             is_solution_author = view.get_object().student == request.user.student
         if is_solution_author or is_teacher:
             return True
