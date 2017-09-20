@@ -33,8 +33,11 @@
   <script src="{% url 'js_reverse' %}"></script>
   <script>
    window.props = {{ course_topics|safe }};
+   {% if request.user.is_teacher %}
+     window.props.isUserTeacher = true;
+   {% endif %}
    {% if request.user.is_student %}
-      window.props.studentID = {{ request.user.student.id }};
+     window.props.studentID = {{ request.user.student.id }};
    {% endif %}
    window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   </script>

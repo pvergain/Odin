@@ -45,6 +45,7 @@ def create_course(*,
                   video_channel: str=None,
                   slug_url: str=None,
                   logo: BinaryIO=None,
+                  is_competition: bool=False,
                   public: bool=True,
                   description: str="") -> Course:
 
@@ -60,7 +61,8 @@ def create_course(*,
         video_channel=video_channel,
         slug_url=slug_url,
         logo=logo,
-        public=public
+        public=public,
+        is_competition=is_competition
     )
 
     weeks = course.duration_in_weeks
@@ -267,3 +269,17 @@ def handle_competition_login(*,
         pass
 
     return user
+
+
+def get_all_student_solution_statistics(*,
+                                        task: IncludedTask) -> Dict:
+    result = {}
+    course = task.topic.course
+    result['total_student_count'] = course.students.count()
+
+    filters = {'solutions__task': task, 'solutions__isnull': False}
+    result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
+    filters = {'solutions__task': task, 'solutions__status': Solution.OK}
+    result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
+
+    return result

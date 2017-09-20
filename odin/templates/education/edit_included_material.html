@@ -1,25 +1,20 @@
 {% extends "dashboard/dashboard_base.html" %}
+{% load static %}
 {% load widget_tweaks %}
 
 {% block content_title %}
-  <h1><center>Add materials for</center></h1>
 {% endblock content_title %}
 
 {% block page_content %}
   <div class="row">
+  <div class="col-md-6">
     {% include "partial/form_errors.html" with form=form errors=readable_errors %}
     {% include "education/partial/message_box.html" %}
-    <div class="row margin-bottom-40 stories-header" data-auto-height="true">
-      <div class="col-md-12">
-        <h2>{{ course.name }}</h2>
-      </div>
-    </div>
-  <div class="col-md-6">
     <div class="portlet light ">
       <div class="portlet-title">
         <div class="caption font-blue-sunglo">
           <i class="icon-settings font-blue-sunglo"></i>
-          <span class="caption-subject bold uppercase"> Add Included Material </span>
+          <span class="caption-subject bold uppercase"> Edit Included Material </span>
         </div>
       </div>
       <div class="portlet-body form">

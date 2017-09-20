@@ -296,6 +296,50 @@ class TestAddNewIncludedMaterialView(TestCase):
             self.assertEqual(topic_material_count + 1, self.topic.materials.count())
 
 
+class TestEditIncludedMaterialView(TestCase):
+
+    def setUp(self):
+        self.course = CourseFactory()
+        self.included_material = IncludedMaterialFactory(topic__course=self.course)
+        self.url = reverse('dashboard:education:course-management:edit-included-material',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'material_id': self.included_material.id
+                           })
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+
+    def test_get_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(403, response.status_code)
+
+    def test_get_is_allowed_when_teacher_for_course(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(200, response.status_code)
+
+    def test_included_material_is_edited_successfully_on_post(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+        new_identifier = faker.name()
+        data = {
+            'identifier': new_identifier,
+            'topic': self.included_material.topic.id,
+            'content': self.included_material.material.content
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse(
+                'dashboard:education:user-course-detail',
+                kwargs={'course_id': self.course.id})
+            )
+            self.included_material.refresh_from_db()
+            self.assertEquals(new_identifier, self.included_material.identifier)
+
+
 class TestAddIncludedMaterialFromExistingView(TestCase):
 
     def setUp(self):

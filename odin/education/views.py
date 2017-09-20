@@ -26,6 +26,7 @@ from odin.grading.services import start_grader_communication
 from odin.users.models import BaseUser
 from odin.authentication.views import LoginWrapperView
 
+from .filters import SolutionsFilter
 from .models import (
     Course,
     Teacher,
@@ -74,7 +75,8 @@ from .services import (
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course,
     handle_competition_registration,
-    handle_competition_login
+    handle_competition_login,
+    get_all_student_solution_statistics
 )
 from .serializers import TopicSerializer, SolutionSerializer
 
@@ -274,6 +276,35 @@ class AddNewIncludedMaterialView(LoginRequiredMixin,
         self.call_service(service_kwargs=create_included_material_kwargs)
 
         return super().form_valid(form)
+
+
+class EditIncludedMaterialView(LoginRequiredMixin,
+                               CourseViewMixin,
+                               ReadableFormErrorsMixin,
+                               IsTeacherInCoursePermission,
+                               UpdateView):
+
+    model = IncludedMaterial
+    form_class = IncludedMaterialModelForm
+    pk_url_kwarg = 'material_id'
+    template_name = 'education/edit_included_material.html'
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+
+        return form_kwargs
+
+    def get_initial(self):
+        instance = self.get_object()
+        self.initial = super().get_initial()
+        self.initial['topic'] = instance.topic.id
+
+        return self.initial
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
 
 
 class ExistingTasksView(LoginRequiredMixin,
@@ -687,9 +718,21 @@ class AllStudentsSolutionsView(LoginRequiredMixin,
                                IsTeacherInCoursePermission,
                                ListView):
     template_name = "education/all_students_solutions.html"
+    filter_class = SolutionsFilter
 
     def get_queryset(self):
-        return self.course.students.select_related('profile').prefetch_related('solutions__task').all()
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        queryset = self.course.students.select_related('profile').prefetch_related('solutions__task').distinct().all()
+        self.filter = self.filter_class(self.request.GET, queryset=queryset, task=task)
+
+        return self.filter.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = get_object_or_404(IncludedTask, id=self.kwargs.get('task_id'))
+        context['solution_statistics'] = get_all_student_solution_statistics(task=task)
+
+        return context
 
 
 class SolutionDetailAPIView(generics.RetrieveAPIView):
