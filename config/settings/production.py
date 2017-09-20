@@ -104,3 +104,5 @@ EMAIL_TEMPLATES = {
 }
 
 from .sentry import *
+
+BROKER_URL = env('BROKER_URL', default='')
