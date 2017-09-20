@@ -4,7 +4,8 @@
   "description": "Odin is the new Loki. LMS for HackSoft Academy",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -d"
+    "build": "webpack -d",
+    "postinstall": "cd ui && ../node_modules/.bin/bower install && cd ../ && npm run build"
   },
   "repository": {
     "type": "git",
@@ -16,16 +17,15 @@
     "url": "https://github.com/HackSoftware/Odin/issues"
   },
   "homepage": "https://github.com/HackSoftware/Odin#readme",
-  "devDependencies": {
+  "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
-    "webpack": "^3.5.5"
-  },
-  "dependencies": {
+    "bower": "^1.8.2",
+    "webpack": "^3.5.5",
     "codemirror": "^5.29.0",
     "css-loader": "^0.28.7",
     "react": "^15.6.1",
