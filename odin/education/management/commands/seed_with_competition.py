@@ -16,14 +16,10 @@ from odin.education.factories import (
     ProgrammingLanguageFactory,
 )
 from odin.education.services import add_student, create_included_task, create_test_for_task
-from odin.education.models import Course, Student
 
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        Course.objects.all().delete()
-        Student.objects.all().delete()
-
         language = ProgrammingLanguageFactory(name='java')
 
         competition = CourseFactory(
@@ -88,4 +84,4 @@ class Command(BaseCommand):
         test.save()
         task.save()
 
-        print('Done.')
+        print('Competition created.')

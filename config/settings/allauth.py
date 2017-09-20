@@ -1,4 +1,8 @@
+import environ
+
 from django.urls import reverse_lazy
+
+env = environ.Env()
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -12,7 +16,7 @@ ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_VERIFICATION = env('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_ADAPTER = 'odin.authentication.adapter.CustomAccountAdapter'
