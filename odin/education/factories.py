@@ -22,7 +22,7 @@ from .models import (
     Task,
     IncludedTask,
     ProgrammingLanguage,
-    Test
+    Test,
 )
 from .services import create_course
 
