@@ -198,5 +198,3 @@ EMAIL_TEMPLATES = {
 }
 
 from .grader import *
-
-BROKER_URL = env('CLOUDAMQP_URL')
