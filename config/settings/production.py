@@ -105,4 +105,4 @@ EMAIL_TEMPLATES = {
 
 from .sentry import *
 
-BROKER_URL = env('BROKER_URL', default='')
+BROKER_URL = env('CLOUDAMQP_URL')
