@@ -34,5 +34,3 @@ DEBUG_TOOLBAR_CONFIG = {
 INSTALLED_APPS += ['django_extensions', ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
-BROKER_URL = env('CLOUDAMQP_URL')
