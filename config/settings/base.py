@@ -29,7 +29,8 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     'django_filters',
     'easy_thumbnails',
-    'django_js_reverse'
+    'django_js_reverse',
+    'corsheaders'
 ]
 
 LOCAL_APPS = [

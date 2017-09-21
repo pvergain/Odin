@@ -8,3 +8,4 @@ raven==6.1.0
 
 django-storages==1.6.5
 boto3==1.4.7
+django-cors-headers==2.1.0
