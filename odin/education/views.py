@@ -4,6 +4,7 @@ from rest_framework import generics
 
 from allauth.account.utils import send_email_confirmation
 
+from django.core.management import call_command
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -857,3 +858,16 @@ class CompetitionSetPasswordView(CourseIsCompetitionPermission,
         send_email_confirmation(self.request, user, signup=True)
 
         return super().form_valid(form)
+
+
+class CompareSolutionsView(LoginRequiredMixin,
+                           CourseViewMixin,
+                           IsTeacherInCoursePermission,
+                           TemplateView):
+    template_name = 'education/solution_comparison.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comparison_result'] = call_command('compare_solutions', self.course.id)
+
+        return context

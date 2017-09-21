@@ -1,0 +1,25 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+  <h1><center>Solution comparison for {{ course.name }}</center></h1>
+{% endblock content_title %}
+
+{% block page_content  %}
+   <div class="row">
+     <div class="portlet box green">
+       <div class="portlet-title">
+         <div class="caption">
+           <i class="fa fa-comments"></i> Results
+         </div>
+         <div class="tools">
+           <a href="javascript:;" class="collapse"> </a>
+         </div>
+       </div>
+       <div class="portlet-body">
+         <section>
+           <pre>{{ comparison_result }}</pre>
+         </section>
+       </div>
+     </div>
+   </div>
+{% endblock page_content %}
