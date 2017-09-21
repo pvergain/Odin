@@ -20,7 +20,7 @@ def get_readable_form_errors(form):
                 readable_errors['Errors'] = error
             else:
                 readable_errors[field] = error
-    return readable_errors
+        return readable_errors
 
 
 def get_gh_email_address(request):
