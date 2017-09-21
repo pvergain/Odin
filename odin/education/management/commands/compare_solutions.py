@@ -69,7 +69,7 @@ class Command(BaseCommand):
             except Course.DoesNotExist:
                 raise CommandError(f'Course with ID: {course_id} does not exist')
 
-            topics = course.topics.all()
+            topics = course.topics.all().prefetch_related('tasks__solutions__student', 'tasks__test')
             for topic in topics:
                 tasks = topic.tasks.all()
 
@@ -77,9 +77,9 @@ class Command(BaseCommand):
                     if not task.gradable:
                         break
                     order = ('student__email', '-id')
-                    passing_solutions = deque(
-                        task.solutions.filter(status=Solution.OK).order_by(*order).distinct('student__email')
-                    )
+                    solution_query = task.solutions.filter(status=Solution.OK).select_related('student__user')
+
+                    passing_solutions = deque(solution_query.order_by(*order).distinct('student__email'))
                     result += f'{len(passing_solutions)} people have solved {task.name}\n'
 
                     while passing_solutions:
