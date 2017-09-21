@@ -32,6 +32,11 @@ def compare_code_solutions(first_solution, second_solution):
 def compare_file_solutions(first_solution, second_solution):
     current_code = first_solution.file.read().decode('utf-8').splitlines()
     next_code = second_solution.file.read().decode('utf-8').splitlines()
+
+    # Reset file pointers
+    first_solution.file.seek(0)
+    second_solution.file.seek(0)
+
     diff_percentage, unified_diff = calculate_difference_percentage(current_code, next_code)
 
     result = ""
@@ -60,6 +65,7 @@ def calculate_difference_percentage(first_chunk, second_chunk):
         diff_percentage = 100
     else:
         diff_percentage = diff_count / avg_length * 100
+
     return diff_percentage, differences
 
 
