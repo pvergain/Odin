@@ -14,9 +14,8 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # raven sentry client
 # See https://docs.sentry.io/clients/python/integrations/django/
-INSTALLED_APPS += ['raven.contrib.django.raven_compat', 'corsheaders']
+INSTALLED_APPS += ['raven.contrib.django.raven_compat']
 RAVEN_MIDDLEWARE = ['raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware']
-CORS_MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware']
 MIDDLEWARE = RAVEN_MIDDLEWARE + CORS_MIDDLEWARE + MIDDLEWARE
 
 
