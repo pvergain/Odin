@@ -59,7 +59,7 @@ def calculate_difference_percentage(first_chunk, second_chunk):
     if avg_length == 0:
         diff_percentage = 100
     else:
-        diff_percentage = diff_count / len(first_chunk) * 100
+        diff_percentage = diff_count / avg_length * 100
     return diff_percentage, differences
 
 
