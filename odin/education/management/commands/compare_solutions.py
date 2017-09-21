@@ -54,7 +54,12 @@ def calculate_difference_percentage(first_chunk, second_chunk):
     diff_count = 0
     for difference in differences:
         diff_count += difference.startswith('-') or difference.startswith('+')
-    return diff_count / len(first_chunk) * 100, differences
+
+    if len(first_chunk) == 0:
+        diff_percentage = 0
+    else:
+        diff_percentage = diff_count / len(first_chunk) * 100
+    return diff_percentage, differences
 
 
 class Command(BaseCommand):
