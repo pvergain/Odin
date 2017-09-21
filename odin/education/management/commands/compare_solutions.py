@@ -71,9 +71,9 @@ class Command(BaseCommand):
                 for task in tasks:
                     if not task.gradable:
                         break
-
+                    order = ('student__email', '-id')
                     passing_solutions = deque(
-                        task.solutions.filter(status=Solution.OK).order_by('student__email').distinct('student__email')
+                        task.solutions.filter(status=Solution.OK).order_by(*order).distinct('student__email')
                     )
                     print(f'{len(passing_solutions)} people have solved {task.name}')
 
