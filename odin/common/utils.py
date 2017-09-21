@@ -13,14 +13,14 @@ def get_readable_form_errors(form):
     """
     Provides an easier way to access form errors through templates.
     """
+    readable_errors = {}
     if not form.is_valid():
-        readable_errors = {}
         for field, error in form.errors.items():
             if field == '__all__':
                 readable_errors['Errors'] = error
             else:
                 readable_errors[field] = error
-        return readable_errors
+    return readable_errors
 
 
 def get_gh_email_address(request):
