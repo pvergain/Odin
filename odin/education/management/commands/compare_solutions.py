@@ -14,17 +14,20 @@ def compare_code_solutions(first_solution, second_solution):
     next_code = second_solution.code.splitlines()
     diff_percentage, unified_diff = calculate_difference_percentage(current_code, next_code)
 
+    result = ""
     if diff_percentage < MIN_ALLOWED_DIFFERENCE_PERCENTAGE:
-        print(
-            f"""
-            Matching contents in solutions
-            {first_solution} from {first_solution.student.email} and
-            {second_solution} from {second_solution.student.email}
-            on task {first_solution.task.name}
-            Differences:
-            """
-        )
-        pprint(unified_diff)
+        result = f"""
+        Matching contents in solutions
+        {first_solution} from {first_solution.student.email} and
+        {second_solution} from {second_solution.student.email}
+        on task {first_solution.task.name}
+        --------------------------------------------
+        Differences: {diff_percentage}%\n
+        """
+        for line in unified_diff:
+            result += line + '\n'
+
+    return result
 
 
 def compare_file_solutions(first_solution, second_solution):
@@ -32,17 +35,19 @@ def compare_file_solutions(first_solution, second_solution):
     next_code = second_solution.file.read().decode('utf-8').splitlines()
     diff_percentage, unified_diff = calculate_difference_percentage(current_code, next_code)
 
+    result = ""
     if diff_percentage < MIN_ALLOWED_DIFFERENCE_PERCENTAGE:
-        print(
-            f"""
-            Matching contents in files
-            {first_solution.file.name} from {first_solution.student.email} and
-            {second_solution.file.name} from {second_solution.student.email}
-            on Task: {first_solution.task.name}
-            Differences:
-            """
-        )
-        pprint(unified_diff)
+        result = f"""
+        Matching contents in files
+        {first_solution.file.name} from {first_solution.student.email} and
+        {second_solution.file.name} from {second_solution.student.email}
+        on Task: {first_solution.task.name}
+        Differences: {diff_percentage}%\n
+        """
+        for line in unified_diff:
+            result += line + '\n'
+
+    return result
 
 
 def calculate_difference_percentage(first_chunk, second_chunk):
@@ -58,6 +63,7 @@ class Command(BaseCommand):
         parser.add_argument('course_id', nargs="+", type=int)
 
     def handle(self, *args, **options):
+        result = ""
         for course_id in options['course_id']:
             try:
                 course = Course.objects.get(id=course_id)
@@ -75,12 +81,15 @@ class Command(BaseCommand):
                     passing_solutions = deque(
                         task.solutions.filter(status=Solution.OK).order_by(*order).distinct('student__email')
                     )
-                    print(f'{len(passing_solutions)} people have solved {task.name}')
+                    result += f'{len(passing_solutions)} people have solved {task.name}\n'
 
                     while passing_solutions:
                         current_solution = passing_solutions.popleft()
                         for next_solution in passing_solutions:
                             if task.test.is_source():
-                                compare_code_solutions(current_solution, next_solution)
+                                output = compare_code_solutions(current_solution, next_solution)
                             else:
-                                compare_file_solutions(current_solution, next_solution)
+                                output = compare_file_solutions(current_solution, next_solution)
+
+                            result += output
+        return result
