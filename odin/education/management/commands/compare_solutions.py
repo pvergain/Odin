@@ -1,5 +1,4 @@
 import difflib
-from pprint import pprint
 from collections import deque
 
 from django.core.management.base import BaseCommand, CommandError
