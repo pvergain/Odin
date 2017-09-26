@@ -9,7 +9,7 @@ from odin.education.models import Material
 
 from .mixins import CompetitionViewMixin
 from .permissions import IsParticipantOrJudgeInCompetitionPermission, IsJudgeInCompetitionPermisssion
-from .models import Competition
+from .models import Competition, CompetitionMaterial
 from .forms import CompetitionMaterialFromExistingForm, CompetitionMaterialModelForm
 from .services import create_competition_material
 
@@ -130,3 +130,20 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
         self.call_service(service_kwargs=form.cleaned_data)
 
         return super().form_valid(form)
+
+
+class EditCompetitionMaterialView(LoginRequiredMixin,
+                                  CompetitionViewMixin,
+                                  IsJudgeInCompetitionPermisssion,
+                                  ReadableFormErrorsMixin,
+                                  UpdateView):
+    model = CompetitionMaterial
+    fields = ['identifier', 'url', 'content']
+    pk_url_kwarg = 'material_id'
+    template_name = 'competitions/edit_competition_material.html'
+
+    def get_success_url(self):
+        return reverse_lazy('competitions:competition-detail',
+                            kwargs={
+                                'competition_slug': self.object.slug_url
+                            })
