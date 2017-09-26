@@ -1,0 +1,14 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+  Create Competition
+{% endblock content_title %}
+
+{% block page_content %}
+  <form  action="" method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" name="submit">Submit</button>
+  </form>
+
+{% endblock page_content %}

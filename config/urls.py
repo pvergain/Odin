@@ -14,6 +14,9 @@ urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
     url(r'^$', RedirectToDashboardIndexView.as_view()),
     url(r'^public/', include(courses_public_urlpatterns, namespace='public')),
+    # New competitions setup patterns
+    url(r'^competitions/', include('odin.competitions.urls', namespace='competitions')),
+    # Previous competitions setup patterns(Temporaryly keeping for comparison purposes)
     url(r'^competition/', include(competition_url_patterns, namespace='competition')),
     url(r'^auth/', include('odin.authentication.urls')),
     url(r'^dashboard/', include('odin.dashboard.urls', namespace='dashboard')),
