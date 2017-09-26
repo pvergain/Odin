@@ -1,6 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from odin.common.mixins import BaseUserPassesTestMixin
 from odin.education.models import Course
@@ -78,3 +79,13 @@ class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
             return True
 
         return False
+
+
+class CannotSubmitSolutionAfterCourseEndDate(BaseUserPassesTestMixin):
+    raise_exception = True
+
+    def test_func(self):
+        if timezone.now().date() > self.course.end_date:
+            return False
+
+        return True and super().test_func()

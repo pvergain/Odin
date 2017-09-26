@@ -45,6 +45,7 @@ from .permissions import (
     IsStudentInCoursePermission,
     CourseIsCompetitionPermission,
     IsStudentOrTeacherInCourseAPIPermission,
+    CannotSubmitSolutionAfterCourseEndDate,
 )
 from .mixins import (
     CourseViewMixin,
@@ -627,6 +628,7 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
                                  SubmitSolutionMixin,
                                  HasTestMixin,
                                  IsStudentInCoursePermission,
+                                 CannotSubmitSolutionAfterCourseEndDate,
                                  FormView):
     form_class = SubmitGradableSolutionForm
 
@@ -684,6 +686,7 @@ class SubmitNonGradableSolutionView(LoginRequiredMixin,
                                     ReadableFormErrorsMixin,
                                     SubmitSolutionMixin,
                                     IsStudentInCoursePermission,
+                                    CannotSubmitSolutionAfterCourseEndDate,
                                     FormView):
     form_class = SubmitNonGradableSolutionForm
 
