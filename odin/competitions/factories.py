@@ -13,8 +13,7 @@ from .models import (
     CompetitionJudge,
     Competition,
     CompetitionMaterial,
-    CompetitionTask,
-    Solution
+    CompetitionTask
 )
 
 
