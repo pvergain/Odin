@@ -13,7 +13,7 @@ from .models import (
     CompetitionJudge,
     Competition,
     CompetitionMaterial,
-    CompetitionTask
+    CompetitionTask,
 )
 
 
@@ -32,10 +32,6 @@ class CompetitionFactory(factory.DjangoModelFactory):
     start_date = factory.LazyAttribute(lambda _: timezone.now().date() + timezone.timedelta(days=faker.pyint()))
 
     slug_url = factory.Sequence(lambda n: f'{n}{faker.slug()}')
-
-    repository = factory.LazyAttribute(lambda _: faker.url())
-    video_channel = factory.LazyAttribute(lambda _: faker.url())
-    facebook_group = factory.LazyAttribute(lambda _: faker.url())
 
     class Meta:
         model = Competition

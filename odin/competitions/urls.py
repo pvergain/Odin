@@ -5,7 +5,8 @@ from .views import (
     EditCompetitionView,
     CreateCompetitionMaterialFromExistingView,
     CreateNewCompetitionMaterialView,
-    EditCompetitionMaterialView
+    EditCompetitionMaterialView,
+    CompetitionDetailView,
 )
 
 urlpatterns = [
@@ -13,6 +14,11 @@ urlpatterns = [
         regex='create-competition/$',
         view=CreateCompetitionView.as_view(),
         name='create-competition'
+    ),
+    url(
+        regex='^competition/(?P<competition_slug>[-\w]+)/$',
+        view=CompetitionDetailView.as_view(),
+        name='competition-detail'
     ),
     url(
         regex='edit-competition/$',

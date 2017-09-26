@@ -15,10 +15,10 @@ from .services import create_competition_material
 
 
 class CompetitionDetailView(LoginRequiredMixin,
-                            IsParticipantOrJudgeInCompetitionPermission,
                             CompetitionViewMixin,
+                            IsParticipantOrJudgeInCompetitionPermission,
                             TemplateView):
-    template_name = 'competitions/competition_detail'
+    template_name = 'competitions/competition_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
