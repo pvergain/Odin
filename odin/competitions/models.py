@@ -8,14 +8,13 @@ from odin.education.models import BaseMaterial, BaseTask, Material, Task
 
 from .managers import CompetitionJudgeManager, CompetitionParticipantManager
 
-
-class CompetitionParticipant(models.Model):
+class CompetitionParticipant(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
 
     objects = CompetitionParticipantManager()
 
 
-class CompetitionJudge(models.Model):
+class CompetitionJudge(BaseUser):
     user = models.OneToOneField(BaseUser, parent_link=True)
 
     objects = CompetitionJudgeManager()
