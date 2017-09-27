@@ -49,6 +49,7 @@ class CompetitionFactory(factory.DjangoModelFactory):
 
 class CompetitionMaterialFactory(factory.DjangoModelFactory):
     material = factory.SubFactory(MaterialFactory)
+    competition = factory.SubFactory(CompetitionFactory)
 
     class Meta:
         model = CompetitionMaterial
@@ -56,6 +57,7 @@ class CompetitionMaterialFactory(factory.DjangoModelFactory):
 
 class CompetitionTaskFactory(factory.DjangoModelFactory):
     task = factory.SubFactory(TaskFactory)
+    competition = factory.SubFactory(CompetitionFactory)
 
     class Meta:
         model = CompetitionTask

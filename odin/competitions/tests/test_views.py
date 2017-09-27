@@ -6,7 +6,7 @@ from django.utils import timezone
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.education.models import Material
-from odin.education.factories import MaterialFactory, ProgrammingLanguageFactory
+from odin.education.factories import MaterialFactory, ProgrammingLanguageFactory, TaskFactory, IncludedTaskFactory
 
 from ..models import CompetitionMaterial, CompetitionJudge, Competition, CompetitionTask, CompetitionTest
 from ..factories import (
@@ -14,6 +14,7 @@ from ..factories import (
     CompetitionJudgeFactory,
     CompetitionParticipantFactory,
     CompetitionMaterialFactory,
+    CompetitionTaskFactory
 )
 
 
@@ -353,3 +354,58 @@ class TestCreateNewCompetitionTaskView(TestCase):
             self.assertRedirects(response, expected_url=expected_url)
             self.assertEqual(task_count + 1, CompetitionTask.objects.count())
             self.assertEqual(test_count + 1, CompetitionTest.objects.count())
+
+
+class TestCreateCompetitionTaskFromExistingView(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.url = reverse('competitions:create-competition-task-from-existing',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url
+                           })
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.judge = CompetitionJudge.objects.create_from_user(self.user)
+        self.language = ProgrammingLanguageFactory()
+
+    def test_can_add_existing_task_that_has_not_been_added_to_competition(self):
+        self.competition.judges.add(self.judge)
+        task_count = CompetitionTask.objects.count()
+        existing_task = TaskFactory()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data={'task': existing_task.id})
+            expected_url = reverse('competitions:competition-detail',
+                                   kwargs={
+                                       'competition_slug': self.competition.slug_url
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+            self.assertEqual(task_count + 1, Competition.objects.count())
+
+    def test_can_add_existing_task_that_has_already_been_added_to_competition(self):
+        existing_task = CompetitionTaskFactory()
+        self.competition.judges.add(self.judge)
+        task_count = CompetitionTask.objects.count()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data={'task': existing_task.task.id})
+            expected_url = reverse('competitions:competition-detail',
+                                   kwargs={
+                                       'competition_slug': self.competition.slug_url
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+            self.assertEqual(task_count + 1, Competition.objects.count())
+
+    def test_can_add_existing_task_that_has_been_included_in_course(self):
+        existing_task = IncludedTaskFactory()
+        self.competition.judges.add(self.judge)
+        task_count = CompetitionTask.objects.count()
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data={'task': existing_task.task.id})
+            expected_url = reverse('competitions:competition-detail',
+                                   kwargs={
+                                       'competition_slug': self.competition.slug_url
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+            self.assertEqual(task_count + 1, Competition.objects.count())
