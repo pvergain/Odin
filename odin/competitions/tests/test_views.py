@@ -6,6 +6,7 @@ from django.utils import timezone
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.education.models import Material
+from odin.education.factories import MaterialFactory
 
 from ..models import CompetitionMaterial, CompetitionJudge, Competition
 from ..factories import (
@@ -252,3 +253,15 @@ class TestCreateExistingCompetitionMaterialFromExistingView(TestCase):
                 kwargs={'competition_slug': self.competition.slug_url}))
             self.assertEqual(competition_material_count + 1, CompetitionMaterial.objects.count())
             self.assertEqual(material_count, Material.objects.count())
+
+    def test_can_add_ordinary_material_to_competition(self):
+        material_count = CompetitionMaterial.objects.count()
+        material = MaterialFactory()
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.post(self.url, data={'material': material.id})
+            self.assertRedirects(response, expected_url=reverse(
+                                 'competitions:competition-detail',
+                                 kwargs={'competition_slug': self.competition.slug_url}))
+            self.assertEqual(material_count + 1, CompetitionMaterial.objects.count())

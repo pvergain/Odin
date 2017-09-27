@@ -369,9 +369,10 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         material = MaterialFactory()
         add_teacher(self.course, teacher)
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertEqual(200, response.status_code)
             response = self.post(self.url, data={'material': material.id})
+            self.assertRedirects(response, expected_url=reverse(
+                                 'dashboard:education:user-course-detail',
+                                 kwargs={'course_id': self.course.id}))
             self.assertEqual(material_count + 1, IncludedMaterial.objects.count())
             included_material = IncludedMaterial.objects.filter(material=material)
             self.assertEqual(1, Topic.objects.filter(materials__in=included_material).count())
