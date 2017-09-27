@@ -179,7 +179,6 @@ class CreateNewCompetitionTaskView(LoginRequiredMixin,
         return form_kwargs
 
     def form_valid(self, form):
-        import ipdb; ipdb.set_trace()
         create_competition_task_kwargs = {
             'name': form.cleaned_data.get('name'),
             'description': form.cleaned_data.get('description'),
