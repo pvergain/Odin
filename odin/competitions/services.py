@@ -1,10 +1,10 @@
-from typing import BinaryIO
+from typing import BinaryIO, Dict
 
 from django.core.exceptions import ValidationError
 
-from odin.education.models import Material, Task
+from odin.education.models import Material, Task, Test, ProgrammingLanguage
 
-from .models import CompetitionMaterial, Competition, CompetitionTask, CompetitionParticipant, Solution
+from .models import CompetitionMaterial, Competition, CompetitionTask, CompetitionParticipant, Solution, CompetitionTest
 
 
 def create_competition_material(*,
@@ -95,3 +95,27 @@ def create_non_gradable_solution(*,
     )
 
     return new_solution
+
+
+def create_competition_test(*,
+                            existing_test: Test=None,
+                            task: CompetitionTask,
+                            language: ProgrammingLanguage,
+                            extra_options: Dict={},
+                            code: str=None,
+                            file: BinaryIO=None):
+    new_test = CompetitionTest(task=task)
+    if existing_test is None:
+        existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
+        existing_test.full_clean()
+        existing_test.save()
+
+    new_test.language = existing_test.language
+    new_test.extra_options = existing_test.extra_options
+    new_test.code = existing_test.code
+    new_test.file = existing_test.file
+
+    new_test.test = existing_test
+    new_test.save()
+
+    return new_test

@@ -4,7 +4,8 @@ from django.contrib.postgres.fields import JSONField
 
 from odin.common.models import UpdatedAtCreatedAtModelMixin
 from odin.users.models import BaseUser
-from odin.education.models import BaseMaterial, BaseTask, Material, Task
+from odin.education.models import BaseMaterial, BaseTask, BaseTest, Material, Task, Test
+from odin.education.mixins import TestModelMixin
 
 from .managers import CompetitionJudgeManager, CompetitionParticipantManager
 
@@ -94,3 +95,12 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
 
     class Meta:
         ordering = ['-id']
+
+
+class CompetitionTest(TestModelMixin, BaseTest):
+    task = models.OneToOneField(CompetitionTask,
+                                on_delete=models.CASCADE,
+                                related_name='test')
+    test = models.ForeignKey(Test,
+                             on_delete=models.CASCADE,
+                             related_name='competition_tests')

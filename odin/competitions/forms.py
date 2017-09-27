@@ -1,6 +1,8 @@
 from django import forms
 
-from .models import CompetitionMaterial
+from odin.education.models import ProgrammingLanguage
+
+from .models import CompetitionMaterial, CompetitionTask
 
 
 class CompetitionMaterialFromExistingForm(forms.ModelForm):
@@ -13,3 +15,13 @@ class CompetitionMaterialModelForm(forms.ModelForm):
     class Meta:
         model = CompetitionMaterial
         fields = ['identifier', 'url', 'content', 'competition']
+
+
+class CompetitionTaskModelForm(forms.ModelForm):
+    language = forms.ModelChoiceField(queryset=ProgrammingLanguage.objects.all(), required=False)
+    code = forms.CharField(widget=forms.Textarea(), required=False)
+    file = forms.FileField(required=False)
+
+    class Meta:
+        model = CompetitionTask
+        fields = ['competition', 'name', 'description', 'gradable']
