@@ -160,6 +160,9 @@ class IncludedMaterial(BaseMaterial):
                               on_delete=models.CASCADE,
                               related_name='materials')
 
+    class Meta:
+        unique_together = (('topic', 'material'), )
+
 
 class Week(models.Model):
     start_date = models.DateField()
@@ -261,6 +264,9 @@ class IncludedTask(BaseTask):
                               related_name='tasks')
 
     objects = TaskQuerySet.as_manager()
+
+    class Meta:
+        unique_together = (('topic', 'task'), )
 
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
