@@ -142,12 +142,6 @@ class TestCreateIncludedMaterial(TestCase):
                                                 url=faker.url(),
                                                 content=faker.text())
 
-    def test_create_included_material_raises_validation_error_if_material_already_exists(self):
-        with self.assertRaises(ValidationError):
-            create_included_material(identifier=self.material.identifier,
-                                     url=faker.url(),
-                                     topic=self.topic)
-
     def test_create_included_material_creates_only_included_material_when_existing_is_provided(self):
         current_material_count = Material.objects.count()
         current_included_material_count = IncludedMaterial.objects.count()

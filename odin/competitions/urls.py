@@ -27,7 +27,7 @@ urlpatterns = [
         name='edit-competition'
     ),
     url(
-        regex='^(?P<competition_slug>[-\w]+)/create-material/from-exististing/$',
+        regex='^(?P<competition_slug>[-\w]+)/create-material/from-existing/$',
         view=CreateCompetitionMaterialFromExistingView.as_view(),
         name='create-competition-material-from-existing'
     ),

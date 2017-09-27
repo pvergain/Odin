@@ -140,7 +140,7 @@ class CourseAssignment(models.Model):
 
 
 class BaseMaterial(UpdatedAtCreatedAtModelMixin, models.Model):
-    identifier = models.CharField(unique=True, max_length=255)
+    identifier = models.CharField(max_length=255)
     url = models.URLField(blank=True, null=True)
     content = models.TextField(blank=True)
 

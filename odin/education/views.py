@@ -136,8 +136,6 @@ class PublicCourseListView(PublicViewContextMixin, ListView):
 
 
 class PublicCourseDetailView(CourseViewMixin, PublicViewContextMixin, DetailView):
-    template_name = 'education/course_detail_container.html'
-
     def get_object(self):
 
         course_url = self.kwargs.get('course_slug')
@@ -207,9 +205,10 @@ class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = transfer_POST_data_to_dict(self.request.POST)
-        data['topic'] = self.kwargs.get('topic_id')
-        form_kwargs['data'] = data
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['topic'] = self.kwargs.get('topic_id')
+            form_kwargs['data'] = data
 
         return form_kwargs
 

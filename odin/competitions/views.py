@@ -63,7 +63,7 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
                                                 CallServiceMixin,
                                                 ReadableFormErrorsMixin,
                                                 FormView):
-    template_name = 'education/existing_material_list.html'
+    template_name = 'competitions/existing_competition_material_list.html'
     form_class = CompetitionMaterialFromExistingForm
 
     def get_service(self):
@@ -85,7 +85,7 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
         form_kwargs = super().get_form_kwargs()
 
         data = transfer_POST_data_to_dict(self.request.POST)
-        data['competition'] = self.competition
+        data['competition'] = self.competition.id
         form_kwargs['data'] = data
 
         return form_kwargs

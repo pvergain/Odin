@@ -5,12 +5,14 @@ from django.utils import timezone
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
+from odin.education.models import Material
 
 from ..models import CompetitionMaterial, CompetitionJudge, Competition
 from ..factories import (
     CompetitionFactory,
     CompetitionJudgeFactory,
     CompetitionParticipantFactory,
+    CompetitionMaterialFactory,
 )
 
 
@@ -206,3 +208,47 @@ class TestAddNewCompetitionMaterialView(TestCase):
 
             self.response_200(response)
             self.assertEqual(material_count, CompetitionMaterial.objects.count())
+
+
+class TestCreateExistingCompetitionMaterialFromExistingView(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.material = CompetitionMaterialFactory(competition=self.competition)
+        self.url = reverse('competitions:create-competition-material-from-existing',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url
+                           })
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+
+    def test_get_is_forbidden_if_not_judge_for_competition(self):
+        user = BaseUserFactory(password=self.test_password)
+        with self.login(email=user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_get_is_allowed_when_judge_for_competition(self):
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+
+    def test_can_add_included_material_from_existing_included_materials(self):
+        competition = CompetitionFactory()
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+        competition_material = CompetitionMaterialFactory(competition=competition)
+
+        competition_material_count = CompetitionMaterial.objects.count()
+        material_count = Material.objects.count()
+
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.post(self.url, data={'material': competition_material.material.id})
+            self.assertRedirects(response, expected_url=reverse(
+                'competitions:competition-detail',
+                kwargs={'competition_slug': self.competition.slug_url}))
+            self.assertEqual(competition_material_count + 1, CompetitionMaterial.objects.count())
+            self.assertEqual(material_count, Material.objects.count())

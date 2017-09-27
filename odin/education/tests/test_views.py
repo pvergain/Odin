@@ -384,6 +384,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         included_material = IncludedMaterialFactory(topic=topic)
 
         included_material_count = IncludedMaterial.objects.count()
+        topic_material_count = self.topic.materials.count()
         material_count = Material.objects.count()
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -392,6 +393,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}))
             self.assertEqual(included_material_count + 1, IncludedMaterial.objects.count())
+            self.assertEqual(topic_material_count + 1, self.topic.materials.count())
             self.assertEqual(material_count, Material.objects.count())
 
 

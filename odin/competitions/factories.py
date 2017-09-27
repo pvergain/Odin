@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
-from odin.education.factories import MaterialFactory, TopicFactory, TaskFactory
+from odin.education.factories import MaterialFactory, TaskFactory
 
 from .models import (
     CompetitionParticipant,
@@ -49,7 +49,6 @@ class CompetitionFactory(factory.DjangoModelFactory):
 
 class CompetitionMaterialFactory(factory.DjangoModelFactory):
     material = factory.SubFactory(MaterialFactory)
-    topic = factory.SubFactory(TopicFactory)
 
     class Meta:
         model = CompetitionMaterial
@@ -57,7 +56,6 @@ class CompetitionMaterialFactory(factory.DjangoModelFactory):
 
 class CompetitionTaskFactory(factory.DjangoModelFactory):
     task = factory.SubFactory(TaskFactory)
-    topic = factory.SubFactory(TopicFactory)
 
     class Meta:
         model = CompetitionTask
