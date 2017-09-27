@@ -70,7 +70,7 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
                             kwargs={
-                                'competition_slug': self.object.slug_url
+                                'competition_slug': self.competition.slug_url
                             })
 
     def get_context_data(self, **kwargs):
@@ -113,14 +113,14 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
                             kwargs={
-                                'competition_slug': self.object.slug_url
+                                'competition_slug': self.competition.slug_url
                             })
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
         data = transfer_POST_data_to_dict(self.request.POST)
-        data['competition'] = self.competition
+        data['competition'] = self.competition.id
 
         form_kwargs['data'] = data
 
@@ -130,6 +130,9 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
         self.call_service(service_kwargs=form.cleaned_data)
 
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
 
 
 class EditCompetitionMaterialView(LoginRequiredMixin,
