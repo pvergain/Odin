@@ -5,12 +5,17 @@ from django.urls import reverse_lazy
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.management.permissions import DashboardManagementPermission
-from odin.education.models import Material
+from odin.education.models import Material, Task
 
 from .mixins import CompetitionViewMixin
 from .permissions import IsParticipantOrJudgeInCompetitionPermission, IsJudgeInCompetitionPermisssion
 from .models import Competition, CompetitionMaterial
-from .forms import CompetitionMaterialFromExistingForm, CompetitionMaterialModelForm, CompetitionTaskModelForm
+from .forms import (
+    CompetitionMaterialFromExistingForm,
+    CompetitionMaterialModelForm,
+    CompetitionTaskModelForm,
+    CompetitionTaskFromExistingForm
+)
 from .services import create_competition_material, create_competition_task, create_competition_test
 
 
@@ -199,5 +204,50 @@ class CreateNewCompetitionTaskView(LoginRequiredMixin,
             }
 
             self.call_service(service=create_competition_test, service_kwargs=create_test_kwargs)
+
+        return super().form_valid(form)
+
+
+class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
+                                            CompetitionViewMixin,
+                                            IsJudgeInCompetitionPermisssion,
+                                            ReadableFormErrorsMixin,
+                                            CallServiceMixin,
+                                            FormView):
+    template_name = 'competitions/existing_task_list.html'
+    form_class = CompetitionTaskFromExistingForm
+
+    def get_service(self):
+        return create_competition_task
+
+    def get_success_url(self):
+        return reverse_lazy('competitions:competition-detail',
+                            kwargs={
+                                'competition_slug': self.competition.slug_url
+                            })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task_list'] = Task.objects.all()
+
+        return context
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['competition'] = self.competition.id
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        create_competition_task_kwargs = {
+            'existing_task': form.cleaned_data.get('task'),
+            'competition': form.cleaned_data.get('competition')
+        }
+
+        self.call_service(service_kwargs=create_competition_task_kwargs)
 
         return super().form_valid(form)

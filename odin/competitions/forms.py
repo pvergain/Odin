@@ -25,3 +25,9 @@ class CompetitionTaskModelForm(forms.ModelForm):
     class Meta:
         model = CompetitionTask
         fields = ['competition', 'name', 'description', 'gradable']
+
+
+class CompetitionTaskFromExistingForm(forms.ModelForm):
+    class Meta:
+        model = CompetitionTask
+        fields = ['competition', 'task']

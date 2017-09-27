@@ -49,6 +49,9 @@ class CompetitionMaterial(BaseMaterial):
                                     on_delete=models.CASCADE,
                                     related_name='materials')
 
+    class Meta:
+        unique_together = (('competition', 'material'),)
+
 
 class CompetitionTask(BaseTask):
     task = models.ForeignKey(Task,
@@ -57,6 +60,9 @@ class CompetitionTask(BaseTask):
     competition = models.ForeignKey(Competition,
                                     on_delete=models.CASCADE,
                                     related_name='tasks')
+
+    class Meta:
+        unique_together = (('competition', 'task'),)
 
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
