@@ -6,9 +6,9 @@ from django.utils import timezone
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.education.models import Material
-from odin.education.factories import MaterialFactory
+from odin.education.factories import MaterialFactory, ProgrammingLanguageFactory
 
-from ..models import CompetitionMaterial, CompetitionJudge, Competition
+from ..models import CompetitionMaterial, CompetitionJudge, Competition, CompetitionTask, CompetitionTest
 from ..factories import (
     CompetitionFactory,
     CompetitionJudgeFactory,
@@ -265,3 +265,91 @@ class TestCreateExistingCompetitionMaterialFromExistingView(TestCase):
                                  'competitions:competition-detail',
                                  kwargs={'competition_slug': self.competition.slug_url}))
             self.assertEqual(material_count + 1, CompetitionMaterial.objects.count())
+
+
+class TestCreateNewCompetitionTaskView(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.url = reverse('competitions:create-new-competition-task',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url
+                           })
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.judge = CompetitionJudge.objects.create_from_user(self.user)
+        self.language = ProgrammingLanguageFactory()
+
+    def test_can_create_new_task_if_judge_in_competition(self):
+        self.competition.judges.add(self.judge)
+        task_count = CompetitionTask.objects.count()
+
+        data = {
+            'name': faker.name(),
+            'description': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('competitions:competition-detail',
+                                   kwargs={
+                                       'competition_slug': self.competition.slug_url
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+            self.assertEqual(task_count + 1, CompetitionTask.objects.count())
+
+    def test_can_not_create_new_task_if_not_judge_in_competition(self):
+        data = {
+            'name': faker.name(),
+            'description': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+
+            self.response_403(response)
+
+    def test_post_does_not_create_test_when_task_is_not_gradable(self):
+        self.competition.judges.add(self.judge)
+        task_count = CompetitionTask.objects.count()
+        test_count = CompetitionTest.objects.count()
+
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'gradable': False,
+            'language': self.language.id,
+            'code': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('competitions:competition-detail',
+                                   kwargs={
+                                       'competition_slug': self.competition.slug_url
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+            self.assertEqual(task_count + 1, CompetitionTask.objects.count())
+            self.assertEqual(test_count, CompetitionTest.objects.count())
+
+    def test_post_creates_test_when_task_is_gradable(self):
+        self.competition.judges.add(self.judge)
+        task_count = CompetitionTask.objects.count()
+        test_count = CompetitionTest.objects.count()
+
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'gradable': True,
+            'language': self.language.id,
+            'code': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('competitions:competition-detail',
+                                   kwargs={
+                                       'competition_slug': self.competition.slug_url
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+            self.assertEqual(task_count + 1, CompetitionTask.objects.count())
+            self.assertEqual(test_count + 1, CompetitionTest.objects.count())
