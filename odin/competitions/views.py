@@ -40,6 +40,7 @@ class CreateCompetitionView(DashboardManagementPermission,
 
 
 class EditCompetitionView(LoginRequiredMixin,
+                          CompetitionViewMixin,
                           IsJudgeInCompetitionPermisssion,
                           UpdateView):
     template_name = 'competitions/create_competition.html'
@@ -47,11 +48,12 @@ class EditCompetitionView(LoginRequiredMixin,
     model = Competition
     slug_field = 'slug_url'
     slug_url_kwarg = 'competition_slug'
+    fields = ['name', 'start_date', 'end_date', 'slug_url']
 
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
                             kwargs={
-                                'competition_slug': self.object.slug_url
+                                'competition_slug': self.competition.slug_url
                             })
 
 

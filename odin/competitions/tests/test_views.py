@@ -108,6 +108,47 @@ class TestCreateCompetitionView(TestCase):
             self.assertEqual(competition_count + 1, Competition.objects.count())
 
 
+class TestEditCompetitionView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.competition = CompetitionFactory()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+        self.url = reverse('competitions:edit-competition',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url
+                           })
+
+    def test_access_to_url_forbidden_if_not_judge(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(url_name=self.url)
+            self.response_403(response)
+
+    def test_post_to_url_forbidden_if_not_judge(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data={})
+            self.response_403(response)
+
+    def test_can_access_edit_competition_successfully_if_judge(self):
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+
+    def test_initial_data_is_shown_in_form(self):
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            form = response.context.get('form')
+            self.assertEqual(self.competition.name, form.initial.get('name'))
+            self.assertEqual(self.competition.start_date, form.initial.get('start_date'))
+            self.assertEqual(self.competition.end_date, form.initial.get('end_date'))
+            self.assertEqual(self.competition.slug_url, form.initial.get('slug_url'))
+
+
 class TestAddNewCompetitionMaterialView(TestCase):
     def setUp(self):
         self.test_password = faker.password()
