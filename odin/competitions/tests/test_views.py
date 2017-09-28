@@ -8,7 +8,14 @@ from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.education.models import Material
 from odin.education.factories import MaterialFactory, ProgrammingLanguageFactory, TaskFactory, IncludedTaskFactory
 
-from ..models import CompetitionMaterial, CompetitionJudge, Competition, CompetitionTask, CompetitionTest
+from ..models import (
+    CompetitionMaterial,
+    CompetitionJudge,
+    Competition,
+    CompetitionTask,
+    CompetitionTest,
+    CompetitionParticipant
+)
 from ..factories import (
     CompetitionFactory,
     CompetitionJudgeFactory,
@@ -505,3 +512,47 @@ class TestEditCompetitionTaskView(TestCase):
             self.assertEqual(self.competition_task.name, form.initial.get('name'))
             self.assertEqual(self.competition_task.description, form.initial.get('description'))
             self.assertEqual(self.competition_task.gradable, form.initial.get('gradable'))
+
+
+class TestCreateGradableSolutionApiView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.competition = CompetitionFactory()
+        self.task = CompetitionTaskFactory(competition=self.competition)
+        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.competition.participants.add(self.participant)
+        self.url = reverse('competitions:submit-gradable-solution',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url
+                           })
+
+    def test_get_is_not_allowed(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+
+            self.response_405(response)
+
+    def test_redirects_to_login_when_anonoymous(self):
+        data = {
+            'participant': self.participant.id,
+            'code': faker.text(),
+            'task': self.task.id
+        }
+        response = self.post(self.url, data=data)
+        self.response_302(response)
+
+    def test_forbidden_when_user_is_not_a_participant_in_competition(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        new_user.is_active = True
+        new_user.save()
+
+        data = {
+            'participant': self.participant.id,
+            'code': faker.text(),
+            'task': self.task.id
+        }
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_403(response)
