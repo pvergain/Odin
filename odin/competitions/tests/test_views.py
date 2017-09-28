@@ -1,4 +1,4 @@
-from test_plus import TestCase  # noqa
+from test_plus import TestCase
 
 from django.urls import reverse
 from django.utils import timezone
