@@ -662,7 +662,7 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
         solution = self.call_service(service_kwargs=create_gradable_solution_kwargs)
         if solution:
             self.solution_id = solution.id
-            start_grader_communication(solution.id)
+            start_grader_communication(solution.id, 'education.Solution')
 
         return super().form_valid(form)
 

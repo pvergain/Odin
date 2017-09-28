@@ -5,8 +5,8 @@ import requests
 import time
 from typing import Dict, Callable
 
-from django.db.models import Model
 from django.conf import settings
+from django.apps import apps
 from django.shortcuts import get_object_or_404
 
 from .models import GraderRequest
@@ -15,13 +15,14 @@ from.exceptions import PollingError
 
 class GraderClient:
     def __init__(self,
-                 solution_model: Model,
+                 solution_model_repr: str,
                  settings_module=settings,
                  grader_ready_data: Dict=None):
 
         self.settings = settings
         self.data = grader_ready_data
-        self.solution_model = solution_model
+        self.solution_model_repr = solution_model_repr
+        self.solution_model = apps.get_model(solution_model_repr)
         self.req_and_resource = self._generate_req_and_resource()
 
     def _generate_req_and_resource(self) -> Dict[str, str]:
@@ -93,7 +94,7 @@ class GraderClient:
                 solution.check_status_location = response.headers['Location']
                 solution.save()
 
-                polling_task.delay(solution.id)
+                polling_task.delay(solution.id, self.solution_model_repr)
                 break
             elif response.status_code == 403 and response.text == "Nonce check failed":
                 self._get_valid_nonce(self.req_and_resource['POST'])

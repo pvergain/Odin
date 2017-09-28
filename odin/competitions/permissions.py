@@ -1,3 +1,5 @@
+from rest_framework.permissions import BasePermission
+
 from odin.common.mixins import BaseUserPassesTestMixin
 
 
@@ -40,5 +42,21 @@ class IsJudgeInCompetitionPermisssion(BaseUserPassesTestMixin):
 
         if is_judge:
             return True and super().test_func()
+
+        return False
+
+
+class IsParticipantInCompetitionApiPerimission(BasePermission):
+    message = "Need to be a participant in this competition"
+
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            return False
+
+        email = request.user.email
+        is_participant = view.competition.participants.filter(email=email).exists()
+
+        if is_participant:
+            return True
 
         return False

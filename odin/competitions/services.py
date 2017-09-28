@@ -63,6 +63,8 @@ def create_gradable_solution(*,
         raise ValidationError("Provide either code or a file, not both!")
     if code is None and file is None:
         raise ValidationError("Provide either code or a file!")
+    if not CompetitionTest.objects.filter(task=task).exists():
+        raise ValidationError("This task does not have tests yet")
     if code is not None:
         new_solution = Solution.objects.create(
             task=task,

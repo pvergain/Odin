@@ -9,7 +9,9 @@ from .views import (
     CompetitionDetailView,
     CreateNewCompetitionTaskView,
     CreateCompetitionTaskFromExistingView,
-    EditCompetitionTaskView
+    EditCompetitionTaskView,
+    CreateGradableSolutionApiView,
+    CreateNonGradableSolutionApiView
 )
 
 urlpatterns = [
@@ -57,5 +59,15 @@ urlpatterns = [
         regex='(?P<competition_slug>[-\w]+)/edit-task/(?P<task_id>[0-9]+)/$',
         view=EditCompetitionTaskView.as_view(),
         name='edit-competition-task'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/solutions/submit-gradable$',
+        view=CreateGradableSolutionApiView.as_view(),
+        name='submit-gradable-solution'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/solutions/submit-non-gradable$',
+        view=CreateNonGradableSolutionApiView.as_view(),
+        name='submit-non-gradable-solution'
     )
 ]
