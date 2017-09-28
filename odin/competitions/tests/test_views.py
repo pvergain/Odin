@@ -268,6 +268,48 @@ class TestCreateExistingCompetitionMaterialFromExistingView(TestCase):
             self.assertEqual(material_count + 1, CompetitionMaterial.objects.count())
 
 
+class TestEditCompetitionMaterialView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.competition = CompetitionFactory()
+        self.competition_material = CompetitionMaterialFactory(competition=self.competition)
+        self.user = BaseUserFactory(password=self.test_password)
+        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+        self.url = reverse('competitions:edit-competition-material',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url,
+                               'material_id': self.competition_material.id
+                           })
+
+    def test_access_to_url_forbidden_if_not_judge(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(url_name=self.url)
+            self.response_403(response)
+
+    def test_post_to_url_forbidden_if_not_judge(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(url_name=self.url, data={})
+            self.response_403(response)
+
+    def test_can_access_edit_competition_successfully_if_judge(self):
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+
+    def test_initial_data_is_shown_in_form(self):
+        self.competition.judges.add(self.judge)
+        self.competition.save()
+        with self.login(email=self.judge.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            form = response.context.get('form')
+            self.assertEqual(self.competition_material.identifier, form.initial.get('identifier'))
+            self.assertEqual(self.competition_material.url, form.initial.get('url'))
+            self.assertEqual(self.competition_material.content, form.initial.get('content'))
+
+
 class TestCreateNewCompetitionTaskView(TestCase):
     def setUp(self):
         self.competition = CompetitionFactory()
