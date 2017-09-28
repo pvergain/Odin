@@ -8,7 +8,8 @@ from .views import (
     EditCompetitionMaterialView,
     CompetitionDetailView,
     CreateNewCompetitionTaskView,
-    CreateCompetitionTaskFromExistingView
+    CreateCompetitionTaskFromExistingView,
+    EditCompetitionTaskView
 )
 
 urlpatterns = [
@@ -51,6 +52,10 @@ urlpatterns = [
         regex='(?P<competition_slug>[-\w]+)/create-task/from-existing/$',
         view=CreateCompetitionTaskFromExistingView.as_view(),
         name='create-competition-task-from-existing'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/edit-task/(?P<task_id>[0-9]+)/$',
+        view=EditCompetitionTaskView.as_view(),
+        name='edit-competition-task'
     )
-
 ]
