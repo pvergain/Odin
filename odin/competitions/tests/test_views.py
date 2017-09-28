@@ -322,6 +322,11 @@ class TestCreateNewCompetitionTaskView(TestCase):
         self.judge = CompetitionJudge.objects.create_from_user(self.user)
         self.language = ProgrammingLanguageFactory()
 
+    def test_can_not_access_view_when_not_judge_in_competition(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
     def test_can_create_new_task_if_judge_in_competition(self):
         self.competition.judges.add(self.judge)
         task_count = CompetitionTask.objects.count()
@@ -341,6 +346,7 @@ class TestCreateNewCompetitionTaskView(TestCase):
             self.assertEqual(task_count + 1, CompetitionTask.objects.count())
 
     def test_can_not_create_new_task_if_not_judge_in_competition(self):
+        task_count = CompetitionTask.objects.count()
         data = {
             'name': faker.name(),
             'description': faker.text()
@@ -350,6 +356,7 @@ class TestCreateNewCompetitionTaskView(TestCase):
             response = self.post(self.url, data=data)
 
             self.response_403(response)
+            self.assertEqual(task_count, CompetitionTask.objects.count())
 
     def test_post_does_not_create_test_when_task_is_not_gradable(self):
         self.competition.judges.add(self.judge)
@@ -409,6 +416,11 @@ class TestCreateCompetitionTaskFromExistingView(TestCase):
         self.user = BaseUserFactory(password=self.test_password)
         self.judge = CompetitionJudge.objects.create_from_user(self.user)
         self.language = ProgrammingLanguageFactory()
+
+    def test_can_not_access_view_when_not_judge_in_competition(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
 
     def test_can_add_existing_task_that_has_not_been_added_to_competition(self):
         self.competition.judges.add(self.judge)
