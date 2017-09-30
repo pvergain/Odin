@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory
-from odin.education.factories import MaterialFactory, TaskFactory
+from odin.education.factories import MaterialFactory, TaskFactory, TaskTestFactory
 
 from .models import (
     CompetitionParticipant,
@@ -15,6 +15,7 @@ from .models import (
     CompetitionMaterial,
     CompetitionTask,
 )
+from .services import create_competition_test
 
 
 class CompetitionParticipantFactory(BaseUserFactory):
@@ -61,3 +62,10 @@ class CompetitionTaskFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = CompetitionTask
+
+
+class CompetitionTestFactory(TaskTestFactory):
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        kwargs['code'] = faker.text()
+        return create_competition_test(*args, **kwargs)

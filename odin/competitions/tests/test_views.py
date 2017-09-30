@@ -6,7 +6,12 @@ from django.utils import timezone
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.education.models import Material
-from odin.education.factories import MaterialFactory, ProgrammingLanguageFactory, TaskFactory, IncludedTaskFactory
+from odin.education.factories import (
+    MaterialFactory,
+    ProgrammingLanguageFactory,
+    TaskFactory,
+    IncludedTaskFactory
+)
 
 from ..models import (
     CompetitionMaterial,
@@ -14,14 +19,16 @@ from ..models import (
     Competition,
     CompetitionTask,
     CompetitionTest,
-    CompetitionParticipant
+    CompetitionParticipant,
+    Solution
 )
 from ..factories import (
     CompetitionFactory,
     CompetitionJudgeFactory,
     CompetitionParticipantFactory,
     CompetitionMaterialFactory,
-    CompetitionTaskFactory
+    CompetitionTaskFactory,
+    CompetitionTestFactory
 )
 
 
@@ -519,9 +526,10 @@ class TestCreateGradableSolutionApiView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.competition = CompetitionFactory()
-        self.task = CompetitionTaskFactory(competition=self.competition)
+        self.task = CompetitionTaskFactory(competition=self.competition, gradable=True)
         self.participant = CompetitionParticipant.objects.create_from_user(self.user)
         self.competition.participants.add(self.participant)
+        self.language = ProgrammingLanguageFactory()
         self.url = reverse('competitions:submit-gradable-solution',
                            kwargs={
                                'competition_slug': self.competition.slug_url
@@ -556,3 +564,29 @@ class TestCreateGradableSolutionApiView(TestCase):
         with self.login(email=new_user.email, password=self.test_password):
             response = self.post(self.url, data=data)
             self.response_403(response)
+
+    def test_does_not_create_solution_when_task_has_no_test(self):
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'code': faker.text(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(solutions_count, Solution.objects.count())
+
+    def test_creates_solution_when_participant_in_competition_and_task_has_test(self):
+        CompetitionTestFactory(task=self.task)
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'code': faker.text(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
