@@ -590,3 +590,70 @@ class TestCreateGradableSolutionApiView(TestCase):
             response = self.post(self.url, data=data)
             self.response_201(response)
             self.assertEqual(solutions_count + 1, Solution.objects.count())
+
+    def test_created_solution_is_in_task_solutions(self):
+        CompetitionTestFactory(task=self.task)
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'code': faker.text(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+            self.task.refresh_from_db()
+            solution = Solution.objects.last()
+            self.assertIn(solution, self.task.solutions.all())
+
+
+class TestCreateNonGradableCompetitionSolutionView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.competition = CompetitionFactory()
+        self.task = CompetitionTaskFactory(competition=self.competition, gradable=False)
+        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.competition.participants.add(self.participant)
+        self.language = ProgrammingLanguageFactory()
+        self.url = reverse('competitions:submit-non-gradable-solution',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url
+                           })
+
+    def test_get_is_not_allowed(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+
+            self.response_405(response)
+
+    def test_creates_solution_when_participant_in_competition(self):
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'url': faker.url(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+
+    def test_created_solution_is_in_task_solutions(self):
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'url': faker.url(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+            self.task.refresh_from_db()
+            solution = Solution.objects.last()
+            self.assertIn(solution, self.task.solutions.all())
