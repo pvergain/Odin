@@ -48,7 +48,7 @@ class HasStudentAlreadyAppliedMixin:
             user_application = request.user.applications.filter(application_info=self.course.application_info)
             if user_application.exists():
                 self.user_applied = True
-                url = reverse('dashboard:applications:edit-application', kwargs={'course_id': self.course.id})
+                url = reverse('dashboard:applications:user-applications')
                 return redirect(url)
         return super().dispatch(request, *args, **kwargs)
 

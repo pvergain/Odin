@@ -2,7 +2,7 @@
   {% for course in courses_open_for_application %}
     <div class="col-md-4">
       <div class="col-md-8">
-        {% include 'applications/partial/courses_to_apply.html' with course=course %} 
+        {% include 'applications/partial/courses_to_apply.html' with course=course %}
       </div>
     </div>
   {% endfor %}
@@ -44,9 +44,6 @@
                 {% endif %}
               {% endfor %}
               <p class="ribbon-content">
-                <a href="{% url 'dashboard:applications:edit-application' application.application_info.course.id %}">
-                  <button class="pull-right btn btn-lg green uppercase">Edit application</button>
-                </a>
               </p>
               </ul>
             </h4>
@@ -56,4 +53,3 @@
     </div>
   </div>
 </div>
-

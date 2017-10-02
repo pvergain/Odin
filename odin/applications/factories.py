@@ -8,9 +8,6 @@ from odin.users.factories import BaseUserFactory
 from .models import (
     Application,
     ApplicationInfo,
-    ApplicationTask,
-    IncludedApplicationTask,
-    ApplicationSolution
 )
 
 
@@ -35,29 +32,3 @@ class ApplicationFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Application
-
-
-class ApplicationTaskFactory(factory.DjangoModelFactory):
-    name = factory.Sequence(lambda n: f'{n}{faker.word()}')
-    description = factory.LazyAttribute(lambda _: faker.text())
-    gradable = factory.LazyAttribute(lambda _: faker.boolean())
-
-    class Meta:
-        model = ApplicationTask
-
-
-class IncludedApplicationTaskFactory(factory.DjangoModelFactory):
-    application_info = factory.SubFactory(ApplicationInfoFactory)
-    task = factory.SubFactory(ApplicationTaskFactory)
-
-    class Meta:
-        model = IncludedApplicationTask
-
-
-class ApplicationSolutionFactory(factory.DjangoModelFactory):
-    task = factory.SubFactory(IncludedApplicationTaskFactory)
-    application = factory.SubFactory(ApplicationFactory)
-    url = factory.LazyAttribute(lambda _: faker.url())
-
-    class Meta:
-        model = ApplicationSolution
