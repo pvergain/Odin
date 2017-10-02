@@ -319,3 +319,32 @@ class TestApplicationDetailView(TestCase):
             response = self.get(self.url)
             self.response_200(response)
             self.assertEqual(self.application, response.context['object'])
+
+
+class TestEditApplicationView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.course = CourseFactory(
+            start_date=timezone.now() + timezone.timedelta(days=10),
+            end_date=timezone.now() + timezone.timedelta(days=20)
+        )
+        self.app_info = ApplicationInfoFactory(
+            start_date=timezone.now(),
+            end_date=timezone.now() + timezone.timedelta(days=4),
+            start_interview_date=timezone.now() + timezone.timedelta(days=5),
+            end_interview_date=timezone.now() + timezone.timedelta(days=6),
+            course=self.course
+        )
+        self.application = ApplicationFactory(application_info=self.app_info, user=self.user)
+        self.url = reverse('dashboard:applications:edit-application',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    def test_get_returns_correct_application(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.assertEqual(response.context['object'], self.application)

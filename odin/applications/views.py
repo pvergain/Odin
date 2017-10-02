@@ -1,6 +1,7 @@
 from django.views.generic import FormView, UpdateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
@@ -10,7 +11,8 @@ from .permissions import ViewApplicationDetailPermission
 from .models import Application, ApplicationInfo
 from .forms import (
     ApplicationInfoModelForm,
-    ApplicationCreateForm
+    ApplicationCreateForm,
+    ApplicationEditForm
 )
 from .services import (
     create_application_info,
@@ -20,7 +22,6 @@ from .mixins import (
     ApplicationInfoFormDataMixin,
     HasStudentAlreadyAppliedMixin,
     ApplicationFormDataMixin,
-    ApplicationTasksMixin,
     RedirectToExternalFormMixin
 )
 
@@ -125,13 +126,13 @@ class UserApplicationsListView(LoginRequiredMixin,
 
 class EditApplicationView(LoginRequiredMixin,
                           CourseViewMixin,
-                          ApplicationTasksMixin,
-                          ApplicationFormDataMixin,
-                          CallServiceMixin,
                           ReadableFormErrorsMixin,
                           UpdateView):
-    # TODO: Refactor for Competition Integration
-    pass
+    form_class = ApplicationEditForm
+    template_name = 'applications/edit_application.html'
+
+    def get_object(self):
+        return get_object_or_404(Application, user=self.request.user, application_info__course=self.course)
 
 
 class ApplicationDetailView(LoginRequiredMixin,

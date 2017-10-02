@@ -42,5 +42,11 @@ class ApplicationCreateForm(forms.ModelForm):
 
 
 class ApplicationEditForm(forms.ModelForm):
-    # TODO: Refactor for Competition integration
-    pass
+    class Meta:
+        model = Application
+        fields = [
+            'phone',
+            'skype',
+            'works_at',
+            'studies_at'
+        ]
