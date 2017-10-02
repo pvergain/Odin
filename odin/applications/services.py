@@ -9,6 +9,7 @@ from .models import (
 from odin.education.models import Course
 from odin.users.models import BaseUser
 from odin.common.services import send_email
+from odin.competitions.models import CompetitionParticipant
 
 
 def create_application_info(*,
@@ -53,6 +54,12 @@ def create_application(*,
 
     instance.full_clean()
     instance.save()
+
+    if application_info.competition:
+        if not hasattr(user, 'competitionparticipant'):
+            participant = CompetitionParticipant.objects.create_from_user(user)
+        application_info.competition.participants.add(participant)
+
     template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')
     context = {
         'user': user.email,

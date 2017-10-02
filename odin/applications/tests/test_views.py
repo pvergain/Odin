@@ -12,6 +12,7 @@ from odin.interviews.services import add_course_to_interviewer_courses
 from odin.education.models import Teacher
 from odin.education.factories import CourseFactory
 from odin.education.services import add_teacher
+from odin.competitions.factories import CompetitionFactory
 
 from ..models import (
     ApplicationInfo,
@@ -136,6 +137,27 @@ class TestApplyToCourseView(TestCase):
             response = self.post(self.url, data=data)
             self.assertRedirects(response, expected_url=reverse('dashboard:applications:user-applications'))
             self.assertEqual(current_app_count + 1, Application.objects.count())
+
+    def test_successful_post_redirects_to_competition_detail_whn_app_info_has_competition(self):
+        competition = CompetitionFactory()
+        self.app_info.start_date = timezone.now().date()
+        self.app_info.end_date = timezone.now().date() + timezone.timedelta(days=2)
+        self.app_info.competition = competition
+        self.app_info.save()
+
+        data = {
+            'phone': faker.phone_number(),
+            'works_at': faker.job(),
+            'skype': faker.word()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response,
+                                 expected_url=reverse('competitions:competition-detail',
+                                                      kwargs={
+                                                          'competition_slug': competition.slug_url
+                                                      }))
 
     def test_post_does_not_create_application_when_apply_is_closed(self):
         self.app_info.start_date = timezone.now().date() - timezone.timedelta(days=2)

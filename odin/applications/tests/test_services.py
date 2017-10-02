@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 from odin.common.faker import faker
 from odin.education.factories import CourseFactory
 from odin.users.factories import BaseUserFactory
+from odin.competitions.factories import CompetitionFactory
+from odin.competitions.models import CompetitionParticipant
 from odin.applications.models import (
     Application,
     ApplicationInfo,
@@ -152,3 +154,19 @@ class TestCreateApplicationService(TestCase):
         create_application(application_info=self.app_info, user=self.user, skype=faker.word())
 
         self.assertEqual(current_application_count + 1, Application.objects.count())
+
+    def test_create_application_makes_user_participant(self):
+        competition = CompetitionFactory()
+        self.app_info.competition = competition
+        self.app_info.save()
+        create_application(application_info=self.app_info, user=self.user, skype=faker.word())
+
+        self.assertTrue(CompetitionParticipant.objects.filter(email=self.user.email).exists())
+
+    def test_create_application_adds_user_as_participant_to_competition_if_app_info_has_competition(self):
+        competition = CompetitionFactory()
+        self.app_info.competition = competition
+        self.app_info.save()
+        create_application(application_info=self.app_info, user=self.user, skype=faker.word())
+
+        self.assertTrue(competition.participants.filter(email=self.user.email).exists())
