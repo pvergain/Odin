@@ -1,3 +1,4 @@
+import json
 from rest_framework import generics
 
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView
@@ -11,12 +12,12 @@ from odin.management.permissions import DashboardManagementPermission
 from odin.education.models import Material, Task
 from odin.grading.services import start_grader_communication
 
-from .mixins import CompetitionViewMixin
+from .mixins import CompetitionViewMixin, CreateSolutionApiMixin
 from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
     IsJudgeInCompetitionPermisssion,
     IsParticipantInCompetitionApiPerimission,
-    IsParticipantIncCompetitionPermission
+    IsParticipantInCompetitionPermission
 )
 from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
 from .forms import (
@@ -32,7 +33,7 @@ from .services import (
     create_gradable_solution,
     create_non_gradable_solution
 )
-from .serializers import CompetitionSolutionSerializer
+from .serializers import CompetitionSolutionSerializer, CompetitionSerializer
 
 
 class CompetitionDetailView(LoginRequiredMixin,
@@ -43,6 +44,13 @@ class CompetitionDetailView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user_judge_in_competition = self.competition.judges.filter(email=self.request.user.email).exists()
+        user_participant_in_competition = self.competition.participants.filter(email=self.request.user.email).exists()
+        competition_data = CompetitionSerializer(self.competition).data
+
+        context['is_user_judge_in_competition'] = user_judge_in_competition
+        context['user_participant_in_competition'] = user_participant_in_competition
+        context['competition_data'] = json.dumps(competition_data)
 
         return context
 
@@ -287,8 +295,9 @@ class EditCompetitionTaskView(LoginRequiredMixin,
 
 
 class CreateGradableSolutionApiView(LoginRequiredMixin,
-                                    CallServiceMixin,
                                     CompetitionViewMixin,
+                                    CreateSolutionApiMixin,
+                                    CallServiceMixin,
                                     generics.CreateAPIView):
     serializer_class = CompetitionSolutionSerializer
     permission_classes = (IsParticipantInCompetitionApiPerimission, )
@@ -306,6 +315,7 @@ class CreateGradableSolutionApiView(LoginRequiredMixin,
 
 class CreateNonGradableSolutionApiView(LoginRequiredMixin,
                                        CompetitionViewMixin,
+                                       CreateSolutionApiMixin,
                                        CallServiceMixin,
                                        generics.CreateAPIView):
     serializer_class = CompetitionSolutionSerializer
@@ -316,6 +326,7 @@ class CreateNonGradableSolutionApiView(LoginRequiredMixin,
 
     def perform_create(self, serializer):
         service_kwargs = serializer.validated_data
+
         self.call_service(service_kwargs=service_kwargs)
 
 
@@ -337,12 +348,18 @@ class AllParticipantsSolutionsView(LoginRequiredMixin,
 
 class ParticipantSolutionsView(LoginRequiredMixin,
                                CompetitionViewMixin,
-                               IsParticipantIncCompetitionPermission,
+                               IsParticipantInCompetitionPermission,
                                ListView):
     template_name = 'competitions/participant_solutions.html'
 
     def get_queryset(self):
         user = self.request.user
-        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('id'))
+        self.task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
 
-        return Solution.objects.filter(participant=user.participant, task=task)
+        return Solution.objects.filter(participant=user.competitionparticipant, task=self.task)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task'] = self.task
+
+        return context

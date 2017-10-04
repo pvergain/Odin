@@ -4,7 +4,7 @@ import { Accordion } from "./Accordion";
 
 class App extends React.Component {
   render() {
-    return <Accordion data={this.props.data} />;
+    return <Accordion data={this.props} />;
   }
 }
 

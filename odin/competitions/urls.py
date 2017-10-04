@@ -11,7 +11,9 @@ from .views import (
     CreateCompetitionTaskFromExistingView,
     EditCompetitionTaskView,
     CreateGradableSolutionApiView,
-    CreateNonGradableSolutionApiView
+    CreateNonGradableSolutionApiView,
+    ParticipantSolutionsView,
+    AllParticipantsSolutionsView
 )
 
 urlpatterns = [
@@ -61,13 +63,23 @@ urlpatterns = [
         name='edit-competition-task'
     ),
     url(
-        regex='(?P<competition_slug>[-\w]+)/solutions/submit-gradable$',
+        regex='(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/solutions/submit-gradable/$',
         view=CreateGradableSolutionApiView.as_view(),
         name='submit-gradable-solution'
     ),
     url(
-        regex='(?P<competition_slug>[-\w]+)/solutions/submit-non-gradable$',
+        regex='(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/solutions/submit-non-gradable/$',
         view=CreateNonGradableSolutionApiView.as_view(),
         name='submit-non-gradable-solution'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/personal-solutions/$',
+        view=ParticipantSolutionsView.as_view(),
+        name='participant-task-solutions'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/all-solutions/$',
+        view=AllParticipantsSolutionsView.as_view(),
+        name='all-participants-solutions'
     )
 ]

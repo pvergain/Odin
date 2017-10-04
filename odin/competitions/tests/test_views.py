@@ -532,7 +532,8 @@ class TestCreateGradableSolutionApiView(TestCase):
         self.language = ProgrammingLanguageFactory()
         self.url = reverse('competitions:submit-gradable-solution',
                            kwargs={
-                               'competition_slug': self.competition.slug_url
+                               'competition_slug': self.competition.slug_url,
+                               'task_id': self.task.id
                            })
 
     def test_get_is_not_allowed(self):
@@ -608,6 +609,38 @@ class TestCreateGradableSolutionApiView(TestCase):
             solution = Solution.objects.last()
             self.assertIn(solution, self.task.solutions.all())
 
+    def test_post_with_different_task_does_not_overwrite_task_from_url(self):
+        CompetitionTestFactory(task=self.task)
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'code': faker.text(),
+            'task': faker.pyint()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+            solution = Solution.objects.last()
+            self.assertEqual(solution.task.id, self.task.id)
+
+    def test_post_with_different_participant_does_not_overwrite_request_participant(self):
+        CompetitionTestFactory(task=self.task)
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': faker.pyint(),
+            'code': faker.text(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+            solution = Solution.objects.last()
+            self.assertEqual(solution.participant.id, self.participant.id)
+
 
 class TestCreateNonGradableCompetitionSolutionView(TestCase):
     def setUp(self):
@@ -620,7 +653,8 @@ class TestCreateNonGradableCompetitionSolutionView(TestCase):
         self.language = ProgrammingLanguageFactory()
         self.url = reverse('competitions:submit-non-gradable-solution',
                            kwargs={
-                               'competition_slug': self.competition.slug_url
+                               'competition_slug': self.competition.slug_url,
+                               'task_id': self.task.id
                            })
 
     def test_get_is_not_allowed(self):
@@ -657,3 +691,33 @@ class TestCreateNonGradableCompetitionSolutionView(TestCase):
             self.task.refresh_from_db()
             solution = Solution.objects.last()
             self.assertIn(solution, self.task.solutions.all())
+
+    def test_post_with_different_task_does_not_overwrite_task_from_url(self):
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': self.participant.id,
+            'url': faker.url(),
+            'task': faker.pyint()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+            solution = Solution.objects.last()
+            self.assertEqual(solution.task.id, self.task.id)
+
+    def test_post_with_different_participant_does_not_overwrite_request_participant(self):
+        solutions_count = Solution.objects.count()
+        data = {
+            'participant': faker.pyint(),
+            'url': faker.url(),
+            'task': self.task.id
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_201(response)
+            self.assertEqual(solutions_count + 1, Solution.objects.count())
+            solution = Solution.objects.last()
+            self.assertEqual(solution.participant.id, self.participant.id)

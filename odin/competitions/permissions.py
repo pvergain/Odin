@@ -18,7 +18,7 @@ class IsParticipantOrJudgeInCompetitionPermission(BaseUserPassesTestMixin):
         return False
 
 
-class IsParticipantIncCompetitionPermission(BaseUserPassesTestMixin):
+class IsParticipantInCompetitionPermission(BaseUserPassesTestMixin):
     raise_exception = True
 
     def test_func(self):
