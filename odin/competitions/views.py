@@ -1,8 +1,9 @@
 from rest_framework import generics
 
-from django.views.generic import TemplateView, CreateView, UpdateView, FormView
+from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
@@ -14,9 +15,10 @@ from .mixins import CompetitionViewMixin
 from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
     IsJudgeInCompetitionPermisssion,
-    IsParticipantInCompetitionApiPerimission
+    IsParticipantInCompetitionApiPerimission,
+    IsParticipantIncCompetitionPermission
 )
-from .models import Competition, CompetitionMaterial, CompetitionTask
+from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
 from .forms import (
     CompetitionMaterialFromExistingForm,
     CompetitionMaterialModelForm,
@@ -315,3 +317,32 @@ class CreateNonGradableSolutionApiView(LoginRequiredMixin,
     def perform_create(self, serializer):
         service_kwargs = serializer.validated_data
         self.call_service(service_kwargs=service_kwargs)
+
+
+class AllParticipantsSolutionsView(LoginRequiredMixin,
+                                   CompetitionViewMixin,
+                                   IsJudgeInCompetitionPermisssion,
+                                   ListView):
+    template_name = 'competitions/all_participants_solutions.html'
+
+    def get_queryset(self):
+        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
+        filters = {
+            'solutions__task': task,
+            'solutions__status': Solution.OK
+        }
+        queryset = self.competition.participants.filter(**filters).select_related('profile')
+        return queryset.prefetch_related('solutions__task').distinct()
+
+
+class ParticipantSolutionsView(LoginRequiredMixin,
+                               CompetitionViewMixin,
+                               IsParticipantIncCompetitionPermission,
+                               ListView):
+    template_name = 'competitions/participant_solutions.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('id'))
+
+        return Solution.objects.filter(participant=user.participant, task=task)

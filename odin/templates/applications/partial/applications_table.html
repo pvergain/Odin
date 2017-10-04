@@ -31,22 +31,12 @@
             </div>
             <h4 class="ribbon-content"><strong>Your application is not completed!</strong></h4>
             {% endif %}
-            <h4 class="ribbon-content">
-              <strong>Application Tasks:</strong>
-            </h4>
-            <h4 class="ribbon-content">
-              <ul>
-              {% for task in application.application_info.tasks.all %}
-                {% if task.solutions.exists %}
-                  <li><p>{{ task.name }} <i class="icon-check"></i></p></li>
-                {% else %}
-                  <li><p>{{ task.name }} <i class="icon-close"></i></p></li>
-                {% endif %}
-              {% endfor %}
-              <p class="ribbon-content">
-              </p>
-              </ul>
-            </h4>
+            {% if application.application_info.competition %}
+              <div class="ribbon-content">
+                <a href="{% url 'competitions:competition-detail' application.application_info.competition.slug_url %}">
+                  <button class="btn green uppercase" type="button">View Application assets</button></a>
+              </div>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
