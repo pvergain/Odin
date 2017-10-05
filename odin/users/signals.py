@@ -5,6 +5,7 @@ from .models import BaseUser, Profile
 
 from odin.education.models import Teacher, Course
 from odin.education.services import add_teacher
+from odin.competitions.models import CompetitionJudge, Competition
 
 
 @receiver(post_save, sender=BaseUser)
@@ -21,3 +22,13 @@ def make_new_superuser_teacher(sender, instance, created, **kwargs):
             teacher.save()
             for course in Course.objects.all():
                 add_teacher(course, teacher, hidden=True)
+
+
+@receiver(post_save, sender=BaseUser)
+def make_new_superuser_competition_judge(sender, instance, created, **kwargs):
+    if created:
+        if instance.is_superuser:
+            judge = CompetitionJudge.objects.create_from_user(instance)
+            judge.save()
+            for competition in Competition.objects.all():
+                competition.judges.add(judge)
