@@ -99,7 +99,17 @@ class SubmitSolutionModal extends React.Component {
 
         this.props.setResponseData(data);
         this.focusDetailModal(closeButtonID, this.props.solutionDetailModalID);
-        pollSolution(data.id, this.props.setResponseData);
+        let pollingUrl;
+        if (this.props.competition) {
+          pollingUrl = Urls["competitions:participant-solution-detail-api"]({
+            solution_id: data.id
+          });
+        } else {
+          pollingUrl = Urls["dashboard:education:student-solution-detail-api"]({
+            solution_id: data.id
+          });
+        }
+        pollSolution(data.id, this.props.setResponseData, pollingUrl);
       }
     });
   }

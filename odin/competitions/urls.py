@@ -13,7 +13,8 @@ from .views import (
     CreateGradableSolutionApiView,
     CreateNonGradableSolutionApiView,
     ParticipantSolutionsView,
-    AllParticipantsSolutionsView
+    AllParticipantsSolutionsView,
+    SolutionDetailApiView
 )
 
 urlpatterns = [
@@ -81,5 +82,10 @@ urlpatterns = [
         regex='(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/all-solutions/$',
         view=AllParticipantsSolutionsView.as_view(),
         name='all-participants-solutions'
+    ),
+    url(
+        regex='solutions/(?P<solution_id>[0-9]+)/$',
+        view=SolutionDetailApiView.as_view(),
+        name='participant-solution-detail-api'
     )
 ]

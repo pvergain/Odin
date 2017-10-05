@@ -17,7 +17,8 @@ from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
     IsJudgeInCompetitionPermisssion,
     IsParticipantInCompetitionApiPerimission,
-    IsParticipantInCompetitionPermission
+    IsParticipantInCompetitionPermission,
+    IsParticipantOrJudgeInCompetitionApiPermission
 )
 from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
 from .forms import (
@@ -310,6 +311,7 @@ class CreateGradableSolutionApiView(LoginRequiredMixin,
         solution = self.call_service(service_kwargs=service_kwargs)
 
         if solution:
+            serializer.instance = solution
             start_grader_communication(solution.id, 'competitions.Solution')
 
 
@@ -363,3 +365,10 @@ class ParticipantSolutionsView(LoginRequiredMixin,
         context['task'] = self.task
 
         return context
+
+
+class SolutionDetailApiView(generics.RetrieveAPIView):
+    serializer_class = CompetitionSolutionSerializer
+    permission_classes = (IsParticipantOrJudgeInCompetitionApiPermission, )
+    queryset = Solution.objects.all()
+    lookup_url_kwarg = 'solution_id'

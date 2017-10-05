@@ -30,7 +30,6 @@ class ListItem extends React.Component {
   }
 
   render() {
-    debugger;
     const modalID = `submit_${this.props.task.id}`;
 
     const solutionDetailModalID = `solution_detail_${this.props.task.id}`;
@@ -59,7 +58,7 @@ class ListItem extends React.Component {
                 <a
                   href={
                     this.props.competition
-                      ? getCompetitionSolutionsUrl()
+                      ? this.getCompetitionSolutionsUrl()
                       : solutionsUrl
                   }
                 >

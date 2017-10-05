@@ -37,7 +37,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CompetitionTask
-        fields = ('id', 'test', 'description', 'gradable', 'solutions')
+        fields = ('id', 'name', 'test', 'description', 'gradable', 'solutions')
 
 
 class CompetitionSerializer(serializers.ModelSerializer):
