@@ -33,11 +33,13 @@ class SolutionDetailModal extends React.Component {
       >
         <div className="portlet light">
           <div className="portlet-body">
-            <div className="col-md-12">
-              <center>
-                <IconContainer status={this.props.solution.status} />
-              </center>
-            </div>
+            {task.gradable
+              ? <div className="col-md-12">
+                  <center>
+                    <IconContainer status={this.props.solution.status} />
+                  </center>
+                </div>
+              : <div />}
             <div className="row">
               <div className="col-md-12">
                 {task.gradable && this.props.solution.test_output
