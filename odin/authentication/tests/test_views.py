@@ -1,5 +1,4 @@
 import os
-from unittest import skip
 
 from test_plus import TestCase
 
@@ -80,14 +79,12 @@ class TestSignUpView(TestCase):
     def tearDown(self):
         del os.environ['RECAPTCHA_TESTING']
 
-    @skip("Temporary for competition")
     def test_readable_errors_are_empty_on_get(self):
         response = self.get(self.url)
         self.assertEqual(200, response.status_code)
         self.assertInContext('readable_errors')
         self.assertEqual(0, len(response.context['readable_errors']))
 
-    @skip("Temporary for competition")
     def test_readable_errors_are_not_none_when_form_is_invalid(self):
         data = {
             'email': faker.email(),
@@ -98,7 +95,6 @@ class TestSignUpView(TestCase):
         self.assertInContext('readable_errors')
         self.assertNotEqual(0, len(response.context['readable_errors']))
 
-    @skip("Temporary for competition")
     def test_view_redirects_to_confirmation_prompt_upon_success(self):
         data = {
             'email': faker.email(),
