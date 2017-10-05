@@ -45,17 +45,6 @@ class IsStudentInCoursePermission(BaseUserPassesTestMixin):
         return False
 
 
-class CourseIsCompetitionPermission(BaseUserPassesTestMixin):
-    raise_exception = True
-
-    def test_func(self):
-        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
-        if course.is_competition:
-            return True and super().test_func()
-
-        return False
-
-
 class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
     message = 'Need to be student or a teacher in the course'
 
