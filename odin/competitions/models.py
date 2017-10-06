@@ -40,6 +40,10 @@ class Competition(models.Model):
         self.full_clean()
         return super().save(*args, **kwargs)
 
+    @property
+    def is_application_competition(self):
+        return hasattr(self, 'application_info')
+
 
 class CompetitionMaterial(BaseMaterial):
     material = models.ForeignKey(Material,

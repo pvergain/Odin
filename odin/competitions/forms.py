@@ -1,3 +1,5 @@
+from captcha.fields import ReCaptchaField
+
 from django import forms
 
 from odin.education.models import ProgrammingLanguage
@@ -31,3 +33,16 @@ class CompetitionTaskFromExistingForm(forms.ModelForm):
     class Meta:
         model = CompetitionTask
         fields = ['competition', 'task']
+
+
+class CompetitionRegistrationForm(forms.Form):
+    full_name = forms.CharField(max_length=255)
+    email = forms.EmailField()
+
+    captcha = ReCaptchaField(label='', attrs={'theme': 'clean'})
+
+
+class CompetitionSetPasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput())
+    registration_token = forms.UUIDField()
+    competition_slug = forms.SlugField()

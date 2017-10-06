@@ -1,8 +1,11 @@
-from typing import BinaryIO, Dict
+import uuid
+from typing import BinaryIO, Dict, Tuple
 
 from django.core.exceptions import ValidationError
 
 from odin.education.models import Material, Task, Test, ProgrammingLanguage
+from odin.users.models import BaseUser
+from odin.users.services import create_user
 
 from .models import CompetitionMaterial, Competition, CompetitionTask, CompetitionParticipant, Solution, CompetitionTest
 
@@ -121,3 +124,50 @@ def create_competition_test(*,
     new_test.save()
 
     return new_test
+
+
+def handle_competition_registration(*,
+                                    email: str,
+                                    full_name: str,
+                                    competition: Competition) -> Tuple[bool, BaseUser]:
+    """
+    Handles competition registration and returns the registration token and True or
+    False depending on whether further handling should be for an existing user or a
+    new one.
+    """
+    user = BaseUser.objects.filter(email=email)
+    registration_uuid = uuid.uuid4()
+    if user.exists():
+        user = user.first()
+        user.competition_registration_uuid = registration_uuid
+        user.save()
+        if not hasattr(user, 'competitionparticipant'):
+            participant = CompetitionParticipant.objects.create_from_user(user)
+        else:
+            participant = user.competitionparticipant
+        handle_existing_user = True
+    else:
+        user = create_user(email=email,
+                           registration_uuid=registration_uuid,
+                           profile_data={'full_name': full_name})
+        participant = CompetitionParticipant.objects.create_from_user(user)
+        user.competition_registration_uuid = registration_uuid
+        user.is_active = False
+        user.save()
+        handle_existing_user = False
+
+    competition.participants.add(participant)
+
+    return (handle_existing_user, user)
+
+
+def handle_competition_login(*,
+                             user: BaseUser,
+                             registration_token: str) -> BaseUser:
+    if not registration_token == str(user.competition_registration_uuid):
+        raise ValidationError('URL token does not match User token')
+
+    user.competition_registration_uuid = None
+    user.save()
+
+    return user

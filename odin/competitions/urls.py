@@ -14,8 +14,29 @@ from .views import (
     CreateNonGradableSolutionApiView,
     ParticipantSolutionsView,
     AllParticipantsSolutionsView,
-    SolutionDetailApiView
+    SolutionDetailApiView,
+    CompetitionSignUpView,
+    CompetitionSetPasswordView,
+    CompetitionLoginView
 )
+
+competition_registration_urlpatterns = [
+    url(
+        regex='(?P<competition_slug>[-\w]+)/signup/$',
+        view=CompetitionSignUpView.as_view(),
+        name='signup'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/set-password/(?P<registration_token>[-\w]+)/$',
+        view=CompetitionSetPasswordView.as_view(),
+        name='set-password'
+    ),
+    url(
+        regex='(?P<competition_slug>[-\w]+)/login/(?P<registration_token>[-\w]+)/$',
+        view=CompetitionLoginView.as_view(),
+        name='login'
+    )
+]
 
 urlpatterns = [
     url(
@@ -88,4 +109,4 @@ urlpatterns = [
         view=SolutionDetailApiView.as_view(),
         name='participant-solution-detail-api'
     )
-]
+] + competition_registration_urlpatterns

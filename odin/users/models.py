@@ -18,6 +18,8 @@ class BaseUser(PermissionsMixin,
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    competition_registration_uuid = models.UUIDField(blank=True, null=True)
+
     USERNAME_FIELD = 'email'
 
     objects = UserManager()

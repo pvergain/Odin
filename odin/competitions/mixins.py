@@ -1,5 +1,6 @@
 from django.http import Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, reverse
+
 
 from odin.common.utils import transfer_POST_data_to_dict
 
@@ -37,3 +38,15 @@ class CreateSolutionApiMixin:
         kwargs['data'] = data
 
         return serializer_class(*args, **kwargs)
+
+
+class RedirectParticipantMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            if self.competition.participants.filter(email=request.user.email).exists():
+                return redirect(reverse('competitions:competition-detail',
+                                        kwargs={
+                                            'competition_slug': self.competition.slug_url
+                                        }))
+
+        return super().dispatch(request, *args, **kwargs)

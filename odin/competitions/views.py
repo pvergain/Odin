@@ -1,38 +1,46 @@
 import json
+from allauth.account.utils import send_email_confirmation
 from rest_framework import generics
 
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404, redirect
 
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.management.permissions import DashboardManagementPermission
 from odin.education.models import Material, Task
 from odin.grading.services import start_grader_communication
+from odin.authentication.views import LoginWrapperView
+from odin.users.models import BaseUser
 
-from .mixins import CompetitionViewMixin, CreateSolutionApiMixin
+from .mixins import CompetitionViewMixin, CreateSolutionApiMixin, RedirectParticipantMixin
 from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
     IsJudgeInCompetitionPermisssion,
     IsParticipantInCompetitionApiPerimission,
     IsParticipantInCompetitionPermission,
-    IsParticipantOrJudgeInCompetitionApiPermission
+    IsParticipantOrJudgeInCompetitionApiPermission,
+    IsStandaloneCompetitionPermission
 )
 from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
 from .forms import (
     CompetitionMaterialFromExistingForm,
     CompetitionMaterialModelForm,
     CompetitionTaskModelForm,
-    CompetitionTaskFromExistingForm
+    CompetitionTaskFromExistingForm,
+    CompetitionRegistrationForm,
+    CompetitionSetPasswordForm
 )
 from .services import (
     create_competition_material,
     create_competition_task,
     create_competition_test,
     create_gradable_solution,
-    create_non_gradable_solution
+    create_non_gradable_solution,
+    handle_competition_registration,
+    handle_competition_login
 )
 from .serializers import CompetitionSolutionSerializer, CompetitionSerializer
 
@@ -328,8 +336,10 @@ class CreateNonGradableSolutionApiView(LoginRequiredMixin,
 
     def perform_create(self, serializer):
         service_kwargs = serializer.validated_data
+        solution = self.call_service(service_kwargs=service_kwargs)
 
-        self.call_service(service_kwargs=service_kwargs)
+        if solution:
+            serializer.instance = solution
 
 
 class AllParticipantsSolutionsView(LoginRequiredMixin,
@@ -372,3 +382,133 @@ class SolutionDetailApiView(generics.RetrieveAPIView):
     permission_classes = (IsParticipantOrJudgeInCompetitionApiPermission, )
     queryset = Solution.objects.all()
     lookup_url_kwarg = 'solution_id'
+
+
+class CompetitionSignUpView(CompetitionViewMixin,
+                            IsStandaloneCompetitionPermission,
+                            RedirectParticipantMixin,
+                            CallServiceMixin,
+                            ReadableFormErrorsMixin,
+                            FormView):
+    form_class = CompetitionRegistrationForm
+    template_name = 'competitions/signup.html'
+
+    def get_service(self):
+        return handle_competition_registration
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_data = json.dumps({'authenticated': self.request.user.is_authenticated()})
+        context['user_data'] = user_data
+
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('competitions:login',
+                            kwargs={
+                                'competition_slug': self.competition.slug_url,
+                                'registration_token': self.registration_token
+                            })
+
+    def get_initial(self):
+        self.initial = super().get_initial()
+        if self.request.user.is_authenticated:
+            self.initial['email'] = self.request.user.email
+
+        return self.initial.copy()
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            if self.request.user.is_authenticated:
+                data['email'] = self.request.user.email
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        service_kwargs = {
+            'email': form.cleaned_data.get('email'),
+            'full_name': form.cleaned_data.get('full_name'),
+            'competition': self.competition
+        }
+        handle_existing_user, user = self.call_service(service_kwargs=service_kwargs)
+        self.registration_token = str(user.competition_registration_uuid)
+        if handle_existing_user:
+            if user.has_usable_password():
+                return super().form_valid(form)
+
+        return redirect(reverse('competitions:set-password',
+                                kwargs={
+                                    'competition_slug': self.competition.slug_url,
+                                    'registration_token': self.registration_token
+                                }))
+
+
+class CompetitionLoginView(CompetitionViewMixin,
+                           IsStandaloneCompetitionPermission,
+                           RedirectParticipantMixin,
+                           CallServiceMixin,
+                           LoginWrapperView):
+    def get_service(self):
+        return handle_competition_login
+
+    def get_success_url(self):
+        return reverse_lazy('competitions:competition-detail',
+                            kwargs={
+                                'competition_slug': self.competition.slug_url
+                            })
+
+    def form_valid(self, form):
+        service_kwargs = {
+            'user': get_object_or_404(BaseUser, email=form.cleaned_data.get('login')),
+            'registration_token': self.kwargs.get('registration_token')
+        }
+
+        user = self.call_service(service_kwargs=service_kwargs)
+        if not user:
+            return redirect(reverse('competitions:login',
+                                    kwargs={
+                                        'competition_slug': self.competition.slug_url,
+                                        'registration_token': self.kwargs.get('registration_token')
+                                    }))
+
+        return super().form_valid(form)
+
+
+class CompetitionSetPasswordView(CompetitionViewMixin,
+                                 IsStandaloneCompetitionPermission,
+                                 RedirectParticipantMixin,
+                                 ReadableFormErrorsMixin,
+                                 FormView):
+    form_class = CompetitionSetPasswordForm
+    template_name = 'competitions/set_password.html'
+    success_url = reverse_lazy('account_email_verification_sent')
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            competition_data = {}
+            data['competition_slug'] = competition_data['competition_slug'] = self.kwargs.get('competition_slug')
+            data['registration_token'] = competition_data['registration_token'] = self.kwargs.get('registration_token')
+            form_kwargs['data'] = data
+            self.request.session['competition_data'] = competition_data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        registration_token = form.cleaned_data.get('registration_token')
+        user = get_object_or_404(BaseUser, competition_registration_uuid=registration_token)
+        user.set_password(form.cleaned_data.get('password'))
+
+        if not user.is_active:
+            user.is_active = True
+        user.save()
+
+        send_email_confirmation(self.request, user, signup=True)
+
+        return super().form_valid(form)

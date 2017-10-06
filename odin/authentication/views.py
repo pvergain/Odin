@@ -96,11 +96,12 @@ class ConfirmEmailWrapperView(auth_views.ConfirmEmailView):
         emailconfirmation = self.get_object()
         user = get_object_or_404(BaseUser, email=emailconfirmation.email_address.email)
 
-        if user.registration_uuid:
-            return reverse_lazy('competition:competition-login',
+        competition_slug = self.request.GET.get('competition_slug')
+        if competition_slug:
+            return reverse_lazy('competitions:login',
                                 kwargs={
-                                    'competition_slug': user.registering_for.slug_url,
-                                    'registration_uuid': user.registration_uuid
+                                    'competition_slug': competition_slug,
+                                    'registration_token': str(user.competition_registration_uuid)
                                 })
 
         return super().get_redirect_url()
