@@ -83,7 +83,7 @@ class IsParticipantOrJudgeInCompetitionApiPermission(BasePermission):
         return False
 
 
-class IsStandaloneCompetitionPermission(BasePermission):
+class IsStandaloneCompetitionPermission(BaseUserPassesTestMixin):
     raise_exception = True
 
     def test_func(self):
