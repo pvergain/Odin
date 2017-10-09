@@ -126,7 +126,7 @@ class IncludedTaskFactory(factory.DjangoModelFactory):
         fields = ('name', 'description', 'gradable')
         task = kwargs.get('task')
         for field in fields:
-            if not kwargs.get(field):
+            if kwargs.get(field) is None:
                 kwargs[field] = task.__dict__.get(field)
         return IncludedTask.objects.create(**kwargs)
 
