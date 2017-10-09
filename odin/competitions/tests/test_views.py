@@ -1,5 +1,6 @@
 import os
 from test_plus import TestCase
+from allauth.account.models import EmailAddress
 
 from django.urls import reverse
 from django.utils import timezone
@@ -798,3 +799,86 @@ class TestCompetitionRegisterView(TestCase):
                                    'registration_token': user.competition_registration_uuid
                                })
         self.assertRedirects(response, expected_url=expected_url)
+
+    def test_adds_participant_to_competition_when_successful(self):
+        email = faker.email()
+        data = {
+            'email': email,
+            'full_name': faker.name(),
+            'g-recaptcha-response': 'PASSED'
+        }
+
+        self.post(self.url, data=data)
+        user = BaseUser.objects.get(email=email)
+
+        self.assertTrue(hasattr(user, 'competitionparticipant'))
+        self.competition.refresh_from_db()
+        self.assertIn(user.competitionparticipant, self.competition.participants.all())
+
+
+class TestCompetitionLoginView(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.registration_token = faker.uuid4()
+        self.url = reverse('competitions:login',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url,
+                               'registration_token': self.registration_token
+                           })
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.competition_registration_uuid = faker.uuid4()
+        self.user.is_active = True
+        self.user.save()
+        EmailAddress.objects.create(user=self.user, email=self.user.email, verified=True, primary=True)
+
+    def test_redirects_to_same_page_when_trying_to_login_with_credentials_for_different_user(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        new_user.competition_registration_uuid = faker.uuid4()
+        new_user.save()
+
+        data = {
+            'login': new_user.email,
+            'password': self.test_password
+        }
+        response = self.post(self.url, data=data, follow=False)
+
+        self.assertRedirects(response, expected_url=self.url)
+
+    def test_redirects_to_competition_detail_on_successful_login(self):
+        participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.competition.participants.add(participant)
+
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+        url = reverse('competitions:login',
+                      kwargs={
+                          'competition_slug': self.competition.slug_url,
+                          'registration_token': self.user.competition_registration_uuid
+                      })
+        response = self.post(url, data=data)
+        self.assertRedirects(response, expected_url=reverse('competitions:competition-detail',
+                                                            kwargs={
+                                                                'competition_slug': self.competition.slug_url
+                                                            }))
+
+    def test_resets_user_registration_token_on_successful_login(self):
+        participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.competition.participants.add(participant)
+        url = reverse('competitions:login',
+                      kwargs={
+                          'competition_slug': self.competition.slug_url,
+                          'registration_token': self.user.competition_registration_uuid
+                      })
+
+        data = {
+            'login': self.user.email,
+            'password': self.test_password
+        }
+
+        self.post(url, data=data)
+        self.user.refresh_from_db()
+
+        self.assertIsNone(self.user.competition_registration_uuid)
