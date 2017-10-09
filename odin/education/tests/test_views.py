@@ -7,6 +7,7 @@ from test_plus import TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
+from django.utils import timezone
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -832,6 +833,19 @@ class TestSubmitGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count, Solution.objects.count())
 
+    def test_submitting_solution_if_course_has_ended_is_forbidden(self):
+        self.course.start_date = timezone.now().date() - timezone.timedelta(days=3)
+        self.course.end_date = timezone.now().date() - timezone.timedelta(days=2)
+        self.course.save()
+
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            data = {'code': faker.text()}
+            response = self.post(url_name=self.url, data=data)
+            self.response_403(response)
+
     @patch('odin.education.views.start_grader_communication')
     def test_solution_for_task_added_successfully_on_post_when_student_for_course_and_source_code_tests(
         self, mock_submit_solution
@@ -878,7 +892,7 @@ class TestSubmitGradableSolutionView(TestCase):
             self.assertEqual(mock_submit_solution.called, True)
 
 
-class TestSubmitNotGradableSolutionView(TestCase):
+class TestSubmitNonGradableSolutionView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
         self.task = IncludedTaskFactory(gradable=False, topic__course=self.course)
@@ -899,6 +913,19 @@ class TestSubmitNotGradableSolutionView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
+
+    def test_submitting_solution_if_course_has_ended_is_forbidden(self):
+        self.course.start_date = timezone.now().date() - timezone.timedelta(days=3)
+        self.course.end_date = timezone.now().date() - timezone.timedelta(days=2)
+        self.course.save()
+
+        student = Student.objects.create_from_user(user=self.user)
+        add_student(self.course, student)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            data = {'url': faker.url()}
+            response = self.post(url_name=self.url, data=data)
+            self.response_403(response)
 
     def test_solution_for_task_added_successfully_on_post_when_student_for_course(self):
         student = Student.objects.create_from_user(user=self.user)
