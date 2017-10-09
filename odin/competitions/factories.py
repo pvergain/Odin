@@ -15,7 +15,11 @@ from .models import (
     CompetitionMaterial,
     CompetitionTask,
 )
-from .services import create_competition_test
+from .services import (
+    create_competition_test,
+    create_competition_material,
+    create_competition_task
+)
 
 
 class CompetitionParticipantFactory(BaseUserFactory):
@@ -55,6 +59,16 @@ class CompetitionMaterialFactory(factory.DjangoModelFactory):
     class Meta:
         model = CompetitionMaterial
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        material = kwargs.get('material')
+        fields = ('identifier', 'url', 'content')
+        for field in fields:
+            if not kwargs.get(field):
+                kwargs[field] = material.__dict__.get(field)
+        kwargs['existing_material'] = kwargs.pop('material')
+        return create_competition_material(*args, **kwargs)
+
 
 class CompetitionTaskFactory(factory.DjangoModelFactory):
     task = factory.SubFactory(TaskFactory)
@@ -62,6 +76,16 @@ class CompetitionTaskFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = CompetitionTask
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        task = kwargs.get('task')
+        fields = ('name', 'description', 'gradable')
+        for field in fields:
+            if not kwargs.get(field):
+                kwargs[field] = task.__dict__.get(field)
+        kwargs['existing_task'] = kwargs.pop('task')
+        return create_competition_task(*args, **kwargs)
 
 
 class CompetitionTestFactory(TaskTestFactory):

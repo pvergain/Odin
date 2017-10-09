@@ -14,6 +14,7 @@ from odin.education.factories import (
     WeekFactory,
     TaskFactory,
     IncludedTaskFactory,
+    IncludedMaterialFactory,
     ProgrammingLanguageFactory,
     SourceCodeTestFactory,
 )
@@ -52,6 +53,7 @@ class Command(BaseCommand):
         while topics:
             topic = topics.popleft()
             task = TaskFactory()
+            IncludedMaterialFactory(topic=topic)
             tasks.appendleft(IncludedTaskFactory(task=task, topic=topic))
 
         language = ProgrammingLanguageFactory(name='python')

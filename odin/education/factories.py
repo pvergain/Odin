@@ -10,7 +10,6 @@ from odin.users.factories import BaseUserFactory
 
 from odin.education.services import create_test_for_task
 
-
 from .models import (
     Student,
     Teacher,
