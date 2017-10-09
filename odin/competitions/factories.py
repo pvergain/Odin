@@ -17,8 +17,6 @@ from .models import (
 )
 from .services import (
     create_competition_test,
-    create_competition_material,
-    create_competition_task
 )
 
 
