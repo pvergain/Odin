@@ -1,9 +1,11 @@
 import os
 from test_plus import TestCase
+from unittest.mock import patch
 from allauth.account.models import EmailAddress
 
 from django.urls import reverse
 from django.utils import timezone
+from django.test.utils import override_settings
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
@@ -882,3 +884,38 @@ class TestCompetitionLoginView(TestCase):
         self.user.refresh_from_db()
 
         self.assertIsNone(self.user.competition_registration_uuid)
+
+
+class TestCompetitionSetPasswordView(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.registration_token = faker.uuid4()
+        self.url = reverse('competitions:set-password',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url,
+                               'registration_token': self.registration_token
+                           })
+        self.user = BaseUserFactory()
+        self.user.competition_registration_uuid = self.registration_token
+        self.user.save()
+
+    def test_redirects_to_email_confirmation_sent_on_successful_registration(self):
+        data = {
+            'password': faker.password()
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
+
+    @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
+    @patch('odin.common.tasks.send_template_mail.delay')
+    def test_sends_email_on_successful_registration(self, mock_send_mail):
+        data = {
+            'password': faker.password()
+        }
+
+        response = self.post(self.url, data=data)
+        self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
+        self.assertTrue(mock_send_mail)
+        (template_name, recipients, context), kwargs = mock_send_mail.call_args
+        self.assertEqual([self.user.email], recipients)

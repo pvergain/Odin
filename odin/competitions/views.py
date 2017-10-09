@@ -489,7 +489,6 @@ class CompetitionSetPasswordView(CompetitionViewMixin,
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
-
         if self.request.method in ('POST', 'PUT'):
             data = transfer_POST_data_to_dict(self.request.POST)
             competition_data = {}
