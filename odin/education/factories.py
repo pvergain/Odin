@@ -95,6 +95,15 @@ class IncludedMaterialFactory(factory.DjangoModelFactory):
     class Meta:
         model = IncludedMaterial
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        material = kwargs.get('material')
+        fields = ('identifier', 'url', 'content')
+        for field in fields:
+            if not kwargs.get(field):
+                kwargs[field] = material.__dict__.get(field)
+        return IncludedMaterial.objects.create(**kwargs)
+
 
 class TaskFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: f'{n}{faker.word()}')
@@ -111,6 +120,15 @@ class IncludedTaskFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = IncludedTask
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        fields = ('name', 'description', 'gradable')
+        task = kwargs.get('task')
+        for field in fields:
+            if not kwargs.get(field):
+                kwargs[field] = task.__dict__.get(field)
+        return IncludedTask.objects.create(**kwargs)
 
 
 class ProgrammingLanguageFactory(factory.DjangoModelFactory):

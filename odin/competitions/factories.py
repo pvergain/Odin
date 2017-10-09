@@ -66,8 +66,7 @@ class CompetitionMaterialFactory(factory.DjangoModelFactory):
         for field in fields:
             if not kwargs.get(field):
                 kwargs[field] = material.__dict__.get(field)
-        kwargs['existing_material'] = kwargs.pop('material')
-        return create_competition_material(*args, **kwargs)
+        return CompetitionMaterial.objects.create(**kwargs)
 
 
 class CompetitionTaskFactory(factory.DjangoModelFactory):
@@ -79,13 +78,12 @@ class CompetitionTaskFactory(factory.DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        task = kwargs.get('task')
         fields = ('name', 'description', 'gradable')
+        task = kwargs.get('task')
         for field in fields:
             if not kwargs.get(field):
                 kwargs[field] = task.__dict__.get(field)
-        kwargs['existing_task'] = kwargs.pop('task')
-        return create_competition_task(*args, **kwargs)
+        return CompetitionTask.objects.create(**kwargs)
 
 
 class CompetitionTestFactory(TaskTestFactory):
