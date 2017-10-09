@@ -1,6 +1,3 @@
-import os
-
-from unittest import skip
 from unittest.mock import patch
 from test_plus import TestCase
 
@@ -36,7 +33,6 @@ from ..models import (
     IncludedTest
 )
 
-from odin.users.models import BaseUser
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
 
 from odin.common.faker import faker
@@ -943,88 +939,3 @@ class TestSubmitNonGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
-
-
-@skip
-class TestCompetitionRegisterView(TestCase):
-    def setUp(self):
-        os.environ['RECAPTCHA_TESTING'] = 'True'
-
-        self.course = CourseFactory()
-        self.course.is_competition = True
-        self.course.save()
-        self.test_password = faker.password()
-        self.user = BaseUserFactory(password=self.test_password)
-        self.user.is_active = True
-        self.user.save()
-        self.full_name = faker.name()
-        self.url = reverse('competition:register-for-competition',
-                           kwargs={'competition_slug': self.course.slug_url})
-
-    def tearDown(self):
-        del os.environ['RECAPTCHA_TESTING']
-
-    def test_can_not_access_competition_registration_when_course_is_not_competition(self):
-        self.course.is_competition = False
-        self.course.save()
-
-        response = self.get(self.url)
-        self.response_403(response)
-
-    def test_register_with_already_existing_user_when_not_logged_in_redirects_to_competition_login(self):
-        data = {
-            'email': self.user.email,
-            'full_name': self.full_name,
-            'g-recaptcha-response': 'PASSED'
-        }
-        response = self.post(self.url, data=data, follow=False)
-        registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
-        self.assertRedirects(response, expected_url=reverse('competition:competition-login',
-                                                            kwargs={'registration_uuid': registration_uuid,
-                                                                    'competition_slug': self.course.slug_url}))
-
-    def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_to_competition_login(self):
-        data = {
-            'email': self.user.email,
-            'full_name': self.full_name,
-            'g-recaptcha-response': 'PASSED'
-        }
-
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data, follow=False)
-            registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
-            self.assertRedirects(response, expected_url=reverse('competition:competition-login',
-                                                                kwargs={'registration_uuid': registration_uuid,
-                                                                        'competition_slug': self.course.slug_url}))
-
-    def test_register_with_existing_user_when_logged_in_with_different_user_redirects_to_competition_login(self):
-        existing_user = BaseUserFactory(password=self.test_password)
-        data = {
-            'email': existing_user.email,
-            'full_name': faker.name(),
-            'g-recaptcha-response': 'PASSED'
-        }
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data, follow=False)
-            existing_user.refresh_from_db()
-            self.assertRedirects(response, expected_url=reverse('competition:competition-login',
-                                                                kwargs={
-                                                                    'registration_uuid':
-                                                                    existing_user.registration_uuid,
-                                                                    'competition_slug': self.course.slug_url
-                                                                }))
-
-    def test_register_with_new_user_redirects_to_competition_set_password(self):
-        data = {
-            'email': faker.email(),
-            'full_name': faker.name(),
-            'g-recaptcha-response': 'PASSED'
-        }
-
-        response = self.post(self.url, data=data)
-        registration_uuid = BaseUser.objects.last().registration_uuid
-        self.assertRedirects(response, expected_url=reverse('competition:set-password-for-competition',
-                                                            kwargs={
-                                                                'competition_slug': self.course.slug_url,
-                                                                'registration_uuid': registration_uuid
-                                                            }))
