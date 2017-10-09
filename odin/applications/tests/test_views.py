@@ -118,7 +118,8 @@ class TestApplyToCourseView(TestCase):
         self.user.save()
         self.course = CourseFactory()
         self.app_info = ApplicationInfoFactory(course=self.course,
-                                               start_date=timezone.now().date())
+                                               start_date=timezone.now().date(),
+                                               competition=None)
         self.url = reverse('dashboard:applications:apply-to-course', kwargs={'course_id': self.course.id})
 
     def test_post_successfully_creates_application_when_apply_is_open(self):
