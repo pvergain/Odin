@@ -22,7 +22,7 @@
   <script>
    window.props = {competitionData: {{competition_data|safe}}}
    window.props.data = {'data': {}}
-   {% if user_judge_in_competition %}
+   {% if is_user_judge_in_competition %}
    window.props.isUserJudgeInCompetition = true;
    {% endif %}
    {% if user_participant_in_competition %}

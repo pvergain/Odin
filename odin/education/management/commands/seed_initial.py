@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 
 from random import choice
 from queue import deque
+from allauth.account.models import EmailAddress
 
 from odin.users.factories import SuperUserFactory
 
@@ -14,7 +15,7 @@ from odin.education.factories import (
     TaskFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
-    SourceCodeTestFactory
+    SourceCodeTestFactory,
 )
 from odin.education.services import add_student, add_teacher
 
@@ -64,6 +65,8 @@ class Command(BaseCommand):
         email = 'testadmin@hacksoft.io'
         password = 'asdf'
 
-        SuperUserFactory(email=email, password=password)
+        # verify email for allauth so it doesn't want email confirmation
+        superuser = SuperUserFactory(email=email, password=password)
+        EmailAddress.objects.create(user=superuser, email=email, primary=True, verified=True)
 
         print(f'Superuser created: {email}/{password}')
