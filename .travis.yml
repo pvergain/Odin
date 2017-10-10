@@ -13,4 +13,6 @@ before_script:
 script:
   - python manage.py migrate
   - flake8
-  - py.test
+  - py.test --cov=odin
+after_success:
+  - coveralls

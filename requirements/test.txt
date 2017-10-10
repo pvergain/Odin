@@ -11,3 +11,4 @@ pytest-sugar==0.8.0
 
 # coverage tools
 coveralls==1.2.0
+pytest-cov==2.5.1
