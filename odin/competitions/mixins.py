@@ -1,4 +1,3 @@
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, reverse
 
 
@@ -10,13 +9,7 @@ from .models import Competition, CompetitionTask
 class CompetitionViewMixin:
     def dispatch(self, request, *args, **kwargs):
         competition_slug = self.kwargs.get('competition_slug')
-
-        competition = Competition.objects.filter(slug_url=competition_slug)
-
-        if competition.exists():
-            self.competition = competition.first()
-        else:
-            raise Http404
+        self.competition = get_object_or_404(Competition, slug_url=competition_slug)
 
         return super().dispatch(request, *args, **kwargs)
 

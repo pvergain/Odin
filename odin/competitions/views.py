@@ -1,6 +1,5 @@
 import json
 from allauth.account.utils import send_email_confirmation
-from rest_framework import generics
 
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,17 +10,14 @@ from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.management.permissions import DashboardManagementPermission
 from odin.education.models import Material, Task
-from odin.grading.services import start_grader_communication
 from odin.authentication.views import LoginWrapperView
 from odin.users.models import BaseUser
 
-from .mixins import CompetitionViewMixin, CreateSolutionApiMixin, RedirectParticipantMixin
+from .mixins import CompetitionViewMixin, RedirectParticipantMixin
 from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
     IsJudgeInCompetitionPermisssion,
-    IsParticipantInCompetitionApiPerimission,
     IsParticipantInCompetitionPermission,
-    IsParticipantOrJudgeInCompetitionApiPermission,
     IsStandaloneCompetitionPermission
 )
 from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
@@ -37,12 +33,10 @@ from .services import (
     create_competition_material,
     create_competition_task,
     create_competition_test,
-    create_gradable_solution,
-    create_non_gradable_solution,
     handle_competition_registration,
     handle_competition_login
 )
-from .serializers import CompetitionSolutionSerializer, CompetitionSerializer
+from .serializers import CompetitionSerializer
 
 
 class CompetitionDetailView(LoginRequiredMixin,
@@ -303,45 +297,6 @@ class EditCompetitionTaskView(LoginRequiredMixin,
                             })
 
 
-class CreateGradableSolutionApiView(LoginRequiredMixin,
-                                    CompetitionViewMixin,
-                                    CreateSolutionApiMixin,
-                                    CallServiceMixin,
-                                    generics.CreateAPIView):
-    serializer_class = CompetitionSolutionSerializer
-    permission_classes = (IsParticipantInCompetitionApiPerimission, )
-
-    def get_service(self):
-        return create_gradable_solution
-
-    def perform_create(self, serializer):
-        service_kwargs = serializer.validated_data
-        solution = self.call_service(service_kwargs=service_kwargs)
-
-        if solution:
-            serializer.instance = solution
-            start_grader_communication(solution.id, 'competitions.Solution')
-
-
-class CreateNonGradableSolutionApiView(LoginRequiredMixin,
-                                       CompetitionViewMixin,
-                                       CreateSolutionApiMixin,
-                                       CallServiceMixin,
-                                       generics.CreateAPIView):
-    serializer_class = CompetitionSolutionSerializer
-    permission_classes = (IsParticipantInCompetitionApiPerimission, )
-
-    def get_service(self):
-        return create_non_gradable_solution
-
-    def perform_create(self, serializer):
-        service_kwargs = serializer.validated_data
-        solution = self.call_service(service_kwargs=service_kwargs)
-
-        if solution:
-            serializer.instance = solution
-
-
 class AllParticipantsSolutionsView(LoginRequiredMixin,
                                    CompetitionViewMixin,
                                    IsJudgeInCompetitionPermisssion,
@@ -375,13 +330,6 @@ class ParticipantSolutionsView(LoginRequiredMixin,
         context['task'] = self.task
 
         return context
-
-
-class SolutionDetailApiView(generics.RetrieveAPIView):
-    serializer_class = CompetitionSolutionSerializer
-    permission_classes = (IsParticipantOrJudgeInCompetitionApiPermission, )
-    queryset = Solution.objects.all()
-    lookup_url_kwarg = 'solution_id'
 
 
 class CompetitionSignUpView(CompetitionViewMixin,

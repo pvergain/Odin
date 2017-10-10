@@ -10,14 +10,16 @@ from .views import (
     CreateNewCompetitionTaskView,
     CreateCompetitionTaskFromExistingView,
     EditCompetitionTaskView,
-    CreateGradableSolutionApiView,
-    CreateNonGradableSolutionApiView,
     ParticipantSolutionsView,
     AllParticipantsSolutionsView,
-    SolutionDetailApiView,
     CompetitionSignUpView,
     CompetitionSetPasswordView,
     CompetitionLoginView
+)
+from .apis import (
+    CreateGradableSolutionApiView,
+    CreateNonGradableSolutionApiView,
+    SolutionDetailApiView
 )
 
 competition_registration_urlpatterns = [
