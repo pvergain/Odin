@@ -4,6 +4,7 @@ Odin is the new Loki. LMS for HackSoft Academy
 
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg)](https://github.com/pydanny/cookiecutter-django/)
 [![Build Status](https://travis-ci.org/HackSoftware/Odin.svg?branch=master)](https://travis-ci.org/HackSoftware/Odin)
+[![Coverage Status](https://coveralls.io/repos/github/HackSoftware/Odin/badge.svg?branch=master)](https://coveralls.io/github/HackSoftware/Odin?branch=master)
 
 ## Setup
 
