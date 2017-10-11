@@ -38,5 +38,3 @@ class TestAssignAcceptedUsersToCourses(TestCase):
         assign_accepted_users_to_courses()
         self.application_info.course.refresh_from_db()
         self.assertEqual(course_student_count, self.application_info.course.students.count())
-
-
