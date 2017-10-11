@@ -1,0 +1,17 @@
+{% load education_extras %}
+
+<div class="portlet collapse" id="notes-section_{{ student.id }}">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-pencil-square-o"></i> Student Notes
+    </div>
+
+  </div>
+  <div class="portlet-body">
+    <ul class="list-unstyled">
+      {% for note in student|notes_for_course:course %}
+        <li></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
