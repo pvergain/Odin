@@ -1,5 +1,6 @@
 {% extends 'dashboard/dashboard_base.html' %}
 {% load static %}
+{% load education_extras %}
 
 {% block content_title %}
   {{course.name}} - {{object.get_full_name}} 
@@ -62,7 +63,14 @@
             <div class="panel-heading">
               <h4 class="panel-title">
                 <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task.topic.id}}" aria-expanded="true"> 
-                  {{ task.name }}
+                  <div class="row">
+                    <div class="col-md-6">
+                      {{ task.name }}
+                    </div>
+                    <div class="col-md-6">
+                      {{ task|passed_or_failed }}
+                    </div>
+                  </div>
                 </a>
               </h4>
             </div>
