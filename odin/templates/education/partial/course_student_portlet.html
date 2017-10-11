@@ -1,0 +1,50 @@
+{% load education_extras %}
+
+{% for student in students %}
+  <div class="row">
+    <div class="portlet box green">
+      <div class="portlet-title">
+        <div class="caption">
+          <i class="fa fa-comments"></i> {{ student.name }} - {{ student.email }}
+        </div>
+        <div class="tools">
+          <a href="javascript:;" class="collapse"> </a>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="col-md-3">
+              {% if student.full_image %}
+                <a href="">
+                  <img src={{ MEDIA_URL }}{{ student.full_image }} class="img-responsive"/></a>
+              {% else %}
+                  <a href="">
+                    <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <div class="socicons">
+                <i class="socicon-btn socicon-mail tooltips"></i><a href="{{ student.email }}">{{ student.email }}</a>
+                {% if student.profile.social_accounts %}
+                  <i class="socicon-btn socicon-github tooltips"></i><a href="{{ student.profile.social_accounts.github }}">{{ student.profile.social_accounts.github }}</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="col-md-4">
+              Attendance: N/A
+            </div>
+            <div class="col-md-4">
+              Correct Solutions: {{ correct_solutions_for_entire_course }}
+            </div>
+            <div class="col-md-4">
+              Notes: {% include 'education/partial/notes_section.html' %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
