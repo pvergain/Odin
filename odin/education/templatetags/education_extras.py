@@ -14,3 +14,10 @@ def convert_from_markdown(text):
 @register.filter(name='iterable_from_difference')
 def iterable_from_difference(x, subtract_from):
     return range(subtract_from-x)
+
+
+@register.filter(name='solved_tasks_for_course')
+def solved_tasks_for_course(student, course):
+    solved = student.solutions.get_solved_solutions_for_student_and_course(student=student, course=course)
+
+    return solved.count()

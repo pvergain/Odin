@@ -28,6 +28,7 @@ from .views import (
     SolutionDetailAPIView,
     CompareSolutionsView,
     CourseStudentDetailView,
+    CourseStudentsListView
 )
 
 
@@ -178,5 +179,10 @@ urlpatterns = [
         regex='^students/(?P<course_id>[0-9]+)/(?P<email>[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/$',
         view=CourseStudentDetailView.as_view(),
         name='course-student-detail'
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/students/$',
+        view=CourseStudentsListView.as_view(),
+        name='course-students-list'
     )
 ]

@@ -702,6 +702,22 @@ class SubmitNonGradableSolutionView(LoginRequiredMixin,
             return JsonResponse(data=data)
 
 
+class CourseStudentsListView(LoginRequiredMixin,
+                             CourseViewMixin,
+                             IsTeacherInCoursePermission,
+                             ListView):
+    template_name = 'education/course_students.html'
+
+    def get_queryset(self):
+        return self.course.students.all().prefetch_related('profile', 'solutions__task')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task_count'] = IncludedTask.objects.filter(topic__course=self.course).count()
+
+        return context
+
+
 class AllStudentsSolutionsView(LoginRequiredMixin,
                                CourseViewMixin,
                                TaskViewMixin,
