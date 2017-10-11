@@ -21,7 +21,8 @@ from .models import (
     Task,
     IncludedTask,
     ProgrammingLanguage,
-    Test
+    Test,
+    Solution,
 )
 from .services import create_course
 
@@ -157,3 +158,15 @@ class BinaryFileTestFactory(TaskTestFactory):
     def _create(cls, model_class, *args, **kwargs):
         kwargs['file'] = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
         return create_test_for_task(*args, **kwargs)
+
+
+class SolutionFactory(factory.DjangoModelFactory):
+    task = factory.SubFactory(IncludedTaskFactory)
+    student = factory.SubFactory(StudentFactory)
+    url = factory.LazyAttribute(lambda _: faker.url())
+    code = factory.LazyAttribute(lambda _: faker.text())
+    build_id = factory.LazyAttribute(lambda _: faker.pyint())
+    test_output = factory.LazyAttribute(lambda _: faker.text())
+
+    class Meta:
+        model = Solution
