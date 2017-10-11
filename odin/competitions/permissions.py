@@ -76,7 +76,7 @@ class IsParticipantOrJudgeInCompetitionApiPermission(BasePermission):
         is_solution_author = False
 
         if hasattr(request.user, 'competitionparticipant'):
-            is_solution_author = view.get_object().participant = request.user.competitionparticipant
+            is_solution_author = view.get_object().participant == request.user.competitionparticipant
         if is_solution_author or is_judge:
             return True
 

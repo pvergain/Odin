@@ -919,3 +919,78 @@ class TestCompetitionSetPasswordView(TestCase):
         self.assertTrue(mock_send_mail)
         (template_name, recipients, context), kwargs = mock_send_mail.call_args
         self.assertEqual([self.user.email], recipients)
+
+
+class TestParticipantSolutionsView(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.task = CompetitionTaskFactory(competition=self.competition)
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.competition.participants.add(self.participant)
+        self.url = reverse('competitions:participant-task-solutions',
+                           kwargs={
+                               'competition_slug': self.competition.slug_url,
+                               'task_id': self.task.id
+                           })
+
+    def test_get_is_forbidden_if_not_participant_in_competition(self):
+        new_user = BaseUserFactory(password=self.test_password)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
+
+            self.response_403(response)
+
+    def test_get_is_allowed_when_participant_in_competition(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.get_check_200(self.url)
+
+
+class TestSolutionDetailApi(TestCase):
+    def setUp(self):
+        self.competition = CompetitionFactory()
+        self.task = CompetitionTaskFactory(competition=self.competition)
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.competition.participants.add(self.participant)
+        self.solution = Solution.objects.create(
+            participant=self.participant,
+            code=faker.text(),
+            task=self.task
+        )
+        self.url = reverse('competitions:participant-solution-detail-api',
+                           kwargs={
+                               'solution_id': self.solution.id
+                           })
+
+    def test_get_is_forbidden_if_not_judge_or_participant_in_competition(self):
+        new_user = BaseUserFactory(password=self.test_password)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
+
+            self.response_403(response)
+
+    def test_get_is_forbidden_if_request_user_is_not_solution_author(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        new_participant = CompetitionParticipant.objects.create_from_user(new_user)
+        self.competition.participants.add(new_participant)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_get_is_allowed_when_user_is_solution_author(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.get_check_200(self.url)
+
+    def test_get_is_allowed_when_user_is_judge_in_competition(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        judge = CompetitionJudge.objects.create_from_user(new_user)
+        self.competition.judges.add(judge)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            self.get_check_200(self.url)
