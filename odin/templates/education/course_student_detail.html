@@ -1,6 +1,7 @@
 {% extends 'dashboard/dashboard_base.html' %}
 {% load static %}
 {% load education_extras %}
+{% load common_extras %}
 
 {% block content_title %}
   {{course.name}} - {{object.get_full_name}} 
@@ -37,7 +38,7 @@
                   Attendance: 0
                 </div>
                 <div class="col-md-4">
-                  Correct solutions: 0
+                  Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks.count }}
                 </div>
                 <div class="col-md-4">
                   Notes: 0  <i class="fa fa-pencil"></i></div>
@@ -76,6 +77,12 @@
             </div>
             <div id="collapse_{{task.topic.id}}" class="panel-collapse collapse" aria-expanded="false" style="">
               <div class="panel-body">
+                {% if task_solutions|lookup:task.id %}
+                  {% for solution in task_solutions|lookup:task.id %}
+                    Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }} -
+                    <a href="#">Build Log</a>
+                  {% endfor %}
+                {% endif %}
               </div>
             </div>
           </div>

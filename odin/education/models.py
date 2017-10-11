@@ -326,5 +326,11 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     def verbose_status(self):
         return self.STATUS_CHOICE[self.status][1]
 
+    def pass_or_fail_status(self):
+        if self.task.gradable and self.status == self.OK or \
+                not self.task.gradable and self.status == self.SUBMITTED_WITHOUT_GRADING:
+            return "Passed"
+        return "Failed"
+
     class Meta:
         ordering = ['-id']
