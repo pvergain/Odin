@@ -1,0 +1,16 @@
+<div class="page-bar">
+  <ul class="page-breadcrumb">
+    <li>
+      <i class="icon-briefcase"></i>
+      <a href="{% url 'dashboard:education:user-courses' %}"><span style="font-size: 120%">Courses</span></a>
+      <i class="fa fa-angle-right"></i>
+    </li>
+    <li>
+      <span style="font-size: 120%">{{ course.name }}</span>
+      <i class="fa fa-angle-right"></i>
+      </li>
+    <li>
+      <span style="font-size: 120%">{{ student.get_full_name }}</span>
+    </li>
+  </ul>
+</div>
