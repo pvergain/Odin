@@ -26,7 +26,8 @@ from .views import (
     MaterialDetailView,
     AllStudentsSolutionsView,
     SolutionDetailAPIView,
-    CompareSolutionsView
+    CompareSolutionsView,
+    CourseStudentDetailView,
 )
 
 
@@ -173,4 +174,9 @@ urlpatterns = [
         view=SolutionDetailAPIView.as_view(),
         name='student-solution-detail-api'
     ),
+    url(
+        regex='^students/(?P<course_id>[0-9]+)/(?P<email>[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/$',
+        view=CourseStudentDetailView.as_view(),
+        name='course-student-detail'
+    )
 ]

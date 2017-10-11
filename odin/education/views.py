@@ -743,3 +743,28 @@ class CompareSolutionsView(LoginRequiredMixin,
         context['comparison_result'] = call_command('compare_solutions', self.course.id)
 
         return context
+
+
+class CourseStudentDetailView(LoginRequiredMixin,
+                              CourseViewMixin,
+                              IsTeacherInCoursePermission,
+                              DetailView):
+    template_name = 'education/course_student_detail.html'
+    model = Student
+    slug_url_kwarg = 'email'
+    slug_field = 'email'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        filters = ['solutions', 'solutions__student']
+        course_tasks = IncludedTask.objects.filter(topic__course=self.course).prefetch_related(*filters)
+        context['course_tasks'] = course_tasks
+        task_solutions = {}
+        instance = self.get_object()
+        for task in course_tasks:
+            task_solutions[task.id] = Solution.objects.filter(task=task, student=instance)
+
+        context['task_solutions'] = task_solutions
+
+        return context

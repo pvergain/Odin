@@ -1,0 +1,11 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+
+{% endblock content_title %}
+
+{% block page_content %}
+  {% for task in course_tasks %}                                             
+    {{ task.name }}
+  {% endfor %}
+{% endblock page_content %}
