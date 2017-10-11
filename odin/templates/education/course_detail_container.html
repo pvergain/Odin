@@ -1,28 +1,14 @@
 {% extends public_page|yesno:'partial/public_base.html,dashboard/dashboard_base.html' %}
 {% block content_title %}
-  {% if not course.is_competition %}
-    {% if public_page %}
-      <div class="container">
-    {% else %}
-        <div>
-    {% endif  %}
-  Competition detail
-        </div>
+  {% if public_page %}
+    <div class="container">
   {% else %}
-    {% if public_page %}
-      <div class="container">
-    {% else %}
       <div>
-    {% endif %}
-    Course detail
-      </div>
   {% endif %}
+  Course detail
+      </div>
 {% endblock content_title %}
 
 {% block page_content %}
-  {% if not course.is_competition %}
-    {% include 'education/course_detail.html' with course=course tasks_ratio=tasks_ratio course_topics=course_topics public_page=public_page %}
-  {% else %}
-    {% include 'education/competition_detail.html' with course=course course_topics=course_topics public_page=public_page %}
-  {% endif %}
+  {% include 'education/course_detail.html' with course=course tasks_ratio=tasks_ratio course_topics=course_topics public_page=public_page %}
 {% endblock page_content %}

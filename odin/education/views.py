@@ -2,8 +2,6 @@ import json
 
 from rest_framework import generics
 
-from allauth.account.utils import send_email_confirmation
-
 from django.core.management import call_command
 from django.views.generic import (
     TemplateView,
@@ -12,20 +10,15 @@ from django.views.generic import (
     FormView,
     UpdateView
 )
-from django.core.exceptions import ValidationError
-from django.contrib import messages
-from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
 from django.http import JsonResponse
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
-from odin.users.models import BaseUser
-from odin.authentication.views import LoginWrapperView
 
 from .filters import SolutionsFilter
 from .models import (
@@ -43,7 +36,6 @@ from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
     IsStudentInCoursePermission,
-    CourseIsCompetitionPermission,
     IsStudentOrTeacherInCourseAPIPermission,
     CannotSubmitSolutionAfterCourseEndDate,
 )
@@ -64,11 +56,8 @@ from .forms import (
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
-    CompetitionRegisterForm,
-    CompetitionSetPasswordForm,
 )
 from .services import (
-    add_student,
     create_topic,
     create_included_material,
     create_included_task,
@@ -76,8 +65,6 @@ from .services import (
     create_gradable_solution,
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course,
-    handle_competition_registration,
-    handle_competition_login,
     get_all_student_solution_statistics
 )
 from .serializers import TopicSerializer, SolutionSerializer
@@ -137,8 +124,6 @@ class PublicCourseListView(PublicViewContextMixin, ListView):
 
 
 class PublicCourseDetailView(CourseViewMixin, PublicViewContextMixin, DetailView):
-    template_name = 'education/course_detail_container.html'
-
     def get_object(self):
 
         course_url = self.kwargs.get('course_slug')
@@ -208,9 +193,10 @@ class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = transfer_POST_data_to_dict(self.request.POST)
-        data['topic'] = self.kwargs.get('topic_id')
-        form_kwargs['data'] = data
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['topic'] = self.kwargs.get('topic_id')
+            form_kwargs['data'] = data
 
         return form_kwargs
 
@@ -665,7 +651,7 @@ class SubmitGradableSolutionView(LoginRequiredMixin,
         solution = self.call_service(service_kwargs=create_gradable_solution_kwargs)
         if solution:
             self.solution_id = solution.id
-            start_grader_communication(solution.id)
+            start_grader_communication(solution.id, 'education.Solution')
 
         return super().form_valid(form)
 
@@ -744,123 +730,6 @@ class SolutionDetailAPIView(generics.RetrieveAPIView):
     permission_classes = (IsStudentOrTeacherInCourseAPIPermission, )
     queryset = Solution.objects.all()
     lookup_url_kwarg = 'solution_id'
-
-
-class CompetitionRegisterView(CourseIsCompetitionPermission,
-                              ReadableFormErrorsMixin,
-                              FormView):
-    form_class = CompetitionRegisterForm
-    template_name = 'education/competition_registration.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['competition'] = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
-
-        return context
-
-    def get_failure_url(self):
-        return reverse('competition:register-for-competition',
-                       kwargs={'competition_slug': self.kwargs.get('competition_slug')})
-
-    def get_success_url(self):
-        return reverse_lazy('competition:competition-login',
-                            kwargs={
-                                'competition_slug': self.kwargs.get('competition_slug'),
-                                'registration_uuid': self.registration_uuid
-                            })
-
-    def form_valid(self, form):
-        service_kwargs = {
-            'email': form.cleaned_data.get('email'),
-            'full_name': form.cleaned_data.get('full_name'),
-            'session_user': self.request.user
-        }
-
-        handle_existing_user, self.registration_uuid = handle_competition_registration(**service_kwargs)
-
-        if handle_existing_user:
-            return super().form_valid(form)
-
-        return redirect(reverse('competition:set-password-for-competition',
-                                kwargs={
-                                    'competition_slug': self.kwargs.get('competition_slug'),
-                                    'registration_uuid': self.registration_uuid
-                                }))
-
-
-class CompetitionLoginView(CourseIsCompetitionPermission,
-                           LoginWrapperView):
-
-    def get_success_url(self):
-        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
-        return reverse_lazy('dashboard:education:user-course-detail',
-                            kwargs={
-                                'course_id': course.id
-                            })
-
-    def get_failure_url(self):
-        return reverse_lazy('competition:competition-login',
-                            kwargs={
-                                'competition_slug': self.kwargs.get('competition_slug'),
-                                'registration_uuid': self.kwargs.get('registration_uuid')
-                             })
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            logout(request)
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
-        user = get_object_or_404(BaseUser, email=form.cleaned_data.get('login'))
-        service_kwargs = {'course': course,
-                          'user': user,
-                          'registration_token': self.kwargs.get('registration_uuid')}
-
-        try:
-            handle_competition_login(**service_kwargs)
-        except ValidationError as e:
-            messages.warning(request=self.request, message=str(e))
-            return redirect(self.get_failure_url())
-
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_competition'] = True
-
-        return context
-
-
-class CompetitionSetPasswordView(CourseIsCompetitionPermission,
-                                 CallServiceMixin,
-                                 ReadableFormErrorsMixin,
-                                 FormView):
-    form_class = CompetitionSetPasswordForm
-    template_name = 'authentication/password_set.html'
-    success_url = reverse_lazy('account_email_verification_sent')
-
-    def get_service(self):
-        return add_student
-
-    def form_valid(self, form):
-        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
-
-        registration_uuid = self.kwargs.get('registration_uuid')
-        user = get_object_or_404(BaseUser, registration_uuid=registration_uuid)
-        user.set_password(form.cleaned_data.get('password'))
-        user.registering_for = course
-
-        if not user.is_active:
-            user.is_active = True
-
-        user.save()
-
-        send_email_confirmation(self.request, user, signup=True)
-
-        return super().form_valid(form)
 
 
 class CompareSolutionsView(LoginRequiredMixin,

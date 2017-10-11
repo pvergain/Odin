@@ -14,6 +14,7 @@ from odin.users.models import BaseUser
 
 from .managers import StudentManager, TeacherManager, CourseManager
 from .query import TaskQuerySet, SolutionQuerySet
+from .mixins import TestModelMixin
 
 
 class Student(BaseUser):
@@ -53,8 +54,6 @@ class Course(models.Model):
     public = models.BooleanField(default=True)
 
     generate_certificates_delta = models.DurationField(default=timedelta(days=15))
-
-    is_competition = models.BooleanField(default=False)
 
     objects = CourseManager()
 
@@ -139,7 +138,7 @@ class CourseAssignment(models.Model):
 
 
 class BaseMaterial(UpdatedAtCreatedAtModelMixin, models.Model):
-    identifier = models.CharField(unique=True, max_length=255)
+    identifier = models.CharField(max_length=255)
     url = models.URLField(blank=True, null=True)
     content = models.TextField(blank=True)
 
@@ -158,6 +157,9 @@ class IncludedMaterial(BaseMaterial):
     topic = models.ForeignKey('Topic',
                               on_delete=models.CASCADE,
                               related_name='materials')
+
+    class Meta:
+        unique_together = (('topic', 'material'), )
 
 
 class Week(models.Model):
@@ -261,6 +263,9 @@ class IncludedTask(BaseTask):
 
     objects = TaskQuerySet.as_manager()
 
+    class Meta:
+        unique_together = (('topic', 'task'), )
+
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     language = models.ForeignKey(ProgrammingLanguage)
@@ -276,38 +281,13 @@ class Test(BaseTest):
     pass
 
 
-class IncludedTest(BaseTest):
+class IncludedTest(TestModelMixin, BaseTest):
     task = models.OneToOneField(IncludedTask,
                                 on_delete=models.CASCADE,
                                 related_name='test')
     test = models.ForeignKey(Test,
                              on_delete=models.CASCADE,
                              related_name='included_tests')
-
-    def is_source(self):
-        return bool(getattr(self, 'code', None))
-
-    def is_binary(self):
-        return bool(getattr(self, 'file', None))
-
-    def test_mode(self):
-        if self.is_binary:
-            return 'binary'
-        return 'plain'
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
-
-    def clean(self):
-        if not self.task.gradable:
-            raise ValidationError("Can not add tests to a non-gradable task")
-
-        if self.code is None and str(self.file) is '':
-            raise ValidationError("A binary file or source code must be provided!")
-
-        if self.code is not None and str(self.file) is not '':
-            raise ValidationError("Either a binary file or source code must be provided")
 
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):

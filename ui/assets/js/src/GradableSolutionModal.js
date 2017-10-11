@@ -29,7 +29,7 @@ class GradableSolutionModal extends React.Component {
         modalTitle={this.props.modalTitle}
         styles={{
           display: "none",
-          "margin-top": "15%"
+          marginTop: "15%"
         }}
         errors={this.props.errors}
       >

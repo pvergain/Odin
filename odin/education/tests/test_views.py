@@ -1,14 +1,9 @@
-import os
-
 from unittest.mock import patch
 from test_plus import TestCase
-
-from allauth.account.models import EmailAddress
 
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
-from django.test.utils import override_settings
 from django.utils import timezone
 
 from ..services import add_student, add_teacher
@@ -38,7 +33,6 @@ from ..models import (
     IncludedTest
 )
 
-from odin.users.models import BaseUser
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
 
 from odin.common.faker import faker
@@ -370,9 +364,10 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         material = MaterialFactory()
         add_teacher(self.course, teacher)
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.assertEqual(200, response.status_code)
             response = self.post(self.url, data={'material': material.id})
+            self.assertRedirects(response, expected_url=reverse(
+                                 'dashboard:education:user-course-detail',
+                                 kwargs={'course_id': self.course.id}))
             self.assertEqual(material_count + 1, IncludedMaterial.objects.count())
             included_material = IncludedMaterial.objects.filter(material=material)
             self.assertEqual(1, Topic.objects.filter(materials__in=included_material).count())
@@ -385,6 +380,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
         included_material = IncludedMaterialFactory(topic=topic)
 
         included_material_count = IncludedMaterial.objects.count()
+        topic_material_count = self.topic.materials.count()
         material_count = Material.objects.count()
 
         with self.login(email=self.user.email, password=self.test_password):
@@ -393,6 +389,7 @@ class TestAddIncludedMaterialFromExistingView(TestCase):
                 'dashboard:education:user-course-detail',
                 kwargs={'course_id': self.course.id}))
             self.assertEqual(included_material_count + 1, IncludedMaterial.objects.count())
+            self.assertEqual(topic_material_count + 1, self.topic.materials.count())
             self.assertEqual(material_count, Material.objects.count())
 
 
@@ -944,237 +941,50 @@ class TestSubmitNonGradableSolutionView(TestCase):
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
 
 
-class TestCompetitionRegisterView(TestCase):
+class TestSolutionDetailApi(TestCase):
     def setUp(self):
-        os.environ['RECAPTCHA_TESTING'] = 'True'
-
         self.course = CourseFactory()
-        self.course.is_competition = True
-        self.course.save()
+        self.topic = TopicFactory(course=self.course)
+        self.task = IncludedTaskFactory(topic=self.topic)
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.user.is_active = True
-        self.user.save()
-        self.full_name = faker.name()
-        self.url = reverse('competition:register-for-competition',
-                           kwargs={'competition_slug': self.course.slug_url})
-
-    def tearDown(self):
-        del os.environ['RECAPTCHA_TESTING']
-
-    def test_can_not_access_competition_registration_when_course_is_not_competition(self):
-        self.course.is_competition = False
-        self.course.save()
-
-        response = self.get(self.url)
-        self.response_403(response)
-
-    def test_register_with_already_existing_user_when_not_logged_in_redirects_to_competition_login(self):
-        data = {
-            'email': self.user.email,
-            'full_name': self.full_name,
-            'g-recaptcha-response': 'PASSED'
-        }
-        response = self.post(self.url, data=data, follow=False)
-        registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
-        self.assertRedirects(response, expected_url=reverse('competition:competition-login',
-                                                            kwargs={'registration_uuid': registration_uuid,
-                                                                    'competition_slug': self.course.slug_url}))
-
-    def test_register_with_already_existing_user_when_logged_in_with_same_user_redirects_to_competition_login(self):
-        data = {
-            'email': self.user.email,
-            'full_name': self.full_name,
-            'g-recaptcha-response': 'PASSED'
-        }
-
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data, follow=False)
-            registration_uuid = BaseUser.objects.get(email=self.user.email).registration_uuid
-            self.assertRedirects(response, expected_url=reverse('competition:competition-login',
-                                                                kwargs={'registration_uuid': registration_uuid,
-                                                                        'competition_slug': self.course.slug_url}))
-
-    def test_register_with_existing_user_when_logged_in_with_different_user_redirects_to_competition_login(self):
-        existing_user = BaseUserFactory(password=self.test_password)
-        data = {
-            'email': existing_user.email,
-            'full_name': faker.name(),
-            'g-recaptcha-response': 'PASSED'
-        }
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data, follow=False)
-            existing_user.refresh_from_db()
-            self.assertRedirects(response, expected_url=reverse('competition:competition-login',
-                                                                kwargs={
-                                                                    'registration_uuid':
-                                                                    existing_user.registration_uuid,
-                                                                    'competition_slug': self.course.slug_url
-                                                                }))
-
-    def test_register_with_new_user_redirects_to_competition_set_password(self):
-        data = {
-            'email': faker.email(),
-            'full_name': faker.name(),
-            'g-recaptcha-response': 'PASSED'
-        }
-
-        response = self.post(self.url, data=data)
-        registration_uuid = BaseUser.objects.last().registration_uuid
-        self.assertRedirects(response, expected_url=reverse('competition:set-password-for-competition',
-                                                            kwargs={
-                                                                'competition_slug': self.course.slug_url,
-                                                                'registration_uuid': registration_uuid
-                                                            }))
-
-
-class TestCompetitionLoginView(TestCase):
-    def setUp(self):
-        self.course = CourseFactory()
-        self.course.is_competition = True
-        self.course.save()
-        self.registration_uuid = faker.uuid4()
-        self.url = reverse('competition:competition-login',
-                           kwargs={'registration_uuid': self.registration_uuid,
-                                   'competition_slug': self.course.slug_url})
-        self.test_password = faker.password()
-        self.user = BaseUserFactory(password=self.test_password)
-        self.user.registration_uuid = self.registration_uuid
-        self.user.is_active = True
-        self.user.save()
-        EmailAddress.objects.create(user=self.user, email=self.user.email, verified=True, primary=True)
-
-    def test_can_not_access_competition_login_if_course_is_not_competition(self):
-        self.course.is_competition = False
-        self.course.save()
-
-        response = self.get(self.url)
-        self.response_403(response)
-
-    def test_redirects_to_same_page_when_trying_to_login_with_credentials_for_different_user(self):
-        new_user = BaseUserFactory(password=self.test_password)
-        new_user.registration_uuid = faker.uuid4()
-        new_user.save()
-
-        data = {
-            'login': new_user.email,
-            'password': self.test_password
-        }
-
-        response = self.post(self.url, data=data, follow=False)
-        self.assertRedirects(response, expected_url=self.url)
-
-    def test_redirects_to_competition_detail_on_successful_competition_login(self):
-        data = {
-            'login': self.user.email,
-            'password': self.test_password
-        }
-
-        response = self.post(self.url, data=data)
-        self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
-                                                            kwargs={
-                                                                'course_id': self.course.id
-                                                            }))
-
-    def test_adds_student_to_course_on_successful_competition_login(self):
-        data = {
-            'login': self.user.email,
-            'password': self.test_password
-        }
-
-        self.post(self.url, data=data)
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.is_student())
-        self.assertIn(self.user.student, self.course.students.all())
-
-    def test_resets_user_registration_token_on_successful_competition_login(self):
-        data = {
-            'login': self.user.email,
-            'password': self.test_password
-        }
-
-        self.post(self.url, data=data)
-        self.user.refresh_from_db()
-        self.assertIsNone(self.user.registration_uuid)
-
-    def test_redirects_to_same_page_when_user_is_already_student_in_competition_course(self):
-        student = Student.objects.create_from_user(self.user)
-        add_student(course=self.course, student=student)
-
-        data = {
-            'login': self.user.email,
-            'password': self.test_password
-        }
-
-        response = self.post(self.url, data=data)
-        expected_url = reverse('dashboard:education:user-course-detail', kwargs={'course_id': self.course.id})
-        self.assertRedirects(response, expected_url=expected_url)
-
-
-class TestCompetitionSetPasswordView(TestCase):
-    def setUp(self):
-        self.course = CourseFactory()
-        self.course.is_competition = True
-        self.course.save()
-        self.registration_uuid = faker.uuid4()
-        self.url = reverse('competition:set-password-for-competition',
+        self.student = Student.objects.create_from_user(self.user)
+        add_student(course=self.course, student=self.student)
+        self.solution = Solution.objects.create(
+            student=self.student,
+            code=faker.text(),
+            task=self.task
+        )
+        self.url = reverse('dashboard:education:student-solution-detail-api',
                            kwargs={
-                               'competition_slug': self.course.slug_url,
-                               'registration_uuid': self.registration_uuid
+                               'solution_id': self.solution.id
                            })
-        self.user = BaseUserFactory()
-        self.user.registration_uuid = self.registration_uuid
-        self.user.save()
 
-    def test_can_not_access_competition_set_password_if_course_not_competition(self):
-        self.course.is_competition = False
-        self.course.save()
+    def test_get_is_forbidden_if_not_student_or_teacher_in_course(self):
+        new_user = BaseUserFactory(password=self.test_password)
 
-        response = self.get(self.url)
-        self.response_403(response)
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
 
-    def test_raises_404_when_registration_token_does_not_exist(self):
-        fake_token = faker.uuid4()
+            self.response_403(response)
 
-        url = reverse('competition:set-password-for-competition',
-                      kwargs={
-                        'competition_slug': self.course.slug_url,
-                        'registration_uuid': fake_token
-                      })
+    def test_get_is_forbidden_if_request_user_is_not_solution_author(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        new_student = Student.objects.create_from_user(new_user)
+        add_student(course=self.course, student=new_student)
 
-        data = {
-            'password': faker.password()
-        }
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
 
-        response = self.post(url, data=data)
-        self.response_404(response)
+    def test_get_is_allowed_when_user_is_solution_author(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.get_check_200(self.url)
 
-    def test_redirects_to_confirmation_email_sent_on_successful_registration(self):
-        data = {
-            'password': faker.password()
-        }
+    def test_get_is_allowed_when_user_is_teacher_in_course(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        teacher = Teacher.objects.create_from_user(new_user)
+        add_teacher(course=self.course, teacher=teacher)
 
-        response = self.post(self.url, data=data)
-        self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
-
-    @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
-    @patch('odin.common.tasks.send_template_mail.delay')
-    def test_sends_email_on_successful_registration(self, mock_send_mail):
-        data = {
-            'password': faker.password()
-        }
-
-        response = self.post(self.url, data=data)
-        self.assertRedirects(response, expected_url=reverse('account_email_verification_sent'))
-        self.assertEqual(mock_send_mail.called, True)
-        (template_name, recipients, context), kwargs = mock_send_mail.call_args
-        self.assertEqual([self.user.email], recipients)
-
-    def test_sets_registration_for_on_successful_registration(self):
-        data = {
-            'password': faker.password()
-        }
-
-        self.post(self.url, data=data)
-        self.user.refresh_from_db()
-        self.assertIsNotNone(self.user.registering_for)
+        with self.login(email=new_user.email, password=self.test_password):
+            self.get_check_200(self.url)

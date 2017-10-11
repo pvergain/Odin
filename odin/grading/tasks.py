@@ -12,9 +12,8 @@ from .exceptions import PollingError
 
 
 @shared_task(bind=True, max_retries=None)
-def poll_solution(self, solution_id):
-    solution_model = apps.get_model(settings.GRADER_SOLUTION_MODEL)
-    grader_client = GraderClient(solution_model=solution_model,
+def poll_solution(self, solution_id, solution_model):
+    grader_client = GraderClient(solution_model_repr=solution_model,
                                  settings_module=settings,
                                  grader_ready_data={})
     try:
@@ -24,10 +23,11 @@ def poll_solution(self, solution_id):
 
 
 @shared_task(bind=True, max_retries=None)
-def submit_solution(self, solution_id):
-    solution_model = apps.get_model(settings.GRADER_SOLUTION_MODEL)
+def submit_solution(self, solution_id, solution_model):
+    solution_model_repr = solution_model
+    solution_model = apps.get_model(solution_model)
     grader_ready_data = get_grader_ready_data(solution_id, solution_model)
-    grader_client = GraderClient(solution_model=solution_model,
+    grader_client = GraderClient(solution_model_repr=solution_model_repr,
                                  settings_module=settings,
                                  grader_ready_data=grader_ready_data)
     try:

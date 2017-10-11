@@ -10,7 +10,6 @@ from odin.users.factories import BaseUserFactory
 
 from odin.education.services import create_test_for_task
 
-
 from .models import (
     Student,
     Teacher,
@@ -22,7 +21,8 @@ from .models import (
     Task,
     IncludedTask,
     ProgrammingLanguage,
-    Test
+    Test,
+    Solution,
 )
 from .services import create_course
 
@@ -96,6 +96,15 @@ class IncludedMaterialFactory(factory.DjangoModelFactory):
     class Meta:
         model = IncludedMaterial
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        material = kwargs.get('material')
+        fields = ('identifier', 'url', 'content')
+        for field in fields:
+            if not kwargs.get(field):
+                kwargs[field] = material.__dict__.get(field)
+        return IncludedMaterial.objects.create(**kwargs)
+
 
 class TaskFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: f'{n}{faker.word()}')
@@ -112,6 +121,15 @@ class IncludedTaskFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = IncludedTask
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        fields = ('name', 'description', 'gradable')
+        task = kwargs.get('task')
+        for field in fields:
+            if kwargs.get(field) is None:
+                kwargs[field] = task.__dict__.get(field)
+        return IncludedTask.objects.create(**kwargs)
 
 
 class ProgrammingLanguageFactory(factory.DjangoModelFactory):
@@ -140,3 +158,15 @@ class BinaryFileTestFactory(TaskTestFactory):
     def _create(cls, model_class, *args, **kwargs):
         kwargs['file'] = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
         return create_test_for_task(*args, **kwargs)
+
+
+class SolutionFactory(factory.DjangoModelFactory):
+    task = factory.SubFactory(IncludedTaskFactory)
+    student = factory.SubFactory(StudentFactory)
+    url = factory.LazyAttribute(lambda _: faker.url())
+    code = factory.LazyAttribute(lambda _: faker.text())
+    build_id = factory.LazyAttribute(lambda _: faker.pyint())
+    test_output = factory.LazyAttribute(lambda _: faker.text())
+
+    class Meta:
+        model = Solution

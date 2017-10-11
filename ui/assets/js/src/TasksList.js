@@ -6,7 +6,6 @@ import SolutionDetailModal from "./SolutionDetailModal";
 class ListItem extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       responseData: {}
     };
@@ -17,10 +16,24 @@ class ListItem extends React.Component {
     this.setState({ responseData: data });
   }
 
+  getCompetitionSolutionsUrl() {
+    const competitionSolutionsUrl = window.props.isUserJudgeInCompetition
+      ? Urls["competitions:all-participants-solutions"]({
+          task_id: this.props.task.id,
+          competition_slug: this.props.competition.slug_url
+        })
+      : Urls["competitions:participant-task-solutions"]({
+          task_id: this.props.task.id,
+          competition_slug: this.props.competition.slug_url
+        });
+    return competitionSolutionsUrl;
+  }
+
   render() {
     const modalID = `submit_${this.props.task.id}`;
 
     const solutionDetailModalID = `solution_detail_${this.props.task.id}`;
+
     const solutionsUrl = window.props.isUserTeacher
       ? Urls["dashboard:education:all-students-solutions"]({
           task_id: this.props.task.id,
@@ -42,7 +55,13 @@ class ListItem extends React.Component {
             </div>
             <div className="col-md-5">
               <div className="btn-group pull-right">
-                <a href={solutionsUrl}>
+                <a
+                  href={
+                    this.props.competition
+                      ? this.getCompetitionSolutionsUrl()
+                      : solutionsUrl
+                  }
+                >
                   <button className="btn btn-default uppercase" type="button">
                     Solutions
                   </button>
@@ -64,6 +83,7 @@ class ListItem extends React.Component {
           solutionDetailModalID={solutionDetailModalID}
           task={this.props.task}
           course={this.props.course}
+          competition={this.props.competition}
           setResponseData={this.setResponseData}
         />
         <SolutionDetailModal
@@ -84,7 +104,14 @@ class TasksList extends React.Component {
     return (
       <div className="list-group">
         {tasks.map(task => {
-          return <ListItem key={task.id} task={task} course={course} />;
+          return (
+            <ListItem
+              key={task.id}
+              task={task}
+              course={course}
+              competition={this.props.competition}
+            />
+          );
         })}
       </div>
     );
