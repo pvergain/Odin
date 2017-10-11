@@ -939,3 +939,52 @@ class TestSubmitNonGradableSolutionView(TestCase):
             self.assertRedirects(response, expected_url=redirect_url)
             self.assertEqual(solution_count + 1, Solution.objects.count())
             self.assertEqual(task_solution_count + 1, self.task.solutions.count())
+
+
+class TestSolutionDetailApi(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.topic = TopicFactory(course=self.course)
+        self.task = IncludedTaskFactory(topic=self.topic)
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.student = Student.objects.create_from_user(self.user)
+        add_student(course=self.course, student=self.student)
+        self.solution = Solution.objects.create(
+            student=self.student,
+            code=faker.text(),
+            task=self.task
+        )
+        self.url = reverse('dashboard:education:student-solution-detail-api',
+                           kwargs={
+                               'solution_id': self.solution.id
+                           })
+
+    def test_get_is_forbidden_if_not_student_or_teacher_in_course(self):
+        new_user = BaseUserFactory(password=self.test_password)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
+
+            self.response_403(response)
+
+    def test_get_is_forbidden_if_request_user_is_not_solution_author(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        new_student = Student.objects.create_from_user(new_user)
+        add_student(course=self.course, student=new_student)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_get_is_allowed_when_user_is_solution_author(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            self.get_check_200(self.url)
+
+    def test_get_is_allowed_when_user_is_teacher_in_course(self):
+        new_user = BaseUserFactory(password=self.test_password)
+        teacher = Teacher.objects.create_from_user(new_user)
+        add_teacher(course=self.course, teacher=teacher)
+
+        with self.login(email=new_user.email, password=self.test_password):
+            self.get_check_200(self.url)
