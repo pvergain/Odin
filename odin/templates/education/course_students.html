@@ -5,7 +5,9 @@
 {% endblock content_title %}
 
 {% block page_content %}
-  {% for assignment in object_list %}
-    {% include 'education/partial/course_student_portlet.html' with student=assignment.student assignment=assignment %}
-  {% endfor %}
+  <div class="col-md-12">
+    {% for assignment in object_list %}
+      {% include 'education/partial/course_student_portlet.html' with student=assignment.student assignment=assignment %}
+    {% endfor %}
+  </div>
 {% endblock page_content %}
