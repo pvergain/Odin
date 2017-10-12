@@ -32,7 +32,6 @@ from .models import (
     Solution,
     IncludedTest,
     IncludedMaterial,
-    StudentNote,
     CourseAssignment
 )
 from .permissions import (
@@ -714,17 +713,13 @@ class CourseStudentsListView(LoginRequiredMixin,
     template_name = 'education/course_students.html'
 
     def get_queryset(self):
-        return self.course.students.all().prefetch_related('profile', 'solutions__task')
+        prefetch = ('notes__author', 'student__solutions__task')
+        qs = CourseAssignment.objects.filter(course=self.course).exclude(teacher__isnull=False)
+        return qs.select_related('student__profile').prefetch_related(*prefetch)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['task_count'] = IncludedTask.objects.filter(topic__course=self.course).count()
-
-        students = context.get('object_list', [])
-        all_notes = StudentNote.objects.filter(assignment__student__in=context['object_list']).select_related()
-        notes_by_student = {i.email: all_notes.filter(assignment__student=i) for i in students}
-
-        context['notes_by_student'] = notes_by_student
 
         return context
 

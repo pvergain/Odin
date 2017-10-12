@@ -8,7 +8,7 @@
   </div>
   <div class="portlet-body">
     <ul class="list-unstyled">
-      {% for note in notes_by_student|lookup:student.email %}
+      {% for note in student_notes.all %}
         <li>
           <strong>[{{ note.created_at }}] {{ note.author.full_name }}: </strong> {{ note.text }}
         </li>

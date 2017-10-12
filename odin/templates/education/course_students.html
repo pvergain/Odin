@@ -5,7 +5,7 @@
 {% endblock content_title %}
 
 {% block page_content %}
-  {% for student in object_list %}
-    {% include 'education/partial/course_student_portlet.html' with student=student %}
+  {% for assignment in object_list %}
+    {% include 'education/partial/course_student_portlet.html' with student=assignment.student assignment=assignment %}
   {% endfor %}
 {% endblock page_content %}

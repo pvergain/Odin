@@ -991,30 +991,6 @@ class TestSolutionDetailApi(TestCase):
             self.get_check_200(self.url)
 
 
-class TestCourseStudentListView(TestCase):
-    def setUp(self):
-        self.course = CourseFactory()
-        self.test_password = faker.password()
-        self.user = BaseUserFactory(password=self.test_password)
-        self.teacher = Teacher.objects.create_from_user(self.user)
-        add_teacher(course=self.course, teacher=self.teacher)
-        self.url = reverse('dashboard:education:course-students-list',
-                           kwargs={
-                               'course_id': self.course.id
-                           })
-        self.student = Student.objects.create_from_user(BaseUserFactory())
-        add_student(course=self.course, student=self.student)
-        assignment = self.student.course_assignments.first()
-        StudentNote.objects.create(assignment=assignment, text=faker.text(), author=self.teacher)
-
-    def test_student_notes_in_context(self):
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.get(self.url)
-            self.response_200(response)
-            context_notes = response.context_data.get('notes_by_student')
-            self.assertEqual(len(context_notes.get(self.student.email)), StudentNote.objects.count())
-
-
 class TestCreateStudentNoteView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
