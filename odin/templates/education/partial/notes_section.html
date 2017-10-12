@@ -10,7 +10,7 @@
     <ul class="list-unstyled">
       {% for note in student_notes.all %}
         <li>
-          <strong>[{{ note.created_at }}] {{ note.author.full_name }}: </strong> {{ note.text }}
+          <strong>[{{ note.created_at }}] {{ note.author.get_full_name }}: </strong> {{ note.text }}
         </li>
       {% endfor %}
 
