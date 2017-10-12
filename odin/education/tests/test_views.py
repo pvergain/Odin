@@ -1051,3 +1051,32 @@ class TestCreateStudentNoteView(TestCase):
             response = self.post(self.url, data=data)
 
             self.response_404(response)
+
+
+class TestCourseStudentDetailView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.teacher = TeacherFactory(password=self.test_password)
+        self.student = StudentFactory()
+        self.course = CourseFactory()
+        add_student(course=self.course, student=self.student)
+        self.url = reverse('dashboard:education:course-student-detail',
+                           kwargs={
+                               'email': self.student.email,
+                               'course_id': self.course.id
+                           })
+        self.teacher.is_active = True
+        self.student.is_active = True
+        self.teacher.save()
+        self.student.save()
+
+    def test_access_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_access_is_allowed_when_teacher_for_course(self):
+        add_teacher(course=self.course, teacher=self.teacher)
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.get_check_200(self.url)

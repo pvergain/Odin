@@ -85,7 +85,7 @@
                   </div>
                   <div class="col-md-6">
                     {% include "education/partial/solution_modal.html" with solution=solution %}
-                    <a class="btn green uppercase" data-toggle="modal" href="#large"> Build log </a>
+                    <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}"> Build log </a>
                   </div>
                   {% endfor %}
                 {% endif %}
