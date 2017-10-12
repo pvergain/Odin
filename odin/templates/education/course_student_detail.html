@@ -41,10 +41,11 @@
                   Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks.count }}
                 </div>
                 <div class="col-md-4">
-                  Notes: 0  <i class="fa fa-pencil"></i></div>
+                  Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a></div>
                 </div>
               </div>
             </h4>
+            {% include 'education/partial/notes_section.html' with student_notes=assignment.notes %}
           </div>
         </div>
 

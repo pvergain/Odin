@@ -788,6 +788,8 @@ class CourseStudentDetailView(LoginRequiredMixin,
             task_solutions[task.id] = Solution.objects.filter(task=task, student=instance)
 
         context['task_solutions'] = task_solutions
+        assignment = get_object_or_404(CourseAssignment, student=instance, course=self.course)
+        context['assignment'] = assignment
 
         return context
 
