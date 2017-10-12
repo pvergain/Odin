@@ -79,8 +79,13 @@
               <div class="panel-body">
                 {% if task_solutions|lookup:task.id %}
                   {% for solution in task_solutions|lookup:task.id %}
-                    Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }} -
-                    <a href="#">Build Log</a>
+                  <div class="col-md-6">
+                    Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }} 
+                  </div>
+                  <div class="col-md-6">
+                    {% include "education/partial/solution_modal.html" with solution=solution %}
+                    <a class="btn green uppercase" data-toggle="modal" href="#large"> Build log </a>
+                  </div>
                   {% endfor %}
                 {% endif %}
               </div>
