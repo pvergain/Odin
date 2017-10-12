@@ -19,7 +19,8 @@ from .models import (
     ProgrammingLanguage,
     Solution,
     Test,
-    IncludedTest
+    IncludedTest,
+    StudentNote
 )
 
 
@@ -228,3 +229,16 @@ def get_all_student_solution_statistics(*,
     result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
 
     return result
+
+
+def create_student_note(*,
+                        author: Teacher,
+                        assignment: CourseAssignment,
+                        text: str) -> StudentNote:
+    note = StudentNote(author=author,
+                       assignment=assignment,
+                       text=text)
+    note.full_clean()
+    note.save()
+
+    return note

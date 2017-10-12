@@ -7,7 +7,8 @@ from .models import (
     IncludedTask,
     IncludedTest,
     Solution,
-    ProgrammingLanguage
+    ProgrammingLanguage,
+    StudentNote
 )
 
 
@@ -104,3 +105,14 @@ class SubmitNonGradableSolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
         fields = ('url', )
+
+
+class StudentNoteForm(forms.ModelForm):
+    def __init__(self, course=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if course:
+            self.fields['student'] = forms.ModelChoiceField(queryset=course.students.all())
+
+    class Meta:
+        model = StudentNote
+        fields = ('author', 'text', 'assignment')

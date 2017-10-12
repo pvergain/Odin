@@ -30,7 +30,8 @@ from ..models import (
     IncludedTask,
     Task,
     Solution,
-    IncludedTest
+    IncludedTest,
+    StudentNote
 )
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
@@ -988,3 +989,89 @@ class TestSolutionDetailApi(TestCase):
 
         with self.login(email=new_user.email, password=self.test_password):
             self.get_check_200(self.url)
+
+
+class TestCourseStudentListView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-students-list',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+        self.student = Student.objects.create_from_user(BaseUserFactory())
+        add_student(course=self.course, student=self.student)
+        assignment = self.student.course_assignments.first()
+        StudentNote.objects.create(assignment=assignment, text=faker.text(), author=self.teacher)
+
+    def test_student_notes_in_context(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            context_notes = response.context_data.get('notes_by_student')
+            self.assertEqual(len(context_notes.get(self.student.email)), StudentNote.objects.count())
+
+
+class TestCreateStudentNoteView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.student = Student.objects.create_from_user(BaseUserFactory())
+        add_student(course=self.course, student=self.student)
+        self.url = reverse('dashboard:education:create-student-note',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    def test_get_redirects_to_course_students_list(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            expected_url = reverse('dashboard:education:course-students-list',
+                                   kwargs={
+                                       'course_id': self.course.id
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_valid_data_creates_student_note_for_correct_assignment(self):
+        current_student_note_count = StudentNote.objects.count()
+        data = {
+            'student': self.student.id,
+            'text': faker.text()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_student_note_count + 1, StudentNote.objects.count())
+            last_note = StudentNote.objects.last()
+            student_notes = self.student.course_assignments.get(course=self.course).notes.all()
+            self.assertIn(last_note, student_notes)
+
+    def test_post_with_valid_data_reditects_to_specific_notes_section(self):
+        data = {
+            'student': self.student.id,
+            'text': faker.text()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('dashboard:education:course-students-list',
+                                   kwargs={
+                                       'course_id': self.course.id
+                                   }) + f'#notes-section_{self.student.id}'
+
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_invalid_student_returns_404(self):
+        new_student = Student.objects.create_from_user(BaseUserFactory())
+        data = {
+            'student': new_student.id,
+            'text': faker.text()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+
+            self.response_404(response)

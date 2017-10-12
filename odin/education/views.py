@@ -11,7 +11,8 @@ from django.views.generic import (
     UpdateView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 
@@ -30,14 +31,16 @@ from .models import (
     IncludedTask,
     Solution,
     IncludedTest,
-    IncludedMaterial
+    IncludedMaterial,
+    StudentNote,
+    CourseAssignment
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
     IsStudentInCoursePermission,
     IsStudentOrTeacherInCourseAPIPermission,
-    CannotSubmitSolutionAfterCourseEndDate,
+    CannotSubmitSolutionAfterCourseEndDate
 )
 from .mixins import (
     CourseViewMixin,
@@ -56,6 +59,7 @@ from .forms import (
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
+    StudentNoteForm
 )
 from .services import (
     create_topic,
@@ -65,7 +69,8 @@ from .services import (
     create_gradable_solution,
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course,
-    get_all_student_solution_statistics
+    get_all_student_solution_statistics,
+    create_student_note
 )
 from .serializers import TopicSerializer, SolutionSerializer
 
@@ -715,6 +720,12 @@ class CourseStudentsListView(LoginRequiredMixin,
         context = super().get_context_data(**kwargs)
         context['task_count'] = IncludedTask.objects.filter(topic__course=self.course).count()
 
+        students = context.get('object_list', [])
+        all_notes = StudentNote.objects.filter(assignment__student__in=context['object_list']).select_related()
+        notes_by_student = {i.email: all_notes.filter(assignment__student=i) for i in students}
+
+        context['notes_by_student'] = notes_by_student
+
         return context
 
 
@@ -784,3 +795,54 @@ class CourseStudentDetailView(LoginRequiredMixin,
         context['task_solutions'] = task_solutions
 
         return context
+
+
+class CreateStudentNoteView(LoginRequiredMixin,
+                            CourseViewMixin,
+                            IsTeacherInCoursePermission,
+                            CallServiceMixin,
+                            FormView):
+    form_class = StudentNoteForm
+    template_name = 'education/partial/notes_section.html'
+
+    def get_success_url(self):
+        url = reverse_lazy('dashboard:education:course-students-list',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+        if hasattr(self, 'student'):
+            return url + f'#notes-section_{self.student.id}'
+
+        return url
+
+    def get(self, request, *args, **kwargs):
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        for field, error in form.errors.items():
+            messages.warning(request=self.request, message=f'{field}: {error}')
+
+        return redirect(self.get_success_url())
+
+    def get_service(self):
+        return create_student_note
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['author'] = self.request.user.teacher
+            data['assignment'] = get_object_or_404(CourseAssignment, course=self.course, student=data['student']).id
+
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        service_kwargs = form.cleaned_data
+        self.student = service_kwargs.pop('student')
+        self.call_service(service_kwargs=service_kwargs)
+
+        return super().form_valid(form)
