@@ -72,14 +72,26 @@ class ListItem extends React.Component {
                     Solutions
                   </button>
                 </a>
-                <a
-                  id={`anchor_${modalID}`}
-                  href={`#${modalID}`}
-                  data-toggle="modal"
-                  className="btn btn-default uppercase"
-                >
-                  Submit
-                </a>
+                {window.props.isUserTeacher
+                  ? <a
+                      href={Urls[
+                        "dashboard:education:course-management:edit-included-task"
+                      ]({
+                        course_id: this.props.course,
+                        task_id: this.props.task.id
+                      })}
+                      className="btn btn-default uppercase"
+                    >
+                      Edit
+                    </a>
+                  : <a
+                      id={`anchor_${modalID}`}
+                      href={`#${modalID}`}
+                      data-toggle="modal"
+                      className="btn btn-default uppercase"
+                    >
+                      Submit
+                    </a>}
               </div>
             </div>
           </div>
