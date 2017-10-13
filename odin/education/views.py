@@ -72,6 +72,7 @@ from .services import (
     create_student_note
 )
 from .serializers import TopicSerializer, SolutionSerializer
+from .utils import get_solution_data
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -779,16 +780,22 @@ class CourseStudentDetailView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        filters = ['solutions', 'solutions__student']
-        course_tasks = IncludedTask.objects.filter(topic__course=self.course).prefetch_related(*filters)
+        student = self.object
+        course_topics = self.course.topics.all()
+        tasks_with_solution = []
+        for topic in course_topics:
+            tasks_with_solution += topic.tasks.all()
+        course_tasks = tasks_with_solution
         context['course_tasks'] = course_tasks
         task_solutions = {}
-        instance = self.get_object()
+        solution_data, passed_or_failed = get_solution_data(self.course, student)
         for task in course_tasks:
-            task_solutions[task.id] = Solution.objects.filter(task=task, student=instance)
+            if not passed_or_failed.get(task.name):
+                passed_or_failed[task.name] = "Not submitted"
+            task_solutions[task.name] = (solution_data.get(task), passed_or_failed.get(task.name))
 
         context['task_solutions'] = task_solutions
-        assignment = get_object_or_404(CourseAssignment, student=instance, course=self.course)
+        assignment = get_object_or_404(CourseAssignment, student=student, course=self.course)
         context['assignment'] = assignment
 
         return context

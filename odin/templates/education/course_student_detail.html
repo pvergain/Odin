@@ -38,7 +38,7 @@
                   Attendance: 0
                 </div>
                 <div class="col-md-4">
-                  Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks.count }}
+                  Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks|length }}
                 </div>
                 <div class="col-md-4">
                   Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a></div>
@@ -60,43 +60,41 @@
       </div>
       <div class="portlet-body">
         <div class="panel-group accordion" id="accordion1">
-          {% for task in course_tasks %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task.topic.id}}" aria-expanded="true"> 
-                  <div class="row">
+            {% for task_name, task_data in task_solutions.items %}
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task_name}}" aria-expanded="true"> 
+                    <div class="row">
+                      <div class="col-md-6">
+                        {{ task_name }}
+                      </div>
+                      <div class="col-md-6">
+                          {{ task_data.1 }}
+                      </div>
+                    </div>
+                  </a>
+                </h4>
+              </div>
+              <div id="collapse_{{task_name}}" class="panel-collapse collapse" aria-expanded="false" style="">
+                <div class="panel-body">
+                  {% if task_data %}
+                    {% for solution in task_data.0 %}
                     <div class="col-md-6">
-                      {{ task.name }}
+                      Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }} 
                     </div>
                     <div class="col-md-6">
-                      {{ task|passed_or_failed }}
+                      {% include "education/partial/solution_modal.html" with solution=solution %}
+                      <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}"> Build log </a>
                     </div>
-                  </div>
-                </a>
-              </h4>
-            </div>
-            <div id="collapse_{{task.topic.id}}" class="panel-collapse collapse" aria-expanded="false" style="">
-              <div class="panel-body">
-                {% if task_solutions|lookup:task.id %}
-                  {% for solution in task_solutions|lookup:task.id %}
-                  <div class="col-md-6">
-                    Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }} 
-                  </div>
-                  <div class="col-md-6">
-                    {% include "education/partial/solution_modal.html" with solution=solution %}
-                    <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}"> Build log </a>
-                  </div>
-                  {% endfor %}
-                {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </div>
               </div>
             </div>
-          </div>
-          {% endfor %}
-        </div>
+        {% endfor %}
       </div>
     </div>
-      <div>
-    </div>
   </div>
+</div>
 {% endblock page_content %}

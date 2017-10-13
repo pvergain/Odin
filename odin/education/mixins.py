@@ -18,9 +18,8 @@ class CourseViewMixin:
             'teachers__profile',
             'topics__week',
             'topics__materials',
-            'topics__tasks',
+            'topics__tasks__solutions',
             'weeks__lectures',
-
         )
         if course_id:
             self.course = Course.objects.filter(id=course_id).prefetch_related(*prefetch)
