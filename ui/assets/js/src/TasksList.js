@@ -16,6 +16,10 @@ class ListItem extends React.Component {
     this.setState({ responseData: data });
   }
 
+  getTaskType(task) {
+    return task.gradable ? "Gradable" : "Non-Gradable";
+  }
+
   getCompetitionSolutionsUrl() {
     const competitionSolutionsUrl = window.props.isUserJudgeInCompetition
       ? Urls["competitions:all-participants-solutions"]({
@@ -51,7 +55,9 @@ class ListItem extends React.Component {
               {this.props.task.name}
             </div>
             <div className="col-md-1">
-              <SolutionStatus task={this.props.task} />
+              {window.props.isUserTeacher
+                ? this.getTaskType(this.props.task)
+                : <SolutionStatus task={this.props.task} />}
             </div>
             <div className="col-md-5">
               <div className="btn-group pull-right">

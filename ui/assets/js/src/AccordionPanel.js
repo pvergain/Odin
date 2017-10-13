@@ -2,6 +2,50 @@ import React from "react";
 import MaterialsList from "./MaterialsList";
 import TasksList from "./TasksList";
 import SolvedRatio from "./SolvedRatio";
+import DropdownButton from "./DropdownButton";
+
+const addMaterialMenuItems = (courseID, topicID) => {
+  return [
+    {
+      value: "From existing",
+      url: Urls[
+        "dashboard:education:course-management:add-included-material-from-existing"
+      ]({
+        course_id: courseID,
+        topic_id: topicID
+      })
+    },
+    {
+      value: "New",
+      url: Urls[
+        "dashboard:education:course-management:add-new-included-material"
+      ]({
+        course_id: courseID,
+        topic_id: topicID
+      })
+    }
+  ];
+};
+
+const addTaskMenuItems = (courseID, topicID) => {
+  return [
+    {
+      value: "From existing",
+      url: Urls[
+        "dashboard:education:course-management:add-included-task-from-existing"
+      ]({
+        course_id: courseID,
+        topic_id: topicID
+      })
+    },
+    {
+      value: "New",
+      url: Urls["dashboard:education:course-management:add-new-included-task"]({
+        course_id: courseID
+      })
+    }
+  ];
+};
 
 const AccordionPanel = props => {
   const collapseID = `collapse_${props.topic.id}`;
@@ -33,6 +77,16 @@ const AccordionPanel = props => {
               </div>
               <div className="ribbon-content">
                 <MaterialsList materials={props.topic.materials} />
+                {window.props.isUserTeacher
+                  ? <DropdownButton
+                      menuItems={addMaterialMenuItems(
+                        props.topic.course,
+                        props.topic.id
+                      )}
+                    >
+                      Add Material
+                    </DropdownButton>
+                  : ""}
               </div>
             </div>
           </div>
@@ -46,6 +100,16 @@ const AccordionPanel = props => {
                   course={props.topic.course}
                   tasks={props.topic.tasks}
                 />
+                {window.props.isUserTeacher
+                  ? <DropdownButton
+                      menuItems={addTaskMenuItems(
+                        props.topic.course,
+                        props.topic.id
+                      )}
+                    >
+                      Add task
+                    </DropdownButton>
+                  : ""}
               </div>
             </div>
           </div>

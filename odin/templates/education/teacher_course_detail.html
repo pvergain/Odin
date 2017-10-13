@@ -1,0 +1,44 @@
+{% load static %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="page-title">Students</h1>
+      <a href="{% url 'dashboard:education:course-students-list' course.id %}">
+        <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">View Students</button></a>
+      <a href="">
+        <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">Send Mass Email</button></a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div id="root">
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="page-title">Course Schedule</h1>
+      {% include 'education/partial/course_schedule.html' %}
+    </div>
+  </div>
+{% endblock page_content %}
+
+{% block extra_scripts %}
+  {% csrf_token %}
+  <script src="{% url 'js_reverse' %}"></script>
+  <script>
+   window.props = {{ course_topics|safe }};
+   {% if request.user.is_teacher %}
+     window.props.isUserTeacher = true;
+   {% endif %}
+   {% if request.user.is_student %}
+     window.props.studentID = {{ request.user.student.id }};
+   {% endif %}
+   window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  </script>
+  <script src="{% static 'bundle.js' %}"></script>
+{% endblock extra_scripts %}

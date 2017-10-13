@@ -10,5 +10,9 @@
 {% endblock content_title %}
 
 {% block page_content %}
-  {% include 'education/course_detail.html' with course=course tasks_ratio=tasks_ratio course_topics=course_topics public_page=public_page %}
+  {% if user.is_teacher %}
+    {% include 'education/teacher_course_detail.html' %}
+  {% else %}
+    {% include 'education/course_detail.html' with course=course tasks_ratio=tasks_ratio course_topics=course_topics public_page=public_page %}
+  {% endif %}
 {% endblock page_content %}
