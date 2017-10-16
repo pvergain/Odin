@@ -29,7 +29,8 @@ from .views import (
     CompareSolutionsView,
     CourseStudentDetailView,
     CourseStudentsListView,
-    CreateStudentNoteView
+    CreateStudentNoteView,
+    EditTopicView
 )
 
 
@@ -51,6 +52,11 @@ course_management_urlpatterns = [
         regex='^(?P<course_id>[0-9]+)/add-topic/$',
         view=AddTopicToCourseView.as_view(),
         name='manage-course-topics'
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/edit-topic/(?P<topic_id>[0-9]+)/$',
+        view=EditTopicView.as_view(),
+        name='edit-topic'
     ),
     url(
         regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/existing-materials/$',

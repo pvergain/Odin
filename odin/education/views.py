@@ -32,7 +32,8 @@ from .models import (
     Solution,
     IncludedTest,
     IncludedMaterial,
-    CourseAssignment
+    CourseAssignment,
+    Topic
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
@@ -170,6 +171,22 @@ class AddTopicToCourseView(LoginRequiredMixin,
         self.call_service(service_kwargs=create_topic_kwargs)
 
         return super().form_valid(form)
+
+
+class EditTopicView(LoginRequiredMixin,
+                    CourseViewMixin,
+                    ReadableFormErrorsMixin,
+                    IsTeacherInCoursePermission,
+                    UpdateView):
+
+    template_name = 'education/add_topic.html'
+    model = Topic
+    pk_url_kwarg = 'topic_id'
+    fields = ('name', 'week')
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
 
 
 class AddIncludedMaterialFromExistingView(LoginRequiredMixin,

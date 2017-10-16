@@ -3,6 +3,7 @@ import MaterialsList from './MaterialsList';
 import TasksList from './TasksList';
 import SolvedRatio from './SolvedRatio';
 import DropdownButton from './DropdownButton';
+import EditItem from './EditItem';
 
 const addMaterialMenuItems = (courseID, topicID) => {
   return [
@@ -49,6 +50,13 @@ const addTaskMenuItems = (courseID, topicID) => {
 
 const AccordionPanel = props => {
   const collapseID = `collapse_${props.topic.id}`;
+  const topicEditUrl = Urls[
+    'dashboard:education:course-management:edit-topic'
+  ]({
+    course_id: props.topic.course,
+    topic_id: props.topic.id,
+  });
+
   return (
     <div className="panel panel-default">
       <div className="panel-heading">
@@ -61,6 +69,7 @@ const AccordionPanel = props => {
             aria-expanded="true">
             Week {props.topic.week} - {props.topic.name}
             <SolvedRatio tasks={props.topic.tasks} />
+            <EditItem editUrl={topicEditUrl} size={1} />
           </a>
         </h4>
       </div>

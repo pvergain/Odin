@@ -1,5 +1,7 @@
 import React from 'react';
 
+import EditItem from './EditItem';
+
 const ListItem = props => {
   const materialUrl = Urls['dashboard:education:material-detail']({
     material_id: props.material.id,
@@ -19,12 +21,7 @@ const ListItem = props => {
         </a>
       </div>
       <div className="col-md-3">
-        <a href={materialEditUrl}>
-          <i
-            className="fa fa-pencil fa-2x"
-            style={{marginTop: '10px', marginRight: '10px'}}
-          />
-        </a>
+        <EditItem editUrl={materialEditUrl} size={2} />
       </div>
     </div>
   );
