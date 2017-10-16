@@ -109,7 +109,9 @@ class CourseDetailView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        topic_queryset = self.course.topics.prefetch_related('tasks__solutions', 'materials', 'tasks__test__language')
+        topic_queryset = self.course.topics.prefetch_related(
+            'tasks__solutions', 'materials', 'week', 'tasks__test__language'
+        )
         topics = TopicSerializer(topic_queryset, many=True)
         course_topics = {}
         course_topics['data'] = topics.data

@@ -7,10 +7,12 @@
     </li>
     <li>
       <span style="font-size: 120%">{{ course.name }}</span>
-      <i class="fa fa-angle-right"></i>
-      </li>
-    <li>
-      <span style="font-size: 120%">{{ student.get_full_name }}</span>
     </li>
+    {% if student %}
+      <li>
+        <i class="fa fa-angle-right"></i>
+        <span style="font-size: 120%">{{ student.get_full_name }}</span>
+      </li>
+    {% endif %}
   </ul>
 </div>
