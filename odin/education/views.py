@@ -2,7 +2,9 @@ import json
 
 from rest_framework import generics
 
+from django.utils import timezone
 from django.core.management import call_command
+from django.views import View
 from django.views.generic import (
     TemplateView,
     ListView,
@@ -78,7 +80,7 @@ from .services import (
     create_lecture
 )
 from .serializers import TopicSerializer, SolutionSerializer
-from .utils import get_solution_data
+from .utils import get_solution_data, add_week_to_course
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -944,3 +946,22 @@ class DeleteLectureView(LoginRequiredMixin,
                             kwargs={
                                 'course_id': self.course.id
                             })
+
+
+class AddWeekToCourseView(LoginRequiredMixin,
+                          CourseViewMixin,
+                          IsTeacherInCoursePermission,
+                          View):
+
+    http_method_names = ['post', 'put']
+    template_name = 'education/teacher_course_detail.html'
+
+    def post(self, request, *args, **kwargs):
+        add_week_to_course(course=self.course, new_end_date=self.course.end_date + timezone.timedelta(days=7))
+
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail', kwargs={
+           'course_id': self.course.id
+        })

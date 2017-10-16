@@ -1,7 +1,11 @@
-from .models import Solution
+from typing import Dict
+
+from django.utils import timezone
+
+from .models import Solution, Student, Course, Week
 
 
-def get_passed_and_failed_tasks(solution_data):
+def get_passed_and_failed_tasks(solution_data: Dict) -> Dict:
     """
     Fills up a dictionary with the status of tasks:
         "Passed" when a task has a passing solution, i.e. when a solution's status is Solution.OK
@@ -25,7 +29,7 @@ def get_passed_and_failed_tasks(solution_data):
     return passed_or_failed
 
 
-def get_solution_data(course, student):
+def get_solution_data(course: Course, student: Student) -> (Dict, Dict):
     """
     Fetch all of `student` solutions for `course` tasks and group them by task
     Get passed and failed tasks and then return the data
@@ -42,3 +46,18 @@ def get_solution_data(course, student):
     passed_and_failed = get_passed_and_failed_tasks(solution_data)
 
     return solution_data, passed_and_failed
+
+
+def add_week_to_course(course: Course, new_end_date: timezone.datetime.date) -> Week:
+    last_week = course.weeks.last()
+    new_week = Week.objects.create(
+        course=course,
+        number=last_week.number + 1,
+        start_date=course.end_date,
+        end_date=new_end_date
+    )
+
+    course.end_date = course.end_date + timezone.timedelta(days=7)
+    course.save()
+
+    return new_week
