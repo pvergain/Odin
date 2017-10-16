@@ -31,7 +31,8 @@ from ..models import (
     Task,
     Solution,
     IncludedTest,
-    StudentNote
+    StudentNote,
+    Lecture
 )
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
@@ -1080,3 +1081,89 @@ class TestCourseStudentDetailView(TestCase):
 
         with self.login(email=self.teacher.email, password=self.test_password):
             self.get_check_200(self.url)
+
+
+class TestCreateLectureView(TestCase):
+    def setUp(self):
+        start_date = timezone.now().date() + timezone.timedelta(days=faker.pyint())
+        self.course = CourseFactory(start_date=start_date,
+                                    end_date=start_date+timezone.timedelta(days=faker.pyint()))
+        self.valid_date = start_date + timezone.timedelta(days=1)
+        self.invalid_date = self.course.end_date + timezone.timedelta(days=faker.pyint())
+        self.test_password = faker.password()
+        self.teacher = Teacher.objects.create_from_user(BaseUserFactory(password=self.test_password))
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:create-lecture',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    def test_post_with_valid_date_creates_lecture_for_course(self):
+        current_lecture_count = self.course.lectures.count()
+        data = {
+            'date': self.valid_date
+        }
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.course.refresh_from_db()
+
+            self.assertEqual(current_lecture_count + 1, self.course.lectures.count())
+
+    def test_post_with_invalid_date_does_not_create_lecture(self):
+        current_lecture_count = self.course.lectures.count()
+        data = {
+            'date': self.invalid_date
+        }
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.course.refresh_from_db()
+
+            self.assertEqual(current_lecture_count, self.course.lectures.count())
+
+
+class TestEditLectureView(TestCase):
+    def setUp(self):
+        start_date = timezone.now().date() + timezone.timedelta(days=faker.pyint())
+        self.course = CourseFactory(start_date=start_date,
+                                    end_date=start_date+timezone.timedelta(days=faker.pyint()))
+        self.lecture = Lecture.objects.create(course=self.course,
+                                              week=self.course.weeks.first(),
+                                              date=self.course.weeks.first().start_date)
+        self.test_password = faker.password()
+        self.teacher = Teacher.objects.create_from_user(BaseUserFactory(password=self.test_password))
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:edit-lecture',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'lecture_id': self.lecture.id
+                           })
+
+    def test_post_with_lecture_from_different_course_returns_404(self):
+        new_course = CourseFactory()
+        new_lecture = Lecture.objects.create(course=new_course,
+                                             week=new_course.weeks.first(),
+                                             date=new_course.weeks.first().start_date)
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(reverse('dashboard:education:course-management:edit-lecture',
+                                 kwargs={
+                                     'course_id': self.course.id,
+                                     'lecture_id': new_lecture.id
+                                 }))
+
+            self.response_404(response)
+
+    def test_post_with_valid_data_redirects_to_course_detail(self):
+        previous_date = self.lecture.date
+        data = {
+            'date': self.course.start_date + timezone.timedelta(days=1)
+        }
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.lecture.refresh_from_db()
+
+            self.assertNotEqual(previous_date, self.lecture.date)
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
+                                                                kwargs={
+                                                                    'course_id': self.course.id
+                                                                }))

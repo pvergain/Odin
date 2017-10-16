@@ -8,8 +8,13 @@ from .models import (
     IncludedTest,
     Solution,
     ProgrammingLanguage,
-    StudentNote
+    StudentNote,
+    Lecture
 )
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
 
 
 class TopicModelForm(forms.ModelForm):
@@ -116,3 +121,23 @@ class StudentNoteForm(forms.ModelForm):
     class Meta:
         model = StudentNote
         fields = ('author', 'text', 'assignment')
+
+
+class CreateLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', 'course')
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class EditLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', )
+
+        widgets = {
+            'date': DateInput()
+        }

@@ -1,0 +1,37 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load widget_tweaks %}
+
+{% block content_title %}
+  Create Lecture
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-6">
+      {% include 'education/partial/message_box.html' %}
+      {% include 'partial/form_errors.html' with errors=readable_errors %}
+
+      <div class="portlet light">
+        <div class="portlet-title">
+          <div class="caption font-blue-sunglo">
+            <i class="icon-settings font-blue-sunglo"></i>
+            <span class="caption-subject bold uppercase"> Create Lecture </span>
+          </div>
+        </div>
+        <div class="portlet-body form">
+          <form action="" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group form-md-line-input">
+              {{ form.date.label }}
+              {% render_field form.date class="form-control form-control-solid"%}
+            </div>
+            <div class="form-actions noborder">
+              <button class="btn green uppercase" type="submit">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
 from django.db import transaction
@@ -20,7 +20,8 @@ from .models import (
     Solution,
     Test,
     IncludedTest,
-    StudentNote
+    StudentNote,
+    Lecture
 )
 
 
@@ -242,3 +243,17 @@ def create_student_note(*,
     note.save()
 
     return note
+
+
+def create_lecture(*,
+                   date: date,
+                   course: Course) -> Lecture:
+    week_qs = Week.objects.filter(start_date__lte=date, end_date__gte=date, course=course)
+    if week_qs.exists():
+        lecture = Lecture(date=date, course=course, week=week_qs.first())
+        lecture.full_clean()
+        lecture.save()
+
+        return lecture
+    else:
+        raise ValidationError('Date not in range of any week for this course')

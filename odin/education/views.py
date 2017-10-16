@@ -8,7 +8,8 @@ from django.views.generic import (
     ListView,
     DetailView,
     FormView,
-    UpdateView
+    UpdateView,
+    DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -33,7 +34,8 @@ from .models import (
     IncludedTest,
     IncludedMaterial,
     CourseAssignment,
-    Topic
+    Topic,
+    Lecture
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
@@ -59,7 +61,9 @@ from .forms import (
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
-    StudentNoteForm
+    StudentNoteForm,
+    CreateLectureForm,
+    EditLectureForm
 )
 from .services import (
     create_topic,
@@ -70,7 +74,8 @@ from .services import (
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course,
     get_all_student_solution_statistics,
-    create_student_note
+    create_student_note,
+    create_lecture
 )
 from .serializers import TopicSerializer, SolutionSerializer
 from .utils import get_solution_data
@@ -869,3 +874,73 @@ class CreateStudentNoteView(LoginRequiredMixin,
         self.call_service(service_kwargs=service_kwargs)
 
         return super().form_valid(form)
+
+
+class CreateLectureView(LoginRequiredMixin,
+                        CourseViewMixin,
+                        IsTeacherInCoursePermission,
+                        CallServiceMixin,
+                        ReadableFormErrorsMixin,
+                        FormView):
+    template_name = 'education/create_lecture.html'
+    form_class = CreateLectureForm
+
+    def get_service(self):
+        return create_lecture
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['course'] = self.course.id
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        lecture = self.call_service(service_kwargs=form.cleaned_data)
+
+        if not lecture:
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class EditLectureView(LoginRequiredMixin,
+                      CourseViewMixin,
+                      IsTeacherInCoursePermission,
+                      ReadableFormErrorsMixin,
+                      UpdateView):
+    template_name = 'education/edit_lecture.html'
+    form_class = EditLectureForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+    def get_object(self):
+        return get_object_or_404(Lecture, id=self.kwargs.get('lecture_id'), course=self.course)
+
+
+class DeleteLectureView(LoginRequiredMixin,
+                        CourseViewMixin,
+                        IsTeacherInCoursePermission,
+                        DeleteView):
+    model = Lecture
+    pk_url_kwarg = 'lecture_id'
+    http_method_names = ['post', 'put', 'delete']
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })

@@ -30,7 +30,10 @@ from .views import (
     CourseStudentDetailView,
     CourseStudentsListView,
     CreateStudentNoteView,
-    EditTopicView
+    EditTopicView,
+    CreateLectureView,
+    EditLectureView,
+    DeleteLectureView
 )
 
 
@@ -113,7 +116,21 @@ course_management_urlpatterns = [
         view=EditIncludedTestView.as_view(),
         name='edit-test'
     ),
-
+    url(
+        regex='^(?P<course_id>[0-9]+)/create-lecture/$',
+        view=CreateLectureView.as_view(),
+        name='create-lecture'
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/edit-lecture/(?P<lecture_id>[0-9]+)$',
+        view=EditLectureView.as_view(),
+        name='edit-lecture'
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/delete-lecture/(?P<lecture_id>[0-9]+)$',
+        view=DeleteLectureView.as_view(),
+        name='delete-lecture'
+    )
 ]
 
 urlpatterns = [
