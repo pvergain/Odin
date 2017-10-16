@@ -61,3 +61,23 @@ def add_week_to_course(course: Course, new_end_date: timezone.datetime.date) -> 
     course.save()
 
     return new_week
+
+
+def map_lecture_dates_to_week_days(course):
+    schedule = {}
+    weekdays_with_lectures = set()
+    weeks = Week.objects.filter(course=course).prefetch_related('lectures').order_by('lectures__date')
+    for week in weeks:
+        schedule[week.number] = {}
+        lectures = week.lectures.all()
+
+        if not lectures.exists():
+            continue
+
+        for lecture in lectures:
+            schedule[week.number][lecture.date.weekday()] = lecture.date
+            weekdays_with_lectures.add(lecture.date.weekday())
+
+    weekdays_with_lectures = sorted(list(weekdays_with_lectures))
+
+    return weekdays_with_lectures, schedule

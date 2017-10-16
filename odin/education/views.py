@@ -1,4 +1,5 @@
 import json
+import calendar
 
 from rest_framework import generics
 
@@ -80,7 +81,7 @@ from .services import (
     create_lecture
 )
 from .serializers import TopicSerializer, SolutionSerializer
-from .utils import get_solution_data, add_week_to_course
+from .utils import get_solution_data, map_lecture_dates_to_week_days, add_week_to_course
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -127,6 +128,13 @@ class CourseDetailView(LoginRequiredMixin,
         if self.request.user.is_student():
             student = self.request.user.student
             context['tasks_ratio'] = calculate_student_valid_solutions_for_course(student=student, course=self.course)
+
+        weekdays_with_lectures, course_schedule = map_lecture_dates_to_week_days(self.course)
+        if course_schedule:
+            context['course_schedule'] = course_schedule
+            context['weekdays'] = weekdays_with_lectures
+            context['humanized_weekdays'] = [calendar.day_name[i] for i in weekdays_with_lectures]
+
         return context
 
 

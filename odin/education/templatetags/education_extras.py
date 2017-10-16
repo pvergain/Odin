@@ -21,3 +21,8 @@ def solved_tasks_for_course(student, course):
     solved = student.solutions.get_solved_solutions_for_student_and_course(student=student, course=course)
 
     return solved.count()
+
+
+@register.filter(name='get_date_for_weekday')
+def get_date_for_weekday(dates, weekday):
+    return dates.get(weekday, "No Lecture")
