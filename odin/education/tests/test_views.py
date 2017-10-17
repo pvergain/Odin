@@ -20,6 +20,7 @@ from ..factories import (
     ProgrammingLanguageFactory,
     SourceCodeTestFactory,
     BinaryFileTestFactory,
+    SolutionFactory,
 )
 from ..models import (
     Student,
@@ -1167,3 +1168,93 @@ class TestEditLectureView(TestCase):
                                                                 kwargs={
                                                                     'course_id': self.course.id
                                                                 }))
+
+
+class TestAllStudentSolutionsView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.course = CourseFactory()
+        self.teacher = TeacherFactory(password=self.test_password)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.task = IncludedTaskFactory(topic__course=self.course)
+        self.student = StudentFactory(password=self.test_password)
+        add_student(course=self.course, student=self.student)
+        self.url = reverse('dashboard:education:all-students-solutions',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'task_id': self.task.id,
+                           })
+        self.student.is_active = True
+        self.teacher.is_active = True
+        self.student.save()
+        self.teacher.save()
+
+    def test_can_not_access_view_if_not_teacher_for_course(self):
+        with self.login(email=self.student.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_can_access_view_if_teacher_for_course(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.get_check_200(self.url)
+
+    def test_statistics_are_zero_when_there_are_no_solutions_for_task(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(0, response.context['solution_statistics'].get(
+                'students_with_a_submitted_solution_count')
+            )
+            self.assertEqual(0, response.context['solution_statistics'].get(
+                'students_with_a_passing_solution_count')
+            )
+
+    def test_students_with_passing_solution_count_is_still_zero_when_task_gradable_and_solution_is_wrong(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.NOT_OK)
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, response.context['solution_statistics'].get(
+                'students_with_a_submitted_solution_count')
+            )
+            self.assertEqual(0, response.context['solution_statistics'].get(
+                'students_with_a_passing_solution_count')
+            )
+
+    def test_passing_solution_count_is_one_when_passing_solution_for_gradable_task_is_submitted(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.OK)
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, response.context['solution_statistics'].get(
+                'students_with_a_submitted_solution_count')
+            )
+            self.assertEqual(1, response.context['solution_statistics'].get(
+                'students_with_a_passing_solution_count')
+            )
+
+    def test_no_students_are_shown_on_correct_filter_when_no_passing_solutions_for_task(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.NOT_OK)
+        self.url = self.url + "?status=correct"
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(0, len(response.context['object_list']))
+
+    def test_student_is_shown_on_correct_filter_when_passing_solution_for_task(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.OK)
+        self.url = self.url + "?status=correct"
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, len(response.context['object_list']))

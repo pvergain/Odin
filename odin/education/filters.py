@@ -1,5 +1,7 @@
 import django_filters
 
+from django.db.models import Q
+
 from .models import Solution, Student
 
 
@@ -13,7 +15,10 @@ class SolutionsFilter(django_filters.FilterSet):
 
     def filter_solutions(self, queryset, name, value):
         if value == 'correct':
-            return queryset.filter(solutions__task=self.task, solutions__status=Solution.OK)
+            q_expression = Q(solutions__task__gradable=True, solutions__status=Solution.OK) \
+                         | Q(solutions__task__gradable=False, solutions__status=Solution.SUBMITTED_WITHOUT_GRADING)
+
+            return queryset.filter(q_expression, solutions__task=self.task)
 
         return queryset
 

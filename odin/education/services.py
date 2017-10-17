@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
 from django.db import transaction
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 from .models import (
@@ -226,8 +227,11 @@ def get_all_student_solution_statistics(*,
 
     filters = {'solutions__task': task, 'solutions__isnull': False}
     result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
-    filters = {'solutions__task': task, 'solutions__status': Solution.OK}
-    result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
+    q_expression = Q(solutions__task__gradable=True, solutions__status=Solution.OK) \
+        | Q(solutions__task__gradable=False, solutions__status=Solution.SUBMITTED_WITHOUT_GRADING)
+    result['students_with_a_passing_solution_count'] = course.students.filter(
+        q_expression, solutions__task=task
+    ).distinct().count()
 
     return result
 
