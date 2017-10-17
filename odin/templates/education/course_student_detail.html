@@ -4,7 +4,7 @@
 {% load common_extras %}
 
 {% block content_title %}
-  {{course.name}} - {{object.get_full_name}} 
+  {{course.name}} {% if object.get_full_name %} - {{object.get_full_name}} {% endif %}
 {% endblock content_title %}
 
 {% block page_content %}
@@ -81,11 +81,11 @@
                   {% if task_data %}
                     {% for solution in task_data.0 %}
                       <div class="col-md-6">
-                        Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }} 
+                        Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }}
                       </div>
                       <div class="col-md-6">
                         {% include "education/partial/solution_modal.html" with solution=solution %}
-                        <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}"> Build log </a>
+                        <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}" style="margin-top: 2px;"> Build log </a>
                       </div>
                     {% endfor %}
                   {% endif %}

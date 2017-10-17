@@ -1,5 +1,5 @@
 {% load static %}
-{% load education_extras %}
+{% load common_extras %}
 
 <div class="row">
   <div class="portlet box green">
@@ -15,13 +15,13 @@
       <div class="row">
         <div class="col-md-12">
           <div class="col-md-2">
-            {% if student.full_image %}
-              <a href="">
+            <a href="{% url 'dashboard:education:course-student-detail' course.id student.email %}">
+              {% if student.full_image %}
                 <img src={{ MEDIA_URL }}{{ student.full_image }} class="img-responsive"/></a>
-            {% else %}
-                <a href="">
-                  <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
-            {% endif %}
+              {% else %}
+                <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
+              {% endif %}
+            </a>
           </div>
           <div class="col-md-9">
             <div class="socicons">
@@ -40,7 +40,7 @@
             Attendance: N/A
           </div>
           <div class=col-md-3>
-            Correct solutions: {{ student|solved_tasks_for_course:course }} / {{ task_count }}
+            Correct solutions: {{ solutions|lookup:student.email }} / {{ task_count }}
           </div>
           <div class=col-md-3>
             Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a>

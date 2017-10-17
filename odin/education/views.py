@@ -81,7 +81,12 @@ from .services import (
     create_lecture
 )
 from .serializers import TopicSerializer, SolutionSerializer
-from .utils import get_solution_data, map_lecture_dates_to_week_days, add_week_to_course
+from .utils import (
+    get_solution_data,
+    map_lecture_dates_to_week_days,
+    add_week_to_course,
+    get_all_solved_student_solution_count_for_course,
+)
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -755,6 +760,7 @@ class CourseStudentsListView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['task_count'] = IncludedTask.objects.filter(topic__course=self.course).count()
+        context['students_passed_solutions'] = get_all_solved_student_solution_count_for_course(course=self.course)
 
         return context
 
@@ -826,7 +832,7 @@ class CourseStudentDetailView(LoginRequiredMixin,
         for task in course_tasks:
             if not passed_or_failed.get(task.name):
                 passed_or_failed[task.name] = "Not submitted"
-            task_solutions[task.name] = (solution_data.get(task), passed_or_failed.get(task.name))
+            task_solutions[task.name] = (solution_data.get(task.name), passed_or_failed.get(task.name))
 
         context['task_solutions'] = task_solutions
         assignment = get_object_or_404(CourseAssignment, student=student, course=self.course)

@@ -9,5 +9,5 @@ def get_message(msg):
 
 
 @register.filter(name='lookup')
-def lookup(dictionary, key):
-    return dictionary.get(key)
+def lookup(dictionary, key, default=0):
+    return dictionary.get(key, default)

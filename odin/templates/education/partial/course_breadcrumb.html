@@ -8,7 +8,7 @@
     <li>
       <span style="font-size: 120%">{{ course.name }}</span>
     </li>
-    {% if student %}
+    {% if student and student.get_full_name %}
       <li>
         <i class="fa fa-angle-right"></i>
         <span style="font-size: 120%">{{ student.get_full_name }}</span>
