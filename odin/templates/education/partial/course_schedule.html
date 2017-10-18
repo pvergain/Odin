@@ -22,7 +22,13 @@
             <tr>
               <td>Week {{ week }}</td>
               {% for weekday in weekdays %}
-                <td>{{ dates|get_date_for_weekday:weekday|date:"d M Y" }}</td>
+                {% with lecture_id=dates|get_lecture_id_for_weekday:weekday %}
+                  {% if lecture_id %}
+                    <td><a href="{% url 'dashboard:education:course-management:edit-lecture' course.id lecture_id %}">{{ dates|get_date_for_weekday:weekday|date:"d M Y" }}</a></td>
+                  {% else %}
+                    <td>No lecture</td>
+                  {% endif  %}
+                {% endwith %}
               {% endfor %}
             </tr>
           {% endfor %}
@@ -30,4 +36,6 @@
       </table>
     </div>
   </div>
+  <a href="{% url 'dashboard:education:course-management:create-lecture' course.id %}">
+    <button class="btn green uppercase" type="button">Add lecture</button></a>
 </div>

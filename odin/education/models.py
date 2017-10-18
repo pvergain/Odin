@@ -203,6 +203,11 @@ class Lecture(models.Model):
 
     present_students = models.ManyToManyField(Student, related_name='lectures')
 
+    def clean(self):
+        if hasattr(self, 'week'):
+            if not self.week.start_date <= self.date <= self.week.end_date:
+                raise ValidationError('Lecture date must be in the date range for it\'s week')
+
     @property
     def not_present_students(self):
         present_ids = self.present_students.values_list('id', flat=True)

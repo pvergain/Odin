@@ -25,4 +25,19 @@ def solved_tasks_for_course(student, course):
 
 @register.filter(name='get_date_for_weekday')
 def get_date_for_weekday(dates, weekday):
-    return dates.get(weekday, "No Lecture")
+    date = dates.get(weekday)
+
+    if date:
+        return date.get('lecture_date')
+
+    return 'No Lecture'
+
+
+@register.filter(name='get_lecture_id_for_weekday')
+def get_lecture_id_for_weekday(dates, weekday):
+    date = dates.get(weekday)
+
+    if date:
+        return date.get('lecture_id', None)
+
+    return None

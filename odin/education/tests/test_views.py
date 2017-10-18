@@ -1169,6 +1169,19 @@ class TestEditLectureView(TestCase):
                                                                     'course_id': self.course.id
                                                                 }))
 
+    def test_post_with_date_outside_of_week_date_does_not_create_lecture(self):
+        current_lecture_count = Lecture.objects.count()
+        data = {
+            'date': self.lecture.week.end_date + timezone.timedelta(days=1)
+        }
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            form = response.context_data.get('form')
+
+            self.assertFalse(form.is_valid())
+            self.assertEqual(current_lecture_count, Lecture.objects.count())
+
 
 class TestAllStudentSolutionsView(TestCase):
     def setUp(self):

@@ -77,7 +77,10 @@ def map_lecture_dates_to_week_days(course: Course) -> (Set, Dict):
             continue
 
         for lecture in lectures:
-            schedule[week.number][lecture.date.weekday()] = lecture.date
+            schedule[week.number][lecture.date.weekday()] = {
+                'lecture_date': lecture.date,
+                'lecture_id': lecture.id
+            }
             weekdays_with_lectures.add(lecture.date.weekday())
 
     weekdays_with_lectures = sorted(list(weekdays_with_lectures))
