@@ -2,52 +2,54 @@
 {% load common_extras %}
 
 <div class="row">
-  <div class="portlet box green">
-    <div class="portlet-title">
-      <div class="caption">
-        <i class="fa fa-comments"></i> {{ student.name }} - {{ student.email }}
+  <div class="col-md-12">
+    <div class="portlet box green">
+      <div class="portlet-title">
+        <div class="caption">
+          <i class="fa fa-comments"></i> {{ student.name }} - {{ student.email }}
+        </div>
+        <div class="tools">
+          <a href="javascript:;" class="collapse"> </a>
+        </div>
       </div>
-      <div class="tools">
-        <a href="javascript:;" class="collapse"> </a>
-      </div>
-    </div>
-    <div class="portlet-body">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="col-md-2">
-            <a href="{% url 'dashboard:education:course-student-detail' course.id student.email %}">
-              {% if student.full_image %}
-                <img src={{ MEDIA_URL }}{{ student.full_image }} class="img-responsive"/></a>
-              {% else %}
-                <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
-              {% endif %}
-            </a>
-          </div>
-          <div class="col-md-9">
-            <div class="socicons">
-              <ul class="list-unstyled">
-                <li> <span><i class="socicon-btn socicon-mail tooltips border-white" style="position: relative;top: 5px;right: 5px"></i>{{ student.email }}</span></li>
-                {% if student.profile.social_accounts %}
-                  <li><i class="socicon-btn socicon-github tooltips border-white" style="position: relative;top: 5px;right: 5px"></i><a href="{{ student.profile.social_accounts.github }}">{{ student.profile.social_accounts.github }}</a></li>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="col-md-2">
+              <a href="{% url 'dashboard:education:course-student-detail' course.id student.email %}">
+                {% if student.full_image %}
+                  <img src={{ MEDIA_URL }}{{ student.full_image }} class="img-responsive"/></a>
+                {% else %}
+                  <img src="{% static 'hackman.png' %}" class="img-responsive"/></a>
                 {% endif %}
-              </ul>
+              </a>
+            </div>
+            <div class="col-md-9">
+              <div class="socicons">
+                <ul class="list-unstyled">
+                  <li> <span><i class="socicon-btn socicon-mail tooltips border-white" style="position: relative;top: 5px;right: 5px"></i>{{ student.email }}</span></li>
+                  {% if student.profile.social_accounts %}
+                    <li><i class="socicon-btn socicon-github tooltips border-white" style="position: relative;top: 5px;right: 5px"></i><a href="{{ student.profile.social_accounts.github }}">{{ student.profile.social_accounts.github }}</a></li>
+                  {% endif %}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-        <div class=col-md-12>
-          <div class=col-md-3></div>
-          <div class=col-md-3>
-            Attendance: N/A
+          <div class=col-md-12>
+            <div class=col-md-3></div>
+            <div class=col-md-3>
+              Attendance: N/A
+            </div>
+            <div class=col-md-3>
+              Correct solutions: {{ solutions|lookup:student.email }} / {{ task_count }}
+            </div>
+            <div class=col-md-3>
+              Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a>
+            </div>
           </div>
-          <div class=col-md-3>
-            Correct solutions: {{ solutions|lookup:student.email }} / {{ task_count }}
+          <div class=col-md-12>
+            {% include 'education/partial/notes_section.html' with student_notes=assignment.notes%}
           </div>
-          <div class=col-md-3>
-            Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a>
-          </div>
-        </div>
-        <div class=col-md-12>
-          {% include 'education/partial/notes_section.html' with student_notes=assignment.notes%}
         </div>
       </div>
     </div>
