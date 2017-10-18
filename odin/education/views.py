@@ -5,6 +5,7 @@ from rest_framework import generics
 
 from django.utils import timezone
 from django.core.management import call_command
+from django.conf import settings
 from django.views import View
 from django.views.generic import (
     TemplateView,
@@ -22,6 +23,7 @@ from django.http import JsonResponse
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
+from odin.common.services import send_email
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
 
@@ -66,7 +68,8 @@ from .forms import (
     SubmitNonGradableSolutionForm,
     StudentNoteForm,
     CreateLectureForm,
-    EditLectureForm
+    EditLectureForm,
+    PlainTextForm
 )
 from .services import (
     create_topic,
@@ -979,3 +982,29 @@ class AddWeekToCourseView(LoginRequiredMixin,
         return reverse_lazy('dashboard:education:user-course-detail', kwargs={
            'course_id': self.course.id
         })
+
+
+class SendEmailToAllStudentsView(LoginRequiredMixin,
+                                 CourseViewMixin,
+                                 IsTeacherInCoursePermission,
+                                 FormView):
+    form_class = PlainTextForm
+    template_name = 'education/send_email_to_all_students.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+    def form_valid(self, form):
+        template_name = settings.EMAIL_TEMPLATES.get('course_information_email')
+        context = {
+            'course': self.course.name,
+            'information': form.cleaned_data.get('text')
+        }
+
+        recipients = [student.email for student in self.course.students.all()]
+        send_email(template_name=template_name, recipients=recipients, context=context)
+
+        return super().form_valid(form)

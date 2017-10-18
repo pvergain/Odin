@@ -7,7 +7,7 @@
       <h1 class="page-title">Students</h1>
       <a href="{% url 'dashboard:education:course-students-list' course.id %}">
         <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">View Students</button></a>
-      <a href="">
+      <a href="{% url 'dashboard:education:course-management:send-email-to-all-students' course.id %}">
         <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">Send Mass Email</button></a>
     </div>
   </div>

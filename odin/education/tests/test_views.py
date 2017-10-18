@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import timezone
+from django.test.utils import override_settings
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -1271,3 +1272,38 @@ class TestAllStudentSolutionsView(TestCase):
             response = self.get(self.url)
             self.response_200(response)
             self.assertEqual(1, len(response.context['object_list']))
+
+
+class TestSendEmailToAllStudentsView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.students = StudentFactory.create_batch(size=5)
+
+        for student in self.students:
+            add_student(course=self.course, student=student)
+
+        self.test_password = faker.password()
+        self.teacher = Teacher.objects.create_from_user(BaseUserFactory(password=self.test_password))
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:send-email-to-all-students',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
+    @patch('odin.common.tasks.send_template_mail.delay')
+    def test_post_sends_email_to_all_students(self, mock_send_mail):
+        data = {
+            'text': faker.text()
+        }
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
+                                                                kwargs={
+                                                                    'course_id': self.course.id
+                                                                }))
+            self.assertTrue(mock_send_mail.called)
+            (template_name, recipients, context), kwargs = mock_send_mail.call_args
+            student_emails = [student.email for student in self.students]
+            self.assertEqual(recipients, student_emails)

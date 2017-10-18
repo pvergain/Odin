@@ -34,7 +34,8 @@ from .views import (
     CreateLectureView,
     EditLectureView,
     DeleteLectureView,
-    AddWeekToCourseView
+    AddWeekToCourseView,
+    SendEmailToAllStudentsView
 )
 
 
@@ -136,6 +137,11 @@ course_management_urlpatterns = [
         regex='^(?P<course_id>[0-9]+)/add-week/$',
         view=AddWeekToCourseView.as_view(),
         name='add-week-to-course',
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/send-email-to-all-students/$',
+        view=SendEmailToAllStudentsView.as_view(),
+        name='send-email-to-all-students',
     )
 ]
 

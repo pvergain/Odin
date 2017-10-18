@@ -141,3 +141,7 @@ class EditLectureForm(forms.ModelForm):
         widgets = {
             'date': DateInput()
         }
+
+
+class PlainTextForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea(), required=True)
