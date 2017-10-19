@@ -200,4 +200,7 @@ EMAIL_TEMPLATES = {
     for key, f in templates.items()
 }
 
+TASK_PASSED = "Passed"
+TASK_FAILED = "Failed"
+
 from .grader import *

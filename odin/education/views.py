@@ -81,13 +81,13 @@ from .services import (
     calculate_student_valid_solutions_for_course,
     get_all_student_solution_statistics,
     create_student_note,
-    create_lecture
+    create_lecture,
+    add_week_to_course,
 )
 from .serializers import TopicSerializer, SolutionSerializer
 from .utils import (
     get_solution_data,
     map_lecture_dates_to_week_days,
-    add_week_to_course,
     get_all_solved_student_solution_count_for_course,
 )
 

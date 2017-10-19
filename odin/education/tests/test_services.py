@@ -322,15 +322,15 @@ class TestCreateLecture(TestCase):
         start_date = timezone.now().date() + timezone.timedelta(days=faker.pyint())
         self.course = CourseFactory(start_date=start_date,
                                     end_date=start_date + timezone.timedelta(days=faker.pyint()))
-        self.valid_date = self.course.start_date + timezone.timedelta(days=1)
-        self.invalid_date = self.course.end_date + timezone.timedelta(days=faker.pyint())
 
     def test_service_creates_lecture_when_date_is_valid(self):
+        valid_date = self.course.start_date + timezone.timedelta(days=1)
         current_lecture_count = Lecture.objects.count()
-        create_lecture(date=self.valid_date, course=self.course)
+        create_lecture(date=valid_date, course=self.course)
 
         self.assertEqual(current_lecture_count + 1, Lecture.objects.count())
 
     def test_service_raises_validation_error_when_date_is_invalid(self):
+        invalid_date = self.course.end_date + timezone.timedelta(days=faker.pyint())
         with self.assertRaises(ValidationError):
-            create_lecture(date=self.invalid_date, course=self.course)
+            create_lecture(date=invalid_date, course=self.course)

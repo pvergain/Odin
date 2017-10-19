@@ -3,6 +3,7 @@ from typing import Dict, BinaryIO
 
 from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 from .models import (
@@ -261,3 +262,20 @@ def create_lecture(*,
         return lecture
     else:
         raise ValidationError('Date not in range of any week for this course')
+
+
+def add_week_to_course(*,
+                       course: Course,
+                       new_end_date: timezone.datetime.date) -> Week:
+    last_week = course.weeks.last()
+    new_week = Week.objects.create(
+        course=course,
+        number=last_week.number + 1,
+        start_date=course.end_date,
+        end_date=new_end_date
+    )
+
+    course.end_date = course.end_date + timezone.timedelta(days=7)
+    course.save()
+
+    return new_week

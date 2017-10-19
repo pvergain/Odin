@@ -1,5 +1,7 @@
 from test_plus import TestCase
 
+from django.conf import settings
+
 from ..factories import IncludedTaskFactory, SolutionFactory, CourseFactory, StudentFactory
 from ..models import Solution
 from ..services import add_student
@@ -29,16 +31,16 @@ class TestGetPassedAndFailedTasks(TestCase):
             self.non_gradable_task.name: [passing_non_gradable_solution]
         }
         result = get_passed_and_failed_tasks(solution_data)
-        self.assertEqual("Passed", result.get(self.gradable_task.name))
-        self.assertEqual("Passed", result.get(self.non_gradable_task.name))
+        self.assertEqual(settings.TASK_PASSED, result.get(self.gradable_task.name))
+        self.assertEqual(settings.TASK_PASSED, result.get(self.non_gradable_task.name))
 
-    def test_returns_task_failed_when_there_is_failing_solution_for_it(self):
+    def test_returns_task_failed_when_there_are_only_failing_solutions_for_it(self):
         failing_solution = SolutionFactory(student=self.student, task=self.gradable_task, status=Solution.NOT_OK)
         solution_data = {
             self.gradable_task.name: [failing_solution]
         }
         result = get_passed_and_failed_tasks(solution_data)
-        self.assertEqual("Failed", result.get(self.gradable_task.name))
+        self.assertEqual(settings.TASK_FAILED, result.get(self.gradable_task.name))
 
 
 class TestGetSolutionData(TestCase):
@@ -49,7 +51,7 @@ class TestGetSolutionData(TestCase):
         self.student = StudentFactory()
         add_student(course=self.course, student=self.student)
 
-    def test_solutions_to_tasks_are_added_to_return_dict(self):
+    def test_solutions_to_tasks_are_added_successfully_to_solution_data(self):
         gradable_solution = SolutionFactory(student=self.student, task=self.gradable_task, status=Solution.OK)
         non_gradable_solution = SolutionFactory(
             student=self.student, task=self.non_gradable_task, status=Solution.SUBMITTED_WITHOUT_GRADING

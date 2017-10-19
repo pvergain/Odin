@@ -1,7 +1,7 @@
 from typing import Dict, Set
 
-from django.utils import timezone
 from django.db.models import Q
+from django.conf import settings
 
 from .models import Solution, Student, Course, Week
 
@@ -18,15 +18,15 @@ def get_passed_and_failed_tasks(solution_data: Dict) -> Dict:
         if task.gradable:
             for solution in solutions:
                 if solution.status == Solution.OK:
-                    passed_or_failed[task_name] = "Passed"
+                    passed_or_failed[task_name] = settings.TASK_PASSED
             if not passed_or_failed.get(task_name):
-                passed_or_failed[task_name] = "Failed"
+                passed_or_failed[task_name] = settings.TASK_FAILED
         else:
             for solution in solutions:
                 if solution.status == Solution.SUBMITTED_WITHOUT_GRADING:
-                    passed_or_failed[task_name] = "Passed"
+                    passed_or_failed[task_name] = settings.TASK_PASSED
             if not passed_or_failed[task_name]:
-                passed_or_failed[task_name] = "Failed"
+                passed_or_failed[task_name] = settings.TASK_FAILED
 
     return passed_or_failed
 
@@ -48,21 +48,6 @@ def get_solution_data(course: Course, student: Student) -> (Dict, Dict):
     passed_and_failed = get_passed_and_failed_tasks(solution_data)
 
     return solution_data, passed_and_failed
-
-
-def add_week_to_course(course: Course, new_end_date: timezone.datetime.date) -> Week:
-    last_week = course.weeks.last()
-    new_week = Week.objects.create(
-        course=course,
-        number=last_week.number + 1,
-        start_date=course.end_date,
-        end_date=new_end_date
-    )
-
-    course.end_date = course.end_date + timezone.timedelta(days=7)
-    course.save()
-
-    return new_week
 
 
 def map_lecture_dates_to_week_days(course: Course) -> (Set, Dict):
@@ -88,7 +73,7 @@ def map_lecture_dates_to_week_days(course: Course) -> (Set, Dict):
     return weekdays_with_lectures, schedule
 
 
-def get_all_solved_student_solution_count_for_course(course: Course):
+def get_all_solved_student_solution_count_for_course(course: Course) -> Dict:
     q_expression = Q(task__gradable=True, status=2) | Q(task__gradable=False, status=6)
     all_passed_solutions = Solution.objects.filter(
         q_expression, task__topic__course=course
