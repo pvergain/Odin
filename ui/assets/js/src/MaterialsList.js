@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 
-import EditItem from './EditItem';
+import EditItem from "./EditItem";
 
 const ListItem = props => {
-  const materialUrl = Urls['dashboard:education:material-detail']({
-    material_id: props.material.id,
+  const materialUrl = Urls["dashboard:education:included-material-detail"]({
+    material_id: props.material.id
   });
   const materialEditUrl = Urls[
-    'dashboard:education:course-management:edit-included-material'
+    "dashboard:education:course-management:edit-included-material"
   ]({
     course_id: props.course,
-    material_id: props.material.id,
+    material_id: props.material.id
   });
 
   return (
@@ -29,19 +29,17 @@ const ListItem = props => {
 
 class MaterialsList extends React.Component {
   render() {
-    const {materials, course} = this.props;
+    const { materials, course } = this.props;
 
-    return materials.length > 0 ? (
-      <div className="list-group">
-        {materials.map(material => {
-          return (
-            <ListItem material={material} course={course} key={material.id} />
-          );
-        })}
-      </div>
-    ) : (
-      <div />
-    );
+    return materials.length > 0
+      ? <div className="list-group">
+          {materials.map(material => {
+            return (
+              <ListItem material={material} course={course} key={material.id} />
+            );
+          })}
+        </div>
+      : <div />;
   }
 }
 

@@ -11,7 +11,6 @@
     {% include "education/partial/message_box.html" %}
     {% include "partial/form_errors.html" with errors=readable_errors %}
     {% include "education/partial/existing_materials.html" with material_list=material_list %}
-      <a href="{% url 'dashboard:education:course-management:add-new-included-material' course.pk topic_id %}"><button type="button" name="button" class="btn green uppercase" >Add new material</button></a>
     </div>
     <!-- END SAMPLE TABLE PORTLET-->
   </div>

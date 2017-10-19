@@ -41,3 +41,15 @@ def get_lecture_id_for_weekday(dates, weekday):
         return date.get('lecture_id', None)
 
     return None
+
+
+@register.filter(name='get_courses_containing_task')
+def get_courses_containing_task(task):
+    included_tasks = task.included_tasks.all()
+    return set(task.topic.course.name for task in included_tasks)
+
+
+@register.filter(name='get_courses_containing_material')
+def get_courses_containing_material(material):
+    included_materials = material.included_materials.all()
+    return set(material.topic.course.name for material in included_materials)

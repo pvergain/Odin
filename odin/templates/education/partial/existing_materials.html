@@ -1,3 +1,5 @@
+{% load education_extras %}
+
 <div class="portlet box green">
   <div class="portlet-title">
     <div class="caption">
@@ -25,6 +27,7 @@
               <th> Identifier </th>
               <th> Url </th>
               <th> Content </th>
+              <th>Courses with this material</th>
               <th> </th>
             </tr>
           </thead>
@@ -32,9 +35,14 @@
             {% for material in material_list %}
               <tr>
                 <td>{{ material.id }}</td>
-                <td>{{ material.identifier }}</td>
+                <td><a href="{% url 'dashboard:education:included-material-detail' material.id %}">{{ material.identifier }}</a></td>
                 <td><a href="{{ material.url }}">{{ material.url }}</a></td>
                 <td>{{ course.content }}</td>
+                <td>
+                  {% for course_name in material|get_courses_containing_material %}
+                    {{ course_name }}<br/>
+                  {% endfor %}
+                </td>
                 <td><button type="submit" class="btn green uppercase" name="material" value="{{ material.id }}">Add material</button></td>
               </tr>
             {% endfor %}

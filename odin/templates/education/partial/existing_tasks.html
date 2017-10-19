@@ -1,3 +1,5 @@
+{% load education_extras %}
+
 <div class="portlet-title">
   <div class="caption">
     <i class="fa fa-comments"></i> All Existing tasks
@@ -15,6 +17,7 @@
           <tr>
             <th> # </th>
             <th> Name </th>
+            <th>Courses with this task</th>
             <th></th>
           </tr>
         </thead>
@@ -23,7 +26,12 @@
           {% for task in task_list %}
             <tr>
               <td>{{ task.id }}</td>
-              <td>{{ task.name }}</td>
+              <td><a href={% url 'dashboard:education:existing-task-detail' task.id %}>{{ task.name }}</a></td>
+              <td>
+                {% for course_name in task|get_courses_containing_task %}
+                  {{ course_name }}<br/>
+                {% endfor %}
+              </td>
               <td><button type="submit" class="btn green uppercase" name="task" value="{{ task.id }}">Add task</button></td>
             </tr>
           {% endfor %}

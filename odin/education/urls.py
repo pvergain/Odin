@@ -13,7 +13,7 @@ from .views import (
     AddNewIncludedTaskView,
     AddIncludedTaskFromExistingView,
     ExistingTasksView,
-    TaskDetailView,
+    IncludedTaskDetailView,
     EditTaskView,
     EditIncludedTaskView,
     AddBinaryFileTestToTaskView,
@@ -23,7 +23,7 @@ from .views import (
     SubmitNonGradableSolutionView,
     StudentSolutionDetailView,
     EditIncludedTestView,
-    MaterialDetailView,
+    IncludedMaterialDetailView,
     AllStudentsSolutionsView,
     SolutionDetailAPIView,
     CompareSolutionsView,
@@ -35,7 +35,9 @@ from .views import (
     EditLectureView,
     DeleteLectureView,
     AddWeekToCourseView,
-    SendEmailToAllStudentsView
+    SendEmailToAllStudentsView,
+    TaskDetailView,
+    MaterialDetailView
 )
 
 
@@ -187,14 +189,24 @@ urlpatterns = [
         name='student-solution-detail'
     ),
     url(
-        regex='^tasks/(?P<task_id>[0-9]+)/$',
+        regex='^existing-tasks/(?P<task_id>[0-9]+)/$',
         view=TaskDetailView.as_view(),
-        name='task-detail'
+        name='existing-task-detail'
+    ),
+    url(
+        regex='^tasks/(?P<task_id>[0-9]+)/$',
+        view=IncludedTaskDetailView.as_view(),
+        name='included-task-detail'
+    ),
+    url(
+        regex='^existing-materials/(?P<material_id>[0-9]+)/$',
+        view=MaterialDetailView.as_view(),
+        name='existing-material-detail'
     ),
     url(
         regex='^materials/(?P<material_id>[0-9]+)/$',
-        view=MaterialDetailView.as_view(),
-        name='material-detail'
+        view=IncludedMaterialDetailView.as_view(),
+        name='included-material-detail'
     ),
     url(
         regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/all-students-solutions/$',

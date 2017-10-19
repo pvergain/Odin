@@ -233,7 +233,7 @@ class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
 
         context['topic_id'] = self.kwargs.get('topic_id')
 
-        context['material_list'] = Material.objects.all()
+        context['material_list'] = Material.objects.prefetch_related('included_materials__topic__course')
 
         return context
 
@@ -433,7 +433,7 @@ class AddIncludedTaskFromExistingView(LoginRequiredMixin,
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['topic_id'] = self.kwargs.get('topic_id')
-        context['task_list'] = Task.objects.all()
+        context['task_list'] = Task.objects.prefetch_related('included_tasks__topic__course')
 
         return context
 
@@ -458,9 +458,15 @@ class AddIncludedTaskFromExistingView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class TaskDetailView(LoginRequiredMixin,
-                     TaskViewMixin,
-                     DetailView):
+class TaskDetailView(LoginRequiredMixin, DetailView):
+    model = Task
+    pk_url_kwarg = 'task_id'
+    template_name = 'education/task_detail.html'
+
+
+class IncludedTaskDetailView(LoginRequiredMixin,
+                             TaskViewMixin,
+                             DetailView):
     model = IncludedTask
     pk_url_kwarg = 'task_id'
     template_name = 'education/task_detail.html'
@@ -468,6 +474,13 @@ class TaskDetailView(LoginRequiredMixin,
 
 class MaterialDetailView(LoginRequiredMixin,
                          DetailView):
+    model = Material
+    pk_url_kwarg = 'material_id'
+    template_name = 'education/material_detail'
+
+
+class IncludedMaterialDetailView(LoginRequiredMixin,
+                                 DetailView):
     model = IncludedMaterial
     pk_url_kwarg = 'material_id'
     template_name = 'education/material_detail.html'
