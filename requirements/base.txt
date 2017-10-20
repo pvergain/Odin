@@ -58,3 +58,6 @@ mistune==0.7.4
 
 # Urls
 django-js-reverse==0.7.3
+
+# Collect staticfiles faster
+Collectfast==0.5.2
