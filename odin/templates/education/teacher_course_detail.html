@@ -3,7 +3,7 @@
 {% block page_content %}
   <div class="row">
     <div class="col-md-12">
-    {% include "education/partial/course_breadcrumb.html" with course=course %}
+    {% include "education/partial/course_breadcrumb.html" with course=course is_student_list=False %}
       <h1 class="page-title">Students</h1>
       <a href="{% url 'dashboard:education:course-students-list' course.id %}">
         <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">View Students</button></a>

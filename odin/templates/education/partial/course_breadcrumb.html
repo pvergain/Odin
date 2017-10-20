@@ -10,10 +10,12 @@
         <span style="font-size: 120%">{{ course.name }}</span>
       </a>
     </li>
+    {% if is_student_list %}
     <li>
       <i class="fa fa-angle-right"></i>
       <span style="font-size: 120%">Students</span>
     </li>
+    {% endif %}
     {% if student and student.get_full_name %}
       <li>
         <i class="fa fa-angle-right"></i>

@@ -10,7 +10,7 @@
 {% block page_content %}
   <div class="row">
     <div class="col-md-12">
-    {% include "education/partial/course_breadcrumb.html" with course=course student=object %}
+    {% include "education/partial/course_breadcrumb.html" with course=course student=object is_student_list=True %}
       <div class="well well-lg" style="background-color: #ffffff;">
         <div class="row">
           <div class="col-md-2">
