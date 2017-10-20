@@ -1,5 +1,9 @@
 {% extends "dashboard/dashboard_base.html" %}
 
+{% block title %}
+  Solution for {{ task.name }}
+{% endblock title %}
+
 {% block content_title %}
     Your solution for {{ task.name }}
 {% endblock content_title %}
