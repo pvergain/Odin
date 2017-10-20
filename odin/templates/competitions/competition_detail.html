@@ -1,6 +1,10 @@
 {% extends 'dashboard/dashboard_base.html' %}
 {% load static %}
 
+{% block title %}
+  Details on {{ competition.name }}
+{% endblock title %}
+
 {% block content_title %}
   Details on {{ competition.name }}
 {% endblock content_title %}
