@@ -2,6 +2,7 @@
 {% load static %}
 
 {% load interview_extras %}
+{% load common_extras %}
 
 {% block body %}
   <body class="page-header-fixed page-sidebar-closed-hide-logo page-container-bg-solid">
@@ -29,7 +30,11 @@
                 <!-- BEGIN USER LOGIN DROPDOWN -->
                 <li class="dropdown dropdown-user">
                   <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                    <img src="{{ MEDIA_URL }}{{ request.user.profile.full_image.name }}" alt="" class="user-pic" src="" />
+                    {% if request.user.profile.full_image %}
+                      <img src="{{ MEDIA_URL }}{{ request.user.profile.full_image.name }}" alt="" class="user-pic" src="" />
+                    {% else %}
+                      <img src="{% static 'hackman.png' %}" />
+                    {% endif %}
                     <span class="username username-hide-on-mobile"></span>
                     <i class="fa fa-angle-down"></i>
                   </a>
@@ -69,20 +74,21 @@
     <!-- BEGIN CONTAINER -->
     <div class="page-container">
       <!-- BEGIN SIDEBAR -->
+      {% with courses='dashboard:education:user-courses' applications='dashboard:applications:user-applications' management='dashboard:management:index' interviews='dashboard:interviews:user-interviews' %}
       <div class="page-sidebar-wrapper">
         <!-- END SIDEBAR -->
         <div class="page-sidebar navbar-collapse collapse">
           <!-- BEGIN SIDEBAR MENU -->
           <ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-hover-submenu " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200">
-            <li class="nav-item start active open">
-              <a href="{% url 'dashboard:education:user-courses' %}" class="nav-link nav-toggle">
+            <li class="nav-item {% active courses %}">
+              <a href="{% url courses %}" class="nav-link nav-toggle">
                 <i class="icon-briefcase"></i>
                 <span class="title">Courses</span>
               </a>
             </li>
             {% if user.is_teacher or user.applications.count %}
-              <li class="nav-item  ">
-                <a href="{% url 'dashboard:applications:user-applications' %}" class="nav-link nav-toggle">
+              <li class="nav-item {% active applications %} ">
+                <a href="{% url applications %}" class="nav-link nav-toggle">
                   <i class="icon-docs"></i>
                   <span class="title">Applications</span>
                   <span class="arrow"></span>
@@ -91,8 +97,8 @@
             {% endif %}
 
             {% if user.is_superuser %}
-              <li class="nav-item  ">
-                <a href="{% url 'dashboard:management:index' %}" class="nav-link nav-toggle">
+              <li class="nav-item {% active management %}" >
+                <a href="{% url management %}" class="nav-link nav-toggle">
                   <i class="icon-settings"></i>
                   <span class="title">Management</span>
                   <span class="arrow"></span>
@@ -100,8 +106,8 @@
               </li>
             {% endif %}
             {% if user|has_interviews_access %}
-              <li class="nav-item start ">
-                <a href="{% url 'dashboard:interviews:user-interviews' %}" class="nav-link nav-toggle">
+              <li class="nav-item start {% active interviews %}">
+                <a href="{% url interviews %}" class="nav-link nav-toggle">
                   <i class="icon-layers"></i>
                   <span class="title">Interviews</span>
                 </a>
@@ -113,6 +119,7 @@
         <!-- END SIDEBAR -->
       </div>
       <!-- END SIDEBAR -->
+      {% endwith %}
       <!-- BEGIN CONTENT -->
       <div class="page-content-wrapper">
         <!-- BEGIN CONTENT BODY -->

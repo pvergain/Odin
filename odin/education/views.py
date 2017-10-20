@@ -202,7 +202,7 @@ class EditTopicView(LoginRequiredMixin,
                     IsTeacherInCoursePermission,
                     UpdateView):
 
-    template_name = 'education/add_topic.html'
+    template_name = 'education/edit_topic.html'
     model = Topic
     pk_url_kwarg = 'topic_id'
     fields = ('name', 'week')
