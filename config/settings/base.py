@@ -13,6 +13,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'collectfast',
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.postgres'
@@ -29,7 +30,7 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     'django_filters',
     'easy_thumbnails',
-    'django_js_reverse'
+    'django_js_reverse',
 ]
 
 LOCAL_APPS = [

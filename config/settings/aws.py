@@ -25,3 +25,5 @@ AWS_EXPIRY = 60 * 60 * 24 * 7
 AWS_S3_OBJECT_PARAMETERS = {
     f'CacheControl': 'max-age={AWS_EXPIRY}',
 }
+
+AWS_PRELOAD_METADATA = True
