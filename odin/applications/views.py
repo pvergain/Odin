@@ -3,31 +3,25 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 
-from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
 from .permissions import ViewApplicationDetailPermission
-from .models import Application, ApplicationTask, ApplicationInfo
+from .models import Application, ApplicationInfo
 from .forms import (
     ApplicationInfoModelForm,
-    IncludedApplicationTaskForm,
     ApplicationCreateForm,
-    ApplicationEditForm,
-    IncludedApplicationTaskFromExistingForm
+    ApplicationEditForm
 )
 from .services import (
     create_application_info,
-    create_included_application_task,
-    create_application,
-    create_application_solution
+    create_application
 )
 from .mixins import (
     ApplicationInfoFormDataMixin,
     HasStudentAlreadyAppliedMixin,
     ApplicationFormDataMixin,
-    ApplicationTasksMixin,
     RedirectToExternalFormMixin
 )
 
@@ -73,73 +67,6 @@ class EditApplicationInfoView(LoginRequiredMixin,
         return success_url
 
 
-class AddIncludedApplicationTaskFromExistingView(LoginRequiredMixin,
-                                                 CourseViewMixin,
-                                                 IsTeacherInCoursePermission,
-                                                 CallServiceMixin,
-                                                 ReadableFormErrorsMixin,
-                                                 FormView):
-    template_name = "applications/existing_task_list.html"
-    form_class = IncludedApplicationTaskFromExistingForm
-
-    def get_success_url(self):
-        success_url = reverse_lazy('dashboard:applications:edit-application-info',
-                                   kwargs={'course_id': self.course.id})
-        return success_url
-
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-
-        if self.request.method in ('POST, PUT'):
-            data = transfer_POST_data_to_dict(self.request.POST)
-            data['application_info'] = self.course.application_info.id
-            form_kwargs['data'] = data
-
-        return form_kwargs
-
-    def form_valid(self, form):
-        data = {
-            'existing_task': form.cleaned_data.get('task'),
-            'application_info': form.cleaned_data.get('application_info')
-        }
-        self.call_service(service=create_included_application_task, service_kwargs=data)
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['task_list'] = ApplicationTask.objects.all()
-        return context
-
-
-class CreateIncludedApplicationTaskView(LoginRequiredMixin,
-                                        CourseViewMixin,
-                                        IsTeacherInCoursePermission,
-                                        CallServiceMixin,
-                                        ReadableFormErrorsMixin,
-                                        FormView):
-    form_class = IncludedApplicationTaskForm
-    template_name = "applications/add_task.html"
-
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-
-        if self.request.method in ('POST', 'PUT'):
-            data = transfer_POST_data_to_dict(self.request.POST)
-            data['application_info'] = self.course.application_info.id
-
-            form_kwargs['data'] = data
-        return form_kwargs
-
-    def get_success_url(self):
-        success_url = reverse_lazy('dashboard:applications:edit-application-info',
-                                   kwargs={'course_id': self.course.id})
-        return success_url
-
-    def form_valid(self, form):
-        self.call_service(service=create_included_application_task, service_kwargs=form.cleaned_data)
-        return super().form_valid(form)
-
-
 class ApplyToCourseView(LoginRequiredMixin,
                         CourseViewMixin,
                         RedirectToExternalFormMixin,
@@ -151,10 +78,18 @@ class ApplyToCourseView(LoginRequiredMixin,
 
     form_class = ApplicationCreateForm
     template_name = "applications/course_application.html"
-    success_url = reverse_lazy('dashboard:applications:user-applications')
+
+    def get_success_url(self):
+        competition = self.application.application_info.competition
+        if competition:
+            return reverse_lazy('competitions:competition-detail',
+                                kwargs={
+                                    'competition_slug': competition.slug_url
+                                })
+        return reverse_lazy('dashboard:applications:user-applications')
 
     def form_valid(self, form):
-        self.call_service(service=create_application, service_kwargs=form.cleaned_data)
+        self.application = self.call_service(service=create_application, service_kwargs=form.cleaned_data)
 
         return super().form_valid(form)
 
@@ -165,8 +100,7 @@ class UserApplicationsListView(LoginRequiredMixin,
 
     def get_queryset(self):
         prefetch = [
-            'application_info__course',
-            'application_info__tasks',
+            'application_info__course'
         ]
 
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
@@ -176,8 +110,7 @@ class UserApplicationsListView(LoginRequiredMixin,
         if self.request.user.is_teacher():
             teacher = self.request.user.teacher
             prefetch = [
-                'application_info__applications__user__profile',
-                'application_info__tasks',
+                'application_info__applications__user__profile'
             ]
             filters = {
                 'teachers__in': [teacher]
@@ -193,49 +126,13 @@ class UserApplicationsListView(LoginRequiredMixin,
 
 class EditApplicationView(LoginRequiredMixin,
                           CourseViewMixin,
-                          ApplicationTasksMixin,
-                          ApplicationFormDataMixin,
-                          CallServiceMixin,
                           ReadableFormErrorsMixin,
                           UpdateView):
     form_class = ApplicationEditForm
-    template_name = "applications/edit_application.html"
-    success_url = reverse_lazy('dashboard:applications:user-applications')
+    template_name = 'applications/edit_application.html'
 
     def get_object(self):
-        user_application = get_object_or_404(Application, user=self.request.user, application_info__course=self.course)
-        return user_application
-
-    def get_initial(self):
-        initial = super().get_initial()
-        if hasattr(self.object, 'solutions'):
-            for task in self.application_tasks:
-                solution = self.object.solutions.filter(task=task)
-                if solution.exists():
-                    initial[task.name] = solution.first().url
-        return initial
-
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-
-        if self.request.method in ('POST', 'PUT'):
-            post_data = self.request.POST
-            for task in self.application_tasks:
-                form_kwargs['data'][task.name] = post_data.get(task.name)
-
-        return form_kwargs
-
-    def form_valid(self, form):
-        for task in self.application_tasks:
-            create_solution_kwargs = {
-                'task': task,
-                'application': self.object,
-                'url': form.cleaned_data.get(task.name)
-            }
-            if create_solution_kwargs['url']:
-                self.call_service(service=create_application_solution, service_kwargs=create_solution_kwargs)
-
-        return super().form_valid(form)
+        return get_object_or_404(Application, user=self.request.user, application_info__course=self.course)
 
 
 class ApplicationDetailView(LoginRequiredMixin,

@@ -1,0 +1,16 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content_title %}
+  Students in {{ course.name }}
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+      {% include "education/partial/course_breadcrumb.html" with course=course %}
+      {% for assignment in object_list %}
+        {% include 'education/partial/course_student_portlet.html' with student=assignment.student assignment=assignment solutions=students_passed_solutions %}
+      {% endfor %}
+    </div>
+  </div>
+{% endblock page_content %}

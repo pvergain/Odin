@@ -1,0 +1,24 @@
+<div class="page-bar">
+  <ul class="page-breadcrumb">
+    <li>
+      <i class="icon-briefcase"></i>
+      <a href="{% url 'dashboard:education:user-courses' %}"><span style="font-size: 120%">Courses</span></a>
+      <i class="fa fa-angle-right"></i>
+    </li>
+    <li>
+      <a href={% url 'dashboard:education:user-course-detail' course.id %}>
+        <span style="font-size: 120%">{{ course.name }}</span>
+      </a>
+    </li>
+    <li>
+      <i class="fa fa-angle-right"></i>
+      <span style="font-size: 120%">Students</span>
+    </li>
+    {% if student and student.get_full_name %}
+      <li>
+        <i class="fa fa-angle-right"></i>
+        <span style="font-size: 120%">{{ student.get_full_name }}</span>
+      </li>
+    {% endif %}
+  </ul>
+</div>

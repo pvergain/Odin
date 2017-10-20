@@ -5,7 +5,8 @@ from odin.education.models import (
     IncludedTask,
     Solution,
     IncludedMaterial,
-    IncludedTest
+    IncludedTest,
+    Week
 )
 
 
@@ -40,10 +41,17 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = ('id', 'test', 'name', 'description', 'gradable', 'solutions')
 
 
+class WeekSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Week
+        fields = ('id', 'number')
+
+
 class TopicSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True)
     materials = MaterialSerializer(many=True)
+    week = WeekSerializer()
 
     class Meta:
         model = Topic
-        fields = ('id', 'name', 'tasks', 'materials', 'course')
+        fields = ('id', 'name', 'tasks', 'materials', 'course', 'week')

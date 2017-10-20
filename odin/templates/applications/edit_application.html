@@ -39,14 +39,6 @@
             <div class="form-group form-md-line-input">
               {% render_field form.studies_at class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Where do you study?" %}
 	    </div>
-            {% for form_field in form %}
-              {% if form_field.name in task_names %}
-                <div class="form-group form-md-line-input">
-                  {{ form_field.label }}
-                  {% render_field form_field class="form-control form-control-solid placeholder-no-fix" placeholder=form_field.label %}
-                </div>
-              {% endif %}
-            {% endfor %}
             <div class="form-actions noborder">
               <button class="btn green uppercase" type="submit">Submit application</button>
             </div>

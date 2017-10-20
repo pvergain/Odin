@@ -1,0 +1,99 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% load education_extras %}
+{% load common_extras %}
+
+{% block content_title %}
+  {{course.name}} {% if object.get_full_name %} - {{object.get_full_name}} {% endif %}
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+    {% include "education/partial/course_breadcrumb.html" with course=course student=object %}
+      <div class="well well-lg" style="background-color: #ffffff;">
+        <div class="row">
+          <div class="col-md-2">
+            {% if object.full_image.name %}
+              <img src="{{MEDIA_URL}}{{object.full_image.name}}" class="img-responsive pic-bordered" alt="">
+            {% else %}
+              <img src="{% static 'hackman.png' %}" class="img-responsive pic-bordered" alt="">
+            {% endif %}
+          </div>
+          <div class="col-md-10">
+            <h2 class="block">
+              {{ object.get_full_name }}
+            </h2>
+            <h4 class="inline-block">
+              <i class="socicon-btn socicon-mail tooltips border-white"></i> <span style="position: relative; bottom: 5px;">{{ object.email }}</span>
+            </h4>
+            <h4 class="block">
+              {% if object.profile.github_url %}
+                <i class="socicon-btn socicon-github tooltips border-white"></i> <span style="position: relative; bottom: 5px;">{{ object.profile.github_url }}</span>
+              {% endif %}
+            </h4>
+            <h4>
+              <div class="row">
+                <div class="col-md-4">
+                  Attendance: 0
+                </div>
+                <div class="col-md-4">
+                  Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks|length }}
+                </div>
+                <div class="col-md-4">
+                  Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a></div>
+                </div>
+              </div>
+            </h4>
+            {% include 'education/partial/notes_section.html' with student_notes=assignment.notes %}
+          </div>
+        </div>
+        <div class="portlet box green">
+          <div class="portlet-title">
+            <div class="caption">
+              <i class="fa fa-gift"></i>Tasks
+            </div>
+          <div class="tools">
+            <a href="javascript:;" class="collapse" data-original-title="" title=""> </a>
+          </div>
+      </div>
+      <div class="portlet-body">
+        <div class="panel-group accordion" id="accordion1">
+            {% for task_name, task_data in task_solutions.items %}
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task_name}}" aria-expanded="true"> 
+                    <div class="row">
+                      <div class="col-md-6">
+                        {{ task_name }}
+                      </div>
+                      <div class="col-md-6">
+                          {{ task_data.1 }}
+                      </div>
+                    </div>
+                  </a>
+                </h4>
+              </div>
+              <div id="collapse_{{task_name}}" class="panel-collapse collapse" aria-expanded="false" style="">
+                <div class="panel-body">
+                  {% if task_data %}
+                    {% for solution in task_data.0 %}
+                      <div class="col-md-6">
+                        Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }}
+                      </div>
+                      <div class="col-md-6">
+                        {% include "education/partial/solution_modal.html" with solution=solution %}
+                        <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}" style="margin-top: 2px;"> Build log </a>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}

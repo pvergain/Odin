@@ -1,12 +1,10 @@
-import uuid
-from datetime import datetime, timedelta
-from typing import Dict, BinaryIO, Tuple
+from datetime import datetime, timedelta, date
+from typing import Dict, BinaryIO
 
 from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
 from django.core.exceptions import ValidationError
-
-from odin.users.models import BaseUser
-from odin.users.services import create_user
 
 from .models import (
     Course,
@@ -23,7 +21,9 @@ from .models import (
     ProgrammingLanguage,
     Solution,
     Test,
-    IncludedTest
+    IncludedTest,
+    StudentNote,
+    Lecture
 )
 
 
@@ -45,7 +45,6 @@ def create_course(*,
                   video_channel: str=None,
                   slug_url: str=None,
                   logo: BinaryIO=None,
-                  is_competition: bool=False,
                   public: bool=True,
                   description: str="") -> Course:
 
@@ -61,8 +60,7 @@ def create_course(*,
         video_channel=video_channel,
         slug_url=slug_url,
         logo=logo,
-        public=public,
-        is_competition=is_competition
+        public=public
     )
 
     weeks = course.duration_in_weeks
@@ -222,55 +220,6 @@ def calculate_student_valid_solutions_for_course(*,
     return f'{ratio:.1f}'
 
 
-def handle_competition_registration(*,
-                                    email: str,
-                                    full_name: str,
-                                    session_user: BaseUser) -> Tuple[bool, str]:
-    """
-    Handles competition registration and returns the registration token and True or
-    False depending on whether further handling should be for an existing user or a
-    new one.
-    """
-    user = BaseUser.objects.filter(email=email)
-    registration_uuid = uuid.uuid4()
-    if user.exists():
-        user = user.first()
-        user.registration_uuid = registration_uuid
-        user.save()
-        handle_existing_user = True
-    else:
-        user = create_user(email=email,
-                           registration_uuid=registration_uuid,
-                           profile_data={'full_name': full_name})
-        handle_existing_user = False
-
-    return (handle_existing_user, registration_uuid)
-
-
-def handle_competition_login(*,
-                             course: Course,
-                             user: BaseUser,
-                             registration_token: str) -> BaseUser:
-    if not registration_token == str(user.registration_uuid):
-        raise ValidationError('Token mismatch')
-
-    if not user.is_student():
-        student = Student.objects.create_from_user(user)
-    else:
-        student = user.student
-
-    user.registration_uuid = None
-    user.registering_for = None
-    user.save()
-
-    try:
-        add_student(course=course, student=student)
-    except ValidationError:
-        pass
-
-    return user
-
-
 def get_all_student_solution_statistics(*,
                                         task: IncludedTask) -> Dict:
     result = {}
@@ -279,7 +228,54 @@ def get_all_student_solution_statistics(*,
 
     filters = {'solutions__task': task, 'solutions__isnull': False}
     result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
-    filters = {'solutions__task': task, 'solutions__status': Solution.OK}
-    result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
+    q_expression = Q(solutions__task__gradable=True, solutions__status=Solution.OK) \
+        | Q(solutions__task__gradable=False, solutions__status=Solution.SUBMITTED_WITHOUT_GRADING)
+    result['students_with_a_passing_solution_count'] = course.students.filter(
+        q_expression, solutions__task=task
+    ).distinct().count()
 
     return result
+
+
+def create_student_note(*,
+                        author: Teacher,
+                        assignment: CourseAssignment,
+                        text: str) -> StudentNote:
+    note = StudentNote(author=author,
+                       assignment=assignment,
+                       text=text)
+    note.full_clean()
+    note.save()
+
+    return note
+
+
+def create_lecture(*,
+                   date: date,
+                   course: Course) -> Lecture:
+    week_qs = Week.objects.filter(start_date__lte=date, end_date__gte=date, course=course)
+    if week_qs.exists():
+        lecture = Lecture(date=date, course=course, week=week_qs.first())
+        lecture.full_clean()
+        lecture.save()
+
+        return lecture
+    else:
+        raise ValidationError('Date not in range of any week for this course')
+
+
+def add_week_to_course(*,
+                       course: Course,
+                       new_end_date: timezone.datetime.date) -> Week:
+    last_week = course.weeks.last()
+    new_week = Week.objects.create(
+        course=course,
+        number=last_week.number + 1,
+        start_date=course.end_date,
+        end_date=new_end_date
+    )
+
+    course.end_date = course.end_date + timezone.timedelta(days=7)
+    course.save()
+
+    return new_week

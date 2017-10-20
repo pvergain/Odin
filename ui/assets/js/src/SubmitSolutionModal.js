@@ -33,6 +33,18 @@ class SubmitSolutionModal extends React.Component {
     this.setState({ code: newCode });
   }
 
+  getCompetitionSubmitSolutionUrl(competition, task) {
+    return task.gradable
+      ? Urls["competitions:submit-gradable-solution"]({
+          competition_slug: competition.slug_url,
+          task_id: task.id
+        })
+      : Urls["competitions:submit-non-gradable-solution"]({
+          competition_slug: competition.slug_url,
+          task_id: task.id
+        });
+  }
+
   getSubmitSolutionUrl(course, task) {
     return task.gradable
       ? Urls["dashboard:education:add-gradable-solution"]({
@@ -87,7 +99,17 @@ class SubmitSolutionModal extends React.Component {
 
         this.props.setResponseData(data);
         this.focusDetailModal(closeButtonID, this.props.solutionDetailModalID);
-        pollSolution(data.id, this.props.setResponseData);
+        let pollingUrl;
+        if (this.props.competition) {
+          pollingUrl = Urls["competitions:participant-solution-detail-api"]({
+            solution_id: data.id
+          });
+        } else {
+          pollingUrl = Urls["dashboard:education:student-solution-detail-api"]({
+            solution_id: data.id
+          });
+        }
+        pollSolution(data.id, this.props.setResponseData, pollingUrl);
       }
     });
   }
@@ -149,7 +171,9 @@ class SubmitSolutionModal extends React.Component {
   render() {
     const { modalID, task, course } = this.props;
     const { code } = this.state;
-    const submitSolutionUrl = this.getSubmitSolutionUrl(course, task);
+    const submitSolutionUrl = this.props.competition
+      ? this.getCompetitionSubmitSolutionUrl(this.props.competition, task)
+      : this.getSubmitSolutionUrl(course, task);
     return task.gradable
       ? <GradableSolutionModal
           modalID={modalID}

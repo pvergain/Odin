@@ -29,8 +29,7 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     'django_filters',
     'easy_thumbnails',
-    'django_js_reverse',
-    'corsheaders'
+    'django_js_reverse'
 ]
 
 LOCAL_APPS = [
@@ -42,7 +41,8 @@ LOCAL_APPS = [
     'odin.management.apps.ManagementConfig',
     'odin.grading.apps.GradingConfig',
     'odin.applications.apps.ApplicationsConfig',
-    'odin.interviews.apps.InterviewsConfig'
+    'odin.interviews.apps.InterviewsConfig',
+    'odin.competitions.apps.CompetitionsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -50,7 +50,6 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -202,8 +201,10 @@ templates = {
     'account_email_email_confirmation_signup': lambda **env_kwargs: env('MANDRILL_SIGNUP_CONFIRM', **env_kwargs),
     'account_email_email_confirmation': lambda **env_kwargs: env('MANDRILL_CONFIRMATION', **env_kwargs),
     'account_email_password_reset_key': lambda **env_kwargs: env('MANDRILL_PASSWORD_RESET', **env_kwargs),
+    'account_email_email_competition_confirmation': lambda **env_kwargs: env('MANDRILL_COMPETITION_CONFIRMATION', **env_kwargs),
     'application_completed_default': lambda **env_kwargs: env('MANDRILL_APPLICATION_COMPLETED', **env_kwargs),
     'interview_confirmation': lambda **env_kwargs: env('MANDRILL_INTERVIEW_CONFIRMATION', **env_kwargs),
+    'course_information_email': lambda **env_kwargs: env('MANDRILL_INTERVIEW_CONFIRMATION', **env_kwargs)
 }
 
 EMAIL_TEMPLATES = {
@@ -211,6 +212,7 @@ EMAIL_TEMPLATES = {
     for key, f in templates.items()
 }
 
-from .grader import *
+TASK_PASSED = "Passed"
+TASK_FAILED = "Failed"
 
-CORS_ORIGIN_ALLOW_ALL = True
+from .grader import *

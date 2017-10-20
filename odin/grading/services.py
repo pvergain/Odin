@@ -51,5 +51,5 @@ def create_binary_problem(*,
     )
 
 
-def start_grader_communication(solution_id: int):
-    transaction.on_commit(lambda: submit_solution.delay(solution_id))
+def start_grader_communication(solution_id: int, solution_model: str):
+    transaction.on_commit(lambda: submit_solution.delay(solution_id, solution_model))

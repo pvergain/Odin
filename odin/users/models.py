@@ -18,9 +18,7 @@ class BaseUser(PermissionsMixin,
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    # Competition Registration Fields
-    registration_uuid = models.UUIDField(blank=True, null=True)
-    registering_for = models.ForeignKey('education.Course', blank=True, null=True)
+    competition_registration_uuid = models.UUIDField(blank=True, null=True)
 
     USERNAME_FIELD = 'email'
 

@@ -10,7 +10,7 @@ export const filterSolutions = solution => {
 
 export const getCountOfPassedTasks = tasks => {
   const passed_tasks = tasks.map(
-    task => (hasPassingSolutionForTask(task) ? 1 : 0),
+    task => (hasPassingSolutionForTask(task) ? 1 : 0)
   );
   return passed_tasks.reduce((x, y) => x + y, 0);
 };
@@ -23,16 +23,13 @@ export const hasPassingSolutionForTask = task => {
   return false;
 };
 
-export const pollSolution = (solution_id, setResponseData) => {
+export const pollSolution = (solution_id, setResponseData, pollingURL) => {
   let requestCount = 0;
-  const pollingURL = Urls['dashboard:education:student-solution-detail-api']({
-    solution_id: solution_id,
-  });
   const interval = setInterval(() => {
     $.ajax({
-      type: 'GET',
+      type: "GET",
       url: pollingURL,
-      dataType: 'json',
+      dataType: "json",
       success: data => {
         requestCount++;
         setResponseData(data);
@@ -43,7 +40,7 @@ export const pollSolution = (solution_id, setResponseData) => {
         ) {
           clearInterval(interval);
         }
-      },
+      }
     });
   }, 2000);
 };

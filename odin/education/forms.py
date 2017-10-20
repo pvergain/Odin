@@ -1,7 +1,5 @@
 from django import forms
 
-from captcha.fields import ReCaptchaField
-
 from .models import (
     Topic,
     IncludedMaterial,
@@ -9,8 +7,14 @@ from .models import (
     IncludedTask,
     IncludedTest,
     Solution,
-    ProgrammingLanguage
+    ProgrammingLanguage,
+    StudentNote,
+    Lecture
 )
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
 
 
 class TopicModelForm(forms.ModelForm):
@@ -108,12 +112,36 @@ class SubmitNonGradableSolutionForm(forms.ModelForm):
         fields = ('url', )
 
 
-class CompetitionRegisterForm(forms.Form):
-    full_name = forms.CharField(max_length=256)
-    email = forms.EmailField()
+class StudentNoteForm(forms.ModelForm):
+    def __init__(self, course=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if course:
+            self.fields['student'] = forms.ModelChoiceField(queryset=course.students.all())
 
-    captcha = ReCaptchaField(label='', attrs={'theme': 'clean'})
+    class Meta:
+        model = StudentNote
+        fields = ('author', 'text', 'assignment')
 
 
-class CompetitionSetPasswordForm(forms.Form):
-    password = forms.CharField(widget=forms.PasswordInput())
+class CreateLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', 'course')
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class EditLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', )
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class PlainTextForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea(), required=True)

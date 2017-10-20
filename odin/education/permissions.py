@@ -1,6 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from odin.common.mixins import BaseUserPassesTestMixin
 from odin.education.models import Course
@@ -45,17 +46,6 @@ class IsStudentInCoursePermission(BaseUserPassesTestMixin):
         return False
 
 
-class CourseIsCompetitionPermission(BaseUserPassesTestMixin):
-    raise_exception = True
-
-    def test_func(self):
-        course = get_object_or_404(Course, slug_url=self.kwargs.get('competition_slug'))
-        if course.is_competition:
-            return True and super().test_func()
-
-        return False
-
-
 class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
     message = 'Need to be student or a teacher in the course'
 
@@ -72,9 +62,19 @@ class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
         is_teacher = course.teachers.filter(email=email).exists()
         is_solution_author = False
 
-        if request.user.is_student:
+        if request.user.is_student():
             is_solution_author = view.get_object().student == request.user.student
         if is_solution_author or is_teacher:
             return True
 
         return False
+
+
+class CannotSubmitSolutionAfterCourseEndDate(BaseUserPassesTestMixin):
+    raise_exception = True
+
+    def test_func(self):
+        if timezone.now().date() > self.course.end_date:
+            return False
+
+        return True and super().test_func()
