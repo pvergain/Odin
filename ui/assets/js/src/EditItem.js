@@ -19,7 +19,7 @@ class EditItem extends React.Component {
 
     return (
       <a onClick={event => this.handleOnClick(event)}>
-        <i className={pencil} style={{marginTop: '10px', marginLeft: '5px'}} />
+        <i className={pencil} />
       </a>
     );
   }

@@ -40,8 +40,4 @@
       </table>
     </div>
   </div>
-  {% if user.is_teacher %}
-    <a href="{% url 'dashboard:education:course-management:create-lecture' course.id %}">
-      <button class="btn green uppercase" type="button">Add lecture</button></a>
-  {% endif %}
 </div>
