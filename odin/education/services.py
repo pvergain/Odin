@@ -46,6 +46,7 @@ def create_course(*,
                   slug_url: str=None,
                   logo: BinaryIO=None,
                   public: bool=True,
+                  attendable: bool=True,
                   description: str="") -> Course:
 
     if Course.objects.filter(name=name).exists():

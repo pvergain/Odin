@@ -19,6 +19,7 @@ class ManagementAddCourseForm(forms.ModelForm):
             'name',
             'start_date',
             'end_date',
+            'attendable',
             'repository',
             'video_channel',
             'facebook_group',

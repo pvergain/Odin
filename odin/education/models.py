@@ -35,6 +35,8 @@ class Course(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
+    attendable = models.BooleanField(default=True)
+
     students = models.ManyToManyField(Student,
                                       through='CourseAssignment',
                                       through_fields=('course', 'student'))

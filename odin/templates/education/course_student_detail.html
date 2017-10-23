@@ -35,7 +35,11 @@
             <h4>
               <div class="row">
                 <div class="col-md-4">
-                  Attendance: 0
+                  {% if course.attendable %}
+                    Attendance: 0
+                  {% else %}
+                    Attendance: N/A
+                  {% endif %}
                 </div>
                 <div class="col-md-4">
                   Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks|length }}
@@ -63,7 +67,7 @@
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
-                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task.id}}" aria-expanded="true"> 
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task.id}}" aria-expanded="true">
                     <div class="row">
                       <div class="col-md-6">
                         {{ task.name }}
