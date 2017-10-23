@@ -71,9 +71,13 @@ const AccordionPanel = props => {
               <div className="col-md-3">
                 Week {props.topic.week.number} - {props.topic.name}
               </div>
-              <div className="col-md-6">
-                <EditItem editUrl={topicEditUrl} size={1} />
-              </div>
+              {window.props.isUserTeacher ? (
+                <div className="col-md-6">
+                  <EditItem editUrl={topicEditUrl} size={1} />
+                </div>
+              ) : (
+                <div className="col-md-6" />
+              )}
               <div className="col-md-3">
                 <SolvedRatio tasks={props.topic.tasks} />
               </div>
