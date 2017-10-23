@@ -143,6 +143,8 @@ class CourseDetailView(LoginRequiredMixin,
             context['weekdays'] = weekdays_with_lectures
             context['humanized_weekdays'] = [calendar.day_name[i] for i in weekdays_with_lectures]
 
+        context['is_user_teacher_in_course'] = self.is_teacher
+
         return context
 
 
