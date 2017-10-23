@@ -868,12 +868,19 @@ class CreateStudentNoteView(LoginRequiredMixin,
     template_name = 'education/partial/notes_section.html'
 
     def get_success_url(self):
-        url = reverse_lazy('dashboard:education:course-students-list',
-                           kwargs={
-                               'course_id': self.course.id
-                           })
-        if hasattr(self, 'student'):
-            return url + f'#notes-section_{self.student.id}'
+        if self.request.POST.get('detail') != 'true':
+            url = reverse_lazy('dashboard:education:course-students-list',
+                               kwargs={
+                                   'course_id': self.course.id
+                               })
+            if hasattr(self, 'student'):
+                return url + f'#notes-section_{self.student.id}'
+        else:
+            url = reverse_lazy('dashboard:education:course-student-detail',
+                               kwargs={
+                                   'course_id': self.course.id,
+                                   'email': self.student.email
+                               }) + f'#notes-section_{self.student.id}'
 
         return url
 

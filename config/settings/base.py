@@ -205,7 +205,7 @@ templates = {
     'account_email_email_competition_confirmation': lambda **env_kwargs: env('MANDRILL_COMPETITION_CONFIRMATION', **env_kwargs),
     'application_completed_default': lambda **env_kwargs: env('MANDRILL_APPLICATION_COMPLETED', **env_kwargs),
     'interview_confirmation': lambda **env_kwargs: env('MANDRILL_INTERVIEW_CONFIRMATION', **env_kwargs),
-    'course_information_email': lambda **env_kwargs: env('MANDRILL_INTERVIEW_CONFIRMATION', **env_kwargs)
+    'course_information_email': lambda **env_kwargs: env('MANDRILL_COURSE_INFORMATION', **env_kwargs)
 }
 
 EMAIL_TEMPLATES = {

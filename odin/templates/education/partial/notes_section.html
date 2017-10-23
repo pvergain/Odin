@@ -13,8 +13,7 @@
           <strong>[{{ note.created_at }}] {{ note.author.get_full_name }}: </strong> {{ note.text }}
         </li>
       {% endfor %}
-
-      <form  action="{% url 'dashboard:education:create-student-note' course.id %}" method="POST">
+      <form id="noteForm" action="{% url 'dashboard:education:create-student-note' course.id %}" method="POST">
         {% csrf_token %}
         <div class="form-body">
           {% include 'education/partial/message_box.html' %}
@@ -23,7 +22,7 @@
             <input type="hidden" name="student" value="{{ student.id }}"/>
           </div>
           <div class="form-actions noborder">
-            <button class="btn green uppercase" type="submit" name="submit">Submit</button>
+            <button class="btn green uppercase" type="button" onClick="handleSubmit()" name="btnSubmit">Submit</button>
           </div>
         </div>
       </form>

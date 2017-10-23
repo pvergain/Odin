@@ -101,3 +101,15 @@
     </div>
   </div>
 {% endblock page_content %}
+{% block extra_scripts %}
+<script type="text/javascript">
+  function handleSubmit() {
+    var form = $('#noteForm');
+    var input = $("<input>")
+               .attr("type", "hidden")
+               .attr("name", "detail").val("true");
+    form.append($(input));
+    form.submit();
+  }
+</script>
+{% endblock extra_scripts %}
