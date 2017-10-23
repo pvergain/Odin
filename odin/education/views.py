@@ -848,7 +848,7 @@ class CourseStudentDetailView(LoginRequiredMixin,
         for task in course_tasks:
             if not passed_or_failed.get(task.name):
                 passed_or_failed[task.name] = "Not submitted"
-            task_solutions[task.name] = (solution_data.get(task.name), passed_or_failed.get(task.name))
+            task_solutions[task] = (solution_data.get(task), passed_or_failed.get(task.name))
 
         context['task_solutions'] = task_solutions
         assignment = get_object_or_404(CourseAssignment, student=student, course=self.course)

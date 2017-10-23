@@ -59,14 +59,14 @@
       </div>
       <div class="portlet-body">
         <div class="panel-group accordion" id="accordion1">
-            {% for task_name, task_data in task_solutions.items %}
+            {% for task, task_data in task_solutions.items %}
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
-                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task_name}}" aria-expanded="true"> 
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{task.id}}" aria-expanded="true"> 
                     <div class="row">
                       <div class="col-md-6">
-                        {{ task_name }}
+                        {{ task.name }}
                       </div>
                       <div class="col-md-6">
                           {{ task_data.1 }}
@@ -75,7 +75,7 @@
                   </a>
                 </h4>
               </div>
-              <div id="collapse_{{task_name}}" class="panel-collapse collapse" aria-expanded="false" style="">
+              <div id="collapse_{{task.id}}" class="panel-collapse collapse" aria-expanded="false" style="">
                 <div class="panel-body">
                   {% if task_data %}
                     {% for solution in task_data.0 %}

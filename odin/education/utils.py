@@ -13,20 +13,19 @@ def get_passed_and_failed_tasks(solution_data: Dict) -> Dict:
         "Failed" when a task has no passing solution
     """
     passed_or_failed = {}
-    for task_name, solutions in solution_data.items():
-        task = solutions[0].task
+    for task, solutions in solution_data.items():
         if task.gradable:
             for solution in solutions:
                 if solution.status == Solution.OK:
-                    passed_or_failed[task_name] = settings.TASK_PASSED
-            if not passed_or_failed.get(task_name):
-                passed_or_failed[task_name] = settings.TASK_FAILED
+                    passed_or_failed[task.name] = settings.TASK_PASSED
+            if not passed_or_failed.get(task.name):
+                passed_or_failed[task.name] = settings.TASK_FAILED
         else:
             for solution in solutions:
                 if solution.status == Solution.SUBMITTED_WITHOUT_GRADING:
-                    passed_or_failed[task_name] = settings.TASK_PASSED
-            if not passed_or_failed[task_name]:
-                passed_or_failed[task_name] = settings.TASK_FAILED
+                    passed_or_failed[task.name] = settings.TASK_PASSED
+            if not passed_or_failed[task.name]:
+                passed_or_failed[task.name] = settings.TASK_FAILED
 
     return passed_or_failed
 
@@ -39,11 +38,11 @@ def get_solution_data(course: Course, student: Student) -> (Dict, Dict):
     all_solutions = student.solutions.filter(task__topic__course=course).prefetch_related('task')
     solution_data = {}
     for solution in all_solutions:
-        task_solutions = solution_data.get(solution.task.name)
+        task_solutions = solution_data.get(solution.task)
         if task_solutions:
-            solution_data[solution.task.name].append(solution)
+            solution_data[solution.task].append(solution)
         else:
-            solution_data[solution.task.name] = [solution]
+            solution_data[solution.task] = [solution]
 
     passed_and_failed = get_passed_and_failed_tasks(solution_data)
 
