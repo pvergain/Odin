@@ -27,8 +27,8 @@ class TestGetPassedAndFailedTasks(TestCase):
         )
 
         solution_data = {
-            self.gradable_task.name: [passing_gradable_solution],
-            self.non_gradable_task.name: [passing_non_gradable_solution]
+            self.gradable_task: [passing_gradable_solution],
+            self.non_gradable_task: [passing_non_gradable_solution]
         }
         result = get_passed_and_failed_tasks(solution_data)
         self.assertEqual(settings.TASK_PASSED, result.get(self.gradable_task.name))
@@ -37,7 +37,7 @@ class TestGetPassedAndFailedTasks(TestCase):
     def test_returns_task_failed_when_there_are_only_failing_solutions_for_it(self):
         failing_solution = SolutionFactory(student=self.student, task=self.gradable_task, status=Solution.NOT_OK)
         solution_data = {
-            self.gradable_task.name: [failing_solution]
+            self.gradable_task: [failing_solution]
         }
         result = get_passed_and_failed_tasks(solution_data)
         self.assertEqual(settings.TASK_FAILED, result.get(self.gradable_task.name))
@@ -59,13 +59,13 @@ class TestGetSolutionData(TestCase):
 
         solution_data, _ = get_solution_data(course=self.course, student=self.student)
 
-        self.assertEqual([gradable_solution], solution_data.get(self.gradable_task.name))
-        self.assertEqual([non_gradable_solution], solution_data.get(self.non_gradable_task.name))
+        self.assertEqual([gradable_solution], solution_data.get(self.gradable_task))
+        self.assertEqual([non_gradable_solution], solution_data.get(self.non_gradable_task))
 
     def test_task_is_not_added_as_key_if_no_solutions_for_it(self):
         solution_data, _ = get_solution_data(course=self.course, student=self.student)
 
-        self.assertIsNone(solution_data.get(self.gradable_task.name))
+        self.assertIsNone(solution_data.get(self.gradable_task))
 
 
 class TestGetAllSolvedStudentSolutionCountForCourse(TestCase):
