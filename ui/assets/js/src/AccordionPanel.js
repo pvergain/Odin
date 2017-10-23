@@ -78,9 +78,13 @@ const AccordionPanel = props => {
               ) : (
                 <div className="col-md-6" />
               )}
-              <div className="col-md-3">
-                <SolvedRatio tasks={props.topic.tasks} />
-              </div>
+              {window.props.isUserTeacher ? (
+                <div className="col-md-3" />
+              ) : (
+                <div className="col-md-3">
+                  <SolvedRatio tasks={props.topic.tasks} />
+                </div>
+              )}
             </div>
           </a>
         </h4>
