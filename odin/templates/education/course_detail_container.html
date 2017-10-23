@@ -1,11 +1,16 @@
 {% extends public_page|yesno:'partial/public_base.html,dashboard/dashboard_base.html' %}
+
+{% block title %}
+  {{ course.name }}
+{% endblock title %}
+
 {% block content_title %}
   {% if public_page %}
     <div class="container">
   {% else %}
       <div>
   {% endif %}
-  {{ course.name }} 
+  {{ course.name }}
       </div>
 {% endblock content_title %}
 

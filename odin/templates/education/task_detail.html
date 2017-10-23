@@ -1,8 +1,12 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load education_extras %}
 
-{% block content_title %}
+{% block title %}
   {{ object.name }}
+{% endblock title %}
+
+{% block content_title %}
+  Details for {{ object.name }}
 {% endblock content_title %}
 
 {% block page_content %}

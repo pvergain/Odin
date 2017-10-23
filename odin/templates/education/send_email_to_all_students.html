@@ -1,6 +1,10 @@
 {% extends 'dashboard/dashboard_base.html' %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Send Email to Students
+{% endblock title %}
+
 {% block content_title %}
   Send Email to all students in {{ course.name }}
 {% endblock content_title %}
