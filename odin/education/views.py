@@ -855,6 +855,7 @@ class CourseStudentDetailView(LoginRequiredMixin,
         context['task_solutions'] = task_solutions
         assignment = get_object_or_404(CourseAssignment, student=student, course=self.course)
         context['assignment'] = assignment
+        context['students_passed_solutions'] = get_all_solved_student_solution_count_for_course(course=self.course)
 
         return context
 

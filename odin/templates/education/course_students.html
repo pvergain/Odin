@@ -18,3 +18,11 @@
     </div>
   </div>
 {% endblock page_content %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+  function handleSubmit() {
+    document.activeElement.form.submit();
+  }
+</script>
+{% endblock extra_scripts %}

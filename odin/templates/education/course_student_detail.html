@@ -11,48 +11,8 @@
   <div class="row">
     <div class="col-md-12">
     {% include "education/partial/course_breadcrumb.html" with course=course student=object is_student_list=True %}
-      <div class="well well-lg" style="background-color: #ffffff;">
-        <div class="row">
-          <div class="col-md-2">
-            {% if object.full_image.name %}
-              <img src="{{MEDIA_URL}}{{object.full_image.name}}" class="img-responsive pic-bordered" alt="">
-            {% else %}
-              <img src="{% static 'hackman.png' %}" class="img-responsive pic-bordered" alt="">
-            {% endif %}
-          </div>
-          <div class="col-md-10">
-            <h2 class="block">
-              {{ object.get_full_name }}
-            </h2>
-            <h4 class="inline-block">
-              <i class="socicon-btn socicon-mail tooltips border-white"></i> <span style="position: relative; bottom: 5px;">{{ object.email }}</span>
-            </h4>
-            <h4 class="block">
-              {% if object.profile.github_url %}
-                <i class="socicon-btn socicon-github tooltips border-white"></i> <span style="position: relative; bottom: 5px;">{{ object.profile.github_url }}</span>
-              {% endif %}
-            </h4>
-            <h4>
-              <div class="row">
-                <div class="col-md-4">
-                  {% if course.attendable %}
-                    Attendance: 0
-                  {% else %}
-                    Attendance: N/A
-                  {% endif %}
-                </div>
-                <div class="col-md-4">
-                  Correct solutions: {{ object|solved_tasks_for_course:course }} / {{ course_tasks|length }}
-                </div>
-                <div class="col-md-4">
-                  Notes: <a for="notes-section_{{ student.id }}" href="#notes-section_{{ student.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a></div>
-                </div>
-              </div>
-            </h4>
-            {% include 'education/partial/notes_section.html' with student_notes=assignment.notes %}
-          </div>
-        </div>
-        <div class="portlet box green">
+    {% include 'education/partial/course_student_portlet.html' with student=assignment.student assignment=assignment solutions=students_passed_solutions %}
+       <div class="portlet box green">
           <div class="portlet-title">
             <div class="caption">
               <i class="fa fa-gift"></i>Tasks
@@ -101,6 +61,7 @@
     </div>
   </div>
 {% endblock page_content %}
+
 {% block extra_scripts %}
 <script type="text/javascript">
   function handleSubmit() {
