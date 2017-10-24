@@ -73,8 +73,8 @@ def create_course(*,
         current = Week(course=course,
                        number=i,
                        start_date=start_date,
-                       end_date=start_date + timedelta(days=7))
-        start_date = current.end_date
+                       end_date=start_date + timedelta(days=6))
+        start_date = current.end_date + timedelta(days=1)
         week_instances.append(current)
 
     Week.objects.bulk_create(week_instances)
