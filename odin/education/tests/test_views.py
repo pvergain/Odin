@@ -1305,5 +1305,5 @@ class TestSendEmailToAllStudentsView(TestCase):
                                                                 }))
             self.assertTrue(mock_send_mail.called)
             (template_name, recipients, context), kwargs = mock_send_mail.call_args
-            student_emails = [student.email for student in self.students]
+            student_emails = [student.email for student in sorted(self.students, key=lambda x: x.id)]
             self.assertEqual(recipients, student_emails)

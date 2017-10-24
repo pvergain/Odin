@@ -71,6 +71,12 @@ class BaseUser(PermissionsMixin,
     def is_interviewer(self):
         return hasattr(self, 'interviewer')
 
+    def is_participant(self):
+        return hasattr(self, 'competitionparticipant')
+
+    def is_judge(self):
+        return hasattr(self, 'competitionjudge')
+
 
 class Profile(models.Model):
     user = models.OneToOneField(BaseUser)

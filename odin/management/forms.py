@@ -4,6 +4,7 @@ from odin.users.models import BaseUser
 
 from odin.education.models import Student, Course, Teacher
 from odin.interviews.models import Interviewer
+from odin.competitions.models import Competition, CompetitionParticipant, CompetitionJudge
 
 
 class DateInput(forms.DateInput):
@@ -46,11 +47,25 @@ class AddStudentToCourseForm(forms.Form):
     course = forms.ModelChoiceField(queryset=Course.objects.all())
 
 
+class AddParticipantToCompetitionForm(forms.Form):
+    use_required_attribute = False
+
+    participant = forms.ModelChoiceField(queryset=CompetitionParticipant.objects.all())
+    competition = forms.ModelChoiceField(queryset=Competition.objects.all())
+
+
 class AddTeacherToCourseForm(forms.Form):
     use_required_attribute = False
 
     teacher = forms.ModelChoiceField(queryset=Teacher.objects.all())
     course = forms.ModelChoiceField(queryset=Course.objects.all())
+
+
+class AddJudgeToCompetitionForm(forms.Form):
+    use_required_attribute = False
+
+    judge = forms.ModelChoiceField(queryset=CompetitionJudge.objects.all())
+    competition = forms.ModelChoiceField(queryset=Competition.objects.all())
 
 
 class AddCourseToInterviewerCoursesForm(forms.Form):
