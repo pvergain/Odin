@@ -11,7 +11,7 @@ from odin.interviews.models import Interviewer
 from odin.education.models import Student, Teacher, Course, CourseAssignment
 from odin.education.services import create_course, add_student, add_teacher
 
-from odin.competitions.models import CompetitionJudge, CompetitionParticipant
+from odin.competitions.models import CompetitionJudge, CompetitionParticipant, Competition
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
@@ -34,8 +34,7 @@ class DashboardManagementView(DashboardManagementPermission,
     paginate_by = 101
     filter_class = UserFilter
     queryset = BaseUser.objects.select_related('profile').all()\
-        .prefetch_related('student', 'teacher', 'interviewer',
-                          'competitionjudge', 'competitionparticipant').order_by('-id')
+        .prefetch_related('student', 'teacher', 'interviewer').order_by('-id')
 
     def get_queryset(self):
         self.filter = self.filter_class(self.request.GET, queryset=self.queryset)
@@ -44,6 +43,7 @@ class DashboardManagementView(DashboardManagementPermission,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.prefetch_related('students', 'teachers')
+        context['competitions'] = Competition.objects.prefetch_related('participants', 'judges')
 
         return context
 
