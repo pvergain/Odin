@@ -20,7 +20,14 @@ from .permissions import (
     IsParticipantInCompetitionPermission,
     IsStandaloneCompetitionPermission
 )
-from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
+from .models import (
+    Competition,
+    CompetitionMaterial,
+    CompetitionTask,
+    Solution,
+    CompetitionParticipant,
+    CompetitionJudge,
+)
 from .forms import (
     CompetitionMaterialFromExistingForm,
     CompetitionMaterialModelForm,
@@ -38,6 +45,31 @@ from .services import (
     handle_competition_login
 )
 from .serializers import CompetitionSerializer
+
+
+class UserCompetitionsView(LoginRequiredMixin, TemplateView):
+    template_name = 'competitions/competitions.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        prefetch = ['participants', 'judges']
+        qs = Competition.objects.prefetch_related(*prefetch)
+
+        context['user_is_judge_for'] = []
+        context['user_is_participant_in'] = []
+
+        judge = user.downcast(CompetitionJudge)
+        participant = user.downcast(CompetitionParticipant)
+
+        if judge:
+            context['user_is_judge_for'] = qs.filter(judges=judge)
+
+        if participant:
+            context['user_is_participant_in'] = qs.filter(participants=participant)
+
+        return context
 
 
 class CompetitionDetailView(LoginRequiredMixin,

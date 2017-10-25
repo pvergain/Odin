@@ -74,7 +74,7 @@
     <!-- BEGIN CONTAINER -->
     <div class="page-container">
       <!-- BEGIN SIDEBAR -->
-      {% with courses='dashboard:education:user-courses' applications='dashboard:applications:user-applications' management='dashboard:management:index' interviews='dashboard:interviews:user-interviews' %}
+      {% with courses='dashboard:education:user-courses' applications='dashboard:applications:user-applications' management='dashboard:management:index' interviews='dashboard:interviews:user-interviews' competitions='competitions:user-competitions'%}
       <div class="page-sidebar-wrapper">
         <!-- END SIDEBAR -->
         <div class="page-sidebar navbar-collapse collapse">
@@ -95,7 +95,6 @@
                 </a>
               </li>
             {% endif %}
-
             {% if user.is_superuser %}
               <li class="nav-item {% active management %}" >
                 <a href="{% url management %}" class="nav-link nav-toggle">
@@ -113,6 +112,12 @@
                 </a>
               </li>
             {% endif %}
+              <li class="nav-item start {% active competitions %}">
+                <a href="{% url competitions %}" class="nav-link nav-toggle">
+                  <i class="icon-trophy"></i>
+                  <span class="title">Competitions</span>
+                </a>
+              </li>
           </ul>
           <!-- END SIDEBAR MENU -->
         </div>
