@@ -44,6 +44,9 @@ class Competition(models.Model):
     def is_application_competition(self):
         return hasattr(self, 'application_info')
 
+    def __str__(self):
+        return self.name
+
 
 class CompetitionMaterial(BaseMaterial):
     material = models.ForeignKey(Material,

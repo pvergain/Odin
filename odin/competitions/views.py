@@ -16,7 +16,7 @@ from odin.users.models import BaseUser
 from .mixins import CompetitionViewMixin, RedirectParticipantMixin
 from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
-    IsJudgeInCompetitionPermisssion,
+    IsJudgeInCompetitionPermission,
     IsParticipantInCompetitionPermission,
     IsStandaloneCompetitionPermission
 )
@@ -73,7 +73,7 @@ class CreateCompetitionView(DashboardManagementPermission,
 
 class EditCompetitionView(LoginRequiredMixin,
                           CompetitionViewMixin,
-                          IsJudgeInCompetitionPermisssion,
+                          IsJudgeInCompetitionPermission,
                           UpdateView):
     template_name = 'competitions/create_competition.html'
 
@@ -91,7 +91,7 @@ class EditCompetitionView(LoginRequiredMixin,
 
 class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
                                                 CompetitionViewMixin,
-                                                IsJudgeInCompetitionPermisssion,
+                                                IsJudgeInCompetitionPermission,
                                                 CallServiceMixin,
                                                 ReadableFormErrorsMixin,
                                                 FormView):
@@ -109,16 +109,17 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['material_list'] = Material.objects.all()
+        context['material_list'] = Material.objects.prefetch_related('included_materials__topic__course')
 
         return context
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = transfer_POST_data_to_dict(self.request.POST)
-        data['competition'] = self.competition.id
-        form_kwargs['data'] = data
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['competition'] = self.competition.id
+            form_kwargs['data'] = data
 
         return form_kwargs
 
@@ -134,7 +135,7 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
 
 class CreateNewCompetitionMaterialView(LoginRequiredMixin,
                                        CompetitionViewMixin,
-                                       IsJudgeInCompetitionPermisssion,
+                                       IsJudgeInCompetitionPermission,
                                        CallServiceMixin,
                                        ReadableFormErrorsMixin,
                                        FormView):
@@ -153,10 +154,11 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = transfer_POST_data_to_dict(self.request.POST)
-        data['competition'] = self.competition.id
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['competition'] = self.competition.id
 
-        form_kwargs['data'] = data
+            form_kwargs['data'] = data
 
         return form_kwargs
 
@@ -165,13 +167,10 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
 
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        return super().form_invalid(form)
-
 
 class EditCompetitionMaterialView(LoginRequiredMixin,
                                   CompetitionViewMixin,
-                                  IsJudgeInCompetitionPermisssion,
+                                  IsJudgeInCompetitionPermission,
                                   ReadableFormErrorsMixin,
                                   UpdateView):
     model = CompetitionMaterial
@@ -188,7 +187,7 @@ class EditCompetitionMaterialView(LoginRequiredMixin,
 
 class CreateNewCompetitionTaskView(LoginRequiredMixin,
                                    CompetitionViewMixin,
-                                   IsJudgeInCompetitionPermisssion,
+                                   IsJudgeInCompetitionPermission,
                                    ReadableFormErrorsMixin,
                                    CallServiceMixin,
                                    FormView):
@@ -237,7 +236,7 @@ class CreateNewCompetitionTaskView(LoginRequiredMixin,
 
 class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
                                             CompetitionViewMixin,
-                                            IsJudgeInCompetitionPermisssion,
+                                            IsJudgeInCompetitionPermission,
                                             ReadableFormErrorsMixin,
                                             CallServiceMixin,
                                             FormView):
@@ -255,7 +254,7 @@ class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['task_list'] = Task.objects.all()
+        context['task_list'] = Task.objects.prefetch_related('included_tasks__topic__course')
 
         return context
 
@@ -282,7 +281,7 @@ class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
 
 class EditCompetitionTaskView(LoginRequiredMixin,
                               CompetitionViewMixin,
-                              IsJudgeInCompetitionPermisssion,
+                              IsJudgeInCompetitionPermission,
                               ReadableFormErrorsMixin,
                               UpdateView):
     model = CompetitionTask
@@ -299,7 +298,7 @@ class EditCompetitionTaskView(LoginRequiredMixin,
 
 class AllParticipantsSolutionsView(LoginRequiredMixin,
                                    CompetitionViewMixin,
-                                   IsJudgeInCompetitionPermisssion,
+                                   IsJudgeInCompetitionPermission,
                                    ListView):
     template_name = 'competitions/all_participants_solutions.html'
 
