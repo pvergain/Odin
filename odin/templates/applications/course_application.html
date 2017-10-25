@@ -30,7 +30,9 @@
         <form action="" method="POST">
           <div class="form-body">
             {% csrf_token %}
-
+            <div class="form-group form-md-line-input">
+              {% render_field form.full_name class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Full name" %}
+            </div>
             <div class="form-group form-md-line-input">
               {% render_field form.phone class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Phone number" %}
             </div>

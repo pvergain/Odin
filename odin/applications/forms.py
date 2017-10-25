@@ -29,11 +29,14 @@ class ApplicationInfoModelForm(forms.ModelForm):
 
 
 class ApplicationCreateForm(forms.ModelForm):
+    full_name = forms.CharField()
+
     class Meta:
         model = Application
         fields = [
             'application_info',
             'user',
+            'full_name',
             'phone',
             'skype',
             'works_at',
