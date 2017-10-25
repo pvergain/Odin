@@ -27,7 +27,8 @@ from .forms import (
     CompetitionTaskModelForm,
     CompetitionTaskFromExistingForm,
     CompetitionRegistrationForm,
-    CompetitionSetPasswordForm
+    CompetitionSetPasswordForm,
+    CreateCompetitionForm,
 )
 from .services import (
     create_competition_material,
@@ -61,8 +62,7 @@ class CompetitionDetailView(LoginRequiredMixin,
 class CreateCompetitionView(DashboardManagementPermission,
                             CreateView):
     template_name = 'competitions/create_competition.html'
-    model = Competition
-    fields = ['name', 'start_date', 'end_date', 'slug_url']
+    form_class = CreateCompetitionForm
 
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
