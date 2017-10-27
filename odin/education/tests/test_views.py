@@ -1,5 +1,4 @@
 from unittest.mock import patch
-from unittest import skip
 from test_plus import TestCase
 
 from django.urls import reverse
