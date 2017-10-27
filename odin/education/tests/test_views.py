@@ -1291,7 +1291,6 @@ class TestSendEmailToAllStudentsView(TestCase):
                                'course_id': self.course.id
                            })
 
-    @skip("Fix this")
     @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
     @patch('odin.common.tasks.send_template_mail.delay')
     def test_post_sends_email_to_all_students(self, mock_send_mail):
