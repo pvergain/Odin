@@ -17,6 +17,7 @@ from .views import (
     AddCourseToInterviewerCoursesView,
     AddParticipantToCompetitionView,
     AddJudgeToCompetitionView,
+    AddCompetitionToCourseView,
 )
 
 urlpatterns = [
@@ -106,4 +107,9 @@ urlpatterns = [
         view=AddCourseToInterviewerCoursesView.as_view(),
         name='add-interviewer-to-course-with-initial'
     ),
+    url(
+        regex='^add-competition-to-course/$',
+        view=AddCompetitionToCourseView.as_view(),
+        name='add-competition-to-course',
+    )
 ]

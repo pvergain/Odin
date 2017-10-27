@@ -71,3 +71,8 @@ class AddJudgeToCompetitionForm(forms.Form):
 class AddCourseToInterviewerCoursesForm(forms.Form):
     course = forms.ModelChoiceField(queryset=Course.objects.filter(application_info__isnull=False))
     interviewer = forms.ModelChoiceField(queryset=Interviewer.objects.all())
+
+
+class AddCompetitionToCourseForm(forms.Form):
+    competition = forms.ModelChoiceField(queryset=Competition.objects.all())
+    course = forms.ModelChoiceField(queryset=Course.objects.get_in_application_period())

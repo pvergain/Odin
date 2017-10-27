@@ -92,6 +92,7 @@ class Profile(models.Model):
     avatar = ImageCropField(blank=True, null=True)
     full_image = ImageCropField(upload_to='avatars/', blank=True, null=True)
     cropping = ImageRatioField('full_image', '300x300')
+    skype = models.CharField(blank=True, null=True, max_length=255)
 
     def get_gh_profile_url(self):
         return self.social_accounts.get('GitHub')

@@ -25,6 +25,7 @@ from .forms import (
     AddCourseToInterviewerCoursesForm,
     AddParticipantToCompetitionForm,
     AddJudgeToCompetitionForm,
+    AddCompetitionToCourseForm,
 )
 
 
@@ -262,5 +263,22 @@ class AddCourseToInterviewerCoursesView(DashboardManagementPermission,
 
     def form_valid(self, form):
         self.call_service(service_kwargs=form.cleaned_data)
+
+        return super().form_valid(form)
+
+
+class AddCompetitionToCourseView(DashboardManagementPermission,
+                                 ReadableFormErrorsMixin,
+                                 FormView):
+    template_name = 'dashboard/add_competition_to_course.html'
+    form_class = AddCompetitionToCourseForm
+    success_url = reverse_lazy('dashboard:management:index')
+
+    def form_valid(self, form):
+        competition = form.cleaned_data.get('competition')
+        course = form.cleaned_data.get('course')
+
+        course.application_info.competition = competition
+        course.application_info.save()
 
         return super().form_valid(form)

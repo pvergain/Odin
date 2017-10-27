@@ -54,7 +54,7 @@ class UserCompetitionsView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        prefetch = ['participants', 'judges']
+        prefetch = ['participants__profile', 'judges__profile']
         qs = Competition.objects.prefetch_related(*prefetch)
 
         context['user_is_judge_for'] = []

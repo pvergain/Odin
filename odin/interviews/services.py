@@ -1,4 +1,5 @@
 from datetime import date, time
+from typing import Dict
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -57,7 +58,18 @@ def add_course_to_interviewer_courses(*,
     return interviewer.courses_to_interview.all()
 
 
-def generate_interview_slots():
+def check_interviewer_skypes(*,
+                             application_info: ApplicationInfo) -> list:
+    interviewers_without_skype = []
+
+    for interviewer in application_info.interviewer_set.all():
+        if not interviewer.profile.skype:
+            interviewers_without_skype.append(interviewer)
+
+    return interviewers_without_skype
+
+
+def generate_interview_slots() -> Dict:
     context = {'log': []}
     context['log'].append("Start generating interviews...\n")
 
@@ -67,6 +79,15 @@ def generate_interview_slots():
     interview_slots_generator.get_generated_slots()
 
     courses_to_interview = ApplicationInfo.objects.get_open_for_interview()
+
+    for application_info in courses_to_interview:
+        interviewers_without_skype = check_interviewer_skypes(application_info=application_info)
+        if interviewers_without_skype != []:
+            context['log'].append("Some interviewers haven't set a skype!")
+            for interviewer in interviewers_without_skype:
+                context['log'].append(f'{application_info.course.name} - {interviewer.email}')
+            context['log'].append('No interviews will be generated.')
+            return context
 
     if len(courses_to_interview) == 0:
         context['log'].append('There are no open for interview courses!\n')
