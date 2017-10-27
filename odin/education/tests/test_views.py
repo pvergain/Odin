@@ -1157,7 +1157,7 @@ class TestEditLectureView(TestCase):
     def test_post_with_valid_data_redirects_to_course_detail(self):
         previous_date = self.lecture.date
         data = {
-            'date': self.course.start_date + timezone.timedelta(days=1)
+            'date': self.lecture.date + timezone.timedelta(days=1)
         }
 
         with self.login(email=self.teacher.email, password=self.test_password):
