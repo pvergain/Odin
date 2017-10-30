@@ -140,18 +140,18 @@ class TestCreateApplicationService(TestCase):
         self.app_info.save()
 
         with self.assertRaises(ValidationError):
-            create_application(application_info=self.app_info, user=self.user)
+            create_application(application_info=self.app_info, user=self.user, full_name=faker.name())
 
     def test_create_application_raises_validation_error_when_user_has_already_applied(self):
         ApplicationFactory(application_info=self.app_info, user=self.user)
 
         with self.assertRaises(ValidationError):
-            create_application(application_info=self.app_info, user=self.user)
+            create_application(application_info=self.app_info, user=self.user, full_name=faker.name())
 
     def test_create_application_creates_application_when_application_is_active_and_user_has_not_applied(self):
         current_application_count = Application.objects.count()
 
-        create_application(application_info=self.app_info, user=self.user, skype=faker.word())
+        create_application(application_info=self.app_info, user=self.user, skype=faker.word(), full_name=faker.name())
 
         self.assertEqual(current_application_count + 1, Application.objects.count())
 
@@ -159,7 +159,7 @@ class TestCreateApplicationService(TestCase):
         competition = CompetitionFactory()
         self.app_info.competition = competition
         self.app_info.save()
-        create_application(application_info=self.app_info, user=self.user, skype=faker.word())
+        create_application(application_info=self.app_info, user=self.user, skype=faker.word(), full_name=faker.name())
 
         self.assertTrue(CompetitionParticipant.objects.filter(email=self.user.email).exists())
 
@@ -167,6 +167,6 @@ class TestCreateApplicationService(TestCase):
         competition = CompetitionFactory()
         self.app_info.competition = competition
         self.app_info.save()
-        create_application(application_info=self.app_info, user=self.user, skype=faker.word())
+        create_application(application_info=self.app_info, user=self.user, skype=faker.word(), full_name=faker.name())
 
         self.assertTrue(competition.participants.filter(email=self.user.email).exists())
