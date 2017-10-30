@@ -8,9 +8,10 @@ from django.db.models import QuerySet
 
 from odin.common.services import send_email
 from odin.applications.models import Application, ApplicationInfo
-from odin.education.models import Course
+from odin.education.models import Course, Student, CourseAssignment
 from .models import Interview, Interviewer, InterviewerFreeTime
 from .helpers.interviews import GenerateInterviews, GenerateInterviewSlots
+from odin.education.services import add_student
 
 
 def create_new_interview_for_application(*,
@@ -122,3 +123,17 @@ def send_interview_confirmation_emails():
 
         interview.has_received_email = True
         interview.save()
+
+
+def assign_accepted_users_to_courses():
+    active_application_infos = ApplicationInfo.objects.get_open_for_interview()
+    for info in active_application_infos:
+        accepted = info.accepted_applicants
+        for application in accepted:
+            if not application.user.is_student():
+                student = Student.objects.create_from_user(application.user)
+            else:
+                student = application.user.student
+
+            if not CourseAssignment.objects.filter(course=info.course, student=student):
+                add_student(course=info.course, student=student)

@@ -38,3 +38,8 @@ def has_interviews_access(user):
         return qs.exists()
 
     return False
+
+
+@register.filter(name='not_in_course')
+def not_in_course(student_applications, course):
+    return student_applications.exclude(user__student__course_assignments__course_id=course.id)

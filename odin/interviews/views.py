@@ -22,10 +22,10 @@ from .services import (
     create_new_interview_for_application,
     create_interviewer_free_time,
     generate_interview_slots,
-    send_interview_confirmation_emails
+    send_interview_confirmation_emails,
+    assign_accepted_users_to_courses
 )
 from .forms import FreeTimeModelForm
-from .tasks import assign_accepted_users_to_courses
 from .serializers import InterviewSerializer
 
 
@@ -237,7 +237,7 @@ class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
                                          DashboardManagementPermission,
                                          View):
     def post(self, request, *args, **kwargs):
-        assign_accepted_users_to_courses.delay()
+        assign_accepted_users_to_courses()
 
         return redirect('dashboard:interviews:accepted-applicants')
 
