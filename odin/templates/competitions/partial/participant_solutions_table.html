@@ -27,8 +27,15 @@
                     <tr>
                       <td>{{ solution.id }}</td>
                       <td>{{ solution.verbose_status }}</td>
+                      <td>
+                        <a href="{% url 'competitions:participant-solution-detail' competition.slug_url task.id solution.id %}">
+                          <button class="btn green uppercase" type="button">
+                            View
+                          </button>
+                        </a>
+                      </td>
                     </tr>
-                  {% endif  %}
+                  {% endif %}
                 {% endfor %}
             </tbody>
           </table>

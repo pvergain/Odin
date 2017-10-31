@@ -1,10 +1,11 @@
 import json
 from allauth.account.utils import send_email_confirmation
 
-from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView
+from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
+from django.db.models import Q
 
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
@@ -336,12 +337,26 @@ class AllParticipantsSolutionsView(LoginRequiredMixin,
 
     def get_queryset(self):
         task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
-        filters = {
-            'solutions__task': task,
-            'solutions__status': Solution.OK
-        }
-        queryset = self.competition.participants.filter(**filters).select_related('profile')
+        conditions = (
+            {
+                'solutions__task__gradable': True,
+                'solutions__status': Solution.OK,
+            },
+            {
+                'solutions__task__gradable': False,
+                'solutions__status': Solution.SUBMITTED_WITHOUT_GRADING
+            }
+        )
+        q_expression = Q(**conditions[0]) | Q(**conditions[1])
+        queryset = self.competition.participants.filter(q_expression, solutions__task=task).select_related('profile')
         return queryset.prefetch_related('solutions__task').distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
+        context['task'] = task
+
+        return context
 
 
 class ParticipantSolutionsView(LoginRequiredMixin,
@@ -490,3 +505,25 @@ class CompetitionSetPasswordView(CompetitionViewMixin,
         send_email_confirmation(self.request, user, signup=True)
 
         return super().form_valid(form)
+
+
+class ParticipantSolutionDetailView(LoginRequiredMixin,
+                                    CompetitionViewMixin,
+                                    IsParticipantOrJudgeInCompetitionPermission,
+                                    DetailView):
+    model = Solution
+    pk_url_kwarg = 'solution_id'
+    template_name = 'competitions/participant_solution_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
+        solution = self.get_object()
+        context['task'] = task
+        context['role'] = solution.participant
+        if solution.task.gradable and not solution.task.test.is_source():
+            try:
+                context['solution_file'] = solution.file.read().decode('utf-8')
+            except UnicodeDecodeError as e:
+                context['solution_file'] = "Invalid file format"
+        return context
