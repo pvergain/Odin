@@ -38,8 +38,37 @@ from ..factories import (
 )
 
 
-class TestCompetitionDetailView(TestCase):
+class TestUserCompetitionsView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.user.is_active = True
+        self.user.save()
+        self.competition = CompetitionFactory()
+        self.url = reverse('competitions:user-competitions')
 
+    def test_no_competitions_are_displayed_if_user_is_not_judge_or_participant_in_any(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(0, len(response.context['user_is_judge_for']))
+            self.assertEqual(0, len(response.context['user_is_participant_in']))
+
+    def test_competitions_are_displayed_when_user_is_judge_and_participant_in_different_competitions(self):
+        other_competition = CompetitionFactory()
+        participant = CompetitionParticipant.objects.create_from_user(self.user)
+        judge = CompetitionJudge.objects.create_from_user(self.user)
+        self.competition.participants.add(participant)
+        other_competition.judges.add(judge)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, len(response.context['user_is_judge_for']))
+            self.assertEqual(1, len(response.context['user_is_participant_in']))
+
+
+class TestCompetitionDetailView(TestCase):
     def setUp(self):
         self.test_password = faker.password()
         self.competition = CompetitionFactory()

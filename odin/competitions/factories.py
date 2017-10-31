@@ -14,6 +14,7 @@ from .models import (
     Competition,
     CompetitionMaterial,
     CompetitionTask,
+    Solution,
 )
 from .services import (
     create_competition_test,
@@ -89,3 +90,15 @@ class CompetitionTestFactory(TaskTestFactory):
     def _create(cls, model_class, *args, **kwargs):
         kwargs['code'] = faker.text()
         return create_competition_test(*args, **kwargs)
+
+
+class SolutionFactory(factory.DjangoModelFactory):
+    task = factory.SubFactory(CompetitionTaskFactory)
+    participant = factory.SubFactory(CompetitionParticipantFactory)
+    url = factory.LazyAttribute(lambda _: faker.url())
+    code = factory.LazyAttribute(lambda _: faker.text())
+    build_id = factory.LazyAttribute(lambda _: faker.pyint())
+    test_output = factory.LazyAttribute(lambda _: faker.text())
+
+    class Meta:
+        model = Solution
