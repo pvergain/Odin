@@ -33,15 +33,6 @@
                 {{ form.description.label }} - Markdown supported
                 {% render_field form.description class="form-control form-control-solid placeholder-no-fix" id="description_area" placeholder="Task Description" %}
 	      </div>
-              <div class="md-checkbox-inline">
-                <div class="md-checkbox">
-                  {% render_field form.gradable id="checkbox6" class="md-check" %}
-                  <label for="checkbox6">
-                    <span></span>
-                    <span class="check"></span>
-                    <span class="box"></span> Make this task gradable </label>
-                </div>
-              </div>
               <div class="form-actions noborder">
                 <button class="btn green uppercase" type="submit" name="button">Update</button>
               </div>
