@@ -1,8 +1,12 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks  %}
 
+{% block title %}
+  Create Free Time
+{% endblock title %}
+
 {% block content_title %}
-  Free time
+  Create Free time
 {% endblock content_title %}
 
 {% block page_content %}
@@ -33,17 +37,17 @@
 	      </div>
               <div class="form-group form-md-line-input">
                 {{ form.end_time.label }}
-                {% render_field form.end_time type="time" class="form-control form-control-solid" %}
+                {% render_field form.end_time class="form-control form-control-solid" %}
 	      </div>
-              <div class="md-checkbox-inline">
-                <div class="md-checkbox">
-                  {% render_field form.buffer_time class="md-check" id="buffer_checkbox" %}
-                  <label for="buffer_checkbox">
-                    <span></span>
-                    <span class="check"></span>
-                    <span class="box"></span> Buffer Time </label>
-                </div>
-              </div>
+              <div class="form-group form-md-line-input">
+                {{ form.interview_time_length.label }}
+                {% render_field form.interview_time_length class="form-control form-control-solid" %}
+	      </div>
+              <div class="form-group form-md-line-input">
+                {{ form.break_time.label }}
+                {% render_field form.break_time class="form-control form-control-solid" %}
+	      </div>
+
               <div class="form-actions noborder">
                 <button class="btn green uppercase" type="submit">Submit</button>
               </div>

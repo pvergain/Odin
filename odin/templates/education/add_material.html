@@ -1,39 +1,55 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Create Material
+{% endblock title %}
+
 {% block content_title %}
   <h1><center>Add materials for</center></h1>
 {% endblock content_title %}
 
 {% block page_content %}
-  <div class="row margin-bottom-40 stories-header" data-auto-height="true">
-    <div class="col-md-12">
-      <h2>{{ course.name }}</h2>
-    </div>
-  </div>
-  <div class="col-md-5">
+  <div class="row">
+    {% include "partial/form_errors.html" with form=form errors=readable_errors %}
     {% include "education/partial/message_box.html" %}
-    {% include "partial/form_errors.html" with errors=readable_errors %}
-    <form method="POST">
-
-      {% csrf_token %}
-
-      <div class="form-group">
-        {% render_field form.identifier class="form-control form-control-solid placeholder-no-fix" placeholder="Material identifier" %}
+    <div class="col-md-12">
+      <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+        <h2>{{ course.name }}</h2>
       </div>
-      <div class="form-group">
-        {% render_field form.url class="form-control form-control-solid placeholder-no-fix" placeholder="Material url" %}
+    </div>
+    <div class="col-md-6">
+      <div class="portlet light ">
+        <div class="portlet-title">
+          <div class="caption font-blue-sunglo">
+            <i class="icon-settings font-blue-sunglo"></i>
+            <span class="caption-subject bold uppercase"> Add Included Material </span>
+          </div>
+        </div>
+        <div class="portlet-body form">
+          <form action="" method="POST" enctype="multipart/form-data">
+            <div class="form-body">
+              {% csrf_token %}
+              <div class="form-group form-md-line-input">
+                {% render_field form.identifier class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Material identifier" %}
+              </div>
+              <div class="form-group form-md-line-input">
+                {% render_field form.url class="form-control form-control-solid placeholder-no-fix" placeholder="Material url" %}
+              </div>
+              <div class="form-group form-md-line-input">
+                {{ form.topic.label }}
+                {% render_field form.topic class="form-control form-control-solid placeholder-no-fix" %}
+              </div>
+              <div class="form-group form-md-line-input">
+                {% render_field form.content class="form-control form-control-solid placeholder-no-fix" placeholder="Material content" %}
+              </div>
+              <div class="form-actions noborder">
+                <button class="btn green uppercase" type="submit">Submit</button>
+              </div>
+          </form>
+            </div>
+        </div>
       </div>
-      <div class="form-group">
-        {{ form.topic.label }}
-        {% render_field form.topic class="form-control form-control-solid placeholder-no-fix"%}
-      </div>
-      <div class="form-group">
-        {% render_field form.content class="form-control form-control-solid placeholder-no-fix" placeholder="Material content" %}
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn green uppercase">Add material</button>
-      </div>
-    </form>
+    </div>
   </div>
 {% endblock page_content %}

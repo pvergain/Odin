@@ -16,6 +16,7 @@ from odin.users.validators import validate_mac
 
 from .managers import StudentManager, TeacherManager, CourseManager
 from .query import TaskQuerySet, SolutionQuerySet, CheckInQuerySet
+from .mixins import TestModelMixin
 
 
 class Student(BaseUser):
@@ -56,6 +57,8 @@ class Course(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
+    attendable = models.BooleanField(default=True)
+
     students = models.ManyToManyField(Student,
                                       through='CourseAssignment',
                                       through_fields=('course', 'student'))
@@ -69,6 +72,8 @@ class Course(models.Model):
     repository = models.URLField(blank=True)
     video_channel = models.URLField(blank=True, null=True)
     facebook_group = models.URLField(blank=True, null=True)
+
+    logo = models.ImageField(blank=True, null=True)
 
     public = models.BooleanField(default=True)
 
@@ -86,7 +91,7 @@ class Course(models.Model):
 
     @property
     def visible_teachers(self):
-        return self.teachers.filter(course_assignments__hidden=False)
+        return self.teachers.filter(course_assignments__hidden=False).select_related('profile')
 
     @property
     def duration_in_weeks(self):
@@ -159,7 +164,7 @@ class CourseAssignment(models.Model):
 
 
 class BaseMaterial(UpdatedAtCreatedAtModelMixin, models.Model):
-    identifier = models.CharField(unique=True, max_length=255)
+    identifier = models.CharField(max_length=255)
     url = models.URLField(blank=True, null=True)
     content = models.TextField(blank=True)
 
@@ -178,6 +183,9 @@ class IncludedMaterial(BaseMaterial):
     topic = models.ForeignKey('Topic',
                               on_delete=models.CASCADE,
                               related_name='materials')
+
+    class Meta:
+        unique_together = (('topic', 'material'), )
 
 
 class Week(models.Model):
@@ -221,6 +229,11 @@ class Lecture(models.Model):
 
     present_students = models.ManyToManyField(Student, related_name='lectures')
 
+    def clean(self):
+        if hasattr(self, 'week'):
+            if not self.week.start_date <= self.date <= self.week.end_date:
+                raise ValidationError('Lecture date must be in the date range for it\'s week')
+
     @property
     def not_present_students(self):
         present_ids = self.present_students.values_list('id', flat=True)
@@ -256,8 +269,6 @@ class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
     description = models.TextField(blank=True, null=True)
     gradable = models.BooleanField(default=False)
 
-    objects = TaskQuerySet.as_manager()
-
     class Meta:
         abstract = True
 
@@ -281,6 +292,11 @@ class IncludedTask(BaseTask):
                               on_delete=models.CASCADE,
                               related_name='tasks')
 
+    objects = TaskQuerySet.as_manager()
+
+    class Meta:
+        unique_together = (('topic', 'task'), )
+
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     language = models.ForeignKey(ProgrammingLanguage)
@@ -296,38 +312,13 @@ class Test(BaseTest):
     pass
 
 
-class IncludedTest(BaseTest):
+class IncludedTest(TestModelMixin, BaseTest):
     task = models.OneToOneField(IncludedTask,
                                 on_delete=models.CASCADE,
                                 related_name='test')
     test = models.ForeignKey(Test,
                              on_delete=models.CASCADE,
                              related_name='included_tests')
-
-    def is_source(self):
-        return getattr(self, 'code', None) is not None
-
-    def is_binary(self):
-        return getattr(self, 'file', None) is not None
-
-    def test_mode(self):
-        if self.is_binary:
-            return 'binary'
-        return 'plain'
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
-
-    def clean(self):
-        if not self.task.gradable:
-            raise ValidationError("Can not add tests to a non-gradable task")
-
-        if self.code is None and str(self.file) is '':
-            raise ValidationError("A binary file or source code must be provided!")
-
-        if self.code is not None and str(self.file) is not '':
-            raise ValidationError("Either a binary file or source code must be provided")
 
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
@@ -356,7 +347,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     check_status_location = models.CharField(max_length=128, null=True, blank=True)
     build_id = models.IntegerField(blank=True, null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICE, default=SUBMITTED_WITHOUT_GRADING)
-    test_output = models.TextField(blank=True, null=True)
+    test_output = JSONField(blank=True, null=True)
     return_code = models.IntegerField(blank=True, null=True)
     file = models.FileField(upload_to="solutions", blank=True, null=True)
 
@@ -364,6 +355,13 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
 
     @property
     def verbose_status(self):
-        for status_index, status in self.STATUS_CHOICE:
-            if status_index == self.status:
-                return status
+        return self.STATUS_CHOICE[self.status][1]
+
+    def pass_or_fail_status(self):
+        if self.task.gradable and self.status == self.OK or \
+                not self.task.gradable and self.status == self.SUBMITTED_WITHOUT_GRADING:
+            return "Passed"
+        return "Failed"
+
+    class Meta:
+        ordering = ['-id']

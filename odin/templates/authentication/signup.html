@@ -5,7 +5,7 @@
 
 
 {% block title %}
-  Log In
+  Sign Up
 {% endblock title %}
 
 {% block body %}
@@ -14,15 +14,10 @@
     <div class="content">
         <!-- BEGIN REGISTRATION FORM -->
         <form class="signup-form" action="{% url 'account_signup' %}" method="post">
-            {% csrf_token %}
-            <h3 class="font-green">Sign Up</h3>
-            {% if not form.is_valid %}
-            {% for error in readable_errors %}
-              <div class="alert alert-warning">
-                <span>{{ error }}</span>
-              </div>
-            {% endfor %}
-            {% endif %}
+           {% include "education/partial/message_box.html" %}
+           {% include "partial/form_errors.html" with errors=readable_errors %}
+           {% csrf_token %}
+          <h3 class="font-green">Sign Up</h3>
             <p class="hint"> Enter your account details below: </p>
             <div class="form-group">
                 {% render_field form.email class="form-control placeholder-no-fix" placeholder="Email Address" %}

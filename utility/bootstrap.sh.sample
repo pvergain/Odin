@@ -19,5 +19,5 @@ dropdb --if-exists "$DATABASE"
 sudo -u postgres createdb -O $USERNAME "$DATABASE"
 
 python manage.py migrate
-python manage.py seed_initial
+python manage.py seed_initials
 python manage.py auth_setup

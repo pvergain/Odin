@@ -1,12 +1,18 @@
 from datetime import date, time
+from typing import Dict
 
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 
+from odin.common.services import send_email
 from odin.applications.models import Application, ApplicationInfo
-from odin.education.models import Course
+from odin.education.models import Course, Student, CourseAssignment
 from .models import Interview, Interviewer, InterviewerFreeTime
 from .helpers.interviews import GenerateInterviews, GenerateInterviewSlots
+from odin.education.services import add_student
 
 
 def create_new_interview_for_application(*,
@@ -33,13 +39,15 @@ def create_interviewer_free_time(*,
                                  date: date,
                                  start_time: time,
                                  end_time: time,
-                                 buffer_time: bool) -> InterviewerFreeTime:
+                                 interview_time_length: int,
+                                 break_time: int) -> InterviewerFreeTime:
 
     return InterviewerFreeTime.objects.create(interviewer=interviewer,
                                               date=date,
                                               start_time=start_time,
                                               end_time=end_time,
-                                              buffer_time=buffer_time)
+                                              interview_time_length=interview_time_length,
+                                              break_time=break_time)
 
 
 def add_course_to_interviewer_courses(*,
@@ -51,19 +59,36 @@ def add_course_to_interviewer_courses(*,
     return interviewer.courses_to_interview.all()
 
 
-def generate_interview_slots():
+def check_interviewer_skypes(*,
+                             application_info: ApplicationInfo) -> list:
+    interviewers_without_skype = []
+
+    for interviewer in application_info.interviewer_set.all():
+        if not interviewer.profile.skype:
+            interviewers_without_skype.append(interviewer)
+
+    return interviewers_without_skype
+
+
+def generate_interview_slots() -> Dict:
     context = {'log': []}
     context['log'].append("Start generating interviews...\n")
-    interview_length = 20
-    break_between_interviews = 10
 
-    interview_slots_generator = GenerateInterviewSlots(
-        interview_length, break_between_interviews)
+    interview_slots_generator = GenerateInterviewSlots()
 
     interview_slots_generator.generate_interview_slots()
     interview_slots_generator.get_generated_slots()
 
     courses_to_interview = ApplicationInfo.objects.get_open_for_interview()
+
+    for application_info in courses_to_interview:
+        interviewers_without_skype = check_interviewer_skypes(application_info=application_info)
+        if interviewers_without_skype != []:
+            context['log'].append("Some interviewers haven't set a skype!")
+            for interviewer in interviewers_without_skype:
+                context['log'].append(f'{application_info.course.name} - {interviewer.email}')
+            context['log'].append('No interviews will be generated.')
+            return context
 
     if len(courses_to_interview) == 0:
         context['log'].append('There are no open for interview courses!\n')
@@ -88,3 +113,48 @@ def generate_interview_slots():
         context['log'].append('All free interview slots: {0}'.format(free_interview_slots))
 
     return context
+
+
+def send_interview_confirmation_emails():
+    interviews = Interview.objects.with_application().without_received_email()
+    for interview in interviews:
+        application = interview.application
+        user = application.user
+        confirm_url_kwargs = {"application_id": application.id,
+                              "interview_token": str(interview.uuid)}
+        context = {
+            'protocol': 'http',
+            'full_name': user.get_full_name(),
+            'course_name': application.application_info.course.name,
+            'start_time': str(interview.start_time),
+            'date': str(interview.date),
+            'domain': Site.objects.get_current().domain,
+            'confirm_url': reverse('dashboard:interviews:confirm-interview',
+                                   kwargs=confirm_url_kwargs),
+            'choose_url': reverse('dashboard:interviews:choose-interview',
+                                  kwargs={"application_id": application.id,
+                                          "interview_token": str(interview.uuid)})
+
+        }
+
+        print('Sending to {} for application {}'.format(user.email, application))
+
+        email_template = settings.EMAIL_TEMPLATES['interview_confirmation']
+        send_email(email_template, [user.email], context)
+
+        interview.has_received_email = True
+        interview.save()
+
+
+def assign_accepted_users_to_courses():
+    active_application_infos = ApplicationInfo.objects.get_open_for_interview()
+    for info in active_application_infos:
+        accepted = info.accepted_applicants
+        for application in accepted:
+            if not application.user.is_student():
+                student = Student.objects.create_from_user(application.user)
+            else:
+                student = application.user.student
+
+            if not CourseAssignment.objects.filter(course=info.course, student=student):
+                add_student(course=info.course, student=student)

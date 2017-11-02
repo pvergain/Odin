@@ -73,9 +73,18 @@ bootstrap.sh
 # Export recaptcha env variables
 captcha_env.sh
 
+# Bower components
 */bower_components/*
 
+# Previous DB dump
 dump.json
 
+# celery beat
 celerybeat-schedule
 celerybeat.pid
+
+# Webpack bundle
+dist/
+
+# Editor specific
+.tern-port

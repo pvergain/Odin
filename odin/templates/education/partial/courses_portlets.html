@@ -1,0 +1,12 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+      <h2>Courses that you are {{ role }} in</h2>
+    </div>
+  </div>
+  {% for course in courses %}
+    <div class="col-md-6">
+      {% include 'education/partial/course_box.html' %}
+    </div>
+  {% endfor %}
+</div>

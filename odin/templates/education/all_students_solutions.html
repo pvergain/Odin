@@ -1,5 +1,9 @@
 {% extends "dashboard/dashboard_base.html" %}
 
+{% block title %}
+  Solutions for {{ task.name }}
+{% endblock title %}
+
 {% block content_title %}
   Solutions for each student
 {% endblock content_title %}
@@ -7,6 +11,7 @@
 {% block page_content %}
   <div class="row">
     <div class="col-md-12">
+      {% include "education/partial/student_statistics.html" with statistics=solution_statistics %}
       {% include "education/partial/student_tables.html" with course=course students=object_list task=task %}
     </div>
   </div>

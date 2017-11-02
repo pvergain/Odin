@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load account socialaccount %}
+
+
+{% block title %}
+  Sign Up for competition
+{% endblock title %}
+
+{% block body %}
+  <body class="login">
+    {% include "partial/logo.html" %}
+    <div class="content">
+      <!-- BEGIN REGISTRATION FORM -->
+      <form class="signup-form" action="" method="post">
+        {% csrf_token %}
+        <h3 class="font-green">Sign Up</h3>
+        {% include 'education/partial/message_box.html' %}
+        {% include 'partial/form_errors.html' with errors=readable_errors %}
+
+        <p class="hint"> Enter your account details below: </p>
+        <div class="form-group" id="email_field">
+          {% render_field form.email class="form-control placeholder-no-fix" placeholder="Email Address" name="email" %}
+        </div>
+        <div class="form-group">
+          {% render_field form.full_name class="form-control placeholder-no-fix" placeholder="Full Name" %}
+        </div>
+        <div class="form-group">
+          {% render_field form.captcha class="form-control" %}
+        </div>
+        <button type="submit" id="register-submit-btn" class="btn btn-success uppercase pull-right">Submit</button>
+    </div>
+      </form>
+      <!-- END REGISTRATION FORM -->
+    </div>
+    <!-- BEGIN CORE PLUGINS -->
+    {% include "partial/core_scripts.html" %}
+    <!-- END CORE PLUGINS -->
+    <!-- BEGIN PAGE LEVEL PLUGINS -->
+    {% include "partial/authentication_scripts.html" %}
+    {% include "partial/form_validation_scripts.html" %}
+
+    <script type="text/javascript">
+     function changeEmailFieldVisibility() {
+         var userData = {{ user_data|safe }};
+         var emailField = $("#email_field");
+         if (userData.authenticated) {
+             emailField.hide();
+         } else {
+             emailField.show();
+         }
+     }
+     $(document).ready(changeEmailFieldVisibility());
+    </script>
+    <!-- END PAGE LEVEL PLUGINS -->
+  </body>
+
+{% endblock body %}

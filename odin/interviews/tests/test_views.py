@@ -10,6 +10,7 @@ from odin.applications.factories import ApplicationFactory, ApplicationInfoFacto
 from odin.applications.models import Application
 from odin.interviews.factories import InterviewFactory, InterviewerFreeTimeFactory
 from odin.interviews.models import Interviewer, Interview, InterviewerFreeTime
+from odin.interviews.services import add_course_to_interviewer_courses
 
 
 class TestChooseInterviewView(TestCase):
@@ -117,6 +118,11 @@ class TestInterviewsListView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
         self.interview = InterviewFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:user-interviews')
 
@@ -141,15 +147,39 @@ class TestInterviewsListView(TestCase):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    def test_access_is_allowed_if_interviewer(self):
+    def test_access_is_allowed_if_interviewer_for_active_course(self):
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
 
-    def test_interviews_are_displayed_correctly_for_interviewer(self):
+    def test_interviews_are_displayed_correctly_for_interviewer_when_he_is_interviewer_for_course(self):
         with self.login(email=self.interviewer.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(list(Interview.objects.all()), list(response.context['object_list']))
+
+    def test_access_is_forbidden_for_interviewer_who_is_not_interviewer_for_course(self):
+        other_user = BaseUserFactory(password=self.test_password)
+        other_interviewer = Interviewer.objects.create_from_user(other_user)
+        with self.login(email=other_interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_access_is_forbidden_when_interviewer_for_already_passed_course(self):
+        old_app_info = ApplicationInfoFactory(
+            start_date=timezone.now() - timezone.timedelta(days=10),
+            end_date=timezone.now() - timezone.timedelta(days=5),
+            start_interview_date=timezone.now() - timezone.timedelta(days=4),
+            end_interview_date=timezone.now() - timezone.timedelta(days=2),
+        )
+
+        other_user = BaseUserFactory(password=self.test_password)
+        other_interviewer = Interviewer.objects.create_from_user(other_user)
+
+        add_course_to_interviewer_courses(interviewer=other_interviewer, course=old_app_info.course)
+
+        with self.login(email=other_interviewer.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
 
 
 class TestCreateFreeTimeView(TestCase):
@@ -157,17 +187,26 @@ class TestCreateFreeTimeView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
+
         self.url = reverse('dashboard:interviews:add-free-time')
 
     def test_can_add_free_time_if_interviewer(self):
         free_time_count = InterviewerFreeTime.objects.count()
         start_time = faker.time_object()
         end_time = (timezone.datetime.combine(timezone.now(), start_time) + timezone.timedelta(seconds=1)).time()
+
+        field_names = ('interview_time_length', 'break_time')
         data = {
             'date': (timezone.now() + timezone.timedelta(days=1)).date(),
             'start_time': start_time,
             'end_time': end_time,
-            'buffer_time': False
+            field_names[0]: InterviewerFreeTime._meta.get_field(field_names[0]).get_default(),
+            field_names[1]: InterviewerFreeTime._meta.get_field(field_names[1]).get_default()
         }
 
         with self.login(email=self.interviewer.email, password=self.test_password):
@@ -188,6 +227,12 @@ class TestUpdateFreeTimeView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
+
         self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:edit-free-time',
                            kwargs={'free_time_id': self.interviewer_free_time.id})
@@ -210,10 +255,13 @@ class TestUpdateFreeTimeView(TestCase):
 
     def test_can_update_personal_free_time_successfully(self):
         old_date = self.interviewer_free_time.date
+        field_names = ('interview_time_length', 'break_time')
         data = {
             'date': old_date + timezone.timedelta(days=1),
             'start_time': self.interviewer_free_time.start_time,
             'end_time': self.interviewer_free_time.end_time,
+            field_names[0]: InterviewerFreeTime._meta.get_field(field_names[0]).get_default(),
+            field_names[1]: InterviewerFreeTime._meta.get_field(field_names[1]).get_default()
         }
 
         with self.login(email=self.interviewer.email, password=self.test_password):
@@ -228,6 +276,12 @@ class TestDeleteFreeTimeView(TestCase):
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.app_info = ApplicationInfoFactory(start_date=timezone.now().date(),
+                                               end_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               start_interview_date=timezone.now().date() + timezone.timedelta(days=1),
+                                               end_interview_date=timezone.now().date() + timezone.timedelta(days=1))
+        add_course_to_interviewer_courses(course=self.app_info.course, interviewer=self.interviewer)
+
         self.interviewer_free_time = InterviewerFreeTimeFactory(interviewer=self.interviewer)
         self.url = reverse('dashboard:interviews:delete-free-time',
                            kwargs={'free_time_id': self.interviewer_free_time.id})
@@ -349,3 +403,54 @@ class TestPromoteAcceptedUsersToStudentsView(TestCase):
         with self.login(email=new_user.email, password=self.test_password):
             response = self.post(self.url)
             self.response_403(response)
+
+
+class TestGenerateInterviewsView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        Interviewer.objects.create_from_user(self.user)
+        self.application_info = ApplicationInfoFactory(
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            start_interview_date=timezone.now().date(),
+            end_interview_date=timezone.now().date() + timezone.timedelta(days=faker.pyint()))
+        self.url = reverse('dashboard:interviews:generate-interviews')
+
+    def test_post_generates_interviews_in_different_intervals_when_slot_times_are_not_default(self):
+        interviewer = self.user.interviewer
+        new_interviewer = Interviewer.objects.create_from_user(BaseUserFactory())
+        add_course_to_interviewer_courses(course=self.application_info.course, interviewer=new_interviewer)
+        add_course_to_interviewer_courses(course=self.application_info.course, interviewer=interviewer)
+
+        now = timezone.now()
+        InterviewerFreeTimeFactory(
+            start_time=now.replace(hour=0, minute=0, second=0, microsecond=0).time(),
+            date=now.date() + timezone.timedelta(days=1),
+            end_time=now.replace(hour=2, minute=0, second=0, microsecond=0).time(),
+            interviewer=interviewer,
+            interview_time_length=20)
+
+        InterviewerFreeTimeFactory(
+            date=now.date() + timezone.timedelta(days=1),
+            start_time=now.replace(hour=0, minute=0, second=0, microsecond=0).time(),
+            end_time=now.replace(hour=2, minute=0, second=0, microsecond=0).time(),
+            interviewer=new_interviewer,
+            interview_time_length=30)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url)
+            interviewer.refresh_from_db()
+            new_interviewer.refresh_from_db()
+
+            first_interview, second_interview, *_ = new_interviewer.interview_set.all()
+            interview_interval = timezone.datetime.combine(timezone.datetime.min.date(), second_interview.start_time) -\
+                timezone.datetime.combine(timezone.datetime.min.date(), first_interview.start_time)
+
+            self.assertEqual(interview_interval, timezone.timedelta(minutes=35))
+
+            first_interview, second_interview, *_ = interviewer.interview_set.all()
+            interview_interval = timezone.datetime.combine(timezone.datetime.min.date(), second_interview.start_time) -\
+                timezone.datetime.combine(timezone.datetime.min.date(), first_interview.start_time)
+
+            self.assertEqual(interview_interval, timezone.timedelta(minutes=25))

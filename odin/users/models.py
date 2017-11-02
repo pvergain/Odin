@@ -20,6 +20,8 @@ class BaseUser(PermissionsMixin,
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    competition_registration_uuid = models.UUIDField(blank=True, null=True)
+
     USERNAME_FIELD = 'email'
 
     objects = UserManager()
@@ -71,6 +73,12 @@ class BaseUser(PermissionsMixin,
     def is_interviewer(self):
         return hasattr(self, 'interviewer')
 
+    def is_participant(self):
+        return hasattr(self, 'competitionparticipant')
+
+    def is_judge(self):
+        return hasattr(self, 'competitionjudge')
+
 
 class Profile(models.Model):
     user = models.OneToOneField(BaseUser)
@@ -85,7 +93,8 @@ class Profile(models.Model):
 
     avatar = ImageCropField(blank=True, null=True)
     full_image = ImageCropField(upload_to='avatars/', blank=True, null=True)
-    cropping = ImageRatioField('full_image', '300x300')
+    cropping = ImageRatioField('full_image', '300x30')
+    skype = models.CharField(blank=True, null=True, max_length=255)
 
     mac = models.CharField(max_length=17, blank=True, null=True)
 

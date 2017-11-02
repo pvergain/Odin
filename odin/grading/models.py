@@ -57,7 +57,7 @@ class GraderBinaryProblem(GraderReadableTypesMixin, models.Model):
         (BINARY, 'binary')
     ]
 
-    test_type = models.SmallIntegerField(choices=TEST_TYPE_CHOICE, default=UNITTEST)
+    test_type = models.SmallIntegerField(choices=TEST_TYPE_CHOICE, default=OUTPUT_CHECKING)
     language = models.CharField(max_length=255)
     file_type = models.SmallIntegerField(choices=FILE_TYPE_CHOICE, default=BINARY)
     solution = models.FileField(upload_to="solutions", null=True, blank=True)
@@ -65,13 +65,11 @@ class GraderBinaryProblem(GraderReadableTypesMixin, models.Model):
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
 
     def read_binary_file(self):
-        with open(self.code.file.path, 'rb') as f:
-            encoded = base64.b64encode(f.read())
+        encoded = base64.b64encode(self.solution.file.read())
 
         return encoded.decode('ascii')
 
     def read_binary_test(self):
-        with open(self.test.file.path, 'rb') as f:
-            encoded = base64.b64encode(f.read())
+        encoded = base64.b64encode(self.test.file.read())
 
         return encoded.decode('ascii')

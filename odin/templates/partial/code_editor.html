@@ -5,6 +5,7 @@
 <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'codemirror/mode/python/python.js'%}"></script>
 <script src="{% static 'codemirror/mode/markdown/markdown.js' %}"></script>
+<script src="{% static 'codemirror/mode/javascript/javascript.js' %}"></script>
 <script type="text/javascript">
  {% if area_id %}
    var codeArea = $('#{{ area_id }}')[0];
@@ -14,7 +15,7 @@
  var testMirror = CodeMirror.fromTextArea(codeArea,
                                           {
                                               lineNumbers: true,
-                                              mode: "{{ mode }}",
+                                              mode: "javascript",
                                               matchBrackets: true,
                                               theme: "neat",
                                               indentUnit: 4

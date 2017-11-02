@@ -10,8 +10,8 @@ from odin.common.utils import get_now
 from odin.users.models import BaseUser
 from odin.users.factories import BaseUserFactory
 
-from ..factories import StudentFactory, TeacherFactory, CourseFactory
-from ..models import Student, Teacher, CourseAssignment
+from ..factories import StudentFactory, TeacherFactory, CourseFactory, IncludedTaskFactory, SolutionFactory
+from ..models import Student, Teacher, CourseAssignment, IncludedTask, Solution
 from ..services import add_student, add_teacher
 
 
@@ -311,3 +311,43 @@ class CourseTests(TestCase):
         course2 = CourseFactory(start_date=start_date, end_date=end_date)
 
         self.assertEqual(3, course2.duration_in_weeks)
+
+
+class TaskTests(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+
+    def test_get_tasks_for_course_returns_tasks_for_course(self):
+        task = IncludedTaskFactory(topic__course=self.course)
+        queryset = IncludedTask.objects.get_tasks_for(self.course)
+        self.assertEqual([task], list(queryset))
+
+    def test_get_tasks_for_course_does_not_return_any_tasks_if_course_has_none(self):
+        queryset = IncludedTask.objects.get_tasks_for(self.course)
+        self.assertEqual([], list(queryset))
+
+
+class SolutionTests(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.student = StudentFactory()
+        add_student(self.course, self.student)
+        self.task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+
+    def test_get_solved_solutions_for_student_and_course_returns_solved_solutions(self):
+        solution = SolutionFactory(task=self.task, student=self.student, status=Solution.SUBMITTED_WITHOUT_GRADING)
+
+        queryset = Solution.objects.get_solved_solutions_for_student_and_course(self.student, self.course)
+        self.assertEqual([solution], list(queryset))
+
+    def test_get_solved_solutions_for_student_and_course_does_not_return_solutions_if_no_solutions(self):
+        queryset = Solution.objects.get_solved_solutions_for_student_and_course(self.student, self.course)
+        self.assertEqual([], list(queryset))
+
+    def test_get_solved_solutions_for_student_and_course_returns_nothing_if_no_solved_solutions(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(task=self.task, student=self.student, status=Solution.NOT_OK)
+
+        queryset = Solution.objects.get_solved_solutions_for_student_and_course(self.student, self.course)
+        self.assertEqual([], list(queryset))

@@ -2,6 +2,10 @@
 {% load widget_tweaks %}
 {% load static %}
 
+{% block title %}
+  Create Task
+{% endblock title %}
+
 {% block content_title %}
   Add task
 {% endblock content_title%}
@@ -19,7 +23,7 @@
           </div>
         </div>
         <div class="portlet-body form">
-          <form action="" method="POST">
+          <form action="" method="POST" enctype="multipart/form-data">
             <div class="form-body">
               {% csrf_token %}
 
@@ -36,21 +40,29 @@
               </div>
               <div class="md-checkbox-inline">
                 <div class="md-checkbox">
-                  {% render_field form.gradable id="checkbox6" class="md-check" onchange="changeTestFieldsVisibility()" %}
+                  {% render_field form.gradable id="checkbox6" class="md-check" onchange="changeLanguageFieldVisibility()" %}
                   <label for="checkbox6">
                     <span></span>
                     <span class="check"></span>
                     <span class="box"></span> Make this task gradable </label>
                 </div>
               </div>
-              <div class="test-fields">
+              <div class="test_language">
                 <div class="form-group form-md-line-input">
                   {{ form.language.label }}
-                  {% render_field form.language class="form-control form-control-solid" %}
+                  {% render_field form.language id="language_field" class="form-control form-control-solid" onchange="changeTestFieldsVisibility(this, true)" %}
                 </div>
+              </div>
+              <div class="binary-test-fields">
+                <div class="form-group form-md-line-input">
+                  {{ form.file.label }}
+                  {% render_field form.file class="form-control form-control-solid"%}
+                </div>
+               </div>
+               <div class="source-code-test-fields">
                 <div class="form-group form-md-line-input">
                   <span>Write your tests below</span>
-                  {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="code_area" placeholder="Enter your test code here" %}
+                    {% render_field form.code class="form-control form-control-solid placeholder-no-fix" id="code_area" placeholder="Enter your test code here" %}
                 </div>
               </div>
               <div class="form-actions noborder">
@@ -66,15 +78,39 @@
 
 {% block extra_scripts %}
   <script type="text/javascript">
-    function changeTestFieldsVisibility(){
-      checkbox = $('#checkbox6')[0];
-      if (checkbox.checked) {
-        $('.test-fields').show();
-      }else {
-        $('.test-fields').hide();
-      }
+   function changeLanguageFieldVisibility(){
+       var checkbox = $('#checkbox6')[0];
+       var languageField = $('#language_field')[0];
+       if (checkbox.checked) {
+           $('.test_language').show();
+           changeTestFieldsVisibility(languageField, true);
+       } else {
+           $('.test_language').hide();
+           changeTestFieldsVisibility(languageField, false);
+       }
+
+   }
+   function changeTestFieldsVisibility(languageField, visible){
+       var binaryFields = $('.binary-test-fields');
+       var sourceFields = $('.source-code-test-fields');
+       if (visible){
+           if (languageField.value === ""){
+               binaryFields.hide()
+               sourceFields.hide();
+           }
+           else if (languageField.value !== "3"){
+               binaryFields.hide()
+               sourceFields.show();
+           } else {
+               sourceFields.hide();
+               binaryFields.show()
+           }
+       } else {
+           binaryFields.hide()
+           sourceFields.hide();
+       }
     }
-    $(document).ready(changeTestFieldsVisibility());
+    $(document).ready(changeLanguageFieldVisibility());
   </script>
   {% include "partial/code_editor.html" with mode="python" %}
   {% include "partial/code_editor.html" with area_id="description_area" mode="markdown"%}

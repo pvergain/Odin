@@ -18,9 +18,14 @@ from .permissions import (
 )
 from .mixins import CheckInterviewDataMixin, HasConfirmedInterviewRedirectMixin, UserInterviewsListMixin
 from .models import Interview, InterviewerFreeTime
-from .services import create_new_interview_for_application, create_interviewer_free_time, generate_interview_slots
+from .services import (
+    create_new_interview_for_application,
+    create_interviewer_free_time,
+    generate_interview_slots,
+    send_interview_confirmation_emails,
+    assign_accepted_users_to_courses
+)
 from .forms import FreeTimeModelForm
-from .tasks import send_interview_confirmation_emails, assign_accepted_users_to_courses
 from .serializers import InterviewSerializer
 
 
@@ -100,6 +105,14 @@ class CreateFreeTimeView(LoginRequiredMixin,
     def get_service(self):
         return create_interviewer_free_time
 
+    def get_initial(self):
+        self.initial = super().get_initial()
+        field_names = ('interview_time_length', 'break_time')
+        self.initial[field_names[0]] = InterviewerFreeTime._meta.get_field(field_names[0]).get_default()
+        self.initial[field_names[1]] = InterviewerFreeTime._meta.get_field(field_names[1]).get_default()
+
+        return self.initial
+
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
@@ -116,6 +129,7 @@ class CreateFreeTimeView(LoginRequiredMixin,
 
 
 class DeleteFreeTimeView(LoginRequiredMixin,
+                         IsInterviewerPermission,
                          CannotControlOtherInterviewerDataPermission,
                          DeleteView):
     model = InterviewerFreeTime
@@ -125,6 +139,7 @@ class DeleteFreeTimeView(LoginRequiredMixin,
 
 
 class UpdateFreeTimeView(LoginRequiredMixin,
+                         IsInterviewerPermission,
                          CannotControlOtherInterviewerDataPermission,
                          ReadableFormErrorsMixin,
                          UpdateView):
@@ -177,12 +192,13 @@ class FreeInterviewsListAPIView(generics.ListAPIView):
 
 class SendInterviewConfirmationEmailsView(DashboardManagementPermission, View):
     def post(self, request, *args, **kwargs):
-        send_interview_confirmation_emails.delay()
+        send_interview_confirmation_emails()
 
         return redirect('dashboard:interviews:user-interviews')
 
 
 class RateInterviewView(LoginRequiredMixin,
+                        IsInterviewerPermission,
                         CannotControlOtherInterviewerDataPermission,
                         ReadableFormErrorsMixin,
                         UpdateView):
@@ -221,12 +237,13 @@ class PromoteAcceptedUsersToStudentsView(LoginRequiredMixin,
                                          DashboardManagementPermission,
                                          View):
     def post(self, request, *args, **kwargs):
-        assign_accepted_users_to_courses.delay()
+        assign_accepted_users_to_courses()
 
         return redirect('dashboard:interviews:accepted-applicants')
 
 
 class DeleteInterviewView(LoginRequiredMixin,
+                          IsInterviewerPermission,
                           CannotControlOtherInterviewerDataPermission,
                           DeleteView):
     model = Interview

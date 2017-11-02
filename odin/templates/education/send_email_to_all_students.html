@@ -1,0 +1,40 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+  Send Email to Students
+{% endblock title %}
+
+{% block content_title %}
+  Send Email to all students in {{ course.name }}
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-6">
+      {% include "education/partial/message_box.html" %}
+      <div class="portlet light ">
+        <div class="portlet-title">
+          <div class="caption font-blue-sunglo">
+            <i class="icon-settings font-blue-sunglo"></i>
+            <span class="caption-subject bold uppercase"> Create Mail Content </span>
+          </div>
+        </div>
+        <div class="portlet-body form">
+          <form action="" method="POST" enctype="multipart/form-data">
+            <div class="form-body">
+              {% csrf_token %}
+              <div class="form-group form-md-line-input">
+                <label>Email content</label>
+                {% render_field form.text class="form-control form-control-solid" id="form_control_1" %}
+	      </div>
+              <div class="form-actions noborder">
+                <button class="btn green uppercase" type="submit">Send</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}

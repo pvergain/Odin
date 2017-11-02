@@ -1,0 +1,23 @@
+{% extends public_page|yesno:'partial/public_base.html,dashboard/dashboard_base.html' %}
+
+{% block title %}
+  {{ course.name }}
+{% endblock title %}
+
+{% block content_title %}
+  {% if public_page %}
+    <div class="container">
+  {% else %}
+      <div>
+  {% endif %}
+  {{ course.name }}
+      </div>
+{% endblock content_title %}
+
+{% block page_content %}
+  {% if is_user_teacher_in_course %}
+    {% include 'education/teacher_course_detail.html' %}
+  {% else %}
+    {% include 'education/course_detail.html' with course=course tasks_ratio=tasks_ratio course_topics=course_topics public_page=public_page %}
+  {% endif %}
+{% endblock page_content %}

@@ -1,0 +1,65 @@
+{% load static %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+    {% include "education/partial/course_breadcrumb.html" with course=course is_student_list=False %}
+      <h1 class="page-title">Students</h1>
+      <a href="{% url 'dashboard:education:course-students-list' course.id %}">
+        <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">View Students</button></a>
+      <a href="{% url 'dashboard:education:course-management:send-email-to-all-students' course.id %}">
+        <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">Send Mass Email</button></a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div id="root">
+      </div>
+      <a href="{% url 'dashboard:education:course-management:manage-course-topics' course.id %}">
+        <button type="button" class="btn green uppercase" style="margin-bottom: 25px;">Add topic</button></a>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="page-title">
+        <div class="row">
+          <div class="col-md-3">
+            Course Schedule
+          </div>
+          <div class="col-md-1">
+            <form method="POST" action={% url 'dashboard:education:course-management:add-week-to-course' course.id %}>
+              {% csrf_token %}
+              <button type="submit" style="border: none; background-color: transparent;">
+                <i class="fa fa-plus fa-1x" style="margin-top: 8px;"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </h1>
+      {% include 'education/partial/course_schedule.html' %}
+      {% if user.is_teacher %}
+        <a href="{% url 'dashboard:education:course-management:create-lecture' course.id %}">
+          <button class="btn green uppercase" type="button">Add lecture</button></a>
+     {% endif %}
+    </div>
+  </div>
+{% endblock page_content %}
+
+{% block extra_scripts %}
+  {% csrf_token %}
+  <script src="{% url 'js_reverse' %}"></script>
+  <script>
+   window.props = {{ course_topics|safe }};
+   {% if request.user.is_teacher %}
+     window.props.isUserTeacher = true;
+   {% endif %}
+   {% if request.user.is_student %}
+     window.props.studentID = {{ request.user.student.id }};
+   {% endif %}
+   window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  </script>
+  <script src="{% static 'bundle.js' %}"></script>
+{% endblock extra_scripts %}

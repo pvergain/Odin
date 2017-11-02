@@ -3,7 +3,8 @@ from django.utils import timezone
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from odin.education.models import Course, BaseTask
+from odin.education.models import Course
+from odin.competitions.models import Competition
 from odin.users.models import BaseUser
 from .managers import ApplicationInfoManager
 from .query import ApplicationQuerySet
@@ -12,7 +13,8 @@ from .query import ApplicationQuerySet
 class ApplicationInfo(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
-    course = models.OneToOneField(Course, related_name="application_info")
+    course = models.OneToOneField(Course, related_name='application_info')
+    competition = models.OneToOneField(Competition, related_name='application_info', blank=True, null=True)
     start_interview_date = models.DateField(blank=True, null=True)
     end_interview_date = models.DateField(blank=True, null=True)
 
@@ -31,7 +33,7 @@ class ApplicationInfo(models.Model):
         return self.applications.select_related('user__profile').filter(is_accepted=True)
 
     def apply_is_active(self):
-        return self.end_date >= timezone.now().date()
+        return self.start_date <= timezone.now().date() <= self.end_date
 
     def interview_is_active(self):
         return self.start_interview_date <= timezone.now().date() and \
@@ -69,7 +71,9 @@ class Application(models.Model):
     objects = ApplicationQuerySet.as_manager()
 
     def get_interview(self):
-        return self.interview_set.select_related('interviewer__profile').first()
+        interview = self.interview_set.select_related('interviewer__profile')
+        if interview:
+            return self.interview_set.select_related('interviewer__profile').first()
 
     def __str__(self):
         return "{0} applying to {1}".format(self.user, self.application_info)
@@ -80,29 +84,3 @@ class Application(models.Model):
     def clean(self):
         if not self.application_info.apply_is_active():
             raise ValidationError(f"The application period for {self.application_info.course} has expired!")
-
-
-class ApplicationTask(BaseTask):
-    pass
-
-
-class IncludedApplicationTask(BaseTask):
-    task = models.ForeignKey(ApplicationTask,
-                             on_delete=models.CASCADE,
-                             related_name='included_tasks')
-    application_info = models.ForeignKey(ApplicationInfo,
-                                         on_delete=models.CASCADE,
-                                         related_name='tasks')
-
-    def clean(self):
-        if self.application_info.external_application_form:
-            raise ValidationError("Can not add tasks to a course with external application")
-
-
-class ApplicationSolution(models.Model):
-    task = models.ForeignKey(IncludedApplicationTask, related_name='solutions')
-    application = models.ForeignKey(Application, related_name='solutions')
-    url = models.URLField(blank=True, null=True)
-
-    class Meta:
-        unique_together = (("task", 'application'),)

@@ -7,8 +7,14 @@ from .models import (
     IncludedTask,
     IncludedTest,
     Solution,
-    ProgrammingLanguage
+    ProgrammingLanguage,
+    StudentNote,
+    Lecture
 )
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
 
 
 class TopicModelForm(forms.ModelForm):
@@ -44,6 +50,7 @@ class IncludedMaterialFromExistingForm(forms.ModelForm):
 class IncludedTaskModelForm(forms.ModelForm):
     language = forms.ModelChoiceField(queryset=ProgrammingLanguage.objects.all(), required=False)
     code = forms.CharField(widget=forms.Textarea(), required=False)
+    file = forms.FileField(required=False)
 
     def __init__(self, course, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,13 +82,13 @@ class IncludedTaskFromExistingForm(forms.ModelForm):
 class SourceCodeTestForm(forms.ModelForm):
     class Meta:
         model = IncludedTest
-        fields = ('language', 'task', 'code')
+        fields = ('language', 'task', 'code', 'extra_options')
 
 
 class BinaryFileTestForm(forms.ModelForm):
     class Meta:
         model = IncludedTest
-        fields = ('language', 'task', 'file')
+        fields = ('language', 'task', 'file', 'extra_options')
 
 
 class SubmitGradableSolutionForm(forms.ModelForm):
@@ -98,6 +105,43 @@ class SubmitGradableSolutionForm(forms.ModelForm):
 
 
 class SubmitNonGradableSolutionForm(forms.ModelForm):
+    url = forms.URLField(required=True)
+
     class Meta:
         model = Solution
         fields = ('url', )
+
+
+class StudentNoteForm(forms.ModelForm):
+    def __init__(self, course=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if course:
+            self.fields['student'] = forms.ModelChoiceField(queryset=course.students.all())
+
+    class Meta:
+        model = StudentNote
+        fields = ('author', 'text', 'assignment')
+
+
+class CreateLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', 'course')
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class EditLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', )
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class PlainTextForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea(), required=True)

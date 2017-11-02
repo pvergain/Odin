@@ -1,0 +1,38 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block title %}
+  Details on {{ competition.name }}
+{% endblock title %}
+
+{% block content_title %}
+  Details on {{ competition.name }}
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div id="root">
+      </div>
+      <div id="modal-root">
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}
+
+{% block extra_scripts %}
+  {% csrf_token %}
+  <script src="{% url 'js_reverse' %}"></script>
+  <script>
+   window.props = {competitionData: {{competition_data|safe}}}
+   window.props.data = {'data': {}}
+   {% if is_user_judge_in_competition %}
+   window.props.isUserJudgeInCompetition = true;
+   {% endif %}
+   {% if user_participant_in_competition %}
+   window.props.participantID = {{ request.user.competitionparticipant.id }};
+   {% endif %}
+   window.props.csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  </script>
+  <script src="{% static 'bundle.js' %}"></script>
+{% endblock extra_scripts %}

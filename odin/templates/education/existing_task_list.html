@@ -1,6 +1,10 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Existing tasks
+{% endblock title %}
+
 {% block content_title %}
   Choose from the following tasks
 {% endblock content_title %}
@@ -12,41 +16,7 @@
     {% include "education/partial/message_box.html" %}
     {% include "partial/form_errors.html" with errors=readable_errors%}
     <div class="portlet box green">
-      <div class="portlet-title">
-        <div class="caption">
-          <i class="fa fa-comments"></i> All Existing tasks
-        </div>
-        <div class="tools">
-          <a href="javascript:;" class="collapse"> </a>
-        </div>
-      </div>
-      <div class="portlet-body">
-        <form class="" action="{% url 'dashboard:education:course-management:add-included-task-from-existing' course.pk topic_id %}" method="POST">
-          {% csrf_token %}
-          <div class="table-scrollable">
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th> # </th>
-                  <th> Name </th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-
-                {% for task in task_list %}
-                  <tr>
-                    <td>{{ task.id }}</td>
-                    <td>{{ task.name }}</td>
-                    <td><button type="submit" class="btn green uppercase" name="task" value="{{ task.id }}">Add task</button></td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-        </form>
-            </table>
-          </div>
-      </div>
-      <a href="{% url 'dashboard:education:course-management:add-new-included-task' course.pk  %}"><button type="button" name="button" class="btn green uppercase" >Add new task</button></a>
+      {% include 'education/partial/existing_tasks.html' with task_list=task_list%}
     </div>
     <!-- END SAMPLE TABLE PORTLET-->
   </div>

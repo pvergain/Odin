@@ -1,6 +1,10 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Edit included task
+{% endblock title%}
+
 {% block content_title %}
   Edit included task
 {% endblock content_title%}
@@ -34,16 +38,7 @@
                 {{ form.topic.label }}
                 {% render_field form.topic class="form-control form-control-solid"%}
               </div>
-              <div class="md-checkbox-inline">
-                <div class="md-checkbox">
-                  {% render_field form.gradable id="checkbox6" class="md-check" onchange="changeTestFieldsVisibility()" %}
-                  <label for="checkbox6">
-                    <span></span>
-                    <span class="check"></span>
-                    <span class="box"></span> Make this task gradable </label>
-                </div>
-              </div>
-              <div class="form-actions noborder">
+             <div class="form-actions noborder">
                 <button class="btn green uppercase" type="submit" name="button">Update</button>
                 {% if object.gradable %}
                   {% if object.test %}

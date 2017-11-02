@@ -7,6 +7,8 @@ from ..factories import BaseUserFactory
 
 from odin.education.models import Teacher, Course
 from odin.education.factories import CourseFactory
+from odin.competitions.models import Competition, CompetitionJudge
+from odin.competitions.factories import CompetitionFactory
 
 from odin.common.faker import faker
 
@@ -55,3 +57,16 @@ class SuperUserSignalTest(TestCase):
         courses = Course.objects.all()
         for course in courses:
             self.assertIn(member=user, container=course.teachers.all())
+
+    def test_create_superuser_creates_competition_judge(self):
+        judge_count = CompetitionJudge.objects.count()
+        BaseUser.objects.create_superuser(email=faker.email(), password=faker.password())
+        self.assertEqual(judge_count + 1, CompetitionJudge.objects.count())
+
+    def test_create_superuser_adds_judge_to_competitions(self):
+        CompetitionFactory.build_batch(5)
+        user = BaseUser.objects.create_superuser(email=faker.email(), password=faker.password())
+        user = user.competitionjudge
+        competitions = Competition.objects.all()
+        for competition in competitions:
+            self.assertIn(user, competition.judges.all())

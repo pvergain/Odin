@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
 from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 from odin.users.models import BaseUser
@@ -9,6 +11,7 @@ from odin.users.models import BaseUser
 from .models import (
     Course,
     CourseAssignment,
+    CourseDescription,
     Student,
     Teacher,
     CheckIn,
@@ -21,7 +24,9 @@ from .models import (
     ProgrammingLanguage,
     Solution,
     Test,
-    IncludedTest
+    IncludedTest,
+    StudentNote,
+    Lecture
 )
 from .helper import get_dates_for_weeks, percentage_presence
 
@@ -61,7 +66,10 @@ def create_course(*,
                   facebook_group: str=None,
                   video_channel: str=None,
                   slug_url: str=None,
-                  public: bool=True) -> Course:
+                  logo: BinaryIO=None,
+                  public: bool=True,
+                  attendable: bool=True,
+                  description: str="") -> Course:
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -74,6 +82,7 @@ def create_course(*,
         facebook_group=facebook_group,
         video_channel=video_channel,
         slug_url=slug_url,
+        logo=logo,
         public=public
     )
 
@@ -86,11 +95,12 @@ def create_course(*,
         current = Week(course=course,
                        number=i,
                        start_date=start_date,
-                       end_date=start_date + timedelta(days=7))
-        start_date = current.end_date
+                       end_date=start_date + timedelta(days=6))
+        start_date = current.end_date + timedelta(days=1)
         week_instances.append(current)
 
     Week.objects.bulk_create(week_instances)
+    CourseDescription.objects.create(course=course, verbose=description)
 
     return course
 
@@ -161,7 +171,6 @@ def create_test_for_task(*,
                          extra_options: Dict={},
                          code: str=None,
                          file: BinaryIO=None):
-
     new_test = IncludedTest(task=task)
     if existing_test is None:
         existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
@@ -242,3 +251,76 @@ def get_presence_for_course(*,
         }
 
     return presence_for_course
+
+
+def calculate_student_valid_solutions_for_course(*,
+                                                 student: Student,
+                                                 course: Course) -> str:
+    total_tasks = IncludedTask.objects.filter(topic__course=course).count()
+    if not total_tasks:
+        return 0
+    solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
+
+    ratio = (solved_tasks/total_tasks) * 100
+    return f'{ratio:.1f}'
+
+
+def get_all_student_solution_statistics(*,
+                                        task: IncludedTask) -> Dict:
+    result = {}
+    course = task.topic.course
+    result['total_student_count'] = course.students.count()
+
+    filters = {'solutions__task': task, 'solutions__isnull': False}
+    result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
+    q_expression = Q(solutions__task__gradable=True, solutions__status=Solution.OK) \
+        | Q(solutions__task__gradable=False, solutions__status=Solution.SUBMITTED_WITHOUT_GRADING)
+    result['students_with_a_passing_solution_count'] = course.students.filter(
+        q_expression, solutions__task=task
+    ).distinct().count()
+
+    return result
+
+
+def create_student_note(*,
+                        author: Teacher,
+                        assignment: CourseAssignment,
+                        text: str) -> StudentNote:
+    note = StudentNote(author=author,
+                       assignment=assignment,
+                       text=text)
+    note.full_clean()
+    note.save()
+
+    return note
+
+
+def create_lecture(*,
+                   date: date,
+                   course: Course) -> Lecture:
+    week_qs = Week.objects.filter(start_date__lte=date, end_date__gte=date, course=course)
+    if week_qs.exists():
+        lecture = Lecture(date=date, course=course, week=week_qs.first())
+        lecture.full_clean()
+        lecture.save()
+
+        return lecture
+    else:
+        raise ValidationError('Date not in range of any week for this course')
+
+
+def add_week_to_course(*,
+                       course: Course,
+                       new_end_date: timezone.datetime.date) -> Week:
+    last_week = course.weeks.last()
+    new_week = Week.objects.create(
+        course=course,
+        number=last_week.number + 1,
+        start_date=course.end_date,
+        end_date=new_end_date
+    )
+
+    course.end_date = course.end_date + timezone.timedelta(days=7)
+    course.save()
+
+    return new_week

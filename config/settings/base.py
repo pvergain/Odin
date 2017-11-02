@@ -16,6 +16,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'collectfast',
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.postgres'
@@ -33,6 +34,7 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'easy_thumbnails',
     'django_celery_beat',
+    'django_js_reverse',
 ]
 
 LOCAL_APPS = [
@@ -44,7 +46,8 @@ LOCAL_APPS = [
     'odin.management.apps.ManagementConfig',
     'odin.grading.apps.GradingConfig',
     'odin.applications.apps.ApplicationsConfig',
-    'odin.interviews.apps.InterviewsConfig'
+    'odin.interviews.apps.InterviewsConfig',
+    'odin.competitions.apps.CompetitionsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -117,41 +120,8 @@ TEMPLATES = [
     },
 ]
 
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-)
-
-LOGIN_URL = reverse_lazy('account_login')
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard:users:profile')
-ACCOUNT_LOGOUT_REDIRECT_URL = reverse_lazy('account_login')
-ACCOUNT_LOGOUT_ON_GET = True
-SOCIALACCOUNT_QUERY_EMAIL = True
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_ADAPTER = 'odin.authentication.adapter.CustomAccountAdapter'
-SOCIALACCOUNT_ADAPTER = "odin.authentication.adapter.CustomAdapter"
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-
-SOCIALACCOUNT_PROVIDERS = {
-    'github': {
-        'SCOPE': [
-            'user:email',
-        ],
-    }
-}
-
-
-# Recaptcha settings
-NOCAPTCHA = True
-RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default='')
-RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_SECRET_KEY', default='')
-RECAPTCHA_USE_SSL = True
+from .allauth import *
+from .captcha import *
 
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
@@ -161,6 +131,7 @@ STATICFILES_DIRS = [
     str(ROOT_DIR.path('ui/images')),
     str(ROOT_DIR.path('ui/bower_components')),
     str(ROOT_DIR.path('ui/assets')),
+    str(ROOT_DIR.path('dist')),
 ]
 
 
@@ -211,6 +182,28 @@ ADMIN_URL = r'^admin/'
 GH_OAUTH_CLIENT_ID = env('GH_OAUTH_CLIENT_ID', default='')
 GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY', default='')
 
+
+# Celery settings
+CELERY_BROKER_URL = env('BROKER_URL', default='amqp://guest:guest@localhost//')
+CELERY_BROKER_POOL_LIMIT = 1
+CELERY_BROKER_HEARTBEAT = None
+CELERY_BROKER_CONNECTION_TIMEOUT = 30
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TASK_SOFT_TIME_LIMIT = env('CELERY_TASK_SOFT_TIME_LIMIT', default=60)
+CELERY_TASK_TIME_LIMIT = env('CELERY_TASK_TIME_LIMIT', default=60+60)
+CELERY_TASK_MAX_RETRIES = env('CELERY_TASK_MAX_RERIES', default=3)
+
+CELERYBEAT_SCHEDULE = {
+    'calculate-presence-every-day': {
+        'task': 'odin.education.tasks.calculate_presence',
+        'schedule': crontab(minute=45, hour=19, day_of_week='mon-fri'),
+    }
+}
+
 # Mandrill settings
 USE_DJANGO_EMAIL_BACKEND = True
 
@@ -220,8 +213,10 @@ templates = {
     'account_email_email_confirmation_signup': lambda **env_kwargs: env('MANDRILL_SIGNUP_CONFIRM', **env_kwargs),
     'account_email_email_confirmation': lambda **env_kwargs: env('MANDRILL_CONFIRMATION', **env_kwargs),
     'account_email_password_reset_key': lambda **env_kwargs: env('MANDRILL_PASSWORD_RESET', **env_kwargs),
+    'account_email_email_competition_confirmation': lambda **env_kwargs: env('MANDRILL_COMPETITION_CONFIRMATION', **env_kwargs),
     'application_completed_default': lambda **env_kwargs: env('MANDRILL_APPLICATION_COMPLETED', **env_kwargs),
     'interview_confirmation': lambda **env_kwargs: env('MANDRILL_INTERVIEW_CONFIRMATION', **env_kwargs),
+    'course_information_email': lambda **env_kwargs: env('MANDRILL_COURSE_INFORMATION', **env_kwargs)
 }
 
 EMAIL_TEMPLATES = {
@@ -242,3 +237,8 @@ GRADER_POLLING_COUNTDOWN = env.int('GRADER_POLLING_COUNTDOWN', default=2)
 GRADER_RESUBMIT_COUNTDOWN = env.int('GRADER_RESUBMIT_COUNTDOWN', default=10)
 
 CHECKIN_TOKEN = env('CHECKIN_TOKEN', default='')
+
+TASK_PASSED = "Passed"
+TASK_FAILED = "Failed"
+
+from .grader import *

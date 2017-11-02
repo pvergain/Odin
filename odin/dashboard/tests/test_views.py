@@ -24,4 +24,4 @@ class TestRedirectToDashboardIndexView(TestCase):
 
         with self.login(email=user.email, password=self.test_password):
             response = self.get(self.url, follow=True)
-            self.assertRedirects(response=response, expected_url=self.reverse('dashboard:index'))
+            self.assertRedirects(response=response, expected_url=self.reverse('dashboard:education:user-courses'))

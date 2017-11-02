@@ -1,0 +1,43 @@
+{% load education_extras %}
+
+<div class="portlet box green">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-comments"></i> Course schedule </div>
+    <div class="tools">
+      <a href="javascript:;" class="collapse"> </a>
+    </div>
+  </div>
+  <div class="portlet-body default-expand">
+    <div class="table-scrollable">
+      <table class="table table-striped table-hover">
+        <thead>
+          <th>Week</th>
+          {% for weekday in humanized_weekdays %}
+            <th>{{ weekday }}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
+          {% for week, dates in course_schedule.items %}
+            <tr>
+              <td>Week {{ week }}</td>
+              {% for weekday in weekdays %}
+                {% with lecture_id=dates|get_lecture_id_for_weekday:weekday %}
+                  {% if lecture_id %}
+                    {% if user.is_teacher %}
+                      <td><a href="{% url 'dashboard:education:course-management:edit-lecture' course.id lecture_id %}">{{ dates|get_date_for_weekday:weekday|date:"d M Y" }}</a></td>
+                    {% else %}
+                      <td>{{ dates|get_date_for_weekday:weekday|date:"d M Y" }}</td>
+                    {% endif  %}
+                  {% else %}
+                    <td>No lecture</td>
+                  {% endif  %}
+                {% endwith %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

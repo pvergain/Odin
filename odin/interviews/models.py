@@ -22,11 +22,26 @@ class Interviewer(BaseUser):
 
 
 class InterviewerFreeTime(models.Model):
+    INTERVIEW_TIME_CHOICES = (
+        (20, '20 minutes'),
+        (25, '25 minutes'),
+        (30, '30 minutes'),
+    )
+
+    BREAK_TIME_CHOICES = (
+        (5, '5 minutes'),
+        (10, '10 minutes'),
+        (15, '15 minutes'),
+    )
+
     interviewer = models.ForeignKey(Interviewer, related_name='free_time_slots')
     date = models.DateField(blank=False, null=True)
     start_time = models.TimeField(blank=False, null=True)
     end_time = models.TimeField(blank=False, null=True)
-    buffer_time = models.BooleanField(default=False)
+    interview_time_length = models.SmallIntegerField(choices=INTERVIEW_TIME_CHOICES,
+                                                     default=20)
+    break_time = models.SmallIntegerField(choices=BREAK_TIME_CHOICES,
+                                          default=5)
 
     def __str__(self):
         return f'On {self.date} - from {self.start_time} to {self.end_time}'
@@ -35,10 +50,17 @@ class InterviewerFreeTime(models.Model):
         return self.interviews.exists()
 
     def clean(self):
-        if self.date <= timezone.now().date():
+        if self.date < timezone.now().date():
             raise ValidationError("Your free time slot can not be in the past")
         if self.start_time >= self.end_time:
             raise ValidationError("The start time can not be the same or after the end time")
+
+        user_timeslots_for_date = InterviewerFreeTime.objects.filter(interviewer=self.interviewer, date=self.date)
+        if not user_timeslots_for_date.exists():
+            return
+        for slot in user_timeslots_for_date:
+            if max(slot.start_time, self.start_time) <= min(slot.end_time, self.end_time):
+                raise ValidationError("Times are overlapping with an already existing Free Time Slot")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -53,7 +75,6 @@ class Interview(models.Model):
     start_time = models.TimeField(blank=False, null=True)
     end_time = models.TimeField(blank=False, null=True)
     interviewer_time_slot = models.ForeignKey(InterviewerFreeTime, related_name="interviews", default=False)
-    buffer_time = models.BooleanField(default=False)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     interviewer_comment = models.TextField(null=True, blank=True, help_text="Коментар от интервюиращия")
 

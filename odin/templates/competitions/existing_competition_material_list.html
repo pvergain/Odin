@@ -1,0 +1,18 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block title %}
+  Existing Materials
+{% endblock title %}
+
+{% block content_title %}
+  Choose from the following materials
+{% endblock content_title %}
+
+
+{% block page_content %}
+  <div class="row">
+    {% include "education/partial/message_box.html" %}
+    {% include "partial/form_errors.html" with errors=readable_errors %}
+    {% include "education/partial/existing_materials.html" with material_list=material_list %}
+  </div>
+{% endblock page_content %}

@@ -1,6 +1,10 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Apply for {{ course.name }}
+{% endblock title %}
+
 {% block content_title %}
     <h1><center>Apply for course</center></h1>
 {% endblock content_title %}
@@ -26,7 +30,9 @@
         <form action="" method="POST">
           <div class="form-body">
             {% csrf_token %}
-
+            <div class="form-group form-md-line-input">
+              {% render_field form.full_name class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Full name" %}
+            </div>
             <div class="form-group form-md-line-input">
               {% render_field form.phone class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Phone number" %}
             </div>

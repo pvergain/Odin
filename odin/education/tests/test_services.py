@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
 from django.db.models import Q
 
 from ..services import (
@@ -17,7 +18,9 @@ from ..services import (
     create_test_for_task,
     create_gradable_solution,
     create_non_gradable_solution,
+    create_lecture
 )
+
 from ..models import (
     Course,
     CourseAssignment,
@@ -30,8 +33,10 @@ from ..models import (
     Solution,
     IncludedTest,
     Student,
-    Teacher
+    Teacher,
+    Lecture,
 )
+
 from ..factories import (
     CourseFactory,
     StudentFactory,
@@ -206,12 +211,6 @@ class TestCreateIncludedMaterial(TestCase):
                                                 url=faker.url(),
                                                 content=faker.text())
 
-    def test_create_included_material_raises_validation_error_if_material_already_exists(self):
-        with self.assertRaises(ValidationError):
-            create_included_material(identifier=self.material.identifier,
-                                     url=faker.url(),
-                                     topic=self.topic)
-
     def test_create_included_material_creates_only_included_material_when_existing_is_provided(self):
         current_material_count = Material.objects.count()
         current_included_material_count = IncludedMaterial.objects.count()
@@ -382,3 +381,22 @@ class TestCreateNonGradableSolution(TestCase):
         self.assertIsNotNone(solution.url)
         self.assertIsNone(solution.file.name)
         self.assertIsNone(solution.code)
+
+
+class TestCreateLecture(TestCase):
+    def setUp(self):
+        start_date = timezone.now().date() + timezone.timedelta(days=faker.pyint())
+        self.course = CourseFactory(start_date=start_date,
+                                    end_date=start_date + timezone.timedelta(days=faker.pyint()))
+
+    def test_service_creates_lecture_when_date_is_valid(self):
+        valid_date = self.course.start_date + timezone.timedelta(days=1)
+        current_lecture_count = Lecture.objects.count()
+        create_lecture(date=valid_date, course=self.course)
+
+        self.assertEqual(current_lecture_count + 1, Lecture.objects.count())
+
+    def test_service_raises_validation_error_when_date_is_invalid(self):
+        invalid_date = self.course.end_date + timezone.timedelta(days=faker.pyint())
+        with self.assertRaises(ValidationError):
+            create_lecture(date=invalid_date, course=self.course)
