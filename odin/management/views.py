@@ -35,7 +35,8 @@ class DashboardManagementView(DashboardManagementPermission,
     paginate_by = 101
     filter_class = UserFilter
     queryset = BaseUser.objects.select_related('profile').all()\
-        .prefetch_related('student', 'teacher', 'interviewer').order_by('-id')
+        .prefetch_related('student', 'teacher', 'interviewer',
+                          'competitionjudge', 'competitionparticipant').order_by('-id')
 
     def get_queryset(self):
         self.filter = self.filter_class(self.request.GET, queryset=self.queryset)
