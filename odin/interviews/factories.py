@@ -19,8 +19,8 @@ class InterviewerFactory(BaseUserFactory):
 class InterviewerFreeTimeFactory(factory.DjangoModelFactory):
     interviewer = factory.SubFactory(InterviewerFactory)
     date = factory.LazyAttribute(lambda _:  timezone.now().date() + timezone.timedelta(days=faker.pyint()))
-    start_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(seconds=2)).time())
-    end_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(seconds=3)).time())
+    start_time = factory.LazyAttribute(lambda _: timezone.now().time())
+    end_time = factory.LazyAttribute(lambda _: (timezone.now() + timezone.timedelta(minutes=20)).time())
 
     class Meta:
         model = InterviewerFreeTime

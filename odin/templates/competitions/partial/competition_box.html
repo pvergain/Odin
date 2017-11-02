@@ -1,0 +1,40 @@
+{% load static %}
+
+<div class="portlet box green">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-comments"></i>{{ competition.name }}
+    </div>
+  </div>
+  <div class="portlet-body">
+    <div class="row">
+      <div class="col-md-3">
+          <a href="{% url 'competitions:competition-detail' competition.slug_url %}">
+            <img src="{% static 'hackman.png' %}" class="img-responsive"/>
+          </a>
+        <section style="margin-top: 15px; text-align: center;">
+          <a class="btn btn-success"
+             href="{% url 'competitions:competition-detail' competition.slug_url %}">
+            Go to competition
+          </a>
+        </section>
+      </div>
+      <div class="col-md-7">
+        <div class="scrollable-content">
+          <p>
+            <strong> Start date</strong>: {{ competition.start_date }}<br>
+            <strong> End date</strong>: {{ competition.end_date }}<br>
+          </p>
+          <p>
+            <strong> Judges:</strong>
+            <ul class="list-unstyled">
+              {% for judge in competition.judges.all %}
+                <li>{{ judge.profile.full_name }} - {{ judge.email }}</li>
+              {% endfor %}
+            </ul>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

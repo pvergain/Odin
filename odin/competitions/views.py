@@ -1,10 +1,11 @@
 import json
 from allauth.account.utils import send_email_confirmation
 
-from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView
+from django.views.generic import TemplateView, CreateView, UpdateView, FormView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
+from django.db.models import Q
 
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
 from odin.common.utils import transfer_POST_data_to_dict
@@ -16,18 +17,26 @@ from odin.users.models import BaseUser
 from .mixins import CompetitionViewMixin, RedirectParticipantMixin
 from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
-    IsJudgeInCompetitionPermisssion,
+    IsJudgeInCompetitionPermission,
     IsParticipantInCompetitionPermission,
     IsStandaloneCompetitionPermission
 )
-from .models import Competition, CompetitionMaterial, CompetitionTask, Solution
+from .models import (
+    Competition,
+    CompetitionMaterial,
+    CompetitionTask,
+    Solution,
+    CompetitionParticipant,
+    CompetitionJudge,
+)
 from .forms import (
     CompetitionMaterialFromExistingForm,
     CompetitionMaterialModelForm,
     CompetitionTaskModelForm,
     CompetitionTaskFromExistingForm,
     CompetitionRegistrationForm,
-    CompetitionSetPasswordForm
+    CompetitionSetPasswordForm,
+    CreateCompetitionForm,
 )
 from .services import (
     create_competition_material,
@@ -37,6 +46,31 @@ from .services import (
     handle_competition_login
 )
 from .serializers import CompetitionSerializer
+
+
+class UserCompetitionsView(LoginRequiredMixin, TemplateView):
+    template_name = 'competitions/competitions.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        prefetch = ['participants__profile', 'judges__profile']
+        qs = Competition.objects.prefetch_related(*prefetch)
+
+        context['user_is_judge_for'] = []
+        context['user_is_participant_in'] = []
+
+        judge = user.downcast(CompetitionJudge)
+        participant = user.downcast(CompetitionParticipant)
+
+        if judge:
+            context['user_is_judge_for'] = qs.filter(judges=judge)
+
+        if participant:
+            context['user_is_participant_in'] = qs.filter(participants=participant)
+
+        return context
 
 
 class CompetitionDetailView(LoginRequiredMixin,
@@ -61,8 +95,7 @@ class CompetitionDetailView(LoginRequiredMixin,
 class CreateCompetitionView(DashboardManagementPermission,
                             CreateView):
     template_name = 'competitions/create_competition.html'
-    model = Competition
-    fields = ['name', 'start_date', 'end_date', 'slug_url']
+    form_class = CreateCompetitionForm
 
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
@@ -73,7 +106,7 @@ class CreateCompetitionView(DashboardManagementPermission,
 
 class EditCompetitionView(LoginRequiredMixin,
                           CompetitionViewMixin,
-                          IsJudgeInCompetitionPermisssion,
+                          IsJudgeInCompetitionPermission,
                           UpdateView):
     template_name = 'competitions/create_competition.html'
 
@@ -91,7 +124,7 @@ class EditCompetitionView(LoginRequiredMixin,
 
 class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
                                                 CompetitionViewMixin,
-                                                IsJudgeInCompetitionPermisssion,
+                                                IsJudgeInCompetitionPermission,
                                                 CallServiceMixin,
                                                 ReadableFormErrorsMixin,
                                                 FormView):
@@ -109,16 +142,17 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['material_list'] = Material.objects.all()
+        context['material_list'] = Material.objects.prefetch_related('included_materials__topic__course')
 
         return context
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = transfer_POST_data_to_dict(self.request.POST)
-        data['competition'] = self.competition.id
-        form_kwargs['data'] = data
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['competition'] = self.competition.id
+            form_kwargs['data'] = data
 
         return form_kwargs
 
@@ -134,7 +168,7 @@ class CreateCompetitionMaterialFromExistingView(LoginRequiredMixin,
 
 class CreateNewCompetitionMaterialView(LoginRequiredMixin,
                                        CompetitionViewMixin,
-                                       IsJudgeInCompetitionPermisssion,
+                                       IsJudgeInCompetitionPermission,
                                        CallServiceMixin,
                                        ReadableFormErrorsMixin,
                                        FormView):
@@ -153,10 +187,11 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
 
-        data = transfer_POST_data_to_dict(self.request.POST)
-        data['competition'] = self.competition.id
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['competition'] = self.competition.id
 
-        form_kwargs['data'] = data
+            form_kwargs['data'] = data
 
         return form_kwargs
 
@@ -165,13 +200,10 @@ class CreateNewCompetitionMaterialView(LoginRequiredMixin,
 
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        return super().form_invalid(form)
-
 
 class EditCompetitionMaterialView(LoginRequiredMixin,
                                   CompetitionViewMixin,
-                                  IsJudgeInCompetitionPermisssion,
+                                  IsJudgeInCompetitionPermission,
                                   ReadableFormErrorsMixin,
                                   UpdateView):
     model = CompetitionMaterial
@@ -188,7 +220,7 @@ class EditCompetitionMaterialView(LoginRequiredMixin,
 
 class CreateNewCompetitionTaskView(LoginRequiredMixin,
                                    CompetitionViewMixin,
-                                   IsJudgeInCompetitionPermisssion,
+                                   IsJudgeInCompetitionPermission,
                                    ReadableFormErrorsMixin,
                                    CallServiceMixin,
                                    FormView):
@@ -237,7 +269,7 @@ class CreateNewCompetitionTaskView(LoginRequiredMixin,
 
 class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
                                             CompetitionViewMixin,
-                                            IsJudgeInCompetitionPermisssion,
+                                            IsJudgeInCompetitionPermission,
                                             ReadableFormErrorsMixin,
                                             CallServiceMixin,
                                             FormView):
@@ -255,7 +287,7 @@ class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['task_list'] = Task.objects.all()
+        context['task_list'] = Task.objects.prefetch_related('included_tasks__topic__course')
 
         return context
 
@@ -282,7 +314,7 @@ class CreateCompetitionTaskFromExistingView(LoginRequiredMixin,
 
 class EditCompetitionTaskView(LoginRequiredMixin,
                               CompetitionViewMixin,
-                              IsJudgeInCompetitionPermisssion,
+                              IsJudgeInCompetitionPermission,
                               ReadableFormErrorsMixin,
                               UpdateView):
     model = CompetitionTask
@@ -299,18 +331,32 @@ class EditCompetitionTaskView(LoginRequiredMixin,
 
 class AllParticipantsSolutionsView(LoginRequiredMixin,
                                    CompetitionViewMixin,
-                                   IsJudgeInCompetitionPermisssion,
+                                   IsJudgeInCompetitionPermission,
                                    ListView):
     template_name = 'competitions/all_participants_solutions.html'
 
     def get_queryset(self):
         task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
-        filters = {
-            'solutions__task': task,
-            'solutions__status': Solution.OK
-        }
-        queryset = self.competition.participants.filter(**filters).select_related('profile')
+        conditions = (
+            {
+                'solutions__task__gradable': True,
+                'solutions__status': Solution.OK,
+            },
+            {
+                'solutions__task__gradable': False,
+                'solutions__status': Solution.SUBMITTED_WITHOUT_GRADING
+            }
+        )
+        q_expression = Q(**conditions[0]) | Q(**conditions[1])
+        queryset = self.competition.participants.filter(q_expression, solutions__task=task).select_related('profile')
         return queryset.prefetch_related('solutions__task').distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
+        context['task'] = task
+
+        return context
 
 
 class ParticipantSolutionsView(LoginRequiredMixin,
@@ -459,3 +505,25 @@ class CompetitionSetPasswordView(CompetitionViewMixin,
         send_email_confirmation(self.request, user, signup=True)
 
         return super().form_valid(form)
+
+
+class ParticipantSolutionDetailView(LoginRequiredMixin,
+                                    CompetitionViewMixin,
+                                    IsParticipantOrJudgeInCompetitionPermission,
+                                    DetailView):
+    model = Solution
+    pk_url_kwarg = 'solution_id'
+    template_name = 'competitions/participant_solution_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = get_object_or_404(CompetitionTask, id=self.kwargs.get('task_id'))
+        solution = self.get_object()
+        context['task'] = task
+        context['role'] = solution.participant
+        if solution.task.gradable and not solution.task.test.is_source():
+            try:
+                context['solution_file'] = solution.file.read().decode('utf-8')
+            except UnicodeDecodeError as e:
+                context['solution_file'] = "Invalid file format"
+        return context

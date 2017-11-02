@@ -1,5 +1,7 @@
 from test_plus import TestCase
 
+from odin.common.faker import faker
+
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -8,9 +10,11 @@ from odin.education.factories import CourseFactory
 from odin.applications.factories import ApplicationInfoFactory
 from odin.interviews.services import add_course_to_interviewer_courses, assign_accepted_users_to_courses
 from odin.interviews.factories import InterviewerFactory
+from odin.interviews.models import Interview
 from odin.applications.factories import ApplicationFactory
+from odin.applications.models import Application
 
-from ..services import create_new_interview_for_application, create_interviewer_free_time
+from ..services import create_new_interview_for_application, create_interviewer_free_time, generate_interview_slots
 from ..factories import InterviewFactory, InterviewerFreeTimeFactory
 from ..models import Interviewer
 
@@ -100,3 +104,61 @@ class TestAssignAcceptedUsersToCourses(TestCase):
         assign_accepted_users_to_courses()
         self.application_info.course.refresh_from_db()
         self.assertEqual(course_student_count, self.application_info.course.students.count())
+
+
+class TestGenerateInterviewSlots(TestCase):
+    def setUp(self):
+        self.user = BaseUserFactory()
+        self.course = CourseFactory(start_date=timezone.now() + timezone.timedelta(days=5))
+        self.application_info = ApplicationInfoFactory(
+                                   course=self.course,
+                                   start_date=timezone.now() - timezone.timedelta(days=5),
+                                   end_date=timezone.now() - timezone.timedelta(days=4),
+                                   start_interview_date=timezone.now() - timezone.timedelta(days=3),
+                                   end_interview_date=timezone.now() + timezone.timedelta(days=4)
+                                )
+        self.interviewer = Interviewer.objects.create_from_user(self.user)
+        self.interviewer.courses_to_interview.add(self.application_info)
+        self.interviewer.save()
+
+    def test_interviewer_without_skype_is_registered_in_generate_interviews_context_and_no_interviews_are_made(self):
+        interview_count = Interview.objects.count()
+        context = generate_interview_slots()
+        self.assertIn("Some interviewers haven't set a skype!", context['log'])
+        self.assertIn(f"{self.course.name} - {self.interviewer.email}", context['log'])
+        self.assertEqual(interview_count, Interview.objects.count())
+
+    def test_no_interviews_are_generated_if_no_courses_open_for_interview(self):
+        interview_count = Interview.objects.count()
+        self.application_info.end_interview_date = timezone.now() - timezone.timedelta(days=1)
+        self.application_info.save()
+
+        context = generate_interview_slots()
+        self.assertIn("There are no open for interview courses!\n", context['log'])
+        self.assertEqual(interview_count, Interview.objects.count())
+
+    def test_no_interviews_are_generated_if_not_enough_free_slots(self):
+        interview_count = Interview.objects.count()
+
+        ApplicationFactory(application_info=self.application_info)
+
+        self.interviewer.profile.skype = faker.word()
+        self.interviewer.profile.save()
+
+        context = generate_interview_slots()
+        application_count = Application.objects.count()
+        self.assertIn(f"Not enough free slots - {application_count}", context['log'])
+        self.assertEqual(interview_count, Interview.objects.count())
+
+    def test_interviews_are_generated_if_enough_free_slots(self):
+        interview_count = Interview.objects.count()
+
+        ApplicationFactory(application_info=self.application_info)
+        InterviewerFreeTimeFactory(interviewer=self.interviewer)
+
+        self.interviewer.profile.skype = faker.word()
+        self.interviewer.profile.save()
+
+        context = generate_interview_slots()
+        self.assertIn(f"Generated interviews: {Interview.objects.count()}", context['log'])
+        self.assertEqual(interview_count + 1, Interview.objects.count())

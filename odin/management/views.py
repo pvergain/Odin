@@ -11,6 +11,8 @@ from odin.interviews.models import Interviewer
 from odin.education.models import Student, Teacher, Course, CourseAssignment
 from odin.education.services import create_course, add_student, add_teacher
 
+from odin.competitions.models import CompetitionJudge, CompetitionParticipant, Competition
+
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
 from .permissions import DashboardManagementPermission
@@ -20,7 +22,10 @@ from .forms import (
     AddStudentToCourseForm,
     AddTeacherToCourseForm,
     ManagementAddCourseForm,
-    AddCourseToInterviewerCoursesForm
+    AddCourseToInterviewerCoursesForm,
+    AddParticipantToCompetitionForm,
+    AddJudgeToCompetitionForm,
+    AddCompetitionToCourseForm,
 )
 
 
@@ -30,7 +35,8 @@ class DashboardManagementView(DashboardManagementPermission,
     paginate_by = 101
     filter_class = UserFilter
     queryset = BaseUser.objects.select_related('profile').all()\
-        .prefetch_related('student', 'teacher', 'interviewer').order_by('-id')
+        .prefetch_related('student', 'teacher', 'interviewer',
+                          'competitionjudge', 'competitionparticipant').order_by('-id')
 
     def get_queryset(self):
         self.filter = self.filter_class(self.request.GET, queryset=self.queryset)
@@ -39,6 +45,7 @@ class DashboardManagementView(DashboardManagementPermission,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['courses'] = Course.objects.prefetch_related('students', 'teachers')
+        context['competitions'] = Competition.objects.prefetch_related('participants', 'judges')
 
         return context
 
@@ -69,6 +76,24 @@ class PromoteUserToInterviewerView(DashboardManagementPermission,
 
         return redirect(reverse('dashboard:management:add-interviewer-to-course-with-initial',
                                 kwargs={'interviewer_email': interviewer.email}))
+
+
+class PromoteUserToJudgeView(DashboardManagementPermission,
+                             View):
+    def get(self, request, *args, **kwargs):
+        instance = BaseUser.objects.get(id=kwargs.get('id'))
+        CompetitionJudge.objects.create_from_user(instance)
+
+        return redirect('dashboard:management:index')
+
+
+class PromoteUserToParticipantView(DashboardManagementPermission,
+                                   View):
+    def get(self, request, *args, **kwargs):
+        instance = BaseUser.objects.get(id=kwargs.get('id'))
+        CompetitionParticipant.objects.create_from_user(instance)
+
+        return redirect('dashboard:management:index')
 
 
 class CreateUserView(DashboardCreateUserMixin, FormView):
@@ -163,6 +188,21 @@ class AddStudentToCourseView(DashboardManagementPermission,
         return super().form_valid(form)
 
 
+class AddParticipantToCompetitionView(DashboardManagementPermission,
+                                      ReadableFormErrorsMixin,
+                                      FormView):
+    template_name = 'dashboard/add_participant_to_competition.html'
+    form_class = AddParticipantToCompetitionForm
+    success_url = reverse_lazy('dashboard:management:index')
+
+    def form_valid(self, form):
+        competition = form.cleaned_data.get('competition')
+        participant = form.cleaned_data.get('participant')
+        competition.participants.add(participant)
+
+        return super().form_valid(form)
+
+
 class AddTeacherToCourseView(DashboardManagementPermission,
                              CallServiceMixin,
                              ReadableFormErrorsMixin,
@@ -183,6 +223,22 @@ class AddTeacherToCourseView(DashboardManagementPermission,
             assignment.save()
         else:
             self.call_service(service_kwargs=form.cleaned_data)
+
+        return super().form_valid(form)
+
+
+class AddJudgeToCompetitionView(DashboardManagementPermission,
+                                ReadableFormErrorsMixin,
+                                FormView):
+    template_name = 'dashboard/add_judge_to_competition.html'
+    form_class = AddJudgeToCompetitionForm
+    success_url = reverse_lazy('dashboard:management:index')
+
+    def form_valid(self, form):
+        judge = form.cleaned_data.get('judge')
+        competition = form.cleaned_data.get('competition')
+
+        competition.judges.add(judge)
 
         return super().form_valid(form)
 
@@ -208,5 +264,22 @@ class AddCourseToInterviewerCoursesView(DashboardManagementPermission,
 
     def form_valid(self, form):
         self.call_service(service_kwargs=form.cleaned_data)
+
+        return super().form_valid(form)
+
+
+class AddCompetitionToCourseView(DashboardManagementPermission,
+                                 ReadableFormErrorsMixin,
+                                 FormView):
+    template_name = 'dashboard/add_competition_to_course.html'
+    form_class = AddCompetitionToCourseForm
+    success_url = reverse_lazy('dashboard:management:index')
+
+    def form_valid(self, form):
+        competition = form.cleaned_data.get('competition')
+        course = form.cleaned_data.get('course')
+
+        course.application_info.competition = competition
+        course.application_info.save()
 
         return super().form_valid(form)

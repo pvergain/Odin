@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from .views import (
+    UserCompetitionsView,
     CreateCompetitionView,
     EditCompetitionView,
     CreateCompetitionMaterialFromExistingView,
@@ -14,7 +15,8 @@ from .views import (
     AllParticipantsSolutionsView,
     CompetitionSignUpView,
     CompetitionSetPasswordView,
-    CompetitionLoginView
+    CompetitionLoginView,
+    ParticipantSolutionDetailView,
 )
 from .apis import (
     CreateGradableSolutionApiView,
@@ -41,6 +43,11 @@ competition_registration_urlpatterns = [
 ]
 
 urlpatterns = [
+    url(
+        regex='^user-competitions/$',
+        view=UserCompetitionsView.as_view(),
+        name='user-competitions',
+    ),
     url(
         regex='create-competition/$',
         view=CreateCompetitionView.as_view(),
@@ -107,8 +114,13 @@ urlpatterns = [
         name='all-participants-solutions'
     ),
     url(
-        regex='solutions/(?P<solution_id>[0-9]+)/$',
+        regex='^solutions/(?P<solution_id>[0-9]+)/$',
         view=SolutionDetailApiView.as_view(),
         name='participant-solution-detail-api'
-    )
+    ),
+    url(
+        regex='^(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/solutions/(?P<solution_id>[0-9]+)/$',
+        view=ParticipantSolutionDetailView.as_view(),
+        name='participant-solution-detail'
+    ),
 ] + competition_registration_urlpatterns

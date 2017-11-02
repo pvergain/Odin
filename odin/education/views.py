@@ -660,6 +660,7 @@ class StudentSolutionDetailView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         solution = self.get_object()
+        context['role'] = solution.student
         if solution.task.gradable and not solution.task.test.is_source():
             try:
                 context['solution_file'] = solution.file.read().decode('utf-8')
