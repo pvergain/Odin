@@ -41,7 +41,6 @@ from .models import (
     CourseAssignment,
     Topic,
     Lecture,
-    SolutionComment,
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
