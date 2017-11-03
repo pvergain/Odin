@@ -944,7 +944,7 @@ class CreateSolutionCommentView(LoginRequiredMixin,
                                 'course_id': self.course.id,
                                 'task_id': solution.task.id,
                                 'solution_id': solution.id
-                            })
+                            }) + f"#comments-section_{solution.id}"
 
     def get(self, request, *args, **kwargs):
         return redirect(self.get_success_url())
