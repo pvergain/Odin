@@ -46,9 +46,12 @@
                       <div class="col-md-6">
                         Solution {{ forloop.revcounter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }}
                       </div>
-                      <div class="col-md-6">
+                      <div class="col-md-1">
                         {% include "education/partial/solution_modal.html" with solution=solution %}
                         <a class="btn green uppercase" data-toggle="modal" href="#large" data-target="#modal_{{solution.id}}" style="margin-top: 2px;"> Build log </a>
+                      </div>
+                      <div class="col-md-4">
+                        <a class="btn green uppercase" href="{% url 'dashboard:education:student-solution-detail' course.id solution.task.id solution.id%}#comments-section_{{ solution.id }}" style="margin-top: 2px;"> Comments </a>
                       </div>
                     {% endfor %}
                   {% endif %}
