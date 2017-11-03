@@ -11,11 +11,11 @@
     <ul class="list-unstyled">
       {% for comment in solution.comments.all reversed %}
         <li class="media">
-          <a class="pull-left" href="javascript:;">
-            {% if comment.teacher.full_image.name %}
-              <img class="media-object" src="{{MEDIA_URL}}{{comment.teacher.profile.full_image}}" style="width: 64px; height: 64px;"></a>
+          <span class="pull-left" href="javascript:;">
+            {% if comment.teacher.profile.full_image %}
+              <img class="media-object" src="{{MEDIA_URL}}{{comment.teacher.profile.full_image}}" style="width: 64px; height: 64px;"></span>
             {% else %}
-            <img src="{% static 'hackman.png' %}" class="img-responsive pic-bordered" style="width: 64px; height: 64px;"></a>
+            <img src="{% static 'hackman.png' %}" class="img-responsive pic-bordered" style="width: 64px; height: 64px;"></span>
             {% endif %}
             <div class="media-body">
               <h4 class="media-heading"><strong>{{ comment.teacher.get_full_name }}</strong></h4>
