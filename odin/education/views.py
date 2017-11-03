@@ -40,7 +40,8 @@ from .models import (
     IncludedMaterial,
     CourseAssignment,
     Topic,
-    Lecture
+    Lecture,
+    SolutionComment,
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
@@ -69,7 +70,8 @@ from .forms import (
     StudentNoteForm,
     CreateLectureForm,
     EditLectureForm,
-    PlainTextForm
+    PlainTextForm,
+    SolutionCommentForm,
 )
 from .services import (
     create_topic,
@@ -81,6 +83,7 @@ from .services import (
     calculate_student_valid_solutions_for_course,
     get_all_student_solution_statistics,
     create_student_note,
+    create_solution_comment,
     create_lecture,
     add_week_to_course,
 )
@@ -666,6 +669,7 @@ class StudentSolutionDetailView(LoginRequiredMixin,
                 context['solution_file'] = solution.file.read().decode('utf-8')
             except UnicodeDecodeError as e:
                 context['solution_file'] = "Invalid file format"
+
         return context
 
 
@@ -914,6 +918,48 @@ class CreateStudentNoteView(LoginRequiredMixin,
     def form_valid(self, form):
         service_kwargs = form.cleaned_data
         self.student = service_kwargs.pop('student')
+        self.call_service(service_kwargs=service_kwargs)
+
+        return super().form_valid(form)
+
+
+class CreateSolutionCommentView(LoginRequiredMixin,
+                                CourseViewMixin,
+                                IsTeacherInCoursePermission,
+                                CallServiceMixin,
+                                FormView):
+    form_class = SolutionCommentForm
+    template_name = 'education/partial/comments_section.html'
+
+    def get_success_url(self):
+        solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
+        return reverse_lazy('dashboard:education:student-solution-detail',
+                            kwargs={
+                                'course_id': self.course.id,
+                                'task_id': solution.task.id,
+                                'solution_id': solution.id
+                            })
+
+    def get(self, request, *args, **kwargs):
+        return redirect(self.get_success_url())
+
+    def get_service(self):
+        return create_solution_comment
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['teacher'] = self.request.user.teacher
+            data['solution'] = get_object_or_404(Solution, id=self.kwargs.get('solution_id')).id
+
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        service_kwargs = form.cleaned_data
         self.call_service(service_kwargs=service_kwargs)
 
         return super().form_valid(form)

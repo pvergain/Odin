@@ -23,7 +23,8 @@ from .models import (
     Test,
     IncludedTest,
     StudentNote,
-    Lecture
+    Lecture,
+    SolutionComment,
 )
 
 
@@ -280,3 +281,16 @@ def add_week_to_course(*,
     course.save()
 
     return new_week
+
+
+def create_solution_comment(*,
+                            solution: Solution,
+                            teacher: Teacher,
+                            text: str) -> SolutionComment:
+    comment = SolutionComment(solution=solution,
+                              teacher=teacher,
+                              text=text)
+    comment.full_clean()
+    comment.save()
+
+    return comment

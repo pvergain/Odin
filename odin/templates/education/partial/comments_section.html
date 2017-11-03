@@ -1,0 +1,31 @@
+{% load common_extras %}
+
+<div class="portlet collapse" id="comments-section_{{ solution.id }}">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-pencil-square-o"></i> Solution comments
+    </div>
+  </div>
+  <div class="portlet-body">
+    <ul class="list-unstyled">
+      {% for comment in solution.comments.all %}
+        <li>
+          <strong>[{{ comment.created_at }}] {{ comment.teacher.get_full_name }}: </strong> {{ comment.text }}
+        </li>
+      {% endfor %}
+      <form id="noteForm" action="{% url 'dashboard:education:create-solution-comment' course_id=course.id solution_id=solution.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-body">
+          {% include 'education/partial/message_box.html' %}
+          <div class="form-group form-md-line-input">
+            <textarea class="form-control from-control-solid placeholder-no-fix" placeholder="Write your comment here" name="text"></textarea>
+            <input type="hidden" name="student" value="{{ solution.student.id }}"/>
+          </div>
+          <div class="form-actions noborder">
+            <button class="btn green uppercase" type="submit" name="submit">Submit</button>
+          </div>
+        </div>
+      </form>
+    </ul>
+  </div>
+</div>

@@ -1,29 +1,36 @@
  <div class="row">
-  <div class="portlet box green">
-    <div class="portlet-title">
-      <div class="caption">
-        <i class="fa fa-comments"></i> Solution
+   <div class="col-md-12">
+      <div class="portlet box green">
+        <div class="portlet-title">
+          <div class="caption">
+            <i class="fa fa-comments"></i> Solution
+          </div>
+        <div class="tools">
+          <a href="javascript:;" class="collapse"> </a>
+        </div>
       </div>
-      <div class="tools">
-        <a href="javascript:;" class="collapse"> </a>
-      </div>
-    </div>
-    <div class="portlet-body">
-      <section>
-        {% if solution.task.gradable %}
-          {% if solution.task.test.is_source %}
-            <pre>{{ solution.code }}</pre>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+          {% if solution.task.gradable %}
+            {% if solution.task.test.is_source %}
+              <pre>{{ solution.code }}</pre>
+            {% else %}
+              <pre>{{ solution_file }}</pre>
+            {% endif %}
           {% else %}
-            <pre>{{ solution_file }}</pre>
+            <pre><a href="{{solution.url}}">{{ solution.url }}</a></pre>
           {% endif %}
-        {% else %}
-          <pre><a href="{{solution.url}}">{{ solution.url }}</a></pre>
-        {% endif %}
-      </section>
-      <section>
-        <h3>Status:</h3>
+          <h3>Status:</h3>
           {{ solution.get_status_display }}
-      </section>
+          <h3>Comments: <a for="comments-section_{{ solution.id }}" href="#comments-section_{{ solution.id }}" data-toggle="collapse" aria-expanded="false"><i class="fa fa-pencil"></i></a></h3>
+        <div class="col-md-12">
+          {% include 'education/partial/comments_section.html' with solution=solution %}
+        </div>
+      </div>
+      </div>
     </div>
   </div>
+  </div>
+</div>
 </div>

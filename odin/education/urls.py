@@ -37,7 +37,8 @@ from .views import (
     AddWeekToCourseView,
     SendEmailToAllStudentsView,
     TaskDetailView,
-    MaterialDetailView
+    MaterialDetailView,
+    CreateSolutionCommentView,
 )
 
 
@@ -237,5 +238,10 @@ urlpatterns = [
         regex='^(?P<course_id>[0-9]+)/create-student-note/$',
         view=CreateStudentNoteView.as_view(),
         name='create-student-note'
-    )
+    ),
+    url(
+        regex='^(?P<course_id>[0-9]+)/(?P<solution_id>[0-9]+)/create-solution-comment/$',
+        view=CreateSolutionCommentView.as_view(),
+        name='create-solution-comment'
+    ),
 ]

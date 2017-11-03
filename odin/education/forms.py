@@ -9,7 +9,8 @@ from .models import (
     Solution,
     ProgrammingLanguage,
     StudentNote,
-    Lecture
+    Lecture,
+    SolutionComment,
 )
 
 
@@ -121,6 +122,12 @@ class StudentNoteForm(forms.ModelForm):
     class Meta:
         model = StudentNote
         fields = ('author', 'text', 'assignment')
+
+
+class SolutionCommentForm(forms.ModelForm):
+    class Meta:
+        model = SolutionComment
+        fields = ('text', 'solution', 'teacher')
 
 
 class CreateLectureForm(forms.ModelForm):

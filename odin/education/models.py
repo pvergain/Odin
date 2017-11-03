@@ -341,3 +341,9 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
 
     class Meta:
         ordering = ['-id']
+
+
+class SolutionComment(UpdatedAtCreatedAtModelMixin, models.Model):
+    text = models.TextField()
+    solution = models.ForeignKey(Solution, related_name='comments')
+    teacher = models.ForeignKey(Teacher, related_name='teacher_comments')

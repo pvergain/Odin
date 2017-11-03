@@ -44,7 +44,7 @@
                   {% if task_data %}
                     {% for solution in task_data.0 %}
                       <div class="col-md-6">
-                        Solution {{ forloop.counter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }}
+                        Solution {{ forloop.revcounter }} - {{ solution.created_at }} - {{ solution.pass_or_fail_status }}
                       </div>
                       <div class="col-md-6">
                         {% include "education/partial/solution_modal.html" with solution=solution %}
