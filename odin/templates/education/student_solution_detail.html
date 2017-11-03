@@ -1,11 +1,11 @@
 {% extends "dashboard/dashboard_base.html" %}
 
 {% block title %}
-  Solution for {{ task.name }}
+  Solution for {{ object.task.name }}
 {% endblock title %}
 
 {% block content_title %}
-  {{ role.get_full_name }}'s solution for {{ task.name }}
+  {{ role.get_full_name }}'s solution for {{ object.task.name }}
 {% endblock content_title %}
 
 {% block page_content %}

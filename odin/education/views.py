@@ -19,7 +19,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
@@ -652,16 +652,23 @@ class StudentSolutionListView(LoginRequiredMixin,
 
 class StudentSolutionDetailView(LoginRequiredMixin,
                                 CourseViewMixin,
-                                TaskViewMixin,
                                 IsStudentOrTeacherInCoursePermission,
                                 DetailView):
     model = Solution
     pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
 
+    def get_object(self):
+        solution = Solution.objects.filter(id=self.kwargs.get('solution_id'))\
+               .prefetch_related('comments__teacher').first()
+        if solution:
+            return solution
+        else:
+            raise Http404
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        solution = self.get_object()
+        solution = self.object
         context['role'] = solution.student
         if solution.task.gradable and not solution.task.test.is_source():
             try:
