@@ -958,7 +958,10 @@ class CreateSolutionCommentView(LoginRequiredMixin,
         if self.request.method in ('POST', 'PUT'):
             data = transfer_POST_data_to_dict(self.request.POST)
             data['teacher'] = self.request.user.teacher
-            data['solution'] = get_object_or_404(Solution, id=self.kwargs.get('solution_id')).id
+            solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
+            data['solution'] = solution.id
+            if data.get('student') != str(solution.student.id):
+                raise Http404("Not this student's solution!")
 
             form_kwargs['data'] = data
 

@@ -52,7 +52,7 @@ def get_solution_data(course: Course, student: Student) -> (Dict, Dict):
 def map_lecture_dates_to_week_days(course: Course) -> (Set, Dict):
     schedule = {}
     weekdays_with_lectures = set()
-    weeks = Week.objects.filter(course=course).prefetch_related('lectures').order_by('lectures__date')
+    weeks = Week.objects.filter(course=course).prefetch_related('lectures').order_by('id')
     for week in weeks:
         schedule[week.number] = {}
         lectures = week.lectures.all()

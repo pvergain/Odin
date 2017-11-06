@@ -1,6 +1,5 @@
 from unittest.mock import patch
 from test_plus import TestCase
-
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
@@ -34,7 +33,8 @@ from ..models import (
     Solution,
     IncludedTest,
     StudentNote,
-    Lecture
+    Lecture,
+    SolutionComment
 )
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
@@ -1023,6 +1023,7 @@ class TestCreateStudentNoteView(TestCase):
             'student': self.student.id,
             'text': faker.text()
         }
+
         with self.login(email=self.user.email, password=self.test_password):
             self.post(self.url, data=data)
             self.assertEqual(current_student_note_count + 1, StudentNote.objects.count())
@@ -1030,11 +1031,12 @@ class TestCreateStudentNoteView(TestCase):
             student_notes = self.student.course_assignments.get(course=self.course).notes.all()
             self.assertIn(last_note, student_notes)
 
-    def test_post_with_valid_data_reditects_to_specific_notes_section(self):
+    def test_post_with_valid_data_redirects_to_specific_notes_section(self):
         data = {
             'student': self.student.id,
             'text': faker.text()
         }
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
             expected_url = reverse('dashboard:education:course-students-list',
@@ -1050,6 +1052,7 @@ class TestCreateStudentNoteView(TestCase):
             'student': new_student.id,
             'text': faker.text()
         }
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
 
@@ -1307,3 +1310,74 @@ class TestSendEmailToAllStudentsView(TestCase):
             (template_name, recipients, context), kwargs = mock_send_mail.call_args
             student_emails = [student.email for student in sorted(self.students, key=lambda x: x.id)]
             self.assertEqual(recipients, student_emails)
+
+
+class TestCreateSolutionCommentView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.student = Student.objects.create_from_user(BaseUserFactory())
+        add_student(course=self.course, student=self.student)
+        self.task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+        self.solution = SolutionFactory(task=self.task, student=self.student)
+        self.url = reverse('dashboard:education:create-solution-comment',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'solution_id': self.solution.id,
+                           })
+
+    def test_get_redirects_to_course_students_list(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            expected_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={
+                                       'course_id': self.course.id,
+                                       'task_id': self.task.id,
+                                       'solution_id': self.solution.id,
+                                   }) + f'#comments-section_{self.solution.id}'
+
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_valid_data_creates_solution_comment_for_correct_solution(self):
+        current_solution_comment_count = SolutionComment.objects.count()
+        data = {
+            'student': self.student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_solution_comment_count + 1, SolutionComment.objects.count())
+            last_comment = SolutionComment.objects.last()
+            solution_comments = self.solution.comments.all()
+            self.assertIn(last_comment, solution_comments)
+
+    def test_post_with_valid_data_redirects_to_specific_comments_section(self):
+        data = {
+            'student': self.student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={
+                                       'course_id': self.course.id,
+                                       'task_id': self.task.id,
+                                       'solution_id': self.solution.id,
+                                   }) + f'#comments-section_{self.solution.id}'
+
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_invalid_student_returns_404(self):
+        new_student = Student.objects.create_from_user(BaseUserFactory())
+        data = {
+            'student': new_student.id,
+            'text': faker.text()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_404(response)
