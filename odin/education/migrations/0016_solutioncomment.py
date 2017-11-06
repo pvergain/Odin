@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('text', models.TextField()),
                 ('solution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='education.Solution')),
-                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='teacher_comments', to='education.Teacher')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_comments', to='users.BaseUser')),
             ],
             options={
                 'abstract': False,

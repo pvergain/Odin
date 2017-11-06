@@ -1,13 +1,13 @@
 {% extends "dashboard/dashboard_base.html" %}
 
 {% block title %}
-  Solution for {{ object.task.name }}
+  Solution for {{ solution.task.name }}
 {% endblock title %}
 
 {% block content_title %}
-  {{ role.get_full_name }}'s solution for {{ object.task.name }}
+  {{ role.get_full_name }}'s solution for {{ solution.task.name }}
 {% endblock content_title %}
 
 {% block page_content %}
-  {% include "education/partial/solution_detail.html" with solution=object %}
+  {% include "education/partial/solution_detail.html" with solution=solution %}
 {% endblock page_content %}

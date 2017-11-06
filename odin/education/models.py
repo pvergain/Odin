@@ -346,4 +346,4 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
 class SolutionComment(UpdatedAtCreatedAtModelMixin, models.Model):
     text = models.TextField()
     solution = models.ForeignKey(Solution, related_name='comments')
-    teacher = models.ForeignKey(Teacher, related_name='teacher_comments')
+    user = models.ForeignKey(BaseUser, related_name='user_comments')

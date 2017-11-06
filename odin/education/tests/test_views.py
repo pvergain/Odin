@@ -1326,24 +1326,17 @@ class TestCreateSolutionCommentView(TestCase):
         self.url = reverse('dashboard:education:create-solution-comment',
                            kwargs={
                                'course_id': self.course.id,
-                               'solution_id': self.solution.id,
                            })
 
-    def test_get_redirects_to_course_students_list(self):
+    def test_get_is_not_allowed(self):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
-            expected_url = reverse('dashboard:education:student-solution-detail',
-                                   kwargs={
-                                       'course_id': self.course.id,
-                                       'task_id': self.task.id,
-                                       'solution_id': self.solution.id,
-                                   }) + f'#comments-section_{self.solution.id}'
-
-            self.assertRedirects(response, expected_url=expected_url)
+            self.response_405(response)
 
     def test_post_with_valid_data_creates_solution_comment_for_correct_solution(self):
         current_solution_comment_count = SolutionComment.objects.count()
         data = {
+            'solution': self.solution.id,
             'student': self.student.id,
             'text': faker.text()
         }
@@ -1357,6 +1350,7 @@ class TestCreateSolutionCommentView(TestCase):
 
     def test_post_with_valid_data_redirects_to_specific_comments_section(self):
         data = {
+            'solution': self.solution.id,
             'student': self.student.id,
             'text': faker.text()
         }
@@ -1375,6 +1369,7 @@ class TestCreateSolutionCommentView(TestCase):
     def test_post_with_invalid_student_returns_404(self):
         new_student = Student.objects.create_from_user(BaseUserFactory())
         data = {
+            'solution': self.solution.id,
             'student': new_student.id,
             'text': faker.text()
         }

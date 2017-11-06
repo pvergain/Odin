@@ -127,7 +127,7 @@ class StudentNoteForm(forms.ModelForm):
 class SolutionCommentForm(forms.ModelForm):
     class Meta:
         model = SolutionComment
-        fields = ('text', 'solution', 'teacher')
+        fields = ('text', 'solution', 'user')
 
 
 class CreateLectureForm(forms.ModelForm):

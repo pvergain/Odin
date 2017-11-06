@@ -240,7 +240,7 @@ urlpatterns = [
         name='create-student-note'
     ),
     url(
-        regex='^(?P<course_id>[0-9]+)/(?P<solution_id>[0-9]+)/create-solution-comment/$',
+        regex='^(?P<course_id>[0-9]+)/create-solution-comment/$',
         view=CreateSolutionCommentView.as_view(),
         name='create-solution-comment'
     ),

@@ -660,7 +660,7 @@ class StudentSolutionDetailView(LoginRequiredMixin,
 
     def get_object(self):
         solution = Solution.objects.filter(id=self.kwargs.get('solution_id'))\
-               .prefetch_related('comments__teacher').first()
+               .prefetch_related('comments__user').first()
         if solution:
             return solution
         else:
@@ -670,6 +670,7 @@ class StudentSolutionDetailView(LoginRequiredMixin,
         context = super().get_context_data(**kwargs)
         solution = self.object
         context['role'] = solution.student
+        context['solution'] = solution
         if solution.task.gradable and not solution.task.test.is_source():
             try:
                 context['solution_file'] = solution.file.read().decode('utf-8')
@@ -931,14 +932,15 @@ class CreateStudentNoteView(LoginRequiredMixin,
 
 class CreateSolutionCommentView(LoginRequiredMixin,
                                 CourseViewMixin,
-                                IsTeacherInCoursePermission,
+                                IsStudentOrTeacherInCoursePermission,
                                 CallServiceMixin,
                                 FormView):
     form_class = SolutionCommentForm
     template_name = 'education/partial/comments_section.html'
+    http_method_names = [u'post', u'put']
 
     def get_success_url(self):
-        solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
+        solution = self.solution
         return reverse_lazy('dashboard:education:student-solution-detail',
                             kwargs={
                                 'course_id': self.course.id,
@@ -946,24 +948,18 @@ class CreateSolutionCommentView(LoginRequiredMixin,
                                 'solution_id': solution.id
                             }) + f"#comments-section_{solution.id}"
 
-    def get(self, request, *args, **kwargs):
-        return redirect(self.get_success_url())
-
     def get_service(self):
         return create_solution_comment
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
+        data = transfer_POST_data_to_dict(self.request.POST)
+        data['user'] = self.request.user.id
+        self.solution = get_object_or_404(Solution, id=data.get('solution'))
+        if data.get('student') != str(self.solution.student.id):
+            raise Http404("Not this student's solution!")
 
-        if self.request.method in ('POST', 'PUT'):
-            data = transfer_POST_data_to_dict(self.request.POST)
-            data['teacher'] = self.request.user.teacher
-            solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
-            data['solution'] = solution.id
-            if data.get('student') != str(solution.student.id):
-                raise Http404("Not this student's solution!")
-
-            form_kwargs['data'] = data
+        form_kwargs['data'] = data
 
         return form_kwargs
 
