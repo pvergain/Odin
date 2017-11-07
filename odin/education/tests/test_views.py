@@ -1277,6 +1277,38 @@ class TestAllStudentSolutionsView(TestCase):
             self.assertEqual(1, len(response.context['object_list']))
 
 
+class TestAddWeekToCourseView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.teacher = TeacherFactory(password=self.test_password)
+        self.teacher.is_active = True
+        self.teacher.save()
+        self.course = CourseFactory()
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:add-week-to-course',
+                           kwargs={'course_id': self.course.id})
+
+    def test_get_is_not_allowed(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_405(response)
+
+    def test_post_is_not_allowed_if_not_teacher_for_course(self):
+        user = BaseUserFactory(password=self.test_password)
+        with self.login(email=user.email, password=self.test_password):
+            response = self.post(self.url)
+            self.response_403(response)
+
+    def test_post_is_successful_when_teacher_for_course(self):
+        course_weeks = self.course.duration_in_weeks
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url)
+            self.response_302(response)
+
+            self.course.refresh_from_db()
+            self.assertEqual(course_weeks + 1, self.course.duration_in_weeks)
+
+
 class TestSendEmailToAllStudentsView(TestCase):
     def setUp(self):
         self.course = CourseFactory()
@@ -1308,8 +1340,9 @@ class TestSendEmailToAllStudentsView(TestCase):
                                                                 }))
             self.assertTrue(mock_send_mail.called)
             (template_name, recipients, context), kwargs = mock_send_mail.call_args
-            student_emails = [student.email for student in sorted(self.students, key=lambda x: x.id)]
-            self.assertEqual(recipients, student_emails)
+            student_emails = [student.email for student in self.students]
+            for email in student_emails:
+                self.assertIn(email, recipients)
 
 
 class TestCreateSolutionCommentView(TestCase):
