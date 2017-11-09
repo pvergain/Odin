@@ -1,0 +1,43 @@
+{% load common_extras %}
+{% load static %}
+
+<div class="portlet collapse" id="comments-section_{{ solution.id }}">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-pencil-square-o"></i> Solution comments
+    </div>
+  </div>
+  <div class="portlet-body">
+    <ul class="list-unstyled">
+      {% for comment in solution.comments.all reversed %}
+        <li class="media">
+          <span class="pull-left" href="javascript:;">
+            {% if comment.user.profile.full_image %}
+              <img class="media-object" src="{{MEDIA_URL}}{{comment.user.profile.full_image}}" style="width: 64px; height: 64px;"></span>
+            {% else %}
+            <img src="{% static 'hackman.png' %}" class="img-responsive pic-bordered" style="width: 64px; height: 64px;"></span>
+            {% endif %}
+            <div class="media-body">
+              <h4 class="media-heading"><strong>{{ comment.user.get_full_name }}</strong></h4>
+              <p> {{ comment.text }} </p>
+              <h5>{{ comment.created_at }}</h5>
+            </div>
+          </li>
+      {% endfor %}
+      <form id="commentForm" action="{% url 'dashboard:education:create-solution-comment' course_id=course.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-body">
+          {% include 'education/partial/message_box.html' %}
+          <div class="form-group form-md-line-input">
+            <textarea class="form-control from-control-solid placeholder-no-fix" placeholder="Write your comment here" name="text"></textarea>
+            <input type="hidden" name="student" value="{{ solution.student.id }}"/>
+            <input type="hidden" name="solution" value="{{ solution.id }}" />
+          </div>
+          <div class="form-actions noborder">
+            <button class="btn green uppercase" type="submit" name="submit">Submit</button>
+          </div>
+        </div>
+      </form>
+    </ul>
+  </div>
+</div>

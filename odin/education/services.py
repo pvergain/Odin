@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+from odin.users.models import BaseUser
+
 from .models import (
     Course,
     CourseAssignment,
@@ -23,7 +25,8 @@ from .models import (
     Test,
     IncludedTest,
     StudentNote,
-    Lecture
+    Lecture,
+    SolutionComment,
 )
 
 
@@ -280,3 +283,16 @@ def add_week_to_course(*,
     course.save()
 
     return new_week
+
+
+def create_solution_comment(*,
+                            solution: Solution,
+                            user: BaseUser,
+                            text: str) -> SolutionComment:
+    comment = SolutionComment(solution=solution,
+                              user=user,
+                              text=text)
+    comment.full_clean()
+    comment.save()
+
+    return comment

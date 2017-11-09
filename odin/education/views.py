@@ -19,7 +19,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
@@ -40,7 +40,7 @@ from .models import (
     IncludedMaterial,
     CourseAssignment,
     Topic,
-    Lecture
+    Lecture,
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
@@ -69,7 +69,8 @@ from .forms import (
     StudentNoteForm,
     CreateLectureForm,
     EditLectureForm,
-    PlainTextForm
+    PlainTextForm,
+    SolutionCommentForm,
 )
 from .services import (
     create_topic,
@@ -81,6 +82,7 @@ from .services import (
     calculate_student_valid_solutions_for_course,
     get_all_student_solution_statistics,
     create_student_note,
+    create_solution_comment,
     create_lecture,
     add_week_to_course,
 )
@@ -650,22 +652,31 @@ class StudentSolutionListView(LoginRequiredMixin,
 
 class StudentSolutionDetailView(LoginRequiredMixin,
                                 CourseViewMixin,
-                                TaskViewMixin,
                                 IsStudentOrTeacherInCoursePermission,
                                 DetailView):
     model = Solution
     pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
 
+    def get_object(self):
+        solution = Solution.objects.filter(id=self.kwargs.get('solution_id'))\
+               .prefetch_related('comments__user').first()
+        if solution:
+            return solution
+        else:
+            raise Http404
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        solution = self.get_object()
+        solution = self.object
         context['role'] = solution.student
+        context['solution'] = solution
         if solution.task.gradable and not solution.task.test.is_source():
             try:
                 context['solution_file'] = solution.file.read().decode('utf-8')
             except UnicodeDecodeError as e:
                 context['solution_file'] = "Invalid file format"
+
         return context
 
 
@@ -914,6 +925,46 @@ class CreateStudentNoteView(LoginRequiredMixin,
     def form_valid(self, form):
         service_kwargs = form.cleaned_data
         self.student = service_kwargs.pop('student')
+        self.call_service(service_kwargs=service_kwargs)
+
+        return super().form_valid(form)
+
+
+class CreateSolutionCommentView(LoginRequiredMixin,
+                                CourseViewMixin,
+                                IsStudentOrTeacherInCoursePermission,
+                                CallServiceMixin,
+                                FormView):
+    form_class = SolutionCommentForm
+    template_name = 'education/partial/comments_section.html'
+    http_method_names = [u'post', u'put']
+
+    def get_success_url(self):
+        solution = self.solution
+        return reverse_lazy('dashboard:education:student-solution-detail',
+                            kwargs={
+                                'course_id': self.course.id,
+                                'task_id': solution.task.id,
+                                'solution_id': solution.id
+                            }) + f"#comments-section_{solution.id}"
+
+    def get_service(self):
+        return create_solution_comment
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        data = transfer_POST_data_to_dict(self.request.POST)
+        data['user'] = self.request.user.id
+        self.solution = get_object_or_404(Solution, id=data.get('solution'))
+        if data.get('student') != str(self.solution.student.id):
+            raise Http404("Not this student's solution!")
+
+        form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        service_kwargs = form.cleaned_data
         self.call_service(service_kwargs=service_kwargs)
 
         return super().form_valid(form)
