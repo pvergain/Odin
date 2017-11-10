@@ -43,6 +43,7 @@ const addTaskMenuItems = (courseID, topicID) => {
       value: 'New',
       url: Urls['dashboard:education:course-management:add-new-included-task']({
         course_id: courseID,
+        topic_id: topicID,
       }),
     },
   ];

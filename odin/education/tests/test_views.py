@@ -436,7 +436,7 @@ class TestAddNewIncludedTaskView(TestCase):
         self.course = CourseFactory()
         self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-new-included-task',
-                           kwargs={'course_id': self.course.id})
+                           kwargs={'course_id': self.course.id, 'topic_id': self.topic.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.language = ProgrammingLanguageFactory()
@@ -449,9 +449,20 @@ class TestAddNewIncludedTaskView(TestCase):
     def test_get_is_allowed_when_teacher_for_course(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
+
+    def test_correct_topic_is_added_to_form_initial_on_get(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            form = response.context.get('form')
+            initial = {'topic': str(self.topic.id)}
+            self.assertEqual(initial, form.initial)
 
     def test_can_create_new_task_for_topic_on_post(self):
         teacher = Teacher.objects.create_from_user(self.user)
@@ -496,7 +507,7 @@ class TestAddNewIncludedTaskView(TestCase):
             self.assertEqual(task_count + 1, IncludedTask.objects.count())
             self.assertEqual(test_count, IncludedTest.objects.count())
 
-    def test_view_creates_test_when_when_task_is_gradeable(self):
+    def test_view_creates_test_when_when_task_is_gradable(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
         task_count = IncludedTask.objects.count()

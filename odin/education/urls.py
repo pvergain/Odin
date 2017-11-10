@@ -92,7 +92,7 @@ course_management_urlpatterns = [
         name='add-included-task-from-existing'
     ),
     url(
-        regex='^(?P<course_id>[0-9]+)/add-task/new$',
+        regex='^(?P<course_id>[0-9]+)/(?P<topic_id>[0-9]+)/add-task/new$',
         view=AddNewIncludedTaskView.as_view(),
         name='add-new-included-task'
     ),
