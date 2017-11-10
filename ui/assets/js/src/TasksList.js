@@ -48,6 +48,10 @@ class ListItem extends React.Component {
           task_id: this.props.task.id,
         });
 
+    const taskDetailUrl = Urls['dashboard:education:included-task-detail']({
+      task_id: this.props.task.id,
+    });
+
     const role = this.props.competition
       ? window.props.isUserJudgeInCompetition
       : window.props.isUserTeacher;
@@ -76,6 +80,11 @@ class ListItem extends React.Component {
             </div>
             <div className="col-md-5">
               <div className="btn-group pull-right">
+                <a href={taskDetailUrl}>
+                  <button className="btn btn-default uppercase" type="button">
+                    Details
+                  </button>
+                </a>
                 <a
                   href={
                     this.props.competition
