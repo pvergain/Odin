@@ -1,25 +1,28 @@
-import React from "react";
+import React from 'react';
 
-import Modal from "./Modal";
-import SubmitFooter from "./SubmitFooter";
-import CodeMirror from "react-codemirror";
-import "codemirror/lib/codemirror.css";
-import "codemirror/theme/neat.css";
-import "codemirror/mode/python/python";
-import "codemirror/mode/ruby/ruby";
-import "codemirror/mode/javascript/javascript";
+import Modal from './Modal';
+import SubmitFooter from './SubmitFooter';
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/neat.css';
+import 'codemirror/mode/python/python';
+import 'codemirror/mode/ruby/ruby';
+import 'codemirror/mode/javascript/javascript';
 
 class GradableSolutionModal extends React.Component {
   render() {
     let options = {};
+    let test = null;
 
     if (this.props.task.gradable) {
+      test = this.props.task.test ? this.props.task.test : null;
+      const language = test ? test.language : 'python';
       options = {
         lineNumbers: true,
         matchBrackets: true,
         indentUnit: 4,
-        theme: "neat",
-        mode: this.props.task.test.language
+        theme: 'neat',
+        mode: language,
       };
     }
 
@@ -28,18 +31,16 @@ class GradableSolutionModal extends React.Component {
         modalID={this.props.modalID}
         modalTitle={this.props.modalTitle}
         styles={{
-          display: "none",
-          marginTop: "15%"
+          display: 'none',
+          marginTop: '15%',
         }}
-        errors={this.props.errors}
-      >
+        errors={this.props.errors}>
         <form
           id="submit_solution_form"
           onSubmit={this.props.performSubmitSolution}
           method="POST"
           action={this.props.submitSolutionUrl}
-          encType="multipart/form-data"
-        >
+          encType="multipart/form-data">
           <input
             type="hidden"
             name="csrfmiddlewaretoken"
@@ -48,15 +49,17 @@ class GradableSolutionModal extends React.Component {
               this.props.setCSRF(input);
             }}
           />
-          {this.props.task.test.source
-            ? <CodeMirror
+          {test ? (
+            this.props.task.test.source ? (
+              <CodeMirror
                 name="code"
                 value={this.props.code}
                 onChange={this.props.handleChange}
                 options={options}
                 ref={input => this.props.setCodeInput(input)}
               />
-            : <div className="form-group form-md-line-input">
+            ) : (
+              <div className="form-group form-md-line-input">
                 <input
                   className="form-control form-control-solid"
                   type="file"
@@ -65,7 +68,15 @@ class GradableSolutionModal extends React.Component {
                     this.props.setFileInput(input);
                   }}
                 />
-              </div>}
+              </div>
+            )
+          ) : (
+            <div>
+              <center>
+                <h3>This task has no test yet!</h3>
+              </center>
+            </div>
+          )}
           <SubmitFooter
             modalID={this.props.modalID}
             handleModalExchange={this.props.closeModal}
