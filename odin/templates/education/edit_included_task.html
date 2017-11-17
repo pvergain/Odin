@@ -47,11 +47,9 @@
                     </a>
                   {% else %}
                     <a href="{% url 'dashboard:education:course-management:add-source-test' course.id object.id %}">
-                      <button class="btn green uppercase" type="button" name="button">Add source code test</button>
-                    </a>
+                      <button class="btn green uppercase" type="button" name="button">Add source code test</button></a>
                     <a href="{% url 'dashboard:education:course-management:add-binary-test' course.id object.id %}">
-                      <button class="btn green uppercase" type="button" name="button">Add binary test</button>
-                    </a>
+                      <button class="btn green uppercase" type="button" name="button">Add binary test</button></a>
                   {% endif %}
                 {% endif %}
               </div>
