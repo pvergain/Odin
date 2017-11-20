@@ -15,17 +15,23 @@ const ListItem = props => {
 
   return (
     <div className="row">
-      <div className="col-md-9">
-        <a href={materialUrl} className="list-group-item">
-          {props.material.identifier}
-        </a>
-      </div>
       {window.props.isUserTeacher ? (
-        <div className="col-md-3">
-          <EditItem editUrl={materialEditUrl} size={2} />
+        <div>
+          <div className="col-md-1">
+            <EditItem editUrl={materialEditUrl} size={2} />
+          </div>
+          <div className="col-md-11">
+            <a href={materialUrl} className="list-group-item">
+              {props.material.identifier}
+            </a>
+          </div>
         </div>
       ) : (
-        ''
+        <div className="col-md-12">
+          <a href={materialUrl} className="list-group-item">
+            {props.material.identifier}
+          </a>
+        </div>
       )}
     </div>
   );

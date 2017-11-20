@@ -69,20 +69,20 @@ const AccordionPanel = props => {
             href={`#${collapseID}`}
             aria-expanded="true">
             <div className="row">
-              <div className="col-md-3">
-                Week {props.topic.week.number} - {props.topic.name}
-              </div>
               {window.props.isUserTeacher ? (
-                <div className="col-md-6">
+                <div className="col-md-4">
+                  Week {props.topic.week.number} - {props.topic.name}{' '}
                   <EditItem editUrl={topicEditUrl} size={1} />
                 </div>
               ) : (
-                <div className="col-md-6" />
+                <div className="col-md-4">
+                  Week {props.topic.week.number} - {props.topic.name}
+                </div>
               )}
               {window.props.isUserTeacher ? (
-                <div className="col-md-3" />
+                <div className="col-md-8" />
               ) : (
-                <div className="col-md-3">
+                <div className="col-md-8">
                   <SolvedRatio tasks={props.topic.tasks} />
                 </div>
               )}
