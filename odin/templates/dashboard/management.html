@@ -43,14 +43,7 @@
                 </div>
                 <div class="form-actions">
                   <input class="btn green uppercase" type="submit" name="" value="Filter">
-                  <a href="{% url 'dashboard:management:add-student' %}"><button class="btn green uppercase" type="button" name="button">Add student</button></a>
-                  <a href="{% url 'dashboard:management:add-teacher' %}"><button class="btn green uppercase" type="button" name="button">Add teacher</button></a>
-                  <a href="{% url 'dashboard:management:add-user' %}"><button class="btn green uppercase" type="button" name="button">Add user</button></a>
-                  <a href="{% url 'dashboard:management:add-student-to-course' %}"><button class="btn green uppercase" type="button" name="button">Add student to course</button></a>
-                  <a href="{% url 'dashboard:management:add-participant-to-competition' %}"><button class="btn green uppercase" type="button" name="button">Add participant to competition</button></a>
-                  <a href="{% url 'dashboard:management:add-teacher-to-course' %}"><button class="btn green uppercase" type="button" name="button">Add teacher to course</button></a>
-                  <a href="{% url 'dashboard:management:add-interviewer-to-course' %}"><button class="btn green uppercase" type="button" name="button">Add interviewer to course</button></a>
-                  <a href="{% url 'dashboard:management:add-judge-to-competition' %}"><button class="btn green uppercase" type="button" name="button">Add judge to competition</button></a>
+                  {% include "dashboard/partial/management_actions.html" %}
                 </div>
               </form>
                 <div class="table-scrollable">
