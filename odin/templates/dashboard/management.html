@@ -16,7 +16,7 @@
         <div class="portlet box green">
             <div class="portlet-title">
                 <div class="caption">
-                    <i class="fa fa-comments"></i> User management table </div>
+                  <i class="fa fa-comments"></i> User management table </div>
                 <div class="tools">
                     <a href="javascript:;" class="expand"> </a>
                 </div>
@@ -78,6 +78,10 @@
                                           {% if not obj.is_judge %}
                                             <a href="{% url 'dashboard:management:promote-to-judge' id=obj.id %}"><button type="button" class="btn btn-default">Make Judge</button></a>
                                           {% endif %}
+                                          {% if not obj.is_participant %}
+                                            <a href="{% url 'dashboard:management:promote-to-participant' id=obj.id %}"><button type="button" class="btn btn-default">Make Participant</button></a>
+                                          {% endif %}
+
                                     </div>
                                 </td>
                               </tr>
