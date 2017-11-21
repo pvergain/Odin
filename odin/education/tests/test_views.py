@@ -1028,6 +1028,17 @@ class TestCreateStudentNoteView(TestCase):
                                    })
             self.assertRedirects(response, expected_url=expected_url)
 
+    def test_post_with_empty_text_does_not_create_note(self):
+        current_student_note_count = StudentNote.objects.count()
+        data = {
+            'student': self.student.id,
+            'text': ''
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_student_note_count, StudentNote.objects.count())
+
     def test_post_with_valid_data_creates_student_note_for_correct_assignment(self):
         current_student_note_count = StudentNote.objects.count()
         data = {
@@ -1376,6 +1387,18 @@ class TestCreateSolutionCommentView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.response_405(response)
+
+    def test_post_with_empty_text_does_not_create_note(self):
+        current_solution_comment_count = SolutionComment.objects.count()
+        data = {
+            'solution': self.solution.id,
+            'student': self.student.id,
+            'text': ''
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_solution_comment_count, SolutionComment.objects.count())
 
     def test_post_with_valid_data_creates_solution_comment_for_correct_solution(self):
         current_solution_comment_count = SolutionComment.objects.count()

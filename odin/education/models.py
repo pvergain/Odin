@@ -231,7 +231,7 @@ class StudentNote(UpdatedAtCreatedAtModelMixin, models.Model):
                                on_delete=models.CASCADE,
                                related_name='notes')
 
-    text = models.TextField(blank=True)
+    text = models.TextField()
 
     class Meta:
         ordering = ('created_at',)

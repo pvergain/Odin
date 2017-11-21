@@ -16,7 +16,9 @@
       <form id="noteForm" action="{% url 'dashboard:education:create-student-note' course.id %}" method="POST">
         {% csrf_token %}
         <div class="form-body">
-          {% include 'education/partial/message_box.html' %}
+          {% autoescape off %}
+            {% include 'education/partial/message_box.html' %}
+          {% endautoescape %}
           <div class="form-group form-md-line-input">
             <textarea class="form-control from-control-solid placeholder-no-fix" placeholder="Write your note here" name="text"></textarea>
             <input type="hidden" name="student" value="{{ student.id }}"/>

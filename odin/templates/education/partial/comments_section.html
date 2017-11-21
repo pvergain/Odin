@@ -1,4 +1,5 @@
 {% load common_extras %}
+{% load widget_tweaks %}
 {% load static %}
 
 <div class="portlet collapse" id="comments-section_{{ solution.id }}">
@@ -8,6 +9,23 @@
     </div>
   </div>
   <div class="portlet-body">
+    <form id="commentForm" action="{% url 'dashboard:education:create-solution-comment' course_id=course.id %}" method="POST">
+      {% csrf_token %}
+      <div class="form-body">
+        {% autoescape off %}
+          {% include 'education/partial/message_box.html' %}
+        {% endautoescape %}
+        <div class="form-group form-md-line-input">
+          <textarea class="form-control from-control-solid placeholder-no-fix" placeholder="Write your comment here" name="text"></textarea>
+          <input type="hidden" name="student" value="{{ solution.student.id }}"/>
+          <input type="hidden" name="solution" value="{{ solution.id }}" />
+        </div>
+        <div class="form-actions noborder">
+          <button class="btn green uppercase" type="submit" name="submit">Submit</button>
+        </div>
+      </div>
+    </form>
+    <hr />
     <ul class="list-unstyled">
       {% for comment in solution.comments.all reversed %}
         <li class="media">
@@ -24,20 +42,6 @@
             </div>
           </li>
       {% endfor %}
-      <form id="commentForm" action="{% url 'dashboard:education:create-solution-comment' course_id=course.id %}" method="POST">
-        {% csrf_token %}
-        <div class="form-body">
-          {% include 'education/partial/message_box.html' %}
-          <div class="form-group form-md-line-input">
-            <textarea class="form-control from-control-solid placeholder-no-fix" placeholder="Write your comment here" name="text"></textarea>
-            <input type="hidden" name="student" value="{{ solution.student.id }}"/>
-            <input type="hidden" name="solution" value="{{ solution.id }}" />
-          </div>
-          <div class="form-actions noborder">
-            <button class="btn green uppercase" type="submit" name="submit">Submit</button>
-          </div>
-        </div>
-      </form>
     </ul>
   </div>
 </div>

@@ -874,6 +874,7 @@ class CourseStudentDetailView(LoginRequiredMixin,
 
 class CreateStudentNoteView(LoginRequiredMixin,
                             CourseViewMixin,
+                            ReadableFormErrorsMixin,
                             IsTeacherInCoursePermission,
                             CallServiceMixin,
                             FormView):
@@ -901,8 +902,10 @@ class CreateStudentNoteView(LoginRequiredMixin,
         return redirect(self.get_success_url())
 
     def form_invalid(self, form):
+        self.student = get_object_or_404(Student, pk=form.data.get('student'))
+
         for field, error in form.errors.items():
-            messages.warning(request=self.request, message=f'{field}: {error}')
+            messages.warning(request=self.request, message=f'Empty note!')
 
         return redirect(self.get_success_url())
 
@@ -968,6 +971,12 @@ class CreateSolutionCommentView(LoginRequiredMixin,
         self.call_service(service_kwargs=service_kwargs)
 
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        for field, error in form.errors.items():
+            messages.warning(request=self.request, message=f'Empty comment!')
+
+        return redirect(self.get_success_url())
 
 
 class CreateLectureView(LoginRequiredMixin,
