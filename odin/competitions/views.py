@@ -214,8 +214,17 @@ class EditCompetitionMaterialView(LoginRequiredMixin,
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
                             kwargs={
-                                'competition_slug': self.object.slug_url
+                                'competition_slug': self.object.competition.slug_url
                             })
+
+
+class CompetitionMaterialDetailView(LoginRequiredMixin,
+                                    CompetitionViewMixin,
+                                    IsParticipantOrJudgeInCompetitionPermission,
+                                    DetailView):
+    model = CompetitionMaterial
+    pk_url_kwarg = 'material_id'
+    template_name = 'education/material_detail.html'
 
 
 class CreateNewCompetitionTaskView(LoginRequiredMixin,
@@ -325,8 +334,17 @@ class EditCompetitionTaskView(LoginRequiredMixin,
     def get_success_url(self):
         return reverse_lazy('competitions:competition-detail',
                             kwargs={
-                                'competition_slug': self.object.slug_url
+                                'competition_slug': self.object.competition.slug_url
                             })
+
+
+class CompetitionTaskDetailView(LoginRequiredMixin,
+                                CompetitionViewMixin,
+                                IsParticipantOrJudgeInCompetitionPermission,
+                                DetailView):
+    model = CompetitionTask
+    pk_url_kwarg = 'task_id'
+    template_name = 'education/task_detail.html'
 
 
 class AllParticipantsSolutionsView(LoginRequiredMixin,

@@ -48,9 +48,15 @@ class ListItem extends React.Component {
           task_id: this.props.task.id,
         });
 
-    const taskDetailUrl = Urls['dashboard:education:included-task-detail']({
-      task_id: this.props.task.id,
-    });
+    const taskDetailUrl = this.props.competition
+      ? Urls['competitions:competition-task-detail']({
+          competition_slug: this.props.competition.slug_url,
+          task_id: this.props.task.id,
+        })
+      : Urls['dashboard:education:included-task-detail']({
+          course_id: this.props.course,
+          task_id: this.props.task.id,
+        });
 
     const role = this.props.competition
       ? window.props.isUserJudgeInCompetition

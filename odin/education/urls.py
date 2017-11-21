@@ -195,7 +195,7 @@ urlpatterns = [
         name='existing-task-detail'
     ),
     url(
-        regex='^tasks/(?P<task_id>[0-9]+)/$',
+        regex='^(?P<course_id>[0-9]+)/tasks/(?P<task_id>[0-9]+)/$',
         view=IncludedTaskDetailView.as_view(),
         name='included-task-detail'
     ),
@@ -205,7 +205,7 @@ urlpatterns = [
         name='existing-material-detail'
     ),
     url(
-        regex='^materials/(?P<material_id>[0-9]+)/$',
+        regex='^(?P<course_id>[0-9]+)/materials/(?P<material_id>[0-9]+)/$',
         view=IncludedMaterialDetailView.as_view(),
         name='included-material-detail'
     ),

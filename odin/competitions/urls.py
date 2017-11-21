@@ -6,11 +6,13 @@ from .views import (
     EditCompetitionView,
     CreateCompetitionMaterialFromExistingView,
     CreateNewCompetitionMaterialView,
+    CompetitionMaterialDetailView,
     EditCompetitionMaterialView,
     CompetitionDetailView,
     CreateNewCompetitionTaskView,
     CreateCompetitionTaskFromExistingView,
     EditCompetitionTaskView,
+    CompetitionTaskDetailView,
     ParticipantSolutionsView,
     AllParticipantsSolutionsView,
     CompetitionSignUpView,
@@ -79,6 +81,11 @@ urlpatterns = [
         name='edit-competition-material'
     ),
     url(
+        regex='^(?P<competition_slug>[-\w]+)/material-detail/(?P<material_id>[0-9]+)/$',
+        view=CompetitionMaterialDetailView.as_view(),
+        name='competition-material-detail',
+    ),
+    url(
         regex='(?P<competition_slug>[-\w]+)/create-task/new/$',
         view=CreateNewCompetitionTaskView.as_view(),
         name='create-new-competition-task'
@@ -92,6 +99,11 @@ urlpatterns = [
         regex='(?P<competition_slug>[-\w]+)/edit-task/(?P<task_id>[0-9]+)/$',
         view=EditCompetitionTaskView.as_view(),
         name='edit-competition-task'
+    ),
+    url(
+        regex='^(?P<competition_slug>[-\w]+)/task-detail/(?P<task_id>[0-9]+)/$',
+        view=CompetitionTaskDetailView.as_view(),
+        name='competition-task-detail',
     ),
     url(
         regex='(?P<competition_slug>[-\w]+)/tasks/(?P<task_id>[0-9]+)/solutions/submit-gradable/$',

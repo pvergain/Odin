@@ -469,7 +469,9 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 
 
 class IncludedTaskDetailView(LoginRequiredMixin,
+                             CourseViewMixin,
                              TaskViewMixin,
+                             IsStudentOrTeacherInCoursePermission,
                              DetailView):
     model = IncludedTask
     pk_url_kwarg = 'task_id'
@@ -484,6 +486,8 @@ class MaterialDetailView(LoginRequiredMixin,
 
 
 class IncludedMaterialDetailView(LoginRequiredMixin,
+                                 CourseViewMixin,
+                                 IsStudentOrTeacherInCoursePermission,
                                  DetailView):
     model = IncludedMaterial
     pk_url_kwarg = 'material_id'

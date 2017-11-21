@@ -28,7 +28,11 @@
             {% for material in material_list %}
               <tr>
                 <td>{{ material.id }}</td>
-                <td><a href="{% url 'dashboard:education:included-material-detail' material.id %}">{{ material.identifier }}</a></td>
+                {% if not competition %}
+                  <td><a href="{% url 'dashboard:education:included-material-detail' course.id material.id %}">{{ material.identifier }}</a></td>
+                {% else %}
+                  <td><a href="{% url 'competitions:competition-material-detail' competition.slug_url material.id %}">{{ material.identifier }}</a></td>
+                {% endif %}
                 <td><a href="{{ material.url }}">{{ material.url }}</a></td>
                 <td>{{ course.content }}</td>
                 <td>
