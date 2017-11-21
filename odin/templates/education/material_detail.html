@@ -27,6 +27,9 @@
                     {{ object.content | markdown }}
                 {% endautoescape %}
               </p>
+              {% if object.url %}
+                <a href={{ object.url }}>{{ object.url }}</a>
+              {% endif %}
             </div>
         </div>
         <!-- END SAMPLE TABLE PORTLET-->
