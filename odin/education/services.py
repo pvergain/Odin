@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -296,3 +297,45 @@ def create_solution_comment(*,
     comment.save()
 
     return comment
+
+
+def get_certificate_data(*,
+                         assignment: CourseAssignment) -> Dict:
+    course_data = {"gradable_tasks": [], "non_gradable_tasks": []}
+    course, student = assignment.course, assignment.student
+
+    course_tasks = IncludedTask.objects.get_tasks_for(course)
+
+    gradable_tasks = course_tasks.filter(gradable=True)
+    non_gradable_tasks = course_tasks.filter(gradable=False)
+
+    for task in gradable_tasks:
+        status = settings.TASK_NOT_SENT
+        solutions = Solution.objects.get_solutions_for(student, task)
+
+        if solutions.exists():
+            if solutions.filter(status=Solution.OK).exists():
+                status = settings.TASK_PASSED
+            elif solutions.filter(status=Solution.NOT_OK).exists():
+                status = settings.TASK_FAILED
+
+        course_data['gradable_tasks'].append({"name": task.name,
+                                              "description": task.description,
+                                              "week": task.topic.week,
+                                              "solution_status": status})
+
+    for task in non_gradable_tasks:
+        has_solution = False
+
+        solutions = Solution.objects.get_solutions_for(student, task)
+        if solutions.exists():
+            has_solution = True
+
+        course_data['non_gradable_tasks'].append({"name": task.name,
+                                                  "description": task.description,
+                                                  "week": task.topic.week,
+                                                  "has_solution": has_solution})
+
+    course_data['percent_awesome'] = calculate_student_valid_solutions_for_course(student=student, course=course)
+
+    return course_data

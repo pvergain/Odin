@@ -215,5 +215,6 @@ EMAIL_TEMPLATES = {
 
 TASK_PASSED = "Passed"
 TASK_FAILED = "Failed"
+TASK_NOT_SENT = "Not sent"
 
 from .grader import *

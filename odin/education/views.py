@@ -41,6 +41,7 @@ from .models import (
     CourseAssignment,
     Topic,
     Lecture,
+    Certificate,
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
@@ -85,6 +86,7 @@ from .services import (
     create_solution_comment,
     create_lecture,
     add_week_to_course,
+    get_certificate_data,
 )
 from .serializers import TopicSerializer, SolutionSerializer
 from .utils import (
@@ -1096,3 +1098,19 @@ class SendEmailToAllStudentsView(LoginRequiredMixin,
         send_email(template_name=template_name, recipients=recipients, context=context)
 
         return super().form_valid(form)
+
+
+class CertificateDetailView(DetailView):
+    def get_object(self):
+        return get_object_or_404(Certificate, token=self.kwargs.get('certificate_token'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        course_data = get_certificate_data(assignment=self.object.assignment)
+
+        context['gradable_tasks'] = course_data["gradable_tasks"]
+        context['non_gradable_tasks'] = course_data["non_gradable_tasks"]
+        context['percent_awesome'] = course_data["percent_awesome"]
+
+        return context
