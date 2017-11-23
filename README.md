@@ -37,16 +37,9 @@ pip install -r requirements/test.txt
 
 ```
 npm install
-
-cd ui
-
-bower install
 ```
 
-* In root directory
-```
-npm run build
-```
+* This installs bower and runs webpack as well as postinstall script.
 
 ## Celery
 
