@@ -36,9 +36,16 @@ pip install -r requirements/test.txt
 ### Install JS requirements
 
 ```
+npm install
+
 cd ui
 
 bower install
+```
+
+* In root directory
+```
+npm run build
 ```
 
 ## Celery
@@ -53,10 +60,12 @@ To run tests:
 $ py.test
 ```
 
-To run the tests, check your test coverage, and generate an HTML coverage report:
+To run the tests and check your test coverage
 
 ```bash
-$ coverage run manage.py test
-$ coverage html
-$ open htmlcov/index.html
+$ py.test --cov=odin
 ```
+
+## Grader
+
+* Check this repository for reference -> https://github.com/HackSoftware/HackGrader
