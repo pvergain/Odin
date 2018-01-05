@@ -1,6 +1,10 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Edit included task
+{% endblock title%}
+
 {% block content_title %}
   Edit included task
 {% endblock content_title%}
@@ -36,14 +40,14 @@
               </div>
               <div class="md-checkbox-inline">
                 <div class="md-checkbox">
-                  {% render_field form.gradable id="checkbox6" class="md-check" onchange="changeTestFieldsVisibility()" %}
+                  {% render_field form.gradable id="checkbox6" class="md-check" onchange="changeLanguageFieldVisibility()" %}
                   <label for="checkbox6">
                     <span></span>
                     <span class="check"></span>
                     <span class="box"></span> Make this task gradable </label>
                 </div>
-              </div>
-              <div class="form-actions noborder">
+               </div>
+               <div class="form-actions noborder">
                 <button class="btn green uppercase" type="submit" name="button">Update</button>
                 {% if object.gradable %}
                   {% if object.test %}
@@ -52,11 +56,9 @@
                     </a>
                   {% else %}
                     <a href="{% url 'dashboard:education:course-management:add-source-test' course.id object.id %}">
-                      <button class="btn green uppercase" type="button" name="button">Add source code test</button>
-                    </a>
+                      <button class="btn green uppercase" type="button" name="button">Add source code test</button></a>
                     <a href="{% url 'dashboard:education:course-management:add-binary-test' course.id object.id %}">
-                      <button class="btn green uppercase" type="button" name="button">Add binary test</button>
-                    </a>
+                      <button class="btn green uppercase" type="button" name="button">Add binary test</button></a>
                   {% endif %}
                 {% endif %}
               </div>

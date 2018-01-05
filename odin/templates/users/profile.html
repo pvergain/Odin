@@ -1,5 +1,9 @@
 {% extends 'dashboard/dashboard_base.html' %}
 
+{% block title %}
+  Profile
+{% endblock title %}
+
 {% block content_title %}
   Your profile
 {% endblock content_title %}
@@ -35,7 +39,13 @@
                       {% for course in course_data %}
                         <tr>
                           <td><a href="{% url 'dashboard:education:user-course-detail' course.0.id %}">{{ course.0.name }}</a></td>
-                          <td>100%</td>
+                          <td>
+                            {% if course.attendable %}
+                              0%
+                            {% else %}
+                              N/A
+                            {% endif  %}
+                          </td>
                           <td>{{ course.1 }}%</td>
                           <td>N/A</td>
                         </tr>

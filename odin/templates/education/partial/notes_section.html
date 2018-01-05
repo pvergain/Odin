@@ -1,0 +1,33 @@
+{% load common_extras %}
+
+<div class="portlet collapse" id="notes-section_{{ student.id }}">
+  <div class="portlet-title">
+    <div class="caption">
+      <i class="fa fa-pencil-square-o"></i> Student Notes
+    </div>
+  </div>
+  <div class="portlet-body">
+    <ul class="list-unstyled">
+      {% for note in student_notes.all %}
+        <li>
+          <strong>[{{ note.created_at }}] {{ note.author.get_full_name }}: </strong> {{ note.text }}
+        </li>
+      {% endfor %}
+      <form id="noteForm" action="{% url 'dashboard:education:create-student-note' course.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-body">
+          {% autoescape off %}
+            {% include 'education/partial/message_box.html' %}
+          {% endautoescape %}
+          <div class="form-group form-md-line-input">
+            <textarea class="form-control from-control-solid placeholder-no-fix" placeholder="Write your note here" name="text"></textarea>
+            <input type="hidden" name="student" value="{{ student.id }}"/>
+          </div>
+          <div class="form-actions noborder">
+            <button class="btn green uppercase" type="button" onClick="handleSubmit()" name="btnSubmit">Submit</button>
+          </div>
+        </div>
+      </form>
+    </ul>
+  </div>
+</div>

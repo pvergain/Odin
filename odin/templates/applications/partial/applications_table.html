@@ -24,17 +24,22 @@
             <div class="ribbon ribbon-shadow ribbon-color-success uppercase">
               <h4>{{ application.application_info.course.name }}       <i class="icon-check"></i></h4>
             </div>
-            <h4 class="ribbon-content"><strong>Your application is completed!</strong></h4>
+            <h4 class="ribbon-content"><span>Your application is completed!</span></h4>
             {% else %}
             <div class="ribbon ribbon-shadow ribbon-color-success uppercase">
               <h4>{{ application.application_info.course.name }}       <i class="icon-close"></i></h4>
             </div>
-            <h4 class="ribbon-content"><strong>Your application is not completed!</strong></h4>
+            <h4 class="ribbon-content">
+              <span><strong>Your application is not completed!</strong></span>
+              {% if application.get_interview %}
+                <span>{{ application.get_interview }}</span>
+              {% endif %}
+            </h4>
             {% endif %}
             {% if application.application_info.competition %}
               <div class="ribbon-content">
                 <a href="{% url 'competitions:competition-detail' application.application_info.competition.slug_url %}">
-                  <button class="btn green uppercase" type="button">View Application assets</button></a>
+                  <button class="btn green uppercase" type="button">View application assets</button></a>
               </div>
             {% endif %}
           </div>

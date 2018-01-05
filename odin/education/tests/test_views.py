@@ -1,10 +1,10 @@
 from unittest.mock import patch
 from test_plus import TestCase
-
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import timezone
+from django.test.utils import override_settings
 
 from ..services import add_student, add_teacher
 from ..factories import (
@@ -20,6 +20,7 @@ from ..factories import (
     ProgrammingLanguageFactory,
     SourceCodeTestFactory,
     BinaryFileTestFactory,
+    SolutionFactory,
 )
 from ..models import (
     Student,
@@ -30,7 +31,10 @@ from ..models import (
     IncludedTask,
     Task,
     Solution,
-    IncludedTest
+    IncludedTest,
+    StudentNote,
+    Lecture,
+    SolutionComment
 )
 
 from odin.users.factories import ProfileFactory, BaseUserFactory, SuperUserFactory
@@ -432,7 +436,7 @@ class TestAddNewIncludedTaskView(TestCase):
         self.course = CourseFactory()
         self.topic = TopicFactory(course=self.course)
         self.url = reverse('dashboard:education:course-management:add-new-included-task',
-                           kwargs={'course_id': self.course.id})
+                           kwargs={'course_id': self.course.id, 'topic_id': self.topic.id})
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
         self.language = ProgrammingLanguageFactory()
@@ -445,9 +449,20 @@ class TestAddNewIncludedTaskView(TestCase):
     def test_get_is_allowed_when_teacher_for_course(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
+
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(200, response.status_code)
+
+    def test_correct_topic_is_added_to_form_initial_on_get(self):
+        teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(self.course, teacher)
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            form = response.context.get('form')
+            initial = {'topic': str(self.topic.id)}
+            self.assertEqual(initial, form.initial)
 
     def test_can_create_new_task_for_topic_on_post(self):
         teacher = Teacher.objects.create_from_user(self.user)
@@ -492,7 +507,7 @@ class TestAddNewIncludedTaskView(TestCase):
             self.assertEqual(task_count + 1, IncludedTask.objects.count())
             self.assertEqual(test_count, IncludedTest.objects.count())
 
-    def test_view_creates_test_when_when_task_is_gradeable(self):
+    def test_view_creates_test_when_when_task_is_gradable(self):
         teacher = Teacher.objects.create_from_user(self.user)
         add_teacher(self.course, teacher)
         task_count = IncludedTask.objects.count()
@@ -988,3 +1003,443 @@ class TestSolutionDetailApi(TestCase):
 
         with self.login(email=new_user.email, password=self.test_password):
             self.get_check_200(self.url)
+
+
+class TestCreateStudentNoteView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.student = Student.objects.create_from_user(BaseUserFactory())
+        add_student(course=self.course, student=self.student)
+        self.url = reverse('dashboard:education:create-student-note',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    def test_get_redirects_to_course_students_list(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            expected_url = reverse('dashboard:education:course-students-list',
+                                   kwargs={
+                                       'course_id': self.course.id
+                                   })
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_empty_text_does_not_create_note(self):
+        current_student_note_count = StudentNote.objects.count()
+        data = {
+            'student': self.student.id,
+            'text': ''
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_student_note_count, StudentNote.objects.count())
+
+    def test_post_with_valid_data_creates_student_note_for_correct_assignment(self):
+        current_student_note_count = StudentNote.objects.count()
+        data = {
+            'student': self.student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_student_note_count + 1, StudentNote.objects.count())
+            last_note = StudentNote.objects.last()
+            student_notes = self.student.course_assignments.get(course=self.course).notes.all()
+            self.assertIn(last_note, student_notes)
+
+    def test_post_with_valid_data_redirects_to_specific_notes_section(self):
+        data = {
+            'student': self.student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('dashboard:education:course-students-list',
+                                   kwargs={
+                                       'course_id': self.course.id
+                                   }) + f'#notes-section_{self.student.id}'
+
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_invalid_student_returns_404(self):
+        new_student = Student.objects.create_from_user(BaseUserFactory())
+        data = {
+            'student': new_student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+
+            self.response_404(response)
+
+
+class TestCourseStudentDetailView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.teacher = TeacherFactory(password=self.test_password)
+        self.student = StudentFactory()
+        self.course = CourseFactory()
+        add_student(course=self.course, student=self.student)
+        self.url = reverse('dashboard:education:course-student-detail',
+                           kwargs={
+                               'email': self.student.email,
+                               'course_id': self.course.id
+                           })
+        self.teacher.is_active = True
+        self.student.is_active = True
+        self.teacher.save()
+        self.student.save()
+
+    def test_access_is_forbidden_if_not_teacher_for_course(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_access_is_allowed_when_teacher_for_course(self):
+        add_teacher(course=self.course, teacher=self.teacher)
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.get_check_200(self.url)
+
+
+class TestCreateLectureView(TestCase):
+    def setUp(self):
+        start_date = timezone.now().date() + timezone.timedelta(days=faker.pyint())
+        self.course = CourseFactory(start_date=start_date,
+                                    end_date=start_date+timezone.timedelta(days=faker.pyint()))
+        self.valid_date = start_date + timezone.timedelta(days=1)
+        self.invalid_date = self.course.end_date + timezone.timedelta(days=faker.pyint())
+        self.test_password = faker.password()
+        self.teacher = Teacher.objects.create_from_user(BaseUserFactory(password=self.test_password))
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:create-lecture',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    def test_post_with_valid_date_creates_lecture_for_course(self):
+        current_lecture_count = self.course.lectures.count()
+        data = {
+            'date': self.valid_date
+        }
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.course.refresh_from_db()
+
+            self.assertEqual(current_lecture_count + 1, self.course.lectures.count())
+
+    def test_post_with_invalid_date_does_not_create_lecture(self):
+        current_lecture_count = self.course.lectures.count()
+        data = {
+            'date': self.invalid_date
+        }
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.course.refresh_from_db()
+
+            self.assertEqual(current_lecture_count, self.course.lectures.count())
+
+
+class TestEditLectureView(TestCase):
+    def setUp(self):
+        start_date = timezone.now().date() + timezone.timedelta(days=faker.pyint())
+        self.course = CourseFactory(start_date=start_date,
+                                    end_date=start_date+timezone.timedelta(days=faker.pyint()))
+        self.lecture = Lecture.objects.create(course=self.course,
+                                              week=self.course.weeks.first(),
+                                              date=self.course.weeks.first().start_date)
+        self.test_password = faker.password()
+        self.teacher = Teacher.objects.create_from_user(BaseUserFactory(password=self.test_password))
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:edit-lecture',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'lecture_id': self.lecture.id
+                           })
+
+    def test_post_with_lecture_from_different_course_returns_404(self):
+        new_course = CourseFactory()
+        new_lecture = Lecture.objects.create(course=new_course,
+                                             week=new_course.weeks.first(),
+                                             date=new_course.weeks.first().start_date)
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(reverse('dashboard:education:course-management:edit-lecture',
+                                 kwargs={
+                                     'course_id': self.course.id,
+                                     'lecture_id': new_lecture.id
+                                 }))
+
+            self.response_404(response)
+
+    def test_post_with_valid_data_redirects_to_course_detail(self):
+        previous_date = self.lecture.date
+        data = {
+            'date': self.lecture.date + timezone.timedelta(days=1)
+        }
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.lecture.refresh_from_db()
+
+            self.assertNotEqual(previous_date, self.lecture.date)
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
+                                                                kwargs={
+                                                                    'course_id': self.course.id
+                                                                }))
+
+    def test_post_with_date_outside_of_week_date_does_not_create_lecture(self):
+        current_lecture_count = Lecture.objects.count()
+        data = {
+            'date': self.lecture.week.end_date + timezone.timedelta(days=1)
+        }
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            form = response.context_data.get('form')
+
+            self.assertFalse(form.is_valid())
+            self.assertEqual(current_lecture_count, Lecture.objects.count())
+
+
+class TestAllStudentSolutionsView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.course = CourseFactory()
+        self.teacher = TeacherFactory(password=self.test_password)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.task = IncludedTaskFactory(topic__course=self.course)
+        self.student = StudentFactory(password=self.test_password)
+        add_student(course=self.course, student=self.student)
+        self.url = reverse('dashboard:education:all-students-solutions',
+                           kwargs={
+                               'course_id': self.course.id,
+                               'task_id': self.task.id,
+                           })
+        self.student.is_active = True
+        self.teacher.is_active = True
+        self.student.save()
+        self.teacher.save()
+
+    def test_can_not_access_view_if_not_teacher_for_course(self):
+        with self.login(email=self.student.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_403(response)
+
+    def test_can_access_view_if_teacher_for_course(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            self.get_check_200(self.url)
+
+    def test_statistics_are_zero_when_there_are_no_solutions_for_task(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(0, response.context['solution_statistics'].get(
+                'students_with_a_submitted_solution_count')
+            )
+            self.assertEqual(0, response.context['solution_statistics'].get(
+                'students_with_a_passing_solution_count')
+            )
+
+    def test_students_with_passing_solution_count_is_still_zero_when_task_gradable_and_solution_is_wrong(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.NOT_OK)
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, response.context['solution_statistics'].get(
+                'students_with_a_submitted_solution_count')
+            )
+            self.assertEqual(0, response.context['solution_statistics'].get(
+                'students_with_a_passing_solution_count')
+            )
+
+    def test_passing_solution_count_is_one_when_passing_solution_for_gradable_task_is_submitted(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.OK)
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, response.context['solution_statistics'].get(
+                'students_with_a_submitted_solution_count')
+            )
+            self.assertEqual(1, response.context['solution_statistics'].get(
+                'students_with_a_passing_solution_count')
+            )
+
+    def test_no_students_are_shown_on_correct_filter_when_no_passing_solutions_for_task(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.NOT_OK)
+        self.url = self.url + "?status=correct"
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(0, len(response.context['object_list']))
+
+    def test_student_is_shown_on_correct_filter_when_passing_solution_for_task(self):
+        self.task.gradable = True
+        self.task.save()
+        SolutionFactory(student=self.student, task=self.task, status=Solution.OK)
+        self.url = self.url + "?status=correct"
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_200(response)
+            self.assertEqual(1, len(response.context['object_list']))
+
+
+class TestAddWeekToCourseView(TestCase):
+    def setUp(self):
+        self.test_password = faker.password()
+        self.teacher = TeacherFactory(password=self.test_password)
+        self.teacher.is_active = True
+        self.teacher.save()
+        self.course = CourseFactory()
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:add-week-to-course',
+                           kwargs={'course_id': self.course.id})
+
+    def test_get_is_not_allowed(self):
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_405(response)
+
+    def test_post_is_not_allowed_if_not_teacher_for_course(self):
+        user = BaseUserFactory(password=self.test_password)
+        with self.login(email=user.email, password=self.test_password):
+            response = self.post(self.url)
+            self.response_403(response)
+
+    def test_post_is_successful_when_teacher_for_course(self):
+        course_weeks = self.course.duration_in_weeks
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url)
+            self.response_302(response)
+
+            self.course.refresh_from_db()
+            self.assertEqual(course_weeks + 1, self.course.duration_in_weeks)
+
+
+class TestSendEmailToAllStudentsView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.students = StudentFactory.create_batch(size=5)
+
+        for student in self.students:
+            add_student(course=self.course, student=student)
+
+        self.test_password = faker.password()
+        self.teacher = Teacher.objects.create_from_user(BaseUserFactory(password=self.test_password))
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.url = reverse('dashboard:education:course-management:send-email-to-all-students',
+                           kwargs={
+                               'course_id': self.course.id
+                           })
+
+    @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
+    @patch('odin.common.tasks.send_template_mail.delay')
+    def test_post_sends_email_to_all_students(self, mock_send_mail):
+        data = {
+            'text': faker.text()
+        }
+
+        with self.login(email=self.teacher.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:education:user-course-detail',
+                                                                kwargs={
+                                                                    'course_id': self.course.id
+                                                                }))
+            self.assertTrue(mock_send_mail.called)
+            (template_name, recipients, context), kwargs = mock_send_mail.call_args
+            student_emails = [student.email for student in self.students]
+            for email in student_emails:
+                self.assertIn(email, recipients)
+
+
+class TestCreateSolutionCommentView(TestCase):
+    def setUp(self):
+        self.course = CourseFactory()
+        self.test_password = faker.password()
+        self.user = BaseUserFactory(password=self.test_password)
+        self.teacher = Teacher.objects.create_from_user(self.user)
+        add_teacher(course=self.course, teacher=self.teacher)
+        self.student = Student.objects.create_from_user(BaseUserFactory())
+        add_student(course=self.course, student=self.student)
+        self.task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+        self.solution = SolutionFactory(task=self.task, student=self.student)
+        self.url = reverse('dashboard:education:create-solution-comment',
+                           kwargs={
+                               'course_id': self.course.id,
+                           })
+
+    def test_get_is_not_allowed(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.get(self.url)
+            self.response_405(response)
+
+    def test_post_with_empty_text_does_not_create_note(self):
+        current_solution_comment_count = SolutionComment.objects.count()
+        data = {
+            'solution': self.solution.id,
+            'student': self.student.id,
+            'text': ''
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_solution_comment_count, SolutionComment.objects.count())
+
+    def test_post_with_valid_data_creates_solution_comment_for_correct_solution(self):
+        current_solution_comment_count = SolutionComment.objects.count()
+        data = {
+            'solution': self.solution.id,
+            'student': self.student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.assertEqual(current_solution_comment_count + 1, SolutionComment.objects.count())
+            last_comment = SolutionComment.objects.last()
+            solution_comments = self.solution.comments.all()
+            self.assertIn(last_comment, solution_comments)
+
+    def test_post_with_valid_data_redirects_to_specific_comments_section(self):
+        data = {
+            'solution': self.solution.id,
+            'student': self.student.id,
+            'text': faker.text()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            expected_url = reverse('dashboard:education:student-solution-detail',
+                                   kwargs={
+                                       'course_id': self.course.id,
+                                       'task_id': self.task.id,
+                                       'solution_id': self.solution.id,
+                                   }) + f'#comments-section_{self.solution.id}'
+
+            self.assertRedirects(response, expected_url=expected_url)
+
+    def test_post_with_invalid_student_returns_404(self):
+        new_student = Student.objects.create_from_user(BaseUserFactory())
+        data = {
+            'solution': self.solution.id,
+            'student': new_student.id,
+            'text': faker.text()
+        }
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.response_404(response)

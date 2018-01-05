@@ -1,8 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
 from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
 from django.core.exceptions import ValidationError
+
+from odin.users.models import BaseUser
 
 from .models import (
     Course,
@@ -19,7 +23,10 @@ from .models import (
     ProgrammingLanguage,
     Solution,
     Test,
-    IncludedTest
+    IncludedTest,
+    StudentNote,
+    Lecture,
+    SolutionComment,
 )
 
 
@@ -42,6 +49,7 @@ def create_course(*,
                   slug_url: str=None,
                   logo: BinaryIO=None,
                   public: bool=True,
+                  attendable: bool=True,
                   description: str="") -> Course:
 
     if Course.objects.filter(name=name).exists():
@@ -68,8 +76,8 @@ def create_course(*,
         current = Week(course=course,
                        number=i,
                        start_date=start_date,
-                       end_date=start_date + timedelta(days=7))
-        start_date = current.end_date
+                       end_date=start_date + timedelta(days=6))
+        start_date = current.end_date + timedelta(days=1)
         week_instances.append(current)
 
     Week.objects.bulk_create(week_instances)
@@ -224,7 +232,67 @@ def get_all_student_solution_statistics(*,
 
     filters = {'solutions__task': task, 'solutions__isnull': False}
     result['students_with_a_submitted_solution_count'] = course.students.filter(**filters).distinct().count()
-    filters = {'solutions__task': task, 'solutions__status': Solution.OK}
-    result['students_with_a_passing_solution_count'] = course.students.filter(**filters).distinct().count()
+    q_expression = Q(solutions__task__gradable=True, solutions__status=Solution.OK) \
+        | Q(solutions__task__gradable=False, solutions__status=Solution.SUBMITTED_WITHOUT_GRADING)
+    result['students_with_a_passing_solution_count'] = course.students.filter(
+        q_expression, solutions__task=task
+    ).distinct().count()
 
     return result
+
+
+def create_student_note(*,
+                        author: Teacher,
+                        assignment: CourseAssignment,
+                        text: str) -> StudentNote:
+    note = StudentNote(author=author,
+                       assignment=assignment,
+                       text=text)
+    note.full_clean()
+    note.save()
+
+    return note
+
+
+def create_lecture(*,
+                   date: date,
+                   course: Course) -> Lecture:
+    week_qs = Week.objects.filter(start_date__lte=date, end_date__gte=date, course=course)
+    if week_qs.exists():
+        lecture = Lecture(date=date, course=course, week=week_qs.first())
+        lecture.full_clean()
+        lecture.save()
+
+        return lecture
+    else:
+        raise ValidationError('Date not in range of any week for this course')
+
+
+def add_week_to_course(*,
+                       course: Course,
+                       new_end_date: timezone.datetime.date) -> Week:
+    last_week = course.weeks.last()
+    new_week = Week.objects.create(
+        course=course,
+        number=last_week.number + 1,
+        start_date=course.end_date,
+        end_date=new_end_date
+    )
+
+    course.end_date = course.end_date + timezone.timedelta(days=7)
+    course.save()
+
+    return new_week
+
+
+def create_solution_comment(*,
+                            solution: Solution,
+                            user: BaseUser,
+                            text: str) -> SolutionComment:
+    comment = SolutionComment(solution=solution,
+                              user=user,
+                              text=text)
+    comment.full_clean()
+    comment.save()
+
+    return comment

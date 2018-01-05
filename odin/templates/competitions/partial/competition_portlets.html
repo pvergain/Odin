@@ -1,0 +1,12 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="row margin-bottom-40 stories-header" data-auto-height="true">
+      <h2>Competitions that you are {{ role }} in</h2>
+    </div>
+  </div>
+  {% for competition in competitions %}
+    <div class="col-md-6">
+      {% include 'competitions/partial/competition_box.html' %}
+    </div>
+  {% endfor %}
+</div>

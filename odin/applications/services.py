@@ -38,6 +38,7 @@ def create_application_info(*,
 def create_application(*,
                        application_info: ApplicationInfo,
                        user: BaseUser,
+                       full_name: str,
                        phone: str=None,
                        skype: str=None,
                        works_at: str=None,
@@ -55,9 +56,15 @@ def create_application(*,
     instance.full_clean()
     instance.save()
 
+    if user.profile:
+        user.profile.full_name = full_name
+        user.profile.save()
+
     if application_info.competition:
         if not hasattr(user, 'competitionparticipant'):
             participant = CompetitionParticipant.objects.create_from_user(user)
+        else:
+            participant = user.competitionparticipant
         application_info.competition.participants.add(participant)
 
     template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')

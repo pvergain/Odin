@@ -71,7 +71,9 @@ class Application(models.Model):
     objects = ApplicationQuerySet.as_manager()
 
     def get_interview(self):
-        return self.interview_set.select_related('interviewer__profile').first()
+        interview = self.interview_set.select_related('interviewer__profile')
+        if interview:
+            return self.interview_set.select_related('interviewer__profile').first()
 
     def __str__(self):
         return "{0} applying to {1}".format(self.user, self.application_info)

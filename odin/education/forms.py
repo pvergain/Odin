@@ -7,8 +7,15 @@ from .models import (
     IncludedTask,
     IncludedTest,
     Solution,
-    ProgrammingLanguage
+    ProgrammingLanguage,
+    StudentNote,
+    Lecture,
+    SolutionComment,
 )
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
 
 
 class TopicModelForm(forms.ModelForm):
@@ -104,3 +111,44 @@ class SubmitNonGradableSolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
         fields = ('url', )
+
+
+class StudentNoteForm(forms.ModelForm):
+    def __init__(self, course=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if course:
+            self.fields['student'] = forms.ModelChoiceField(queryset=course.students.all())
+
+    class Meta:
+        model = StudentNote
+        fields = ('author', 'text', 'assignment')
+
+
+class SolutionCommentForm(forms.ModelForm):
+    class Meta:
+        model = SolutionComment
+        fields = ('text', 'solution', 'user')
+
+
+class CreateLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', 'course')
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class EditLectureForm(forms.ModelForm):
+    class Meta:
+        model = Lecture
+        fields = ('date', )
+
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class PlainTextForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea(), required=True)

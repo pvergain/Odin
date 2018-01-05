@@ -35,6 +35,8 @@ class Course(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
+    attendable = models.BooleanField(default=True)
+
     students = models.ManyToManyField(Student,
                                       through='CourseAssignment',
                                       through_fields=('course', 'student'))
@@ -203,6 +205,11 @@ class Lecture(models.Model):
 
     present_students = models.ManyToManyField(Student, related_name='lectures')
 
+    def clean(self):
+        if hasattr(self, 'week'):
+            if not self.week.start_date <= self.date <= self.week.end_date:
+                raise ValidationError('Lecture date must be in the date range for it\'s week')
+
     @property
     def not_present_students(self):
         present_ids = self.present_students.values_list('id', flat=True)
@@ -224,7 +231,7 @@ class StudentNote(UpdatedAtCreatedAtModelMixin, models.Model):
                                on_delete=models.CASCADE,
                                related_name='notes')
 
-    text = models.TextField(blank=True)
+    text = models.TextField()
 
     class Meta:
         ordering = ('created_at',)
@@ -326,5 +333,17 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     def verbose_status(self):
         return self.STATUS_CHOICE[self.status][1]
 
+    def pass_or_fail_status(self):
+        if self.task.gradable and self.status == self.OK or \
+                not self.task.gradable and self.status == self.SUBMITTED_WITHOUT_GRADING:
+            return "Passed"
+        return "Failed"
+
     class Meta:
         ordering = ['-id']
+
+
+class SolutionComment(UpdatedAtCreatedAtModelMixin, models.Model):
+    text = models.TextField()
+    solution = models.ForeignKey(Solution, related_name='comments')
+    user = models.ForeignKey(BaseUser, related_name='user_comments')

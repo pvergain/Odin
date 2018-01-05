@@ -13,6 +13,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'collectfast',
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.postgres'
@@ -29,7 +30,7 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     'django_filters',
     'easy_thumbnails',
-    'django_js_reverse'
+    'django_js_reverse',
 ]
 
 LOCAL_APPS = [
@@ -179,6 +180,18 @@ GH_OAUTH_SECRET_KEY = env('GH_OAUTH_SECRET_KEY', default='')
 
 
 # Celery settings
+CELERY_BROKER_URL = env('BROKER_URL', default='amqp://guest:guest@localhost//')
+CELERY_BROKER_POOL_LIMIT = 1
+CELERY_BROKER_HEARTBEAT = None
+CELERY_BROKER_CONNECTION_TIMEOUT = 30
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TASK_SOFT_TIME_LIMIT = env('CELERY_TASK_SOFT_TIME_LIMIT', default=60)
+CELERY_TASK_TIME_LIMIT = env('CELERY_TASK_TIME_LIMIT', default=60+60)
+CELERY_TASK_MAX_RETRIES = env('CELERY_TASK_MAX_RERIES', default=3)
 
 # Mandrill settings
 USE_DJANGO_EMAIL_BACKEND = True
@@ -192,11 +205,15 @@ templates = {
     'account_email_email_competition_confirmation': lambda **env_kwargs: env('MANDRILL_COMPETITION_CONFIRMATION', **env_kwargs),
     'application_completed_default': lambda **env_kwargs: env('MANDRILL_APPLICATION_COMPLETED', **env_kwargs),
     'interview_confirmation': lambda **env_kwargs: env('MANDRILL_INTERVIEW_CONFIRMATION', **env_kwargs),
+    'course_information_email': lambda **env_kwargs: env('MANDRILL_COURSE_INFORMATION', **env_kwargs)
 }
 
 EMAIL_TEMPLATES = {
     key: f(default='')
     for key, f in templates.items()
 }
+
+TASK_PASSED = "Passed"
+TASK_FAILED = "Failed"
 
 from .grader import *

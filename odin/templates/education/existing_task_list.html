@@ -1,6 +1,10 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load widget_tweaks %}
 
+{% block title %}
+  Existing tasks
+{% endblock title %}
+
 {% block content_title %}
   Choose from the following tasks
 {% endblock content_title %}
@@ -13,7 +17,6 @@
     {% include "partial/form_errors.html" with errors=readable_errors%}
     <div class="portlet box green">
       {% include 'education/partial/existing_tasks.html' with task_list=task_list%}
-      <a href="{% url 'dashboard:education:course-management:add-new-included-task' course.pk  %}"><button type="button" name="button" class="btn green uppercase" >Add new task</button></a>
     </div>
     <!-- END SAMPLE TABLE PORTLET-->
   </div>

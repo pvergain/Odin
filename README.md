@@ -36,10 +36,10 @@ pip install -r requirements/test.txt
 ### Install JS requirements
 
 ```
-cd ui
-
-bower install
+npm install
 ```
+
+* This installs bower and runs webpack as well as postinstall script.
 
 ## Celery
 
@@ -53,10 +53,12 @@ To run tests:
 $ py.test
 ```
 
-To run the tests, check your test coverage, and generate an HTML coverage report:
+To run the tests and check your test coverage
 
 ```bash
-$ coverage run manage.py test
-$ coverage html
-$ open htmlcov/index.html
+$ py.test --cov=odin
 ```
+
+## Grader
+
+* Check this repository for reference -> https://github.com/HackSoftware/HackGrader

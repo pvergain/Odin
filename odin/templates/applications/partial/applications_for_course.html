@@ -17,7 +17,7 @@
             <tr>
               <th> # </th>
               <th> Applicant </th>
-               {% for task in course.application_info.tasks.all %}
+               {% for task in course.application_info.competition.tasks.all %}
                 <th id="{{ task.name }}">
                   {{ task.name }}
                 </th>
@@ -30,7 +30,7 @@
               <tr>
                 <td>{{ app.id }}</td>
                 <td> <a href="{% url 'dashboard:applications:application-detail' app.id %}">{{ app.user.get_full_name }}</a> </td>
-                {% for task in course.application_info.tasks.all %}
+                {% for task in course.application_info.competition.tasks.all %}
                   <td>
                     <div class="list-icon-container">
                       {% if task|has_solution_for_task:app %}

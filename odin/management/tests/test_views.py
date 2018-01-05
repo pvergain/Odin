@@ -352,31 +352,31 @@ class TestAddCourseToInterViewerCoursesView(TestCase):
         self.interviewer.save()
         self.url = reverse('dashboard:management:add-interviewer-to-course')
 
-        def test_post_does_not_add_course_when_course_does_not_have_application_info(self):
-            current_course_count = self.interviewer.courses_to_interview.count()
+    def test_post_does_not_add_course_when_course_does_not_have_application_info(self):
+        current_course_count = self.interviewer.courses_to_interview.count()
 
-            data = {
-                'interviewer': self.interviewer.id,
-                'course': self.course.id
+        data = {
+            'interviewer': self.interviewer.id,
+            'course': self.course.id
 
-            }
+        }
 
-            with self.login(email=self.interviewer.email, password=self.test_password):
-                self.post(self.url, data=data)
-                self.interviewer.refresh_from_db()
-                self.assertEqual(current_course_count, self.interviewer.courses_to_interview.count())
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            self.post(self.url, data=data)
+            self.interviewer.refresh_from_db()
+            self.assertEqual(current_course_count, self.interviewer.courses_to_interview.count())
 
-                def test_post_adds_course_when_course_has_have_application_info(self):
-                    ApplicationInfoFactory(course=self.course)
-                    self.course.refresh_from_db()
+    def test_post_adds_course_when_course_has_have_application_info(self):
+        ApplicationInfoFactory(course=self.course)
+        self.course.refresh_from_db()
 
-                    data = {
-                        'interviewer': self.interviewer.id,
-                        'course': self.course.id
+        data = {
+            'interviewer': self.interviewer.id,
+            'course': self.course.id
 
-                    }
+        }
 
-                    with self.login(email=self.interviewer.email, password=self.test_password):
-                        response = self.post(self.url, data=data)
-                        self.assertRedirects(response, expected_url=reverse('dashboard:management:index'))
-                        self.assertIn(self.course.application_info, self.interviewer.courses_to_interview.all())
+        with self.login(email=self.interviewer.email, password=self.test_password):
+            response = self.post(self.url, data=data)
+            self.assertRedirects(response, expected_url=reverse('dashboard:management:index'))
+            self.assertIn(self.course.application_info, self.interviewer.courses_to_interview.all())

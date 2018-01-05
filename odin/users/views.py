@@ -45,7 +45,7 @@ class UserProfileView(LoginRequiredMixin, DashboardManagementPermission, DetailV
 
 class EditProfileView(LoginRequiredMixin, ReadableFormErrorsMixin, UpdateView):
     model = Profile
-    fields = ['full_name', 'description', 'full_image']
+    fields = ['full_name', 'description', 'full_image', 'skype']
     success_url = reverse_lazy('dashboard:users:profile')
     template_name = 'users/edit_profile.html'
 

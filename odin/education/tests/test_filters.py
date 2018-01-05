@@ -10,7 +10,7 @@ from ..filters import SolutionsFilter
 class TestSolutionFilter(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.task = IncludedTaskFactory(topic__course=self.course)
+        self.task = IncludedTaskFactory(topic__course=self.course, gradable=True)
         self.filter = SolutionsFilter(task=self.task)
         self.queryset = IncludedTask.objects.all()
 

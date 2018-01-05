@@ -1,14 +1,48 @@
-{% extends 'dashboard/dashboard_base.html' %}
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% load widget_tweaks %}
 
-{% block content_title %}
+{% block title %}
   Create Competition
-{% endblock content_title %}
+{% endblock title %}
 
 {% block page_content %}
-  <form  action="" method="POST">
-    {% csrf_token %}
-    {{ form }}
-    <button type="submit" name="submit">Submit</button>
-  </form>
-
+<div class="row">
+  <div class="col-md-6">
+    {% include "partial/form_errors.html" with form=form errors=readable_errors %}
+    {% include "education/partial/message_box.html" %}
+    <div class="portlet light ">
+      <div class="portlet-title">
+        <div class="caption font-blue-sunglo">
+          <i class="icon-settings font-blue-sunglo"></i>
+          <span class="caption-subject bold uppercase"> Add competition</span>
+        </div>
+      </div>
+      <div class="portlet-body form">
+        <form action="" method="POST" enctype="multipart/form-data">
+          <div class="form-body">
+            {% csrf_token %}
+            <div class="form-group form-md-line-input">
+              {% render_field form.name class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Competition name" %}
+            </div>
+            <div class="form-group form-md-line-input">
+              {{ form.start_date.label }}
+              {% render_field form.start_date class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Start date" %}
+	    </div>
+            <div class="form-group form-md-line-input">
+              {{ form.end_date.label }}
+              {% render_field form.end_date class="form-control form-control-solid placeholder-no-fix" placeholder="End date"%}
+	    </div>
+            <div class="form-group form-md-line-input">
+              {% render_field form.slug_url class="form-control form-control-solid placeholder-no-fix" placeholder="Competition slug" %}
+            </div>
+            <div class="form-actions noborder">
+              <button class="btn green uppercase" type="submit">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock page_content %}

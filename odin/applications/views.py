@@ -79,6 +79,9 @@ class ApplyToCourseView(LoginRequiredMixin,
     form_class = ApplicationCreateForm
     template_name = "applications/course_application.html"
 
+    def get_service(self):
+        return create_application
+
     def get_success_url(self):
         competition = self.application.application_info.competition
         if competition:
@@ -89,7 +92,7 @@ class ApplyToCourseView(LoginRequiredMixin,
         return reverse_lazy('dashboard:applications:user-applications')
 
     def form_valid(self, form):
-        self.application = self.call_service(service=create_application, service_kwargs=form.cleaned_data)
+        self.application = self.call_service(service_kwargs=form.cleaned_data)
 
         return super().form_valid(form)
 

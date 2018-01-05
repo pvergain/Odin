@@ -1,0 +1,40 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% load widget_tweaks %}
+
+{% block title %}
+  Add Participant to competition
+{% endblock title %}
+
+{% block page_content %}
+  <div class="col-md-6">
+    {% include "partial/form_errors.html" with form=form errors=readable_errors %}
+    {% include "education/partial/message_box.html" %}
+    <div class="portlet light ">
+      <div class="portlet-title">
+        <div class="caption font-blue-sunglo">
+          <i class="icon-settings font-blue-sunglo"></i>
+          <span class="caption-subject bold uppercase"> Add Participant to competition </span>
+        </div>
+      </div>
+      <div class="portlet-body form">
+        <form action="" method="POST">
+          <div class="form-body">
+            {% csrf_token %}
+            <div class="form-group form-md-line-input">
+              {{ form.participant.label }}
+              {% render_field form.participant class="form-control form-control-solid" id="form_control_1" %}
+            </div>
+            <div class="form-group form-md-line-input">
+              {{ form.competition.label }}
+              {% render_field form.competition class="form-control form-control-solid" id="form_control_1" %}
+	    </div>
+            <div class="form-actions noborder">
+              <button class="btn green uppercase" type="submit">Submit</button>
+            </div>
+        </form>
+          </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -4,6 +4,8 @@ from .views import (
     PromoteUserToStudentView,
     PromoteUserToTeacherView,
     PromoteUserToInterviewerView,
+    PromoteUserToJudgeView,
+    PromoteUserToParticipantView,
     DashboardManagementView,
     CreateUserView,
     CreateStudentView,
@@ -13,6 +15,9 @@ from .views import (
     AddStudentToCourseView,
     AddTeacherToCourseView,
     AddCourseToInterviewerCoursesView,
+    AddParticipantToCompetitionView,
+    AddJudgeToCompetitionView,
+    AddCompetitionToCourseView,
 )
 
 urlpatterns = [
@@ -35,6 +40,16 @@ urlpatterns = [
         regex='^promote/interviewer/(?P<id>[0-9]+)/$',
         view=PromoteUserToInterviewerView.as_view(),
         name='promote-to-interviewer'
+    ),
+    url(
+        regex='^promote/judge/(?P<id>[0-9]+)/$',
+        view=PromoteUserToJudgeView.as_view(),
+        name='promote-to-judge'
+    ),
+    url(
+        regex='^promote/participant/(?P<id>[0-9]+)/$',
+        view=PromoteUserToParticipantView.as_view(),
+        name='promote-to-participant'
     ),
     url(
         regex='^add-student/$',
@@ -78,8 +93,23 @@ urlpatterns = [
 
     ),
     url(
+        regex='^add-participant-to-competition/$',
+        view=AddParticipantToCompetitionView.as_view(),
+        name='add-participant-to-competition',
+    ),
+    url(
+        regex='^add-judge-to-competition/$',
+        view=AddJudgeToCompetitionView.as_view(),
+        name='add-judge-to-competition',
+    ),
+    url(
         regex='^add-interviewer-to-course/(?P<interviewer_email>[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/$',
         view=AddCourseToInterviewerCoursesView.as_view(),
         name='add-interviewer-to-course-with-initial'
     ),
+    url(
+        regex='^add-competition-to-course/$',
+        view=AddCompetitionToCourseView.as_view(),
+        name='add-competition-to-course',
+    )
 ]

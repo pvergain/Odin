@@ -129,6 +129,7 @@ class TestApplyToCourseView(TestCase):
 
         current_app_count = Application.objects.count()
         data = {
+            'full_name': faker.name(),
             'phone': faker.phone_number(),
             'works_at': faker.job(),
             'skype': faker.word()
@@ -139,7 +140,7 @@ class TestApplyToCourseView(TestCase):
             self.assertRedirects(response, expected_url=reverse('dashboard:applications:user-applications'))
             self.assertEqual(current_app_count + 1, Application.objects.count())
 
-    def test_successful_post_redirects_to_competition_detail_whn_app_info_has_competition(self):
+    def test_successful_post_redirects_to_competition_detail_when_application_info_has_competition(self):
         competition = CompetitionFactory()
         self.app_info.start_date = timezone.now().date()
         self.app_info.end_date = timezone.now().date() + timezone.timedelta(days=2)
@@ -147,6 +148,7 @@ class TestApplyToCourseView(TestCase):
         self.app_info.save()
 
         data = {
+            'full_name': faker.name(),
             'phone': faker.phone_number(),
             'works_at': faker.job(),
             'skype': faker.word()
@@ -182,7 +184,7 @@ class TestApplyToCourseView(TestCase):
         self.app_info.end_date = timezone.now().date() + timezone.timedelta(days=2)
         self.app_info.save()
 
-        create_application(user=self.user, application_info=self.app_info, skype=faker.word())
+        create_application(user=self.user, application_info=self.app_info, skype=faker.word(), full_name=faker.name())
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertRedirects(response,
@@ -199,7 +201,8 @@ class TestApplyToCourseView(TestCase):
             'skype': faker.word()
         }
 
-        create_application(user=self.user, application_info=self.app_info, skype=data.get('skype'))
+        create_application(user=self.user, application_info=self.app_info,
+                           skype=data.get('skype'), full_name=faker.name())
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
             expected_url = reverse('dashboard:applications:user-applications')
@@ -223,6 +226,7 @@ class TestApplyToCourseView(TestCase):
         self.app_info.save()
 
         data = {
+            'full_name': faker.name(),
             'phone': faker.phone_number(),
             'works_at': faker.job(),
             'skype': faker.word

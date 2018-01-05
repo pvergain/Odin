@@ -1,5 +1,9 @@
 {% extends "dashboard/dashboard_base.html" %}
 
+{% block title %}
+  Solutions for {{ task.name }}
+{% endblock title %}
+
 {% block content_title %}
   <strong>{{ task.name }}</strong>
 {% endblock content_title %}
@@ -35,6 +39,7 @@
               <h4>URL: </h4>
               <p><a href={{ solution.url }}>{{ solution.url }}</a></p>
             {% endif %}
+            <a class="btn green uppercase" href="{% url 'dashboard:education:student-solution-detail' course.id solution.task.id solution.id%}#comments-section_{{ solution.id }}" style="margin-top: 2px;"> Comments </a>
           </div>
         </div>
       </div>

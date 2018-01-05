@@ -1,6 +1,10 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% load interview_extras %}
 
+{% block title %}
+  Accepted Applicants
+{% endblock title %}
+
 {% block content_title %}
   Accepted applicants
 {% endblock content_title %}
@@ -24,6 +28,10 @@
           </div>
         </div>
         <div class="portlet-body">
+          {% with applicants=info.accepted_applicants|not_in_course:info.course %}
+          {% if info.accepted_applicants and not applicants %}
+            <h4>All accepted applicants have been assigned to course!</h4>
+          {% else %}
           <div class="table-scrollable">
             <table class="table table-striped table-hover">
               <thead>
@@ -36,29 +44,30 @@
                 </tr>
               </thead>
               <tbody>
-                {% for app in info.accepted_applicants %}
-                  <tr>
-                    <td>{{ app.id }}</td>
-                    <td> <a href="{% url 'dashboard:applications:application-detail' app.id %}">{{ app.user.get_full_name }}</a> </td>
-                    {% with interview=app.get_interview%}
-                    <td>
-                     {{ interview.interviewer.get_full_name }}
-                    </td>
-                    <td> {{ interview | calculate_average_rating }}</td>
-                    <td>
-                      <a href="{% url 'dashboard:interviews:rate-interview' interview.uuid %}">
-                        <button class="btn green uppercase" type="button">Rate</button>
-                      </a>
-                    </td>
-
-                    {% endwith %}
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+              {% for app in info.accepted_applicants|not_in_course:info.course %}
+                <tr>
+                  <td>{{ app.id }}</td>
+                  <td> <a href="{% url 'dashboard:applications:application-detail' app.id %}">{{ app.user.get_full_name }}</a> </td>
+                  {% with interview=app.get_interview%}
+                  <td>
+                   {{ interview.interviewer.get_full_name }}
+                  </td>
+                  <td> {{ interview | calculate_average_rating }}</td>
+                  <td>
+                    <a href="{% url 'dashboard:interviews:rate-interview' interview.uuid %}">
+                      <button class="btn green uppercase" type="button">Rate</button>
+                    </a>
+                  </td>
+                  {% endwith %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% endif %}
+          {% endwith %}
         </div>
       </div>
     </div>
+  </div>
   {% endfor %}
 {% endblock page_content %}

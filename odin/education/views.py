@@ -1,22 +1,29 @@
 import json
+import calendar
 
 from rest_framework import generics
 
+from django.utils import timezone
 from django.core.management import call_command
+from django.conf import settings
+from django.views import View
 from django.views.generic import (
     TemplateView,
     ListView,
     DetailView,
     FormView,
-    UpdateView
+    UpdateView,
+    DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 
 from odin.common.utils import transfer_POST_data_to_dict
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
+from odin.common.services import send_email
 from odin.management.permissions import DashboardManagementPermission
 from odin.grading.services import start_grader_communication
 
@@ -30,14 +37,17 @@ from .models import (
     IncludedTask,
     Solution,
     IncludedTest,
-    IncludedMaterial
+    IncludedMaterial,
+    CourseAssignment,
+    Topic,
+    Lecture,
 )
 from .permissions import (
     IsStudentOrTeacherInCoursePermission,
     IsTeacherInCoursePermission,
     IsStudentInCoursePermission,
     IsStudentOrTeacherInCourseAPIPermission,
-    CannotSubmitSolutionAfterCourseEndDate,
+    CannotSubmitSolutionAfterCourseEndDate
 )
 from .mixins import (
     CourseViewMixin,
@@ -56,6 +66,11 @@ from .forms import (
     BinaryFileTestForm,
     SubmitGradableSolutionForm,
     SubmitNonGradableSolutionForm,
+    StudentNoteForm,
+    CreateLectureForm,
+    EditLectureForm,
+    PlainTextForm,
+    SolutionCommentForm,
 )
 from .services import (
     create_topic,
@@ -65,9 +80,18 @@ from .services import (
     create_gradable_solution,
     create_non_gradable_solution,
     calculate_student_valid_solutions_for_course,
-    get_all_student_solution_statistics
+    get_all_student_solution_statistics,
+    create_student_note,
+    create_solution_comment,
+    create_lecture,
+    add_week_to_course,
 )
 from .serializers import TopicSerializer, SolutionSerializer
+from .utils import (
+    get_solution_data,
+    map_lecture_dates_to_week_days,
+    get_all_solved_student_solution_count_for_course,
+)
 
 
 class UserCoursesView(LoginRequiredMixin, TemplateView):
@@ -104,7 +128,9 @@ class CourseDetailView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        topic_queryset = self.course.topics.prefetch_related('tasks__solutions', 'materials', 'tasks__test__language')
+        topic_queryset = self.course.topics.prefetch_related(
+            'tasks__solutions', 'materials', 'week', 'tasks__test__language'
+        )
         topics = TopicSerializer(topic_queryset, many=True)
         course_topics = {}
         course_topics['data'] = topics.data
@@ -112,6 +138,15 @@ class CourseDetailView(LoginRequiredMixin,
         if self.request.user.is_student():
             student = self.request.user.student
             context['tasks_ratio'] = calculate_student_valid_solutions_for_course(student=student, course=self.course)
+
+        weekdays_with_lectures, course_schedule = map_lecture_dates_to_week_days(self.course)
+        if course_schedule:
+            context['course_schedule'] = course_schedule
+            context['weekdays'] = weekdays_with_lectures
+            context['humanized_weekdays'] = [calendar.day_name[i] for i in weekdays_with_lectures]
+
+        context['is_user_teacher_in_course'] = self.is_teacher
+
         return context
 
 
@@ -165,6 +200,22 @@ class AddTopicToCourseView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
+class EditTopicView(LoginRequiredMixin,
+                    CourseViewMixin,
+                    ReadableFormErrorsMixin,
+                    IsTeacherInCoursePermission,
+                    UpdateView):
+
+    template_name = 'education/edit_topic.html'
+    model = Topic
+    pk_url_kwarg = 'topic_id'
+    fields = ('name', 'week')
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={'course_id': self.course.id})
+
+
 class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
                                           CourseViewMixin,
                                           CallServiceMixin,
@@ -186,7 +237,7 @@ class AddIncludedMaterialFromExistingView(LoginRequiredMixin,
 
         context['topic_id'] = self.kwargs.get('topic_id')
 
-        context['material_list'] = Material.objects.all()
+        context['material_list'] = Material.objects.prefetch_related('included_materials__topic__course')
 
         return context
 
@@ -386,7 +437,7 @@ class AddIncludedTaskFromExistingView(LoginRequiredMixin,
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['topic_id'] = self.kwargs.get('topic_id')
-        context['task_list'] = Task.objects.all()
+        context['task_list'] = Task.objects.prefetch_related('included_tasks__topic__course')
 
         return context
 
@@ -411,9 +462,17 @@ class AddIncludedTaskFromExistingView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class TaskDetailView(LoginRequiredMixin,
-                     TaskViewMixin,
-                     DetailView):
+class TaskDetailView(LoginRequiredMixin, DetailView):
+    model = Task
+    pk_url_kwarg = 'task_id'
+    template_name = 'education/task_detail.html'
+
+
+class IncludedTaskDetailView(LoginRequiredMixin,
+                             CourseViewMixin,
+                             TaskViewMixin,
+                             IsStudentOrTeacherInCoursePermission,
+                             DetailView):
     model = IncludedTask
     pk_url_kwarg = 'task_id'
     template_name = 'education/task_detail.html'
@@ -421,6 +480,15 @@ class TaskDetailView(LoginRequiredMixin,
 
 class MaterialDetailView(LoginRequiredMixin,
                          DetailView):
+    model = Material
+    pk_url_kwarg = 'material_id'
+    template_name = 'education/material_detail'
+
+
+class IncludedMaterialDetailView(LoginRequiredMixin,
+                                 CourseViewMixin,
+                                 IsStudentOrTeacherInCoursePermission,
+                                 DetailView):
     model = IncludedMaterial
     pk_url_kwarg = 'material_id'
     template_name = 'education/material_detail.html'
@@ -588,21 +656,31 @@ class StudentSolutionListView(LoginRequiredMixin,
 
 class StudentSolutionDetailView(LoginRequiredMixin,
                                 CourseViewMixin,
-                                TaskViewMixin,
                                 IsStudentOrTeacherInCoursePermission,
                                 DetailView):
     model = Solution
     pk_url_kwarg = 'solution_id'
     template_name = 'education/student_solution_detail.html'
 
+    def get_object(self):
+        solution = Solution.objects.filter(id=self.kwargs.get('solution_id'))\
+               .prefetch_related('comments__user').first()
+        if solution:
+            return solution
+        else:
+            raise Http404
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        solution = self.get_object()
+        solution = self.object
+        context['role'] = solution.student
+        context['solution'] = solution
         if solution.task.gradable and not solution.task.test.is_source():
             try:
                 context['solution_file'] = solution.file.read().decode('utf-8')
             except UnicodeDecodeError as e:
                 context['solution_file'] = "Invalid file format"
+
         return context
 
 
@@ -702,6 +780,25 @@ class SubmitNonGradableSolutionView(LoginRequiredMixin,
             return JsonResponse(data=data)
 
 
+class CourseStudentsListView(LoginRequiredMixin,
+                             CourseViewMixin,
+                             IsTeacherInCoursePermission,
+                             ListView):
+    template_name = 'education/course_students.html'
+
+    def get_queryset(self):
+        prefetch = ('notes__author', 'student__solutions__task')
+        qs = CourseAssignment.objects.filter(course=self.course).exclude(teacher__isnull=False)
+        return qs.select_related('student__profile').prefetch_related(*prefetch)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task_count'] = IncludedTask.objects.filter(topic__course=self.course).count()
+        context['students_passed_solutions'] = get_all_solved_student_solution_count_for_course(course=self.course)
+
+        return context
+
+
 class AllStudentsSolutionsView(LoginRequiredMixin,
                                CourseViewMixin,
                                TaskViewMixin,
@@ -743,3 +840,259 @@ class CompareSolutionsView(LoginRequiredMixin,
         context['comparison_result'] = call_command('compare_solutions', self.course.id)
 
         return context
+
+
+class CourseStudentDetailView(LoginRequiredMixin,
+                              CourseViewMixin,
+                              IsTeacherInCoursePermission,
+                              DetailView):
+    template_name = 'education/course_student_detail.html'
+    model = Student
+    slug_url_kwarg = 'email'
+    slug_field = 'email'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        student = self.object
+        course_topics = self.course.topics.all()
+        tasks_with_solution = []
+        for topic in course_topics:
+            tasks_with_solution += topic.tasks.all()
+        course_tasks = tasks_with_solution
+        context['course_tasks'] = course_tasks
+        task_solutions = {}
+        solution_data, passed_or_failed = get_solution_data(self.course, student)
+        for task in course_tasks:
+            if not passed_or_failed.get(task.name):
+                passed_or_failed[task.name] = "Not submitted"
+            task_solutions[task] = (solution_data.get(task), passed_or_failed.get(task.name))
+
+        context['task_solutions'] = task_solutions
+        assignment = get_object_or_404(CourseAssignment, student=student, course=self.course)
+        context['assignment'] = assignment
+        context['students_passed_solutions'] = get_all_solved_student_solution_count_for_course(course=self.course)
+
+        return context
+
+
+class CreateStudentNoteView(LoginRequiredMixin,
+                            CourseViewMixin,
+                            ReadableFormErrorsMixin,
+                            IsTeacherInCoursePermission,
+                            CallServiceMixin,
+                            FormView):
+    form_class = StudentNoteForm
+    template_name = 'education/partial/notes_section.html'
+
+    def get_success_url(self):
+        if self.request.POST.get('detail') != 'true':
+            url = reverse_lazy('dashboard:education:course-students-list',
+                               kwargs={
+                                   'course_id': self.course.id
+                               })
+            if hasattr(self, 'student'):
+                return url + f'#notes-section_{self.student.id}'
+        else:
+            url = reverse_lazy('dashboard:education:course-student-detail',
+                               kwargs={
+                                   'course_id': self.course.id,
+                                   'email': self.student.email
+                               }) + f'#notes-section_{self.student.id}'
+
+        return url
+
+    def get(self, request, *args, **kwargs):
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        self.student = get_object_or_404(Student, pk=form.data.get('student'))
+
+        for field, error in form.errors.items():
+            messages.warning(request=self.request, message=f'Empty note!')
+
+        return redirect(self.get_success_url())
+
+    def get_service(self):
+        return create_student_note
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['course'] = self.course
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['author'] = self.request.user.teacher
+            data['assignment'] = get_object_or_404(CourseAssignment, course=self.course, student=data['student']).id
+
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        service_kwargs = form.cleaned_data
+        self.student = service_kwargs.pop('student')
+        self.call_service(service_kwargs=service_kwargs)
+
+        return super().form_valid(form)
+
+
+class CreateSolutionCommentView(LoginRequiredMixin,
+                                CourseViewMixin,
+                                IsStudentOrTeacherInCoursePermission,
+                                CallServiceMixin,
+                                FormView):
+    form_class = SolutionCommentForm
+    template_name = 'education/partial/comments_section.html'
+    http_method_names = [u'post', u'put']
+
+    def get_success_url(self):
+        solution = self.solution
+        return reverse_lazy('dashboard:education:student-solution-detail',
+                            kwargs={
+                                'course_id': self.course.id,
+                                'task_id': solution.task.id,
+                                'solution_id': solution.id
+                            }) + f"#comments-section_{solution.id}"
+
+    def get_service(self):
+        return create_solution_comment
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        data = transfer_POST_data_to_dict(self.request.POST)
+        data['user'] = self.request.user.id
+        self.solution = get_object_or_404(Solution, id=data.get('solution'))
+        if data.get('student') != str(self.solution.student.id):
+            raise Http404("Not this student's solution!")
+
+        form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        service_kwargs = form.cleaned_data
+        self.call_service(service_kwargs=service_kwargs)
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        for field, error in form.errors.items():
+            messages.warning(request=self.request, message=f'Empty comment!')
+
+        return redirect(self.get_success_url())
+
+
+class CreateLectureView(LoginRequiredMixin,
+                        CourseViewMixin,
+                        IsTeacherInCoursePermission,
+                        CallServiceMixin,
+                        ReadableFormErrorsMixin,
+                        FormView):
+    template_name = 'education/create_lecture.html'
+    form_class = CreateLectureForm
+
+    def get_service(self):
+        return create_lecture
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        if self.request.method in ('POST', 'PUT'):
+            data = transfer_POST_data_to_dict(self.request.POST)
+            data['course'] = self.course.id
+            form_kwargs['data'] = data
+
+        return form_kwargs
+
+    def form_valid(self, form):
+        lecture = self.call_service(service_kwargs=form.cleaned_data)
+
+        if not lecture:
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class EditLectureView(LoginRequiredMixin,
+                      CourseViewMixin,
+                      IsTeacherInCoursePermission,
+                      ReadableFormErrorsMixin,
+                      UpdateView):
+    template_name = 'education/edit_lecture.html'
+    form_class = EditLectureForm
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+    def get_object(self):
+        return get_object_or_404(Lecture, id=self.kwargs.get('lecture_id'), course=self.course)
+
+
+class DeleteLectureView(LoginRequiredMixin,
+                        CourseViewMixin,
+                        IsTeacherInCoursePermission,
+                        DeleteView):
+    model = Lecture
+    pk_url_kwarg = 'lecture_id'
+    http_method_names = ['post', 'put', 'delete']
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+
+class AddWeekToCourseView(LoginRequiredMixin,
+                          CourseViewMixin,
+                          IsTeacherInCoursePermission,
+                          View):
+
+    http_method_names = ['post', 'put']
+    template_name = 'education/teacher_course_detail.html'
+
+    def post(self, request, *args, **kwargs):
+        add_week_to_course(course=self.course, new_end_date=self.course.end_date + timezone.timedelta(days=7))
+
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail', kwargs={
+           'course_id': self.course.id
+        })
+
+
+class SendEmailToAllStudentsView(LoginRequiredMixin,
+                                 CourseViewMixin,
+                                 IsTeacherInCoursePermission,
+                                 FormView):
+    form_class = PlainTextForm
+    template_name = 'education/send_email_to_all_students.html'
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:education:user-course-detail',
+                            kwargs={
+                                'course_id': self.course.id
+                            })
+
+    def form_valid(self, form):
+        template_name = settings.EMAIL_TEMPLATES.get('course_information_email')
+        context = {
+            'course': self.course.name,
+            'information': form.cleaned_data.get('text')
+        }
+
+        recipients = [student.email for student in self.course.students.all()]
+        send_email(template_name=template_name, recipients=recipients, context=context)
+
+        return super().form_valid(form)

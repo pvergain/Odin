@@ -4,7 +4,7 @@ from .query import ApplicationInfoQuerySet
 
 class ApplicationInfoManager(models.Manager):
     def get_queryset(self):
-        return ApplicationInfoQuerySet(self.model, using=self._db)
+        return ApplicationInfoQuerySet(self.model, using=self._db).prefetch_related('course')
 
     def get_open_for_apply(self):
         return [info for info in self.all() if info.apply_is_active()]
