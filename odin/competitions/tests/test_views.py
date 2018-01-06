@@ -775,13 +775,6 @@ class TestCompetitionRegisterView(TestCase):
     def tearDown(self):
         del os.environ['RECAPTCHA_TESTING']
 
-    def test_can_not_access_competition_registration_when_competition_not_standalone(self):
-        self.application_info.competition = self.competition
-        self.application_info.save()
-
-        response = self.get(self.url)
-        self.response_403(response)
-
     def test_register_with_already_existing_user_when_not_logged_in_redirects_to_competition_login(self):
         data = {
             'email': self.user.email,

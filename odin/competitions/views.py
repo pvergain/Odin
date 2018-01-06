@@ -19,7 +19,6 @@ from .permissions import (
     IsParticipantOrJudgeInCompetitionPermission,
     IsJudgeInCompetitionPermission,
     IsParticipantInCompetitionPermission,
-    IsStandaloneCompetitionPermission
 )
 from .models import (
     Competition,
@@ -397,7 +396,6 @@ class ParticipantSolutionsView(LoginRequiredMixin,
 
 
 class CompetitionSignUpView(CompetitionViewMixin,
-                            IsStandaloneCompetitionPermission,
                             RedirectParticipantMixin,
                             CallServiceMixin,
                             ReadableFormErrorsMixin,
@@ -460,7 +458,6 @@ class CompetitionSignUpView(CompetitionViewMixin,
 
 
 class CompetitionLoginView(CompetitionViewMixin,
-                           IsStandaloneCompetitionPermission,
                            RedirectParticipantMixin,
                            CallServiceMixin,
                            LoginWrapperView):
@@ -491,7 +488,6 @@ class CompetitionLoginView(CompetitionViewMixin,
 
 
 class CompetitionSetPasswordView(CompetitionViewMixin,
-                                 IsStandaloneCompetitionPermission,
                                  RedirectParticipantMixin,
                                  ReadableFormErrorsMixin,
                                  FormView):
