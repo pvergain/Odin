@@ -516,6 +516,9 @@ class CompetitionSetPasswordView(CompetitionViewMixin,
             user.is_active = True
         user.save()
 
+        """
+        TODO: Why do we need this email confirmation?
+        """
         send_email_confirmation(self.request, user, signup=True)
 
         return super().form_valid(form)
