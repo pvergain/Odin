@@ -11,7 +11,7 @@ from odin.interviews.models import Interviewer
 from odin.education.models import Student, Teacher, Course, CourseAssignment
 from odin.education.services import create_course, add_student, add_teacher
 
-from odin.competitions.models import CompetitionJudge, CompetitionParticipant, Competition
+from odin.competitions.models import Competition
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
@@ -36,7 +36,7 @@ class DashboardManagementView(DashboardManagementPermission,
     filter_class = UserFilter
     queryset = BaseUser.objects.select_related('profile').all()\
         .prefetch_related('student', 'teacher', 'interviewer',
-                          'competitionjudge', 'competitionparticipant').order_by('-id')
+                          'judge_in_competitions', 'participant_in_competitions').order_by('-id')
 
     def get_queryset(self):
         self.filter = self.filter_class(self.request.GET, queryset=self.queryset)
@@ -76,24 +76,6 @@ class PromoteUserToInterviewerView(DashboardManagementPermission,
 
         return redirect(reverse('dashboard:management:add-interviewer-to-course-with-initial',
                                 kwargs={'interviewer_email': interviewer.email}))
-
-
-class PromoteUserToJudgeView(DashboardManagementPermission,
-                             View):
-    def get(self, request, *args, **kwargs):
-        instance = BaseUser.objects.get(id=kwargs.get('id'))
-        CompetitionJudge.objects.create_from_user(instance)
-
-        return redirect('dashboard:management:index')
-
-
-class PromoteUserToParticipantView(DashboardManagementPermission,
-                                   View):
-    def get(self, request, *args, **kwargs):
-        instance = BaseUser.objects.get(id=kwargs.get('id'))
-        CompetitionParticipant.objects.create_from_user(instance)
-
-        return redirect('dashboard:management:index')
 
 
 class CreateUserView(DashboardCreateUserMixin, FormView):

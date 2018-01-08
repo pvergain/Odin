@@ -84,6 +84,7 @@ class ApplyToCourseView(LoginRequiredMixin,
 
     def get_success_url(self):
         competition = self.application.application_info.competition
+
         if competition:
             return reverse_lazy('competitions:competition-detail',
                                 kwargs={

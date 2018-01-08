@@ -21,17 +21,13 @@ from odin.education.factories import (
 
 from ..models import (
     CompetitionMaterial,
-    CompetitionJudge,
     Competition,
     CompetitionTask,
     CompetitionTest,
-    CompetitionParticipant,
     Solution
 )
 from ..factories import (
     CompetitionFactory,
-    CompetitionJudgeFactory,
-    CompetitionParticipantFactory,
     CompetitionMaterialFactory,
     CompetitionTaskFactory,
     CompetitionTestFactory
@@ -56,10 +52,8 @@ class TestUserCompetitionsView(TestCase):
 
     def test_competitions_are_displayed_when_user_is_judge_and_participant_in_different_competitions(self):
         other_competition = CompetitionFactory()
-        participant = CompetitionParticipant.objects.create_from_user(self.user)
-        judge = CompetitionJudge.objects.create_from_user(self.user)
-        self.competition.participants.add(participant)
-        other_competition.judges.add(judge)
+        self.competition.participants.add(self.user)
+        other_competition.judges.add(self.user)
 
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
@@ -73,8 +67,8 @@ class TestCompetitionDetailView(TestCase):
         self.test_password = faker.password()
         self.competition = CompetitionFactory()
         self.user = BaseUserFactory(password=self.test_password)
-        self.participant = CompetitionParticipantFactory(password=self.test_password)
-        self.judge = CompetitionJudgeFactory(password=self.test_password)
+        self.participant = self.user
+        self.judge = self.user
         self.url = reverse('competitions:competition-detail', kwargs={'competition_slug': self.competition.slug_url})
         self.user.is_active = True
         self.participant.is_active = True
@@ -166,7 +160,7 @@ class TestEditCompetitionView(TestCase):
         self.test_password = faker.password()
         self.competition = CompetitionFactory()
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+        self.judge = self.user
         self.url = reverse('competitions:edit-competition',
                            kwargs={
                                'competition_slug': self.competition.slug_url
@@ -207,7 +201,7 @@ class TestAddNewCompetitionMaterialView(TestCase):
         self.test_password = faker.password()
         self.competition = CompetitionFactory()
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(self.user)
+        self.judge = self.user
         self.competition.judges.add(self.judge)
         self.url = reverse('competitions:create-new-competition-material',
                            kwargs={
@@ -271,7 +265,7 @@ class TestCreateExistingCompetitionMaterialFromExistingView(TestCase):
                            })
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+        self.judge = self.user
 
     def test_get_is_forbidden_if_not_judge_for_competition(self):
         user = BaseUserFactory(password=self.test_password)
@@ -323,7 +317,7 @@ class TestEditCompetitionMaterialView(TestCase):
         self.competition = CompetitionFactory()
         self.competition_material = CompetitionMaterialFactory(competition=self.competition)
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+        self.judge = self.user
         self.url = reverse('competitions:edit-competition-material',
                            kwargs={
                                'competition_slug': self.competition.slug_url,
@@ -368,7 +362,7 @@ class TestCreateNewCompetitionTaskView(TestCase):
                            })
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(self.user)
+        self.judge = self.user
         self.language = ProgrammingLanguageFactory()
 
     def test_can_not_access_view_when_not_judge_in_competition(self):
@@ -463,7 +457,7 @@ class TestCreateCompetitionTaskFromExistingView(TestCase):
                            })
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(self.user)
+        self.judge = self.user
         self.language = ProgrammingLanguageFactory()
 
     def test_can_not_access_view_when_not_judge_in_competition(self):
@@ -520,7 +514,7 @@ class TestEditCompetitionTaskView(TestCase):
         self.competition = CompetitionFactory()
         self.competition_task = CompetitionTaskFactory(competition=self.competition)
         self.user = BaseUserFactory(password=self.test_password)
-        self.judge = CompetitionJudge.objects.create_from_user(user=self.user)
+        self.judge = self.user
         self.url = reverse('competitions:edit-competition-task',
                            kwargs={
                                'competition_slug': self.competition.slug_url,
@@ -562,7 +556,7 @@ class TestCreateGradableSolutionApiView(TestCase):
         self.user = BaseUserFactory(password=self.test_password)
         self.competition = CompetitionFactory()
         self.task = CompetitionTaskFactory(competition=self.competition, gradable=True)
-        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.participant = self.user
         self.competition.participants.add(self.participant)
         self.language = ProgrammingLanguageFactory()
         self.url = reverse('competitions:submit-gradable-solution',
@@ -683,7 +677,7 @@ class TestCreateNonGradableCompetitionSolutionView(TestCase):
         self.user = BaseUserFactory(password=self.test_password)
         self.competition = CompetitionFactory()
         self.task = CompetitionTaskFactory(competition=self.competition, gradable=False)
-        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.participant = self.user
         self.competition.participants.add(self.participant)
         self.language = ProgrammingLanguageFactory()
         self.url = reverse('competitions:submit-non-gradable-solution',
@@ -870,7 +864,7 @@ class TestCompetitionLoginView(TestCase):
         self.assertRedirects(response, expected_url=self.url)
 
     def test_redirects_to_competition_detail_on_successful_login(self):
-        participant = CompetitionParticipant.objects.create_from_user(self.user)
+        participant = self.user
         self.competition.participants.add(participant)
 
         data = {
@@ -889,7 +883,7 @@ class TestCompetitionLoginView(TestCase):
                                                             }))
 
     def test_resets_user_registration_token_on_successful_login(self):
-        participant = CompetitionParticipant.objects.create_from_user(self.user)
+        participant = self.user
         self.competition.participants.add(participant)
         url = reverse('competitions:login',
                       kwargs={
@@ -949,7 +943,7 @@ class TestParticipantSolutionsView(TestCase):
         self.task = CompetitionTaskFactory(competition=self.competition)
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.participant = self.user
         self.competition.participants.add(self.participant)
         self.url = reverse('competitions:participant-task-solutions',
                            kwargs={
@@ -976,7 +970,7 @@ class TestSolutionDetailApi(TestCase):
         self.task = CompetitionTaskFactory(competition=self.competition)
         self.test_password = faker.password()
         self.user = BaseUserFactory(password=self.test_password)
-        self.participant = CompetitionParticipant.objects.create_from_user(self.user)
+        self.participant = self.user
         self.competition.participants.add(self.participant)
         self.solution = Solution.objects.create(
             participant=self.participant,
@@ -997,11 +991,10 @@ class TestSolutionDetailApi(TestCase):
             self.response_403(response)
 
     def test_get_is_forbidden_if_request_user_is_not_solution_author(self):
-        new_user = BaseUserFactory(password=self.test_password)
-        new_participant = CompetitionParticipant.objects.create_from_user(new_user)
-        self.competition.participants.add(new_participant)
+        participant = BaseUserFactory(password=self.test_password)
+        self.competition.participants.add(participant)
 
-        with self.login(email=new_user.email, password=self.test_password):
+        with self.login(email=participant.email, password=self.test_password):
             response = self.get(self.url)
             self.response_403(response)
 
@@ -1010,9 +1003,8 @@ class TestSolutionDetailApi(TestCase):
             self.get_check_200(self.url)
 
     def test_get_is_allowed_when_user_is_judge_in_competition(self):
-        new_user = BaseUserFactory(password=self.test_password)
-        judge = CompetitionJudge.objects.create_from_user(new_user)
+        judge = BaseUserFactory(password=self.test_password)
         self.competition.judges.add(judge)
 
-        with self.login(email=new_user.email, password=self.test_password):
+        with self.login(email=judge.email, password=self.test_password):
             self.get_check_200(self.url)

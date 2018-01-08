@@ -25,8 +25,6 @@ from .models import (
     CompetitionMaterial,
     CompetitionTask,
     Solution,
-    CompetitionParticipant,
-    CompetitionJudge,
 )
 from .forms import (
     CompetitionMaterialFromExistingForm,
@@ -60,14 +58,8 @@ class UserCompetitionsView(LoginRequiredMixin, TemplateView):
         context['user_is_judge_for'] = []
         context['user_is_participant_in'] = []
 
-        judge = user.downcast(CompetitionJudge)
-        participant = user.downcast(CompetitionParticipant)
-
-        if judge:
-            context['user_is_judge_for'] = qs.filter(judges=judge)
-
-        if participant:
-            context['user_is_participant_in'] = qs.filter(participants=participant)
+        context['user_is_judge_for'] = qs.filter(judges=user)
+        context['user_is_participant_in'] = qs.filter(participants=user)
 
         return context
 

@@ -4,7 +4,6 @@ from ..templatetags.application_extras import has_solution_for_task
 
 from odin.users.factories import BaseUserFactory
 from odin.competitions.factories import CompetitionFactory, CompetitionTaskFactory, SolutionFactory
-from odin.competitions.models import CompetitionParticipant
 
 from ..factories import ApplicationInfoFactory, ApplicationFactory
 
@@ -21,6 +20,6 @@ class TestHasSolutionForTask(TestCase):
         self.assertFalse(has_solution_for_task(self.competition_task, self.application))
 
     def test_user_is_returned_when_he_or_she_has_correct_solution_for_task(self):
-        participant = CompetitionParticipant.objects.create_from_user(self.user)
+        participant = BaseUserFactory()
         SolutionFactory(task=self.competition_task, participant=participant)
         self.assertTrue(has_solution_for_task(self.competition_task, self.application))

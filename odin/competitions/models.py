@@ -7,28 +7,14 @@ from odin.users.models import BaseUser
 from odin.education.models import BaseMaterial, BaseTask, BaseTest, Material, Task, Test
 from odin.education.mixins import TestModelMixin
 
-from .managers import CompetitionJudgeManager, CompetitionParticipantManager
-
-
-class CompetitionParticipant(BaseUser):
-    user = models.OneToOneField(BaseUser, parent_link=True)
-
-    objects = CompetitionParticipantManager()
-
-
-class CompetitionJudge(BaseUser):
-    user = models.OneToOneField(BaseUser, parent_link=True)
-
-    objects = CompetitionJudgeManager()
-
 
 class Competition(models.Model):
     name = models.CharField(unique=True, max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
 
-    participants = models.ManyToManyField(CompetitionParticipant)
-    judges = models.ManyToManyField(CompetitionJudge)
+    participants = models.ManyToManyField(BaseUser, related_name='participant_in_competitions')
+    judges = models.ManyToManyField(BaseUser, related_name='judge_in_competitions')
 
     slug_url = models.SlugField(unique=True)
 
@@ -92,7 +78,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     )
 
     task = models.ForeignKey(CompetitionTask, related_name='solutions')
-    participant = models.ForeignKey(CompetitionParticipant, related_name='solutions')
+    participant = models.ForeignKey(BaseUser, related_name='competition_solutions')
     url = models.URLField(blank=True, null=True)
     code = models.TextField(blank=True, null=True)
     check_status_location = models.CharField(max_length=128, null=True, blank=True)

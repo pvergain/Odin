@@ -75,13 +75,6 @@
                                           {% if not obj.is_interviewer %}
                                             <a href="{% url 'dashboard:management:promote-to-interviewer' id=obj.id %}"><button type="button" class="btn btn-default">Make Interviewer</button></a>
                                           {% endif %}
-                                          {% if not obj.is_judge %}
-                                            <a href="{% url 'dashboard:management:promote-to-judge' id=obj.id %}"><button type="button" class="btn btn-default">Make Judge</button></a>
-                                          {% endif %}
-                                          {% if not obj.is_participant %}
-                                            <a href="{% url 'dashboard:management:promote-to-participant' id=obj.id %}"><button type="button" class="btn btn-default">Make Participant</button></a>
-                                          {% endif %}
-
                                     </div>
                                 </td>
                               </tr>
