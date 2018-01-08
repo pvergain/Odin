@@ -36,12 +36,6 @@
               {% endif %}
             </h4>
             {% endif %}
-            {% if application.application_info.competition %}
-              <div class="ribbon-content">
-                <a href="{% url 'competitions:competition-detail' application.application_info.competition.slug_url %}">
-                  <button class="btn green uppercase" type="button">View application assets</button></a>
-              </div>
-            {% endif %}
           </div>
         {% endfor %}
       </div>

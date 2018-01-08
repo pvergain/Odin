@@ -150,51 +150,6 @@
                 </div>
             </div>
         </div>
-        <div class="portlet box green">
-             <div class="portlet-title">
-                 <div class="caption">
-                     <i class="fa fa-comments"></i> Competitions table </div>
-                 <div class="tools">
-                     <a href="javascript:;" class="expand"> </a>
-                 </div>
-             </div>
-             <div class="portlet-body default-collapsed">
-                 <div class="form-actions">
-                     <a href="{% url 'competitions:create-competition' %}"><button class="btn green uppercase" type="button" name="button">Add competition</button></a>
-                    <a href="{% url 'dashboard:management:add-competition-to-course'%}">
-                      <button class="btn green uppercase" type="button" name="button">Add competition to course</button>
-                    </a>
-                 </div>
-                <div class="table-scrollable">
-                     <table class="table table-striped table-hover">
-                         <thead>
-                             <tr>
-                                 <th> # </th>
-                                 <th> Name </th>
-                                 <th>Start Date</th>
-                                 <th>End Date</th>
-                                 <th> Participants </th>
-                                 <th> Judges </th>
-                                 <th> Actions </th>
-                             </tr>
-                         </thead>
-                         <tbody>
-                             {% for competition in competitions %}
-                                 <tr>
-                                     <td>{{ competition.id }}</td>
-                                     <td><a href="{% url 'competitions:competition-detail' competition.slug_url %}">{{ competition.name }}</a></td>
-                                     <td>{{ competition.start_date }}</td>
-                                     <td>{{ competition.end_date }}</td>
-                                     <td>{{ competition.participants.count }}</td>
-                                     <td>{{ competition.judges.count }}</td>
-                                     <td><a href="{% url 'competitions:edit-competition' competition.slug_url %}"><button class="btn green uppercase" type="button" name="button">Edit competition</button></a></td>
-                                 </tr>
-                             {% endfor %}
-                         </tbody>
-                     </table>
-                 </div>
-             </div>
-         </div>
     </div>
   </div>
 {% endblock page_content %}

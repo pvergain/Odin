@@ -20,6 +20,5 @@ class TestHasSolutionForTask(TestCase):
         self.assertFalse(has_solution_for_task(self.competition_task, self.application))
 
     def test_user_is_returned_when_he_or_she_has_correct_solution_for_task(self):
-        participant = BaseUserFactory()
-        SolutionFactory(task=self.competition_task, participant=participant)
+        SolutionFactory(task=self.competition_task, participant=self.user)
         self.assertTrue(has_solution_for_task(self.competition_task, self.application))
