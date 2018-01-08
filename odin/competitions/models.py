@@ -3,9 +3,21 @@ from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField
 
 from odin.common.models import UpdatedAtCreatedAtModelMixin
+
 from odin.users.models import BaseUser
-from odin.education.models import BaseMaterial, BaseTask, BaseTest, Material, Task, Test
+
+from odin.education.models import (
+    BaseMaterial,
+    BaseTask,
+    BaseTest,
+    Material,
+    Task,
+    Test,
+    Course
+)
 from odin.education.mixins import TestModelMixin
+
+from odin.applications.models import ApplicationInfo
 
 
 class Competition(models.Model):
@@ -17,6 +29,18 @@ class Competition(models.Model):
     judges = models.ManyToManyField(BaseUser, related_name='judge_in_competitions')
 
     slug_url = models.SlugField(unique=True)
+
+    application_info = models.OneToOneField(
+        ApplicationInfo,
+        related_name='competition',
+        blank=True, null=True
+    )
+
+    course = models.ForeignKey(
+        Course,
+        related_name='competitions',
+        blank=True, null=True
+    )
 
     def clean(self):
         if self.start_date > self.end_date:

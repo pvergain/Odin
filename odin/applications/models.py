@@ -4,7 +4,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from odin.education.models import Course
-from odin.competitions.models import Competition
 from odin.users.models import BaseUser
 from .managers import ApplicationInfoManager
 from .query import ApplicationQuerySet
@@ -13,8 +12,9 @@ from .query import ApplicationQuerySet
 class ApplicationInfo(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
+
     course = models.OneToOneField(Course, related_name='application_info')
-    competition = models.OneToOneField(Competition, related_name='application_info', blank=True, null=True)
+
     start_interview_date = models.DateField(blank=True, null=True)
     end_interview_date = models.DateField(blank=True, null=True)
 
@@ -55,6 +55,10 @@ class ApplicationInfo(models.Model):
 
             if self.start_interview_date >= self.end_interview_date:
                 raise ValidationError("Start interview date can not be after end interview date")
+
+    @property
+    def has_competition(self):
+        return hasattr(self, 'competition')
 
 
 class Application(models.Model):

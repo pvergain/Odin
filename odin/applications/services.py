@@ -59,7 +59,7 @@ def create_application(*,
         user.profile.full_name = full_name
         user.profile.save()
 
-    if application_info.competition is not None:
+    if application_info.has_competition:
         application_info.competition.participants.add(user)
 
     template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')
