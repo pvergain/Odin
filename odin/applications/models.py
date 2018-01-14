@@ -95,6 +95,9 @@ class Application(models.Model):
 
     @property
     def is_complete(self):
+        """
+        TODO: Add a bunch of nice tests
+        """
         Solution = apps.get_model('competitions', 'Solution')
 
         if not self.application_info.has_competition:
