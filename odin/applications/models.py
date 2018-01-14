@@ -1,10 +1,12 @@
 from django.utils import timezone
-
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.apps import apps
 
 from odin.education.models import Course
+
 from odin.users.models import BaseUser
+
 from .managers import ApplicationInfoManager
 from .query import ApplicationQuerySet
 
@@ -20,8 +22,10 @@ class ApplicationInfo(models.Model):
 
     description = models.TextField(blank=True, null=True)
 
-    external_application_form = models.URLField(blank=True, null=True,
-                                                help_text='Only add if course requires external application form')
+    external_application_form = models.URLField(
+        blank=True, null=True,
+        help_text='Only add if course requires external application form'
+    )
 
     objects = ApplicationInfoManager()
 
@@ -88,3 +92,27 @@ class Application(models.Model):
     def clean(self):
         if not self.application_info.apply_is_active():
             raise ValidationError(f"The application period for {self.application_info.course} has expired!")
+
+    @property
+    def is_complete(self):
+        Solution = apps.get_model('competitions', 'Solution')
+
+        if not self.application_info.has_competition:
+            return True
+
+        tasks = {
+            task: False
+            for task in self.application_info.competition.tasks.all()
+        }
+
+        solutions = Solution.objects.filter(
+            participant=self.user,
+            task__competition=self.application_info.competition,
+            status=Solution.OK
+        )
+
+        for solution in solutions:
+            if solution.task in tasks:
+                tasks[solution.task] = True
+
+        return all(tasks.values())
