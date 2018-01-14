@@ -68,7 +68,7 @@
           <form action="{% url 'dashboard:competitions:update-application-competition-solutions' %}" method="POST">
             <div class="form-body">
               {% csrf_token %}
-              <input type="hidden" name="application_id" value="{{ application.id }}" />
+              <input type="hidden" name="application" value="{{ application.id }}" />
               {% for competition_task in application.application_info.competition.tasks.all %} 
                 <h2>{{ competition_task.task.name }}</h2>
                 {% autoescape off %}
