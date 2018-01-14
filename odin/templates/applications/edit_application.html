@@ -65,16 +65,17 @@
       <div class="portlet-body">
         <p>In order to complete your application, please provide solutions to all tasks below</p>
         <div class="form">
-          <form action="" method="POST">
+          <form action="{% url 'dashboard:competitions:update-application-competition-solutions' %}" method="POST">
             <div class="form-body">
               {% csrf_token %}
+              <input type="hidden" name="application_id" value="{{ application.id }}" />
               {% for competition_task in application.application_info.competition.tasks.all %} 
                 <h2>{{ competition_task.task.name }}</h2>
                 {% autoescape off %}
                   <p>{{ competition_task.task.description|markdown }}</p>
                 {% endautoescape %}
                 <div class="form-group form-md-line-input">
-                  <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here"></textarea>
+                  <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here" name="task_{{ competition_task.id}}"></textarea>
                 </div>
               {% endfor %}
             </div>
