@@ -15,8 +15,8 @@
     Looks like you are authenticated. Click here and proceed to internal course apply form.
   {% else %}
     <p>In order to apply, you need to have an account in our system.</p>
-    <a class="btn btn-success">Click here to register</a>
-    <a class="btn btn-primary">Click here to login &amp; proceed</a>
+    <a href="{{ register_url }}" class="btn btn-success">Click here to register</a>
+    <a href="{{ login_url}}" class="btn btn-primary">Click here to login &amp; proceed</a>
   {% endif %}
 
   </div>

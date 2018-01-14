@@ -5,13 +5,15 @@ from django.views.generic import (
     DetailView,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
+
 from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
+
 from .permissions import ViewApplicationDetailPermission
 from .models import Application, ApplicationInfo
 from .forms import (
@@ -157,5 +159,18 @@ class PublicCourseApplyView(DetailView):
         context = super().get_context_data(**kwargs)
 
         context['is_user_authenticated'] = self.request.user.is_authenticated
+
+        next_action_url = reverse(
+            'public:course_apply',
+            kwargs={
+                'course_slug': self.kwargs.get('course_slug')
+            }
+        )
+
+        register_url = reverse('account_signup')
+        login_url = reverse('account_login')
+
+        context['register_url'] = f'{register_url}?next={next_action_url}'
+        context['login_url'] = f'{login_url}?next={next_action_url}'
 
         return context
