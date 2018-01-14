@@ -1,4 +1,9 @@
-from django.views.generic import FormView, UpdateView, ListView, DetailView
+from django.views.generic import (
+    FormView,
+    UpdateView,
+    ListView,
+    DetailView,
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -138,3 +143,12 @@ class ApplicationDetailView(LoginRequiredMixin,
     model = Application
     template_name = 'applications/application_detail.html'
     pk_url_kwarg = 'application_id'
+
+
+class PublicCourseApplyView(DetailView):
+    template_name = 'applications/public_apply.html'
+
+    def get_object(self):
+        course_url = self.kwargs.get('course_slug')
+
+        return get_object_or_404(Course, slug_url=course_url)

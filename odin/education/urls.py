@@ -1,5 +1,7 @@
 from django.conf.urls import url, include
 
+from odin.applications.views import PublicCourseApplyView
+
 from .views import (
     UserCoursesView,
     CourseDetailView,
@@ -52,6 +54,11 @@ courses_public_urlpatterns = [
         regex='^(?P<course_slug>[-\w]+)/$',
         view=PublicCourseDetailView.as_view(),
         name='course_detail'
+    ),
+    url(
+        regex='^(?P<course_slug>[-\w]+)/apply/$',
+        view=PublicCourseApplyView.as_view(),
+        name='course_apply'
     ),
 ]
 
