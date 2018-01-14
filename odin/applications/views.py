@@ -14,6 +14,8 @@ from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
 from odin.education.permissions import IsTeacherInCoursePermission
 
+from odin.competitions.models import Solution
+
 from .permissions import ViewApplicationDetailPermission
 from .models import Application, ApplicationInfo
 from .forms import (
@@ -150,6 +152,24 @@ class EditApplicationView(LoginRequiredMixin,
             user=self.request.user,
             application_info__course=self.course
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        application_info = self.object.application_info
+
+        if application_info.has_competition:
+            last_solutions = {}
+
+            for competition_task in application_info.competition.tasks.all():
+                last_solutions[competition_task.id] = Solution.objects.filter(
+                    participant=self.request.user,
+                    task=competition_task
+                ).order_by('-id').first()
+
+            context['last_solutions'] = last_solutions
+
+        return context
 
 
 class ApplicationDetailView(LoginRequiredMixin,

@@ -1,5 +1,5 @@
 {% extends "dashboard/dashboard_base.html" %}
-{% load widget_tweaks education_extras %}
+{% load widget_tweaks education_extras utils %}
 
 {% block title %}
   Edit Applciation
@@ -75,7 +75,13 @@
                   <p>{{ competition_task.task.description|markdown }}</p>
                 {% endautoescape %}
                 <div class="form-group form-md-line-input">
+                    {% if last_solutions|has_key:competition_task.id %}
+                      {% with last_solutions|get_key:competition_task.id as solution %}
+                      <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here" name="task_{{ competition_task.id}}">{{ solution.code }}</textarea>
+                      {% endwith %}
+                      {% else %}
                   <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here" name="task_{{ competition_task.id}}"></textarea>
+                    {% endif %}
                 </div>
               {% endfor %}
             </div>
