@@ -1,5 +1,7 @@
 from django.views.generic import View
 from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 from rest_framework import serializers
 
@@ -20,10 +22,16 @@ def parse_task_key(key):
     return int(key[len(TASK_KEY):])
 
 
-class UpdateApplicationCompetitionSolutionsView(View):
+class UpdateApplicationCompetitionSolutionsView(LoginRequiredMixin, View):
     class ViewSerializer(serializers.Serializer):
         application = serializers.PrimaryKeyRelatedField(
            queryset=Application.objects.all()
+        )
+
+    def finish_request(self):
+        return redirect(
+            'dashboard:applications:edit',
+            course_slug=self.application.application_info.course.slug_url
         )
 
     def post(self, request):
@@ -37,15 +45,15 @@ class UpdateApplicationCompetitionSolutionsView(View):
                 task_id = parse_task_key(key)
                 task_to_solutions[CompetitionTask.objects.get(id=task_id)] = value
 
-        application = serializer.validated_data['application']
+        self.application = serializer.validated_data['application']
+
+        if self.application.user != request.user:
+            return self.finish_request()
 
         update_application_competition_solutions(
-            application=application,
+            application=self.application,
             task_to_solutions=task_to_solutions,
             participant=request.user
         )
 
-        return redirect(
-            'dashboard:applications:edit',
-            course_slug=application.application_info.course.slug_url
-        )
+        return self.finish_request()
