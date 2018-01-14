@@ -152,3 +152,10 @@ class PublicCourseApplyView(DetailView):
         course_url = self.kwargs.get('course_slug')
 
         return get_object_or_404(Course, slug_url=course_url)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['is_user_authenticated'] = self.request.user.is_authenticated
+
+        return context

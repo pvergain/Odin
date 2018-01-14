@@ -1,2 +1,23 @@
 {% extends "partial/public_base.html" %}
 
+{% block content_title %}
+  <div class="container">
+    <div class="row-md-12">
+      Application for {{ course.name }}
+    </div>
+  </div>
+{% endblock content_title %}
+
+{% block page_content %}
+  <div class="container">
+
+  {% if is_user_authenticated %}
+    Looks like you are authenticated. Click here and proceed to internal course apply form.
+  {% else %}
+    <p>In order to apply, you need to have an account in our system.</p>
+    <a class="btn btn-success">Click here to register</a>
+    <a class="btn btn-primary">Click here to login &amp; proceed</a>
+  {% endif %}
+
+  </div>
+{% endblock %}
