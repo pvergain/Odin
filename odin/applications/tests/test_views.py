@@ -119,7 +119,7 @@ class TestApplyToCourseView(TestCase):
         self.app_info = ApplicationInfoFactory(course=self.course,
                                                start_date=timezone.now().date(),
                                                competition=None)
-        self.url = reverse('dashboard:applications:apply-to-course', kwargs={'course_id': self.course.id})
+        self.url = reverse('dashboard:applications:apply-to-course', kwargs={'course_slug': self.course.slug_url})
 
     def test_post_successfully_creates_application_when_apply_is_open(self):
         self.app_info.start_date = timezone.now().date()
@@ -321,9 +321,9 @@ class TestEditApplicationView(TestCase):
             course=self.course
         )
         self.application = ApplicationFactory(application_info=self.app_info, user=self.user)
-        self.url = reverse('dashboard:applications:edit-application',
+        self.url = reverse('dashboard:applications:edit',
                            kwargs={
-                               'course_id': self.course.id
+                               'course_slug': self.course.slug_url
                            })
 
     def test_get_returns_correct_application(self):
