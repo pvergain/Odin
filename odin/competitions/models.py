@@ -43,12 +43,26 @@ class Competition(models.Model):
     )
 
     def clean(self):
+        """
+        TODO: Add tests for validation errors
+        """
         if self.start_date > self.end_date:
             raise ValidationError("End date cannot be before start date!")
+
+        if self.course is not None and self.application_info is not None:
+            raise ValidationError('Cannot have competition for both'
+                                  'application & course')
 
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+    @property
+    def is_standalone(self):
+        if self.application_info is None and self.course is None:
+            return True
+
+        return False
 
     def __str__(self):
         return self.name
