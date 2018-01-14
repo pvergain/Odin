@@ -6,6 +6,7 @@ from rest_framework import serializers
 from odin.applications.models import Application
 
 from odin.competitions.models import CompetitionTask
+from odin.competitions.services import update_application_competition_solutions
 
 
 TASK_KEY = 'task_'
@@ -37,6 +38,12 @@ class UpdateApplicationCompetitionSolutionsView(View):
                 task_to_solutions[CompetitionTask.objects.get(id=task_id)] = value
 
         application = serializer.validated_data['application']
+
+        update_application_competition_solutions(
+            application=application,
+            task_to_solutions=task_to_solutions,
+            participant=request.user
+        )
 
         return redirect(
             'dashboard:applications:edit',
