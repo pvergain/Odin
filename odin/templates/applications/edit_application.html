@@ -1,5 +1,5 @@
 {% extends "dashboard/dashboard_base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks education_extras %}
 
 {% block title %}
   Edit Applciation
@@ -19,11 +19,11 @@
   <div class="col-md-12">
     {% include "education/partial/message_box.html" %}
     {% include "partial/form_errors.html" with errors=readable_errors %}
-    <div class="portlet light ">
+    <div class="portlet light">
       <div class="portlet-title">
         <div class="caption font-blue-sunglo">
           <i class="icon-settings font-blue-sunglo"></i>
-          <span class="caption-subject bold uppercase"> Edit Application </span>
+          <span class="caption-subject bold uppercase">Edit Application</span>
         </div>
       </div>
       <div class="portlet-body form">
@@ -51,5 +51,40 @@
       </div>
     </div>
   </div>
-</div>
+
+  {% if application.application_info.has_competition %}
+
+  <div class="row-md-12">
+    <div class="portlet light">
+      <div class="portlet-title">
+        <div class="caption font-blue-sunglo">
+          <i class="icon-settings font-blue-sunglo"></i>
+          <span class="caption-subject bold uppercase">Application tasks</span>
+        </div>
+      </div>
+      <div class="portlet-body">
+        <p>In order to complete your application, please provide solutions to all tasks below</p>
+        <div class="form">
+          <form action="" method="POST">
+            <div class="form-body">
+              {% csrf_token %}
+              {% for competition_task in application.application_info.competition.tasks.all %} 
+                <h2>{{ competition_task.task.name }}</h2>
+                {% autoescape off %}
+                  <p>{{ competition_task.task.description|markdown }}</p>
+                {% endautoescape %}
+                <div class="form-group form-md-line-input">
+                  <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here"></textarea>
+                </div>
+              {% endfor %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+</div
 {% endblock page_content %}
