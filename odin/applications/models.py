@@ -94,7 +94,7 @@ class Application(models.Model):
             raise ValidationError(f"The application period for {self.application_info.course} has expired!")
 
     @property
-    def is_complete(self):
+    def is_completed(self):
         """
         TODO: Add a bunch of nice tests
         """
