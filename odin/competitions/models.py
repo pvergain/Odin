@@ -50,10 +50,6 @@ class Competition(models.Model):
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    @property
-    def is_application_competition(self):
-        return hasattr(self, 'application_info')
-
     def __str__(self):
         return self.name
 
