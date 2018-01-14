@@ -86,15 +86,13 @@
                 <span class="title">Courses</span>
               </a>
             </li>
-            {% if user.is_teacher or user.applications.count %}
-              <li class="nav-item {% active applications %} ">
-                <a href="{% url applications %}" class="nav-link nav-toggle">
-                  <i class="icon-docs"></i>
-                  <span class="title">Applications</span>
-                  <span class="arrow"></span>
-                </a>
-              </li>
-            {% endif %}
+            <li class="nav-item {% active applications %} ">
+              <a href="{% url applications %}" class="nav-link nav-toggle">
+                <i class="icon-docs"></i>
+                <span class="title">Applications</span>
+                <span class="arrow"></span>
+              </a>
+            </li>
             {% if user.is_superuser %}
               <li class="nav-item {% active management %}" >
                 <a href="{% url management %}" class="nav-link nav-toggle">
