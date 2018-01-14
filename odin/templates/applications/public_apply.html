@@ -12,7 +12,8 @@
   <div class="container">
 
   {% if is_user_authenticated %}
-    Looks like you are authenticated. Click here and proceed to internal course apply form.
+    <p>Looks like you are authenticated.</p>
+    <a href="{{ course_apply_url }}" class="btn btn-primary">Click here to proceed with the application</a>
   {% else %}
     <p>In order to apply, you need to have an account in our system.</p>
     <a href="{{ register_url }}" class="btn btn-success">Click here to register</a>

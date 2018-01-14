@@ -163,14 +163,21 @@ class PublicCourseApplyView(DetailView):
         next_action_url = reverse(
             'public:course_apply',
             kwargs={
-                'course_slug': self.kwargs.get('course_slug')
+                'course_slug': self.object.slug_url
             }
         )
 
         register_url = reverse('account_signup')
         login_url = reverse('account_login')
+        course_apply_url = reverse(
+            'dashboard:applications:apply-to-course',
+            kwargs={
+                'course_slug': self.object.slug_url
+            }
+        )
 
         context['register_url'] = f'{register_url}?next={next_action_url}'
         context['login_url'] = f'{login_url}?next={next_action_url}'
+        context['course_apply_url'] = course_apply_url
 
         return context
