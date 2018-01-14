@@ -4,6 +4,6 @@
   <img src="{% static 'hackman.png' %}" class="img-responsive" />
   <div class="caption">
     <center><h3>{{ course.name }}</h3></center>
-      <center><a href={% url 'dashboard:applications:apply-to-course' course.id %}><button type="button" class="btn green uppercase">Apply Now</button></a></center>
+      <center><a href={% url 'dashboard:applications:apply-to-course' course.slug_url %}><button type="button" class="btn green uppercase">Apply Now</button></a></center>
   </div>
 </div>
