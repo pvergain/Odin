@@ -97,6 +97,13 @@ class ApplyToCourseView(LoginRequiredMixin,
 
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['application_has_competition'] = self.course.application_info.has_competition
+
+        return context
+
 
 class UserApplicationsListView(LoginRequiredMixin,
                                ListView):
