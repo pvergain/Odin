@@ -142,8 +142,14 @@ class EditApplicationView(LoginRequiredMixin,
     form_class = ApplicationEditForm
     template_name = 'applications/edit_application.html'
 
+    success_url = reverse_lazy('dashboard:applications:user-applications')
+
     def get_object(self):
-        return get_object_or_404(Application, user=self.request.user, application_info__course=self.course)
+        return get_object_or_404(
+            Application,
+            user=self.request.user,
+            application_info__course=self.course
+        )
 
 
 class ApplicationDetailView(LoginRequiredMixin,

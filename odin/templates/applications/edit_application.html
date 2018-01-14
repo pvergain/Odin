@@ -16,7 +16,7 @@
     </div>
  </div>
  <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-12">
     {% include "education/partial/message_box.html" %}
     {% include "partial/form_errors.html" with errors=readable_errors %}
     <div class="portlet light ">
@@ -44,7 +44,7 @@
               {% render_field form.studies_at class="form-control form-control-solid placeholder-no-fix" id="form_control_1" placeholder="Where do you study?" %}
 	    </div>
             <div class="form-actions noborder">
-              <button class="btn green uppercase" type="submit">Submit application</button>
+              <button class="btn green uppercase" type="submit">Update application</button>
             </div>
           </div>
         </form>

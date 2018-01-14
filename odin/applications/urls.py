@@ -36,8 +36,8 @@ urlpatterns = [
         name='application-detail'
     ),
     url(
-        regex='^(?P<course_id>[0-9]+)/edit-application/$',
+        regex='^(?P<course_slug>[-\w]+)/edit/$',
         view=EditApplicationView.as_view(),
-        name='edit-application'
+        name='edit'
     )
 ]
