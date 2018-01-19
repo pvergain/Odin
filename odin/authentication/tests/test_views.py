@@ -4,6 +4,7 @@ from test_plus import TestCase
 
 from django.core import mail
 from django.urls import reverse
+from django.test import override_settings
 
 from allauth.account.models import EmailAddress
 
@@ -39,6 +40,7 @@ class TestLogInView(TestCase):
         self.assertInContext('readable_errors')
         self.assertNotEqual(0, len(response.context['readable_errors']))
 
+    @override_settings(ACCOUNT_EMAIL_VERIFICATION='mandatory')
     def test_view_redirects_to_confirmation_prompt_when_email_is_not_confirmed(self):
         user = BaseUserFactory(password=self.test_password)
         user.is_active = True
