@@ -12,7 +12,6 @@ from odin.interviews.services import add_course_to_interviewer_courses
 from odin.education.models import Teacher
 from odin.education.factories import CourseFactory
 from odin.education.services import add_teacher
-from odin.competitions.factories import CompetitionFactory
 
 from ..models import (
     ApplicationInfo,
@@ -120,7 +119,7 @@ class TestApplyToCourseView(TestCase):
         self.app_info = ApplicationInfoFactory(course=self.course,
                                                start_date=timezone.now().date(),
                                                competition=None)
-        self.url = reverse('dashboard:applications:apply-to-course', kwargs={'course_id': self.course.id})
+        self.url = reverse('dashboard:applications:apply-to-course', kwargs={'course_slug': self.course.slug_url})
 
     def test_post_successfully_creates_application_when_apply_is_open(self):
         self.app_info.start_date = timezone.now().date()
@@ -139,28 +138,6 @@ class TestApplyToCourseView(TestCase):
             response = self.post(self.url, data=data)
             self.assertRedirects(response, expected_url=reverse('dashboard:applications:user-applications'))
             self.assertEqual(current_app_count + 1, Application.objects.count())
-
-    def test_successful_post_redirects_to_competition_detail_when_application_info_has_competition(self):
-        competition = CompetitionFactory()
-        self.app_info.start_date = timezone.now().date()
-        self.app_info.end_date = timezone.now().date() + timezone.timedelta(days=2)
-        self.app_info.competition = competition
-        self.app_info.save()
-
-        data = {
-            'full_name': faker.name(),
-            'phone': faker.phone_number(),
-            'works_at': faker.job(),
-            'skype': faker.word()
-        }
-
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data)
-            self.assertRedirects(response,
-                                 expected_url=reverse('competitions:competition-detail',
-                                                      kwargs={
-                                                          'competition_slug': competition.slug_url
-                                                      }))
 
     def test_post_does_not_create_application_when_apply_is_closed(self):
         self.app_info.start_date = timezone.now().date() - timezone.timedelta(days=2)
@@ -344,9 +321,9 @@ class TestEditApplicationView(TestCase):
             course=self.course
         )
         self.application = ApplicationFactory(application_info=self.app_info, user=self.user)
-        self.url = reverse('dashboard:applications:edit-application',
+        self.url = reverse('dashboard:applications:edit',
                            kwargs={
-                               'course_id': self.course.id
+                               'course_slug': self.course.slug_url
                            })
 
     def test_get_returns_correct_application(self):

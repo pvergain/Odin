@@ -3,23 +3,21 @@ from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField
 
 from odin.common.models import UpdatedAtCreatedAtModelMixin
+
 from odin.users.models import BaseUser
-from odin.education.models import BaseMaterial, BaseTask, BaseTest, Material, Task, Test
+
+from odin.education.models import (
+    BaseMaterial,
+    BaseTask,
+    BaseTest,
+    Material,
+    Task,
+    Test,
+    Course
+)
 from odin.education.mixins import TestModelMixin
 
-from .managers import CompetitionJudgeManager, CompetitionParticipantManager
-
-
-class CompetitionParticipant(BaseUser):
-    user = models.OneToOneField(BaseUser, parent_link=True)
-
-    objects = CompetitionParticipantManager()
-
-
-class CompetitionJudge(BaseUser):
-    user = models.OneToOneField(BaseUser, parent_link=True)
-
-    objects = CompetitionJudgeManager()
+from odin.applications.models import ApplicationInfo
 
 
 class Competition(models.Model):
@@ -27,22 +25,44 @@ class Competition(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
-    participants = models.ManyToManyField(CompetitionParticipant)
-    judges = models.ManyToManyField(CompetitionJudge)
+    participants = models.ManyToManyField(BaseUser, related_name='participant_in_competitions')
+    judges = models.ManyToManyField(BaseUser, related_name='judge_in_competitions')
 
     slug_url = models.SlugField(unique=True)
 
+    application_info = models.OneToOneField(
+        ApplicationInfo,
+        related_name='competition',
+        blank=True, null=True
+    )
+
+    course = models.ForeignKey(
+        Course,
+        related_name='competitions',
+        blank=True, null=True
+    )
+
     def clean(self):
+        """
+        TODO: Add tests for validation errors
+        """
         if self.start_date > self.end_date:
             raise ValidationError("End date cannot be before start date!")
+
+        if self.course is not None and self.application_info is not None:
+            raise ValidationError('Cannot have competition for both'
+                                  'application & course')
 
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
 
     @property
-    def is_application_competition(self):
-        return hasattr(self, 'application_info')
+    def is_standalone(self):
+        if self.application_info is None and self.course is None:
+            return True
+
+        return False
 
     def __str__(self):
         return self.name
@@ -92,7 +112,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     )
 
     task = models.ForeignKey(CompetitionTask, related_name='solutions')
-    participant = models.ForeignKey(CompetitionParticipant, related_name='solutions')
+    participant = models.ForeignKey(BaseUser, related_name='competition_solutions')
     url = models.URLField(blank=True, null=True)
     code = models.TextField(blank=True, null=True)
     check_status_location = models.CharField(max_length=128, null=True, blank=True)

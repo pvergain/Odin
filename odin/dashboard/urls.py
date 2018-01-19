@@ -25,6 +25,10 @@ urlpatterns = [
         view=include('odin.applications.urls', namespace='applications')
     ),
     url(
+        regex='^competitions/',
+        view=include('odin.competitions.urls', namespace='competitions')
+    ),
+    url(
         regex='^interviews/',
         view=include('odin.interviews.urls', namespace='interviews')
     ),

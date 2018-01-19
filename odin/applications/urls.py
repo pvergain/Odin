@@ -21,7 +21,7 @@ urlpatterns = [
         name='edit-application-info'
     ),
     url(
-        regex='^(?P<course_id>[0-9]+)/apply/$',
+        regex='^(?P<course_slug>[-\w]+)/apply/$',
         view=ApplyToCourseView.as_view(),
         name='apply-to-course'
     ),
@@ -36,8 +36,8 @@ urlpatterns = [
         name='application-detail'
     ),
     url(
-        regex='^(?P<course_id>[0-9]+)/edit-application/$',
+        regex='^(?P<course_slug>[-\w]+)/edit/$',
         view=EditApplicationView.as_view(),
-        name='edit-application'
+        name='edit'
     )
 ]

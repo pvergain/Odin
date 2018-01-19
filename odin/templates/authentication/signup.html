@@ -13,7 +13,7 @@
     {% include "partial/logo.html" %}
     <div class="content">
         <!-- BEGIN REGISTRATION FORM -->
-        <form class="signup-form" action="{% url 'account_signup' %}" method="post">
+        <form class="signup-form" action="{% url 'account_signup' %}?{{ redirect_field_name }}={{ redirect_field_value }}" method="post">
            {% include "education/partial/message_box.html" %}
            {% include "partial/form_errors.html" with errors=readable_errors %}
            {% csrf_token %}

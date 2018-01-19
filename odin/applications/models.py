@@ -1,11 +1,12 @@
 from django.utils import timezone
-
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.apps import apps
 
 from odin.education.models import Course
-from odin.competitions.models import Competition
+
 from odin.users.models import BaseUser
+
 from .managers import ApplicationInfoManager
 from .query import ApplicationQuerySet
 
@@ -13,15 +14,18 @@ from .query import ApplicationQuerySet
 class ApplicationInfo(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
+
     course = models.OneToOneField(Course, related_name='application_info')
-    competition = models.OneToOneField(Competition, related_name='application_info', blank=True, null=True)
+
     start_interview_date = models.DateField(blank=True, null=True)
     end_interview_date = models.DateField(blank=True, null=True)
 
     description = models.TextField(blank=True, null=True)
 
-    external_application_form = models.URLField(blank=True, null=True,
-                                                help_text='Only add if course requires external application form')
+    external_application_form = models.URLField(
+        blank=True, null=True,
+        help_text='Only add if course requires external application form'
+    )
 
     objects = ApplicationInfoManager()
 
@@ -56,6 +60,10 @@ class ApplicationInfo(models.Model):
             if self.start_interview_date >= self.end_interview_date:
                 raise ValidationError("Start interview date can not be after end interview date")
 
+    @property
+    def has_competition(self):
+        return hasattr(self, 'competition')
+
 
 class Application(models.Model):
     application_info = models.ForeignKey(ApplicationInfo, related_name='applications')
@@ -84,3 +92,30 @@ class Application(models.Model):
     def clean(self):
         if not self.application_info.apply_is_active():
             raise ValidationError(f"The application period for {self.application_info.course} has expired!")
+
+    @property
+    def is_completed(self):
+        """
+        TODO: Add a bunch of nice tests
+        """
+        Solution = apps.get_model('competitions', 'Solution')
+
+        if not self.application_info.has_competition:
+            return True
+
+        tasks = {
+            task: False
+            for task in self.application_info.competition.tasks.all()
+        }
+
+        solutions = Solution.objects.filter(
+            participant=self.user,
+            task__competition=self.application_info.competition,
+            status=Solution.OK
+        )
+
+        for solution in solutions:
+            if solution.task in tasks:
+                tasks[solution.task] = True
+
+        return all(tasks.values())

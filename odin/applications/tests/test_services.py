@@ -7,7 +7,6 @@ from odin.common.faker import faker
 from odin.education.factories import CourseFactory
 from odin.users.factories import BaseUserFactory
 from odin.competitions.factories import CompetitionFactory
-from odin.competitions.models import CompetitionParticipant
 from odin.applications.models import (
     Application,
     ApplicationInfo,
@@ -159,9 +158,11 @@ class TestCreateApplicationService(TestCase):
         competition = CompetitionFactory()
         self.app_info.competition = competition
         self.app_info.save()
+
         create_application(application_info=self.app_info, user=self.user, skype=faker.word(), full_name=faker.name())
 
-        self.assertTrue(CompetitionParticipant.objects.filter(email=self.user.email).exists())
+        self.assertEqual(1, competition.participants.count())
+        self.assertEqual(self.user, competition.participants.first())
 
     def test_create_application_adds_user_as_participant_to_competition_if_app_info_has_competition(self):
         competition = CompetitionFactory()
