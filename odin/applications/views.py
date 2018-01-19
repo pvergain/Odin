@@ -5,6 +5,7 @@ from django.views.generic import (
     DetailView,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
@@ -96,6 +97,17 @@ class ApplyToCourseView(LoginRequiredMixin,
 
     def form_valid(self, form):
         self.application = self.call_service(service_kwargs=form.cleaned_data)
+
+        if self.course.application_info.has_competition:
+            messages.success(
+                self.request,
+                'Your application is submitted but not ready. Check the "edit" application buttow below.'
+            )
+        else:
+            messages.succes(
+                self.request,
+                'Your application is submited & ready.'
+            )
 
         return super().form_valid(form)
 
