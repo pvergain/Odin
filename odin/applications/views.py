@@ -104,7 +104,7 @@ class ApplyToCourseView(LoginRequiredMixin,
                 'Your application is submitted but not ready. Check the "edit" application buttow below.'
             )
         else:
-            messages.succes(
+            messages.success(
                 self.request,
                 'Your application is submited & ready.'
             )
