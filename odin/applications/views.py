@@ -194,7 +194,7 @@ class PublicCourseApplyView(DetailView):
         context['is_user_authenticated'] = self.request.user.is_authenticated
 
         next_action_url = reverse(
-            'public:course_apply',
+            'dashboard:applications:apply-to-course',
             kwargs={
                 'course_slug': self.object.slug_url
             }
