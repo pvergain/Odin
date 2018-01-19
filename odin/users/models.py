@@ -72,10 +72,10 @@ class BaseUser(PermissionsMixin,
         return hasattr(self, 'interviewer')
 
     def is_participant(self):
-        return hasattr(self, 'competitionparticipant')
+        return self.participant_in_competitions.count() > 0
 
     def is_judge(self):
-        return hasattr(self, 'competitionjudge')
+        return self.judge_in_competitions.count() > 0
 
 
 class Profile(models.Model):

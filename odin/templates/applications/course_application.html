@@ -16,7 +16,11 @@
     </div>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-12">
+    {% if application_has_competition %}
+      <p><strong>This is step 1 of the application process.</strong> After you have finished the form, there is going to be some problems to be solved.
+    {% endif %}
+
     {% include "education/partial/message_box.html" %}
     {% include "partial/form_errors.html" with errors=readable_errors %}
     <div class="portlet light ">

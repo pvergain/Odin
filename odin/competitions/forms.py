@@ -34,8 +34,13 @@ class CompetitionMaterialModelForm(forms.ModelForm):
 
 
 class CompetitionTaskModelForm(forms.ModelForm):
-    language = forms.ModelChoiceField(queryset=ProgrammingLanguage.objects.all(), required=False)
-    code = forms.CharField(widget=forms.Textarea(), required=False)
+    language = forms.ModelChoiceField(
+        queryset=ProgrammingLanguage.objects.all()
+    )
+    code = forms.CharField(
+        widget=forms.Textarea(),
+        required=False
+    )
     file = forms.FileField(required=False)
 
     class Meta:

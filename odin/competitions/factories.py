@@ -9,8 +9,6 @@ from odin.users.factories import BaseUserFactory
 from odin.education.factories import MaterialFactory, TaskFactory, TaskTestFactory
 
 from .models import (
-    CompetitionParticipant,
-    CompetitionJudge,
     Competition,
     CompetitionMaterial,
     CompetitionTask,
@@ -19,16 +17,6 @@ from .models import (
 from .services import (
     create_competition_test,
 )
-
-
-class CompetitionParticipantFactory(BaseUserFactory):
-    class Meta:
-        model = CompetitionParticipant
-
-
-class CompetitionJudgeFactory(BaseUserFactory):
-    class Meta:
-        model = CompetitionJudge
 
 
 class CompetitionFactory(factory.DjangoModelFactory):
@@ -94,7 +82,7 @@ class CompetitionTestFactory(TaskTestFactory):
 
 class SolutionFactory(factory.DjangoModelFactory):
     task = factory.SubFactory(CompetitionTaskFactory)
-    participant = factory.SubFactory(CompetitionParticipantFactory)
+    participant = factory.SubFactory(BaseUserFactory)
     url = factory.LazyAttribute(lambda _: faker.url())
     code = factory.LazyAttribute(lambda _: faker.text())
     build_id = factory.LazyAttribute(lambda _: faker.pyint())

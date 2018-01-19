@@ -4,8 +4,6 @@ from .views import (
     PromoteUserToStudentView,
     PromoteUserToTeacherView,
     PromoteUserToInterviewerView,
-    PromoteUserToJudgeView,
-    PromoteUserToParticipantView,
     DashboardManagementView,
     CreateUserView,
     CreateStudentView,
@@ -40,16 +38,6 @@ urlpatterns = [
         regex='^promote/interviewer/(?P<id>[0-9]+)/$',
         view=PromoteUserToInterviewerView.as_view(),
         name='promote-to-interviewer'
-    ),
-    url(
-        regex='^promote/judge/(?P<id>[0-9]+)/$',
-        view=PromoteUserToJudgeView.as_view(),
-        name='promote-to-judge'
-    ),
-    url(
-        regex='^promote/participant/(?P<id>[0-9]+)/$',
-        view=PromoteUserToParticipantView.as_view(),
-        name='promote-to-participant'
     ),
     url(
         regex='^add-student/$',

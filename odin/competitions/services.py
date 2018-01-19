@@ -4,10 +4,19 @@ from typing import BinaryIO, Dict, Tuple
 from django.core.exceptions import ValidationError
 
 from odin.education.models import Material, Task, Test, ProgrammingLanguage
+
+from odin.applications.models import Application
+
 from odin.users.models import BaseUser
 from odin.users.services import create_user
 
-from .models import CompetitionMaterial, Competition, CompetitionTask, CompetitionParticipant, Solution, CompetitionTest
+from .models import (
+    CompetitionMaterial,
+    Competition,
+    CompetitionTask,
+    Solution,
+    CompetitionTest
+)
 
 
 def create_competition_material(*,
@@ -59,7 +68,7 @@ def create_competition_task(*,
 
 def create_gradable_solution(*,
                              task: CompetitionTask,
-                             participant: CompetitionParticipant,
+                             participant: BaseUser,
                              code: str=None,
                              file: BinaryIO=None) -> Solution:
     if code is not None and file is not None:
@@ -88,7 +97,7 @@ def create_gradable_solution(*,
 
 def create_non_gradable_solution(*,
                                  task: CompetitionTask,
-                                 participant: CompetitionParticipant,
+                                 participant: BaseUser,
                                  url: str=None) -> Solution:
     if url is None:
             raise ValidationError("Provide a url!")
@@ -141,22 +150,17 @@ def handle_competition_registration(*,
         user = user.first()
         user.competition_registration_uuid = registration_uuid
         user.save()
-        if not hasattr(user, 'competitionparticipant'):
-            participant = CompetitionParticipant.objects.create_from_user(user)
-        else:
-            participant = user.competitionparticipant
         handle_existing_user = True
     else:
         user = create_user(email=email,
                            registration_uuid=registration_uuid,
                            profile_data={'full_name': full_name})
-        participant = CompetitionParticipant.objects.create_from_user(user)
         user.competition_registration_uuid = registration_uuid
         user.is_active = False
         user.save()
         handle_existing_user = False
 
-    competition.participants.add(participant)
+    competition.participants.add(user)
 
     return (handle_existing_user, user)
 
@@ -171,3 +175,23 @@ def handle_competition_login(*,
     user.save()
 
     return user
+
+
+def update_application_competition_solutions(*,
+                                             participant: BaseUser,
+                                             application: Application,
+                                             task_to_solutions: Dict[CompetitionTask, str]):
+    if not application.application_info.has_competition:
+        raise ValidationError('Application info has no competition')
+
+    competition = application.application_info.competition
+
+    for competition_task, solution_code in task_to_solutions.items():
+        if competition_task.competition != competition:
+            raise ValidationError('competition_task.competition != application_info.competition')
+
+        create_gradable_solution(
+            task=competition_task,
+            participant=participant,
+            code=solution_code
+        )

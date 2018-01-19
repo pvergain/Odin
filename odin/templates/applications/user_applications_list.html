@@ -9,6 +9,8 @@
 {% endblock content_title %}
 
 {% block page_content %}
+  {% include "education/partial/message_box.html" %}
+
   {% include "applications/partial/applications_table.html" with applications=object_list %}
   {% if teached_courses %}
     <div class="row margin-bottom-40 stories-header" data-auto-height="true">
