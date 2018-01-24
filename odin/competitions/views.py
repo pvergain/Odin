@@ -56,6 +56,6 @@ class UpdateApplicationCompetitionSolutionsView(LoginRequiredMixin, View):
             participant=request.user
         )
 
-        messages.success(request, 'Successfuly updated a task.')
+        messages.success(request, 'Successfully updated a task.')
 
         return self.finish_request()
