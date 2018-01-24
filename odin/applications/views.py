@@ -192,6 +192,11 @@ class EditApplicationView(LoginRequiredMixin,
 
         return context
 
+    def form_valid(self, form):
+        messages.success(self.request, 'Successfully updated application.')
+
+        return super().form_valid(form)
+
 
 class ApplicationDetailView(LoginRequiredMixin,
                             ViewApplicationDetailPermission,
