@@ -1,7 +1,7 @@
 from django.views.generic import View
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib import messages
 
 from rest_framework import serializers
 
@@ -55,5 +55,7 @@ class UpdateApplicationCompetitionSolutionsView(LoginRequiredMixin, View):
             task_to_solutions=task_to_solutions,
             participant=request.user
         )
+
+        messages.success(request, 'Successfuly updated a task.')
 
         return self.finish_request()
