@@ -13,7 +13,11 @@
     {% include "partial/logo.html" %}
     <div class="content">
         <!-- BEGIN REGISTRATION FORM -->
+        {% if redirect_field_name and redirect_field_value %}
         <form class="signup-form" action="{% url 'account_signup' %}?{{ redirect_field_name }}={{ redirect_field_value }}" method="post">
+        {% else %}
+        <form class="signup-form" action="{% url 'account_signup' %}" method="post">
+        {% endif %}
            {% include "education/partial/message_box.html" %}
            {% include "partial/form_errors.html" with errors=readable_errors %}
            {% csrf_token %}
