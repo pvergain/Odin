@@ -1,14 +1,11 @@
 from datetime import date
 
-from django.conf import settings
-
 from .models import (
     Application,
     ApplicationInfo,
 )
 from odin.education.models import Course
 from odin.users.models import BaseUser
-from odin.common.services import send_email
 
 
 def create_application_info(*,
@@ -44,13 +41,15 @@ def create_application(*,
                        studies_at: str=None,
                        has_interview_date: bool=False) -> Application:
 
-    instance = Application(application_info=application_info,
-                           user=user,
-                           phone=phone,
-                           skype=skype,
-                           works_at=works_at,
-                           studies_at=studies_at,
-                           has_interview_date=has_interview_date)
+    instance = Application(
+        application_info=application_info,
+        user=user,
+        phone=phone,
+        skype=skype,
+        works_at=works_at,
+        studies_at=studies_at,
+        has_interview_date=has_interview_date
+    )
 
     instance.full_clean()
     instance.save()
@@ -61,12 +60,5 @@ def create_application(*,
 
     if application_info.has_competition:
         application_info.competition.participants.add(user)
-
-    template_name = settings.EMAIL_TEMPLATES.get('application_completed_default')
-    context = {
-        'user': user.email,
-        'course': application_info.course.name
-    }
-    send_email(template_name=template_name, recipients=[user.email], context=context)
 
     return instance

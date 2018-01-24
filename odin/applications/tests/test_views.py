@@ -1,9 +1,7 @@
 from test_plus import TestCase
-from unittest.mock import patch
 
 from django.urls import reverse
 from django.utils import timezone
-from django.test.utils import override_settings
 
 from odin.common.faker import faker
 from odin.users.factories import BaseUserFactory, SuperUserFactory
@@ -131,6 +129,7 @@ class TestApplyToCourseView(TestCase):
             'full_name': faker.name(),
             'phone': faker.phone_number(),
             'works_at': faker.job(),
+            'studies_at': faker.job(),
             'skype': faker.word()
         }
 
@@ -194,26 +193,6 @@ class TestApplyToCourseView(TestCase):
             self.assertRedirects(response,
                                  expected_url=self.app_info.external_application_form,
                                  fetch_redirect_response=False)
-
-    @override_settings(USE_DJANGO_EMAIL_BACKEND=False)
-    @patch('odin.common.tasks.send_template_mail.delay')
-    def test_sends_mail_to_address_upon_successful_application(self, mock_send_mail):
-        self.app_info.start_date = timezone.now().date()
-        self.app_info.end_date = timezone.now().date() + timezone.timedelta(days=2)
-        self.app_info.save()
-
-        data = {
-            'full_name': faker.name(),
-            'phone': faker.phone_number(),
-            'works_at': faker.job(),
-            'skype': faker.word
-        }
-        with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data)
-            self.assertRedirects(response, expected_url=reverse('dashboard:applications:user-applications'))
-            self.assertEqual(mock_send_mail.called, True)
-            (template_name, recipients, context), kwargs = mock_send_mail.call_args
-            self.assertEqual([self.user.email], recipients)
 
 
 class TestUserApplicationsListView(TestCase):

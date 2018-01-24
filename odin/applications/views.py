@@ -131,6 +131,10 @@ class UserApplicationsListView(LoginRequiredMixin,
         return Application.objects.filter(user=self.request.user).prefetch_related(*prefetch)
 
     def get_context_data(self, **kwargs):
+        """
+        TODO: Refactor & split into services / selectors
+        There is a lot of business logic here.
+        """
         context = super().get_context_data(**kwargs)
         if self.request.user.is_teacher():
             teacher = self.request.user.teacher
@@ -143,7 +147,12 @@ class UserApplicationsListView(LoginRequiredMixin,
 
             courses = Course.objects.get_in_application_period().filter(**filters)
             context['teached_courses'] = courses.prefetch_related(*prefetch).order_by('-start_date')
-        courses_open_for_application = [app_info.course for app_info in ApplicationInfo.objects.get_open_for_apply()]
+        courses_open_for_application = []
+
+        for app_info in ApplicationInfo.objects.get_open_for_apply():
+            course = app_info.course
+            if not course.application_info.applications.filter(user=self.request.user).exists():
+                courses_open_for_application.append(course)
         context['courses_open_for_application'] = courses_open_for_application
 
         return context
@@ -182,6 +191,11 @@ class EditApplicationView(LoginRequiredMixin,
             context['last_solutions'] = last_solutions
 
         return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Successfully updated application.')
+
+        return super().form_valid(form)
 
 
 class ApplicationDetailView(LoginRequiredMixin,

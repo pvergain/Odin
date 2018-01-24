@@ -43,6 +43,14 @@ class ApplicationCreateForm(forms.ModelForm):
             'studies_at',
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['phone'].required = True
+        self.fields['skype'].required = True
+        self.fields['works_at'].required = True
+        self.fields['studies_at'].required = True
+
 
 class ApplicationEditForm(forms.ModelForm):
     class Meta:
@@ -53,3 +61,11 @@ class ApplicationEditForm(forms.ModelForm):
             'works_at',
             'studies_at'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['phone'].required = True
+        self.fields['skype'].required = True
+        self.fields['works_at'].required = True
+        self.fields['studies_at'].required = True
