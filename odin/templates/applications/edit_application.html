@@ -77,10 +77,10 @@
                 <div class="form-group form-md-line-input">
                     {% if last_solutions|has_key:competition_task.id %}
                       {% with last_solutions|get_key:competition_task.id as solution %}
-                      <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here" name="task_{{ competition_task.id}}">{{ solution.code }}</textarea>
+                      <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution (code) here." name="task_{{ competition_task.id}}">{{ solution.code }}</textarea>
                       {% endwith %}
                       {% else %}
-                  <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your solution here" name="task_{{ competition_task.id}}"></textarea>
+                  <textarea class="form-control form-control-solid placeholder-no-fix" placeholder="Paste your task solution (code) here." name="task_{{ competition_task.id}}"></textarea>
                     {% endif %}
                 </div>
               {% endfor %}
