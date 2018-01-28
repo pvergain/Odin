@@ -61,3 +61,5 @@ django-js-reverse==0.7.3
 
 # Collect staticfiles faster
 Collectfast==0.5.2
+
+django-tinymce==2.7.0

@@ -3,6 +3,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.apps import apps
 
+from tinymce.models import HTMLField
+
 from odin.education.models import Course
 
 from odin.users.models import BaseUser
@@ -20,7 +22,7 @@ class ApplicationInfo(models.Model):
     start_interview_date = models.DateField(blank=True, null=True)
     end_interview_date = models.DateField(blank=True, null=True)
 
-    description = models.TextField(blank=True, null=True)
+    description = HTMLField(blank=True, null=True)
 
     external_application_form = models.URLField(
         blank=True, null=True,

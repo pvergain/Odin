@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'easy_thumbnails',
     'django_js_reverse',
+    'tinymce'
 ]
 
 LOCAL_APPS = [
