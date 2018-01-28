@@ -29,7 +29,7 @@
               {% for application in applications %}
                 <tr>
                   <td>{{ application.application_info.course }}</td>
-                  <td>{{ application.is_completed }}</td>
+                  <td>{{ application.is_partially_completed }}</td>
                   <td>{{ application.application_info.end_date }}</td>
                   <td><a href="{% url 'dashboard:applications:edit' application.application_info.course.slug_url %}" class="btn btn-info">Edit</a></td>
                 </tr>

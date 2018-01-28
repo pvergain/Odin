@@ -119,3 +119,29 @@ class Application(models.Model):
                 tasks[solution.task] = True
 
         return all(tasks.values())
+
+    @property
+    def is_partially_completed(self):
+        """
+        Has submitted solutions for all.
+        """
+        Solution = apps.get_model('competitions', 'Solution')
+
+        if not self.application_info.has_competition:
+            return True
+
+        tasks = {
+            task: False
+            for task in self.application_info.competition.tasks.all()
+        }
+
+        solutions = Solution.objects.filter(
+            participant=self.user,
+            task__competition=self.application_info.competition
+        )
+
+        for solution in solutions:
+            if solution.code and solution.task in tasks:
+                tasks[solution.task] = True
+
+        return all(tasks.values())
