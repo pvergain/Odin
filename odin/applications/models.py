@@ -49,15 +49,8 @@ class ApplicationInfo(models.Model):
         if self.course.start_date < timezone.now().date():
             raise ValidationError(f"{self.course} has already started")
 
-        if self.start_date < timezone.now().date() or self.end_date < timezone.now().date():
-            raise ValidationError("Can not create an application in the past")
-
         if self.start_date >= self.end_date:
             raise ValidationError("Start date can not be after end date")
-
-        if self.start_interview_date and self.end_interview_date:
-            if self.start_interview_date < timezone.now().date() or self.end_interview_date <= timezone.now().date():
-                raise ValidationError("Can not create interview dates in the past")
 
             if self.start_interview_date >= self.end_interview_date:
                 raise ValidationError("Start interview date can not be after end interview date")

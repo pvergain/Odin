@@ -30,15 +30,6 @@ class TestCreateApplicationInfoService(TestCase):
         self.start_interview_date = faker.date_object()
         self.end_interview_date = faker.date_object()
 
-    def test_create_application_info_raises_validation_error_when_start_date_is_in_past(self):
-        self.start_date = timezone.now().date() - timezone.timedelta(days=1)
-        self.end_date = timezone.now().date() + timezone.timedelta(days=1)
-
-        with self.assertRaises(ValidationError):
-            create_application_info(start_date=self.start_date,
-                                    end_date=self.end_date,
-                                    course=self.course)
-
     def test_create_application_info_raises_validation_error_when_end_date_is_in_past(self):
         self.start_date = timezone.now().date() + timezone.timedelta(days=1)
         self.end_date = timezone.now().date() - timezone.timedelta(days=1)
@@ -56,48 +47,6 @@ class TestCreateApplicationInfoService(TestCase):
             create_application_info(start_date=self.start_date,
                                     end_date=self.end_date,
                                     course=self.course)
-
-    def test_create_application_info_raises_validation_error_when_start_interview_date_is_in_past(self):
-        self.start_date = timezone.now().date() + timezone.timedelta(days=1)
-        self.end_date = timezone.now().date() + timezone.timedelta(days=2)
-
-        self.start_interview_date = timezone.now().date() - timezone.timedelta(days=1)
-        self.end_interview_date = timezone.now().date() + timezone.timedelta(days=1)
-
-        with self.assertRaises(ValidationError):
-            create_application_info(start_date=self.start_date,
-                                    end_date=self.end_date,
-                                    course=self.course,
-                                    start_interview_date=self.start_interview_date,
-                                    end_interview_date=self.end_interview_date)
-
-    def test_create_application_info_raises_validation_error_when_end_interview_date_is_in_past(self):
-        self.start_date = timezone.now().date() + timezone.timedelta(days=1)
-        self.end_date = timezone.now().date() + timezone.timedelta(days=2)
-
-        self.start_interview_date = timezone.now().date() + timezone.timedelta(days=1)
-        self.end_interview_date = timezone.now().date() - timezone.timedelta(days=1)
-
-        with self.assertRaises(ValidationError):
-            create_application_info(start_date=self.start_date,
-                                    end_date=self.end_date,
-                                    course=self.course,
-                                    start_interview_date=self.start_interview_date,
-                                    end_interview_date=self.end_interview_date)
-
-    def test_create_application_info_raises_validation_error_when_start_interview_date_is_after_end_date(self):
-        self.start_date = timezone.now().date() + timezone.timedelta(days=1)
-        self.end_date = timezone.now().date() + timezone.timedelta(days=2)
-
-        self.start_interview_date = timezone.now().date() + timezone.timedelta(days=2)
-        self.end_interview_date = timezone.now().date() + timezone.timedelta(days=1)
-
-        with self.assertRaises(ValidationError):
-            create_application_info(start_date=self.start_date,
-                                    end_date=self.end_date,
-                                    course=self.course,
-                                    start_interview_date=self.start_interview_date,
-                                    end_interview_date=self.end_interview_date)
 
     def test_create_application_info_creates_application_info_when_data_is_valid(self):
         self.start_date = timezone.now().date() + timezone.timedelta(days=1)

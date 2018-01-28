@@ -12,10 +12,12 @@
   <div class="container">
     <div class="row">
     <div class="col-md-9">
-      <img src="{{ course.logo.url }}" />
-      {{ course.application_info.description }}
+      {% autoescape off %}
+        {{ course.application_info.description }}
+      {% endautoescape %}
     </div>
     <div class="col-md-3">
+      <img src="{{ course.logo.url }}" />
       {% if is_user_authenticated %}
         <p>Looks like you are authenticated.</p>
         <a href="{{ course_apply_url }}" class="btn btn-primary">Click here to proceed with the application</a>
