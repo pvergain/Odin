@@ -10,15 +10,26 @@
 
 {% block page_content %}
   <div class="container">
+    <div class="row">
+    <div class="col-md-9">
+      <img src="{{ course.logo.url }}" />
+      {{ course.application_info.description }}
+    </div>
+    <div class="col-md-3">
+      {% if is_user_authenticated %}
+        <p>Looks like you are authenticated.</p>
+        <a href="{{ course_apply_url }}" class="btn btn-primary">Click here to proceed with the application</a>
+      {% else %}
+        <p><strong>In order to apply, you need to have an account in our system.</strong></p>
+        <div>
+          <a href="{{ register_url }}" class="btn btn-success">Click here to register</a>
+        </div>
+        <div style="margin-top: 25px">
+          <a href="{{ login_url}}" class="btn btn-primary">Click here to login &amp; proceed</a>
+        </div>
+      {% endif %}
+    </div>
 
-  {% if is_user_authenticated %}
-    <p>Looks like you are authenticated.</p>
-    <a href="{{ course_apply_url }}" class="btn btn-primary">Click here to proceed with the application</a>
-  {% else %}
-    <p>In order to apply, you need to have an account in our system.</p>
-    <a href="{{ register_url }}" class="btn btn-success">Click here to register</a>
-    <a href="{{ login_url}}" class="btn btn-primary">Click here to login &amp; proceed</a>
-  {% endif %}
-
+  </div>
   </div>
 {% endblock %}
