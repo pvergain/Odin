@@ -218,3 +218,8 @@ TASK_PASSED = "Passed"
 TASK_FAILED = "Failed"
 
 from .grader import *
+
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': 'advanced',
+    'relative_urls': False
+}
