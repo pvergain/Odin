@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from .models import ProgrammingLanguage, Course
+from .models import (
+    ProgrammingLanguage,
+    Course,
+    Task,
+    Test
+)
 
 
 @admin.register(ProgrammingLanguage)
@@ -11,3 +16,13 @@ class ProgrammingLanguageAdmin(admin.ModelAdmin):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug_url')
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ('name', 'gradable')
+
+
+@admin.register(Test)
+class TestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'description', 'language')

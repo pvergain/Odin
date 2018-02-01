@@ -248,6 +248,9 @@ class BaseTask(UpdatedAtCreatedAtModelMixin, models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.name
+
 
 class Task(BaseTask):
     pass
@@ -279,9 +282,13 @@ class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
     code = models.TextField(blank=True, null=True)
     file = models.FileField(blank=True, null=True)
+    description = models.CharField(max_length=255, default='Test')
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return f'{self.id}/{self.description}/{self.language}'
 
 
 class Test(BaseTest):
