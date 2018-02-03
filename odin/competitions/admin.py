@@ -26,4 +26,4 @@ class CompetitionTestAdmin(admin.ModelAdmin):
 
 @admin.register(Solution)
 class CompetitionSolutionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'task', 'participant')
+    list_display = ('id', 'task', 'participant', 'code', 'created_at')
