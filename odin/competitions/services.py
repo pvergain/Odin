@@ -190,6 +190,14 @@ def update_application_competition_solutions(*,
         if competition_task.competition != competition:
             raise ValidationError('competition_task.competition != application_info.competition')
 
+        if solution_code.strip() == '':
+            continue
+
+        last_solution = competition_task.solutions.filter(participant=participant).last()
+
+        if last_solution.code == solution_code:
+            continue
+
         create_gradable_solution(
             task=competition_task,
             participant=participant,
