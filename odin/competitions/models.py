@@ -8,7 +8,6 @@ from odin.users.models import BaseUser
 
 from odin.education.models import (
     BaseMaterial,
-    BaseTask,
     Material,
     Task,
     Test,
