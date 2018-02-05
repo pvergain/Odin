@@ -4,7 +4,6 @@ from typing import Dict, BinaryIO
 
 from .models import GraderBinaryProblem, GraderPlainProblem
 from .validators import run_create_problem_service_validation
-from .tasks import submit_solution
 
 
 def create_plain_problem(*,
@@ -52,4 +51,6 @@ def create_binary_problem(*,
 
 
 def start_grader_communication(solution_id: int, solution_model: str):
+    from odin.grading.tasks import submit_solution
+
     transaction.on_commit(lambda: submit_solution.delay(solution_id, solution_model))
