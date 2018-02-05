@@ -91,6 +91,18 @@ class CompetitionTask(models.Model):
     def __str__(self):
         return f'{self.task}, {self.competition}'
 
+    @property
+    def name(self):
+        return self.task.name
+
+    @property
+    def description(self):
+        return self.task.description
+
+    @property
+    def gradable(self):
+        return self.task.gradable
+
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     PENDING = 0
@@ -140,3 +152,23 @@ class CompetitionTest(TestModelMixin, models.Model):
 
     def __str__(self):
         return f'{self.task}, {self.test}'
+
+    @property
+    def language(self):
+        return self.test.language
+
+    @property
+    def extra_options(self):
+        return self.test.extra_options
+
+    @property
+    def code(self):
+        return self.test.code
+
+    @property
+    def file(self):
+        return self.test.file
+
+    @property
+    def description(self):
+        return self.test.description
