@@ -68,8 +68,11 @@ class CompetitionTaskFactory(factory.DjangoModelFactory):
         fields = ('name', 'description', 'gradable')
         task = kwargs.get('task')
         for field in fields:
-            if not kwargs.get(field):
-                kwargs[field] = task.__dict__.get(field)
+            value = kwargs.get(field)
+            if value is not None:
+                setattr(task, field, value)
+                kwargs.pop(field)
+
         return CompetitionTask.objects.create(**kwargs)
 
 
