@@ -10,7 +10,7 @@ dropdb --if-exists odin
 sudo -u postgres createdb -O $USERNAME odin
 
 echo "Starting pg_restore ...\n"
-pg_restore -U $USERNAME -d odin -c -j 4 db.dump
+pg_restore -U $USERNAME -d odin -c -j 4 db.dump &> pg_restore_log
 rm db.dump
 
 echo "Migrations and data ...\n"
