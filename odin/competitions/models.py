@@ -7,7 +7,6 @@ from odin.common.models import UpdatedAtCreatedAtModelMixin
 from odin.users.models import BaseUser
 
 from odin.education.models import (
-    BaseMaterial,
     Material,
     Task,
     Test,
@@ -66,7 +65,7 @@ class Competition(models.Model):
         return self.name
 
 
-class CompetitionMaterial(BaseMaterial):
+class CompetitionMaterial(models.Model):
     material = models.ForeignKey(Material,
                                  on_delete=models.CASCADE,
                                  related_name='competition_materials')
