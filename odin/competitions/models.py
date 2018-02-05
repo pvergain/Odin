@@ -9,7 +9,6 @@ from odin.users.models import BaseUser
 from odin.education.models import (
     BaseMaterial,
     BaseTask,
-    BaseTest,
     Material,
     Task,
     Test,
@@ -80,7 +79,7 @@ class CompetitionMaterial(BaseMaterial):
         unique_together = (('competition', 'material'),)
 
 
-class CompetitionTask(BaseTask):
+class CompetitionTask(models.Model):
     task = models.ForeignKey(Task,
                              on_delete=models.CASCADE,
                              related_name='competition_tasks')
@@ -130,7 +129,7 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
         ordering = ['-id']
 
 
-class CompetitionTest(TestModelMixin, BaseTest):
+class CompetitionTest(TestModelMixin, models.Model):
     task = models.OneToOneField(CompetitionTask,
                                 on_delete=models.CASCADE,
                                 related_name='test')
