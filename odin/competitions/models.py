@@ -88,6 +88,9 @@ class CompetitionTask(models.Model):
     class Meta:
         unique_together = (('competition', 'task'),)
 
+    def __str__(self):
+        return f'{self.task}, {self.competition}'
+
 
 class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
     PENDING = 0
@@ -134,3 +137,6 @@ class CompetitionTest(TestModelMixin, models.Model):
     test = models.ForeignKey(Test,
                              on_delete=models.CASCADE,
                              related_name='competition_tests')
+
+    def __str__(self):
+        return f'{self.task}, {self.test}'
