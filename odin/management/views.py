@@ -21,6 +21,7 @@ from odin.education.services import create_course, add_student, add_teacher
 from odin.competitions.models import Competition
 
 from odin.applications.models import ApplicationInfo
+from odin.applications.services import get_partially_completed_applications
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
@@ -285,5 +286,15 @@ class ApplicationsView(DashboardManagementPermission,
         )
 
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['applications'] = get_partially_completed_applications(
+            application_info=self.application_info
+        )
+        context['applications_count'] = len(context['applications'])
+
+        return context
 
     template_name = 'management/applications_view.html'

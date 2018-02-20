@@ -82,5 +82,25 @@ def get_last_solutions_for_application(*, application: Application):
 
 def get_applications_with_last_solutions(*, application_info: ApplicationInfo):
     applications = Application.objects.filter(application_info=application_info)
+    result = []
 
-    return applications
+    for application in applications:
+        if application.is_partially_completed:
+            application.last_solutions = list(get_last_solutions_for_application(
+                application=application
+            ).values())
+
+            result.append(application)
+
+    return result
+
+
+def get_partially_completed_applications(*, application_info: ApplicationInfo):
+    applications = Application.objects.filter(application_info=application_info)
+    result = []
+
+    for application in applications:
+        if application.is_partially_completed:
+            result.append(application)
+
+    return result
