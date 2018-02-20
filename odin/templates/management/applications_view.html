@@ -1,0 +1,29 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+      <h1>Total of {{ applications_count }}</h1>
+      <table class="table table-stripped">
+        <thead>
+          <th>User</th>
+          <th>Work</th>
+          <th>Study</th>
+          <th></th>
+        </thead>
+        <tbody>
+          {% for application in applications %}
+            <tr>
+              <td>{{ application.user }}</td>
+              <td>{{ application.works_at }}</td>
+              <td>{{ application.studies_at }}</td>
+              <td>
+                <a href="{% url 'dashboard:management:application-solutions' application.id %}">Check solutions</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock page_content %}

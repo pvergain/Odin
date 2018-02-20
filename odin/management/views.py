@@ -1,5 +1,11 @@
 from django.shortcuts import redirect
-from django.views.generic import View, ListView, FormView, UpdateView
+from django.views.generic import (
+    View,
+    ListView,
+    FormView,
+    UpdateView,
+    TemplateView
+)
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
@@ -8,10 +14,17 @@ from odin.users.services import create_user
 
 from odin.interviews.services import add_course_to_interviewer_courses
 from odin.interviews.models import Interviewer
+
 from odin.education.models import Student, Teacher, Course, CourseAssignment
 from odin.education.services import create_course, add_student, add_teacher
 
 from odin.competitions.models import Competition
+
+from odin.applications.models import Application, ApplicationInfo
+from odin.applications.services import (
+    get_partially_completed_applications,
+    get_last_solutions_for_application
+)
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
@@ -265,3 +278,49 @@ class AddCompetitionToCourseView(DashboardManagementPermission,
         course.application_info.save()
 
         return super().form_valid(form)
+
+
+class ApplicationsView(DashboardManagementPermission,
+                       TemplateView):
+    template_name = 'management/applications_view.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.application_info = get_object_or_404(
+            ApplicationInfo,
+            pk=self.kwargs['application_info_id']
+        )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['applications'] = get_partially_completed_applications(
+            application_info=self.application_info
+        )
+        context['applications_count'] = len(context['applications'])
+
+        return context
+
+
+class ApplicationSolutionsView(DashboardManagementPermission,
+                               TemplateView):
+    template_name = 'management/application_solutions.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.application = get_object_or_404(
+            Application,
+            pk=self.kwargs['application_id']
+        )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['application'] = self.application
+        context['solutions'] = get_last_solutions_for_application(
+            application=self.application
+        )
+
+        return context
