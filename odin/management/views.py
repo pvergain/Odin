@@ -20,8 +20,11 @@ from odin.education.services import create_course, add_student, add_teacher
 
 from odin.competitions.models import Competition
 
-from odin.applications.models import ApplicationInfo
-from odin.applications.services import get_partially_completed_applications
+from odin.applications.models import Application, ApplicationInfo
+from odin.applications.services import (
+    get_partially_completed_applications,
+    get_last_solutions_for_application
+)
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
@@ -279,6 +282,8 @@ class AddCompetitionToCourseView(DashboardManagementPermission,
 
 class ApplicationsView(DashboardManagementPermission,
                        TemplateView):
+    template_name = 'management/applications_view.html'
+
     def dispatch(self, request, *args, **kwargs):
         self.application_info = get_object_or_404(
             ApplicationInfo,
@@ -297,4 +302,25 @@ class ApplicationsView(DashboardManagementPermission,
 
         return context
 
-    template_name = 'management/applications_view.html'
+
+class ApplicationSolutionsView(DashboardManagementPermission,
+                               TemplateView):
+    template_name = 'management/application_solutions.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.application = get_object_or_404(
+            Application,
+            pk=self.kwargs['application_id']
+        )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['application'] = self.application
+        context['solutions'] = get_last_solutions_for_application(
+            application=self.application
+        )
+
+        return context

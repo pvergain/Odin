@@ -9,6 +9,7 @@
           <th>User</th>
           <th>Work</th>
           <th>Study</th>
+          <th></th>
         </thead>
         <tbody>
           {% for application in applications %}
@@ -16,6 +17,9 @@
               <td>{{ application.user }}</td>
               <td>{{ application.works_at }}</td>
               <td>{{ application.studies_at }}</td>
+              <td>
+                <a href="{% url 'dashboard:management:application-solutions' application.id %}">Check solutions</a>
+              </td>
             </tr>
           {% endfor %}
         </tbody>
