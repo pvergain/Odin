@@ -1,5 +1,11 @@
 from django.shortcuts import redirect
-from django.views.generic import View, ListView, FormView, UpdateView
+from django.views.generic import (
+    View,
+    ListView,
+    FormView,
+    UpdateView,
+    TemplateView
+)
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
@@ -8,10 +14,13 @@ from odin.users.services import create_user
 
 from odin.interviews.services import add_course_to_interviewer_courses
 from odin.interviews.models import Interviewer
+
 from odin.education.models import Student, Teacher, Course, CourseAssignment
 from odin.education.services import create_course, add_student, add_teacher
 
 from odin.competitions.models import Competition
+
+from odin.applications.models import ApplicationInfo
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
 
@@ -265,3 +274,16 @@ class AddCompetitionToCourseView(DashboardManagementPermission,
         course.application_info.save()
 
         return super().form_valid(form)
+
+
+class ApplicationsView(DashboardManagementPermission,
+                       TemplateView):
+    def dispatch(self, request, *args, **kwargs):
+        self.application_info = get_object_or_404(
+            ApplicationInfo,
+            pk=self.kwargs['application_info_id']
+        )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    template_name = 'management/applications_view.html'
