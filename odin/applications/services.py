@@ -1,5 +1,7 @@
 from datetime import date
 
+from django.apps import apps
+
 from .models import (
     Application,
     ApplicationInfo,
@@ -62,3 +64,23 @@ def create_application(*,
         application_info.competition.participants.add(user)
 
     return instance
+
+
+def get_last_solutions_for_application(*, application: Application):
+    Solution = apps.get_model('competitions', 'Solution')
+
+    tasks = {
+        task: Solution.objects.filter(
+            participant=application.user,
+            task=task
+        ).last()
+        for task in application.application_info.competition.tasks.all()
+    }
+
+    return tasks
+
+
+def get_applications_with_last_solutions(*, application_info: ApplicationInfo):
+    applications = Application.objects.filter(application_info=application_info)
+
+    return applications
