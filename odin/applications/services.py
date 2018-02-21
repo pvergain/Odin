@@ -81,7 +81,9 @@ def get_last_solutions_for_application(*, application: Application):
 
 
 def get_partially_completed_applications(*, application_info: ApplicationInfo):
-    applications = Application.objects.filter(application_info=application_info)
+    related = ['interview_person']
+
+    applications = Application.objects.select_related(*related).filter(application_info=application_info)
     result = []
 
     for application in applications:

@@ -9,6 +9,8 @@
           <th>User</th>
           <th>Work</th>
           <th>Study</th>
+          <th>Interview slot</th>
+          <th>Interviewer</th>
           <th></th>
         </thead>
         <tbody>
@@ -17,6 +19,8 @@
               <td>{{ application.user }}</td>
               <td>{{ application.works_at }}</td>
               <td>{{ application.studies_at }}</td>
+              <td>{{ application.interview_slot|default:'N/A' }}</td>
+              <td>{{ application.interview_person|default:'N/A' }}</td>
               <td>
                 <a href="{% url 'dashboard:management:application-solutions' application.id %}">Check solutions</a>
               </td>
