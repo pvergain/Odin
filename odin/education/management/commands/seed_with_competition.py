@@ -26,10 +26,10 @@ class Command(BaseCommand):
             name='HackConf Competition',
             start_date=date.today(),
             end_date=date.today() + timedelta(days=7),
-            is_competition=True
+            #is_competition=True
         )
 
-        assert competition.is_competition
+        # assert competition.is_competition
 
         student = StudentFactory(
             email='teststudent@hacksoft.io',
