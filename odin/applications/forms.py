@@ -69,3 +69,10 @@ class ApplicationEditForm(forms.ModelForm):
         self.fields['skype'].required = True
         self.fields['works_at'].required = True
         self.fields['studies_at'].required = True
+
+class ApplicationInterviewerUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Application
+        fields = [
+            'interview_person',
+        ]

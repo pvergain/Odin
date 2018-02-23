@@ -41,6 +41,8 @@ from .forms import (
     AddCompetitionToCourseForm,
 )
 
+from odin.applications.forms import ApplicationInterviewerUpdateForm
+
 
 class DashboardManagementView(DashboardManagementPermission,
                               ListView):
@@ -300,6 +302,11 @@ class ApplicationsView(DashboardManagementPermission,
         )
         context['applications_count'] = len(context['applications'])
 
+        '''
+        adding just the list of people that can do interviews a.k.a superusers
+        '''
+        context['interviewers'] = BaseUser.objects.filter(is_superuser=True)
+
         return context
 
 
@@ -324,3 +331,21 @@ class ApplicationSolutionsView(DashboardManagementPermission,
         )
 
         return context
+
+class ApplicationInterviewPersonView(DashboardManagementPermission,
+                                        UpdateView):
+    
+    model = Application
+    form_class = ApplicationInterviewerUpdateForm
+    # template_name = 'dashboard/edit_course.html'
+    pk_url_kwarg = 'application_id'
+
+    def form_valid(self, form):
+        user = BaseUser.objects.filter(id=self.request.POST['int_person'])[0]
+        form.instance.interview_person = user
+        return super(ApplicationInterviewPersonView, self).form_valid(form)
+
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:management:applications',
+                            kwargs={'application_info_id': 1})

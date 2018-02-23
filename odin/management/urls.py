@@ -17,7 +17,8 @@ from .views import (
     AddJudgeToCompetitionView,
     AddCompetitionToCourseView,
     ApplicationsView,
-    ApplicationSolutionsView
+    ApplicationSolutionsView,
+    ApplicationInterviewPersonView,
 )
 
 urlpatterns = [
@@ -111,5 +112,10 @@ urlpatterns = [
         regex='^application/(?P<application_id>[0-9]+)/solutions/$',
         view=ApplicationSolutionsView.as_view(),
         name='application-solutions'
-    )
+    ),
+    url(
+    regex='^application_int_person/(?P<application_id>[0-9]+)/$',
+    view=ApplicationInterviewPersonView.as_view(),
+    name='application-interview-person'
+    ),
 ]
