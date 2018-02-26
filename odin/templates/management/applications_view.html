@@ -25,7 +25,8 @@
               <td>
                 <form action="{% url 'dashboard:management:application-interview-person' application.id %}" method="POST">
                   {% csrf_token %}
-                  <select name="int_person">
+                  <input type='hidden' name='management_id' value='1'>
+                  <select name="interview_person">
                     {% if not application.interview_person %}
                     <option value='' selected='selected'>Please Choose Interviewer</option>
                     {% else %}
@@ -34,7 +35,7 @@
                     
                     {% for interviewer in interviewers %}
                     
-                    {% if application.interview_person.email|is_equal:interviewer.email %}
+                    {% if application.interview_person.email == interviewer.email %}
                     <option value="{{ interviewer.id }}" selected='selected'>{{ interviewer.email }}</option>
                     
                     {% else %}

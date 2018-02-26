@@ -91,3 +91,11 @@ def get_partially_completed_applications(*, application_info: ApplicationInfo):
             result.append(application)
 
     return result
+
+
+def add_interview_person_to_application(*, application: Application, interview_person: BaseUser):
+    application.interviewer_person = interview_person
+    application.save()
+
+    return application
+    
