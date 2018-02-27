@@ -106,6 +106,7 @@ class CreateUserView(DashboardCreateUserMixin, FormView):
 
         return super().form_valid(form)
 
+
 class CreateStudentView(DashboardCreateUserMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -332,9 +333,10 @@ class ApplicationSolutionsView(DashboardManagementPermission,
 
         return context
 
+
 class ApplicationInterviewPersonView(DashboardManagementPermission,
-                                    UpdateView):
-    
+                                     UpdateView):
+
     model = Application
     form_class = ApplicationInterviewerUpdateForm
     pk_url_kwarg = 'application_id'
@@ -342,7 +344,6 @@ class ApplicationInterviewPersonView(DashboardManagementPermission,
     def form_valid(self, form):
         add_interview_person_to_application(application=form.instance, **form.cleaned_data)
         return super().form_valid(form)
-
 
     def get_success_url(self):
         return reverse_lazy('dashboard:management:applications',

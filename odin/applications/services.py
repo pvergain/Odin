@@ -98,4 +98,3 @@ def add_interview_person_to_application(*, application: Application, interview_p
     application.save()
 
     return application
-    
