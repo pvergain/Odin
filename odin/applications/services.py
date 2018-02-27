@@ -93,7 +93,7 @@ def get_partially_completed_applications(*, application_info: ApplicationInfo):
     return result
 
 
-def add_interview_person_to_application(*, application: Application, interview_person: BaseUser):
+def add_interview_person_to_application(*, application: Application, interview_person: BaseUser) -> Application:
     application.interviewer_person = interview_person
     application.save()
 
