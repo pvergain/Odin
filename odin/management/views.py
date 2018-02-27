@@ -23,7 +23,8 @@ from odin.competitions.models import Competition
 from odin.applications.models import Application, ApplicationInfo
 from odin.applications.services import (
     get_partially_completed_applications,
-    get_last_solutions_for_application
+    get_last_solutions_for_application,
+    add_interview_person_to_application
 )
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
@@ -40,6 +41,8 @@ from .forms import (
     AddJudgeToCompetitionForm,
     AddCompetitionToCourseForm,
 )
+
+from odin.applications.forms import ApplicationInterviewerUpdateForm
 
 
 class DashboardManagementView(DashboardManagementPermission,
@@ -300,6 +303,11 @@ class ApplicationsView(DashboardManagementPermission,
         )
         context['applications_count'] = len(context['applications'])
 
+        '''
+        adding just the list of people that can do interviews a.k.a superusers
+        '''
+        context['interviewers'] = BaseUser.objects.filter(is_superuser=True)
+
         return context
 
 
@@ -324,3 +332,19 @@ class ApplicationSolutionsView(DashboardManagementPermission,
         )
 
         return context
+
+
+class ApplicationInterviewPersonView(DashboardManagementPermission,
+                                     UpdateView):
+
+    model = Application
+    form_class = ApplicationInterviewerUpdateForm
+    pk_url_kwarg = 'application_id'
+
+    def form_valid(self, form):
+        add_interview_person_to_application(application=form.instance, **form.cleaned_data)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:management:applications',
+                            kwargs={'application_info_id': self.request.POST['management_id']})
