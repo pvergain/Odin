@@ -22,9 +22,10 @@ from odin.competitions.models import Competition
 
 from odin.applications.models import Application, ApplicationInfo
 from odin.applications.services import (
-    get_partially_completed_applications,
+    # get_partially_completed_applications,
     get_last_solutions_for_application,
-    add_interview_person_to_application
+    add_interview_person_to_application,
+    get_partially_completed_applications1
 )
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
@@ -105,6 +106,7 @@ class CreateUserView(DashboardCreateUserMixin, FormView):
         create_user(**form.cleaned_data)
 
         return super().form_valid(form)
+
 
 class CreateStudentView(DashboardCreateUserMixin, FormView):
     def get_context_data(self, **kwargs):
@@ -297,9 +299,8 @@ class ApplicationsView(DashboardManagementPermission,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['applications'] = get_partially_completed_applications(
-            application_info=self.application_info
-        )
+        context['applications'] = get_partially_completed_applications1(
+            application_info=self.application_info)
         context['applications_count'] = len(context['applications'])
 
         '''
@@ -324,7 +325,6 @@ class ApplicationSolutionsView(DashboardManagementPermission,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context['application'] = self.application
         context['solutions'] = get_last_solutions_for_application(
             application=self.application
@@ -332,9 +332,10 @@ class ApplicationSolutionsView(DashboardManagementPermission,
 
         return context
 
+
 class ApplicationInterviewPersonView(DashboardManagementPermission,
-                                    UpdateView):
-    
+                                     UpdateView):
+
     model = Application
     form_class = ApplicationInterviewerUpdateForm
     pk_url_kwarg = 'application_id'
@@ -342,7 +343,6 @@ class ApplicationInterviewPersonView(DashboardManagementPermission,
     def form_valid(self, form):
         add_interview_person_to_application(application=form.instance, **form.cleaned_data)
         return super().form_valid(form)
-
 
     def get_success_url(self):
         return reverse_lazy('dashboard:management:applications',
