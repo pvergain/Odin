@@ -22,12 +22,11 @@ from odin.competitions.models import Competition
 
 from odin.applications.models import Application, ApplicationInfo
 from odin.applications.services import (
-    # get_partially_completed_applications,
+    get_partially_completed_applications,
     get_last_solutions_for_application,
     add_interview_person_to_application,
     generate_last_solutions_per_participant,
     get_valid_solutions,
-    get_partially_completed_applications1
 )
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
@@ -304,14 +303,8 @@ class ApplicationsView(DashboardManagementPermission,
         valid_solutions = get_valid_solutions(application_info=self.application_info,
                                               solutions=generate_last_solutions_per_participant())
 
-        '''
-        context['applications'] = get_partially_completed_applications(
-            application_info=self.application_info)
-        context['applications_count'] = len(context['applications'])
-        '''
-
-        context['applications'] = get_partially_completed_applications1(valid_solutions=valid_solutions,
-                                                                        application_info=self.application_info)
+        context['applications'] = get_partially_completed_applications(valid_solutions=valid_solutions,
+                                                                       application_info=self.application_info)
 
         '''
         adding just the list of people that can do interviews a.k.a superusers

@@ -82,19 +82,6 @@ def get_last_solutions_for_application(*, application: Application):
     return tasks
 
 
-def get_partially_completed_applications(*, application_info: ApplicationInfo):
-    related = ['interview_person']
-
-    applications = Application.objects.select_related(*related).filter(application_info=application_info)
-    result = []
-
-    for application in applications:
-        if application.is_partially_completed:
-            result.append(application)
-
-    return result
-
-
 def add_interview_person_to_application(*, application: Application, interview_person: BaseUser) -> Application:
     application.interviewer_person = interview_person
     application.save()
@@ -145,8 +132,8 @@ def get_valid_solutions(*, application_info: ApplicationInfo,
     return valid_solutions
 
 
-def get_partially_completed_applications1(*, valid_solutions: 'valid_solutions_DICT',
-                                          application_info: ApplicationInfo):
+def get_partially_completed_applications(*, valid_solutions: 'valid_solutions_DICT',
+                                         application_info: ApplicationInfo):
     '''
     expected valid_solutions structure
 
