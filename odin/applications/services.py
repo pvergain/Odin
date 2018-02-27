@@ -93,15 +93,7 @@ def get_partially_completed_applications(*, application_info: ApplicationInfo):
     return result
 
 
-def get_partially_completed_applications1(*, application_info: ApplicationInfo):
-    applications = application_info.applications.all().select_related('user')
-
-    result = [application for application in applications if application.is_partially_completed is True]
-
-    return result
-
-
-def add_interview_person_to_application(*, application: Application, interview_person: BaseUser):
+def add_interview_person_to_application(*, application: Application, interview_person: BaseUser) -> Application:
     application.interviewer_person = interview_person
     application.save()
 

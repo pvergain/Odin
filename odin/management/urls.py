@@ -114,8 +114,8 @@ urlpatterns = [
         name='application-solutions'
     ),
     url(
-    regex='^application_int_person/(?P<application_id>[0-9]+)/$',
-    view=ApplicationInterviewPersonView.as_view(),
-    name='application-interview-person'
+        regex='^application_int_person/(?P<application_id>[0-9]+)/$',
+        view=ApplicationInterviewPersonView.as_view(),
+        name='application-interview-person'
     ),
 ]
