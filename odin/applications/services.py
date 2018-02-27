@@ -9,6 +9,8 @@ from .models import (
 from odin.education.models import Course
 from odin.users.models import BaseUser
 
+from odin.competitions.models import Solution
+
 
 def create_application_info(*,
                             start_date: date,
@@ -98,3 +100,67 @@ def add_interview_person_to_application(*, application: Application, interview_p
     application.save()
 
     return application
+
+
+def generate_last_solutions_per_participant() -> 'last_solutions_per_task_per_participant_DICT':
+    '''
+    raw_solutions structure
+
+    raw_solutions[solution] = [(participant_id, task_id, solution_id), ...]
+    '''
+
+    raw_solutions = Solution.objects.values_list(
+        'participant', 'task', 'id').order_by('participant', 'task', '-id')
+    solutions = {}
+
+    for solution in raw_solutions:
+        if solution[0] in solutions.keys():
+            if solution[1] in solutions[solution[0]].keys():
+                pass
+            else:
+                solutions[solution[0]].update({solution[1]: solution[2]})
+        else:
+            solutions[solution[0]] = {solution[1]: solution[2]}
+
+    return solutions
+
+
+def get_valid_solutions(*, application_info: ApplicationInfo,
+                        solutions: 'last_solutions_per_task_per_participant_DICT') -> 'valid_solutions_DICT':
+    '''
+    solutions structure
+        solutions[solution] = (participant_id, task_id, solution_id)
+
+    '''
+    tasks_count = application_info.competition.tasks.all().count()
+
+    valid_solutions = {}
+
+    for item in solutions.keys():
+        if len(solutions[item].keys()) == tasks_count:
+            valid_solutions.update({item: solutions[item]})
+    else:
+        pass
+
+    return valid_solutions
+
+
+def get_partially_completed_applications1(*, valid_solutions: 'valid_solutions_DICT',
+                                          application_info: ApplicationInfo):
+    '''
+    expected valid_solutions structure
+
+    valid_solutions = {user_id: {task_idX: solution_id, task_idX+1:solution_id, task_idX+n: solution_id}, ...}
+    '''
+    valid_solutions_criteria = [user_id for user_id in valid_solutions.keys()]
+
+    applications = []
+    all_applications = application_info.applications.all().select_related('user', 'interview_person')
+
+    for application in all_applications:
+        if application.user.id in valid_solutions_criteria:
+            applications.append(application)
+        else:
+            pass
+
+    return applications
