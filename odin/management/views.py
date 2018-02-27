@@ -22,10 +22,9 @@ from odin.competitions.models import Competition
 
 from odin.applications.models import Application, ApplicationInfo
 from odin.applications.services import (
-    # get_partially_completed_applications,
+    get_partially_completed_applications,
     get_last_solutions_for_application,
     add_interview_person_to_application,
-    get_partially_completed_applications1
 )
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
@@ -299,7 +298,7 @@ class ApplicationsView(DashboardManagementPermission,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['applications'] = get_partially_completed_applications1(
+        context['applications'] = get_partially_completed_applications(
             application_info=self.application_info)
         context['applications_count'] = len(context['applications'])
 
