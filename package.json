@@ -21,7 +21,7 @@
     "url": "https://github.com/HackSoftware/Odin/issues"
   },
   "homepage": "https://github.com/HackSoftware/Odin#readme",
-  "dependencies": {
+  "devDpendencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
