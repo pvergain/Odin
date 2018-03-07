@@ -67,8 +67,7 @@ class TestCreateApplicationInfoView(TestCase):
 
         with self.login(email=self.user.email, password=self.test_password):
             response = self.post(self.url, data=data)
-
-            self.assertFalse(response.context_data['form'].is_valid())
+            self.assertEqual(302, response.status_code)
             self.assertEqual(current_app_info_count, ApplicationInfo.objects.count())
 
     def test_post_creates_instance_when_data_is_valid(self):
@@ -102,9 +101,11 @@ class TestCreateApplicationInfoView(TestCase):
         }
 
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data)
-            self.assertFalse(response.context_data['form'].is_valid())
-            self.assertEqual(current_app_info_count, ApplicationInfo.objects.count())
+            response = self.post(self.url, data=data, follow=True)
+            self.assertEqual(current_app_info_count,
+                             ApplicationInfo.objects.count())
+            message = list(response.context.get('messages'))[0]
+            self.assertTrue('Start date can not be after end date' in message.message)
 
 
 class TestApplyToCourseView(TestCase):
@@ -145,14 +146,17 @@ class TestApplyToCourseView(TestCase):
 
         current_app_count = Application.objects.count()
         data = {
+            'full_name': faker.name(),
             'phone': faker.phone_number(),
-            'works_at': faker.job()
+            'works_at': faker.job(),
+            'studies_at': faker.job(),
+            'skype': faker.word()
         }
 
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.post(self.url, data=data)
-
-            self.assertFalse(response.context_data['form'].is_valid())
+            self.response = self.post(self.url, data=data, follow=True)
+            self.assertContains(
+                self.response, f'The application period for {self.app_info.course} has expired!')
             self.assertEqual(current_app_count, Application.objects.count())
 
     def test_get_redirects_when_user_has_already_applied(self):
@@ -309,3 +313,21 @@ class TestEditApplicationView(TestCase):
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url)
             self.assertEqual(response.context['object'], self.application)
+
+    def test_can_update_application_when_application_is_closed(self):
+        self.app_info.start_date = timezone.now().date() - timezone.timedelta(days=30)
+        self.app_info.end_date = timezone.now().date() - timezone.timedelta(days=10)
+        self.app_info.save()
+
+        data = {
+            'phone': faker.phone_number(),
+            'works_at': faker.job(),
+            'skype': faker.word(),
+            'studies_at': faker.word()
+        }
+
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.post(self.url, data=data, follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(
+                response, f'The application period for {self.app_info.course} has expired!')

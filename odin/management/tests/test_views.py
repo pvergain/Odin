@@ -1,4 +1,5 @@
 from test_plus import TestCase
+from datetime import datetime
 
 from django.core.urlresolvers import reverse
 from django.utils import timezone
@@ -8,7 +9,7 @@ from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.interviews.models import Interviewer
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
 from odin.education.models import Student, Teacher, BaseUser, Course
-from odin.applications.factories import ApplicationInfoFactory
+from odin.applications.factories import ApplicationInfoFactory, ApplicationFactory
 
 from odin.common.faker import faker
 
@@ -380,3 +381,48 @@ class TestAddCourseToInterViewerCoursesView(TestCase):
             response = self.post(self.url, data=data)
             self.assertRedirects(response, expected_url=reverse('dashboard:management:index'))
             self.assertIn(self.course.application_info, self.interviewer.courses_to_interview.all())
+
+
+class TestApplicationAddInterviewPersonView(TestCase):
+    def setUp(self):
+        self.application = ApplicationFactory()
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        self.management_id = self.application.application_info.id
+        self.url = reverse('dashboard:management:application-interview-person',
+                           kwargs={'application_id': self.application.id})
+
+    def test_successfully_submited_data(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            data = {
+                'interview_person': self.user.id,
+                'management_id': self.management_id
+            }
+            response = self.post(self.url, data=data, follow=False)
+            self.assertEqual(200, response.status_code)
+
+    def test_cannot_add_interviewer_to_application(self):
+        self.application.application_info.end_date = datetime(2018, 2, 28)
+        self.application.save()
+        with self.login(email=self.user.email, password=self.test_password):
+            data = {
+                'interview_person': self.user.id,
+                'management_id': self.management_id
+            }
+            self.response = self.client.post(self.url, data=data, follow=True)
+            self.assertContains(self.response,
+                                f'The interview period for {self.application.application_info.course} has expired!')
+
+
+class TestAccessApplicationsManagementHidden(TestCase):
+    def setUp(self):
+        self.application = ApplicationFactory()
+        self.test_password = faker.password()
+        self.user = SuperUserFactory(password=self.test_password)
+        self.management_id = self.application.application_info.id
+        self.url = reverse('dashboard:management:applications', kwargs={'application_info_id': self.management_id})
+
+    def test_successful_access_with_superuser(self):
+        with self.login(email=self.user.email, password=self.test_password):
+            response = self.client.get(self.url)
+            self.assertEqual(200, response.status_code)
