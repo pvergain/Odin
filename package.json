@@ -7,6 +7,10 @@
     "build": "webpack -d",
     "postinstall": "cd ui && ../node_modules/.bin/bower install && cd ../ && npm run build"
   },
+  "engines": {
+    "node": "8.6.0",
+    "npm": "5.3.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HackSoftware/Odin.git"
