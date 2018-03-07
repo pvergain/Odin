@@ -1,6 +1,5 @@
 from django.utils import timezone
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.apps import apps
 
 from tinymce.models import HTMLField
@@ -45,16 +44,6 @@ class ApplicationInfo(models.Model):
         return self.start_interview_date <= timezone.now().date() and \
                self.end_interview_date >= timezone.now().date()
 
-    def clean(self):
-        if self.course.start_date < timezone.now().date():
-            raise ValidationError(f"{self.course} has already started")
-
-        if self.start_date >= self.end_date:
-            raise ValidationError("Start date can not be after end date")
-
-            if self.start_interview_date >= self.end_interview_date:
-                raise ValidationError("Start interview date can not be after end interview date")
-
     @property
     def has_competition(self):
         return hasattr(self, 'competition')
@@ -87,10 +76,6 @@ class Application(models.Model):
 
     class Meta:
         unique_together = (("application_info", "user"),)
-
-    def clean(self):
-        if not self.application_info.apply_is_active():
-            raise ValidationError(f"The application period for {self.application_info.course} has expired!")
 
     @property
     def is_completed(self):

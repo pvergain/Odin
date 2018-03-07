@@ -1,7 +1,7 @@
 {% if not form.is_valid %}
-  {% for key, value in errors.items %}
-    <div class="alert alert-warning">
-      {{ key }}: {{ value }}
-    </div>
-  {% endfor %}
-{% endif %}
+    {% for key, value in errors.items %}
+      <div class="alert alert-warning">
+        {{ key }}: {{ value }}
+      </div>
+    {% endfor %}
+  {% endif %}
