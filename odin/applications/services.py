@@ -1,6 +1,8 @@
 from datetime import date
 
 from django.apps import apps
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from .models import (
     Application,
@@ -8,6 +10,26 @@ from .models import (
 )
 from odin.education.models import Course
 from odin.users.models import BaseUser
+
+
+def validate_can_create_application_info(*, instance: ApplicationInfo):
+
+    if instance.course.start_date < timezone.now().date():
+        raise ValidationError(f"{instance.course} has already started")
+
+    if instance.start_date >= instance.end_date:
+        raise ValidationError("Start date can not be after end date")
+
+        if instance.start_interview_date >= instance.end_interview_date:
+            raise ValidationError(
+                "Start interview date can not be after end interview date")
+
+
+def validate_can_create_or_update_application(*, instance: Application):
+
+    if not instance.application_info.apply_is_active():
+        raise ValidationError(
+            f"The application period for {instance.application_info.course} has expired!")
 
 
 def create_application_info(*,
@@ -28,6 +50,7 @@ def create_application_info(*,
                                external_application_form=external_application_form)
 
     instance.full_clean()
+    validate_can_create_application_info(instance=instance)
     instance.save()
 
     return instance
@@ -54,6 +77,7 @@ def create_application(*,
     )
 
     instance.full_clean()
+    validate_can_create_or_update_application(instance=instance)
     instance.save()
 
     if user.profile:
@@ -91,6 +115,15 @@ def get_partially_completed_applications(*, application_info: ApplicationInfo):
             result.append(application)
 
     return result
+
+
+def validate_can_add_interviewer_to_application(*, application: Application):
+    application = application
+    if not application.application_info.interview_is_active():
+        raise ValidationError(
+            f'The interview period for {application.application_info.course} has expired!')
+    else:
+        return application
 
 
 def add_interview_person_to_application(*, application: Application, interview_person: BaseUser) -> Application:

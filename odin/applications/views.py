@@ -9,7 +9,10 @@ from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
+from django.core.exceptions import ValidationError
+
 from odin.common.mixins import CallServiceMixin, ReadableFormErrorsMixin
+from odin.applications.services import validate_can_create_or_update_application
 
 from odin.education.mixins import CourseViewMixin
 from odin.education.models import Course
@@ -47,7 +50,11 @@ class CreateApplicationInfoView(LoginRequiredMixin,
     template_name = "applications/create_application_info.html"
 
     def form_valid(self, form):
-        self.call_service(service=create_application_info, service_kwargs=form.cleaned_data)
+        try:
+            self.call_service(service=create_application_info, service_kwargs=form.cleaned_data)
+        except ValidationError as err:
+            messages.add_message(self.request, messages.WARNING, err.message)
+            return super().form_invalid(form)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -96,7 +103,11 @@ class ApplyToCourseView(LoginRequiredMixin,
         return reverse_lazy('dashboard:applications:user-applications')
 
     def form_valid(self, form):
-        self.application = self.call_service(service_kwargs=form.cleaned_data)
+        try:
+            self.application = self.call_service(service_kwargs=form.cleaned_data)
+        except ValidationError as err:
+            messages.warning(request=self.request, message=err.message)
+            return super().form_invalid(form)
 
         if self.course.application_info.has_competition:
             messages.success(
@@ -193,7 +204,12 @@ class EditApplicationView(LoginRequiredMixin,
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, 'Successfully updated application.')
+        try:
+            validate_can_create_or_update_application(instance=form.instance)
+            messages.success(self.request, 'Successfully updated application.')
+        except ValidationError as err:
+            messages.warning(self.request, err.message)
+            return super().form_invalid(form)
 
         return super().form_valid(form)
 

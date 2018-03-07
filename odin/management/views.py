@@ -24,7 +24,8 @@ from odin.applications.models import Application, ApplicationInfo
 from odin.applications.services import (
     get_partially_completed_applications,
     get_last_solutions_for_application,
-    add_interview_person_to_application
+    add_interview_person_to_application,
+    validate_can_add_interviewer_to_application
 )
 
 from odin.common.mixins import ReadableFormErrorsMixin, CallServiceMixin
@@ -43,6 +44,9 @@ from .forms import (
 )
 
 from odin.applications.forms import ApplicationInterviewerUpdateForm
+
+from django.core.exceptions import ValidationError
+from django.contrib import messages
 
 
 class DashboardManagementView(DashboardManagementPermission,
@@ -340,8 +344,14 @@ class ApplicationInterviewPersonView(DashboardManagementPermission,
     model = Application
     form_class = ApplicationInterviewerUpdateForm
     pk_url_kwarg = 'application_id'
+    template_name = 'management/application_interview_person.html'
 
     def form_valid(self, form):
+        try:
+            validate_can_add_interviewer_to_application(application=form.instance)
+        except ValidationError as err:
+            messages.warning(request=self.request, message=err.message)
+            return super().form_invalid(form)
         add_interview_person_to_application(application=form.instance, **form.cleaned_data)
         return super().form_valid(form)
 
