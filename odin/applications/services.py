@@ -91,8 +91,9 @@ def create_application(*,
 
     return instance
 
+
 def validate_can_add_interviewer_to_application(*, application: Application):
-    
+
     if not application.application_info.interview_is_active():
         raise ValidationError(
             f'The interview period for {application.application_info.course} has expired!')
@@ -105,6 +106,7 @@ def add_interview_person_to_application(*, application: Application, interview_p
     application.save()
 
     return application
+
 
 def get_last_solutions_for_application(*, application: Application):
     Solution = apps.get_model('competitions', 'Solution')
@@ -182,5 +184,3 @@ def get_partially_completed_applications(*, valid_solutions: 'valid_solutions_DI
             pass
 
     return applications
-
-

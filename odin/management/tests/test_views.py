@@ -424,7 +424,8 @@ class TestAccessApplicationsManagementHidden(TestCase):
         self.start_interview_date = self.end_date + timedelta(days=1)
         self.end_interview_date = self.end_date + timedelta(days=5)
         self.application_info = ApplicationInfoFactory(start_date=self.start_date,
-                                                       end_date=self.end_date, start_interview_date=self.start_interview_date,
+                                                       end_date=self.end_date,
+                                                       start_interview_date=self.start_interview_date,
                                                        end_interview_date=self.end_interview_date)
         self.competition.application_info = self.application_info
         self.competition.save()
