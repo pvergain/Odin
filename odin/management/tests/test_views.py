@@ -436,7 +436,6 @@ class TestAccessApplicationsManagementHidden(TestCase):
         self.url = reverse('dashboard:management:applications', kwargs={'application_info_id': self.management_id})
 
     def test_successful_access_with_superuser(self):
-        import ipdb; ipdb.set_trace()
         with self.login(email=self.user.email, password=self.test_password):
             response = self.get(self.url, follow=True)
             self.assertEqual(200, response.status_code)
