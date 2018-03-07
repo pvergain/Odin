@@ -118,7 +118,7 @@ def get_partially_completed_applications(*, application_info: ApplicationInfo):
 
 
 def validate_can_add_interviewer_to_application(*, application: Application):
-    application = application
+
     if not application.application_info.interview_is_active():
         raise ValidationError(
             f'The interview period for {application.application_info.course} has expired!')

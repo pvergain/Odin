@@ -53,7 +53,7 @@ class CreateApplicationInfoView(LoginRequiredMixin,
         try:
             self.call_service(service=create_application_info, service_kwargs=form.cleaned_data)
         except ValidationError as err:
-            messages.add_message(self.request, messages.WARNING, err.message)
+            messages.warning(self.request, err.message)
             return super().form_invalid(form)
         return super().form_valid(form)
 
