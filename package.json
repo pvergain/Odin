@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Odin is the new Loki. LMS for HackSoft Academy",
   "main": "index.js",
+"  engines": {
+    "node": "8.10.0"
+  },
   "scripts": {
     "build": "webpack -d",
     "postinstall": "cd ui && ../node_modules/.bin/bower install && cd ../ && npm run build"
