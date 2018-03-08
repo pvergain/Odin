@@ -1,3 +1,4 @@
+from typing import Dict
 from datetime import date
 
 from django.apps import apps
@@ -10,6 +11,8 @@ from .models import (
 )
 from odin.education.models import Course
 from odin.users.models import BaseUser
+
+from odin.competitions.models import Solution
 
 
 def validate_can_create_application_info(*, instance: ApplicationInfo):
@@ -90,33 +93,6 @@ def create_application(*,
     return instance
 
 
-def get_last_solutions_for_application(*, application: Application):
-    Solution = apps.get_model('competitions', 'Solution')
-
-    tasks = {
-        task: Solution.objects.filter(
-            participant=application.user,
-            task=task
-        ).last()
-        for task in application.application_info.competition.tasks.all()
-    }
-
-    return tasks
-
-
-def get_partially_completed_applications(*, application_info: ApplicationInfo):
-    related = ['interview_person']
-
-    applications = Application.objects.select_related(*related).filter(application_info=application_info)
-    result = []
-
-    for application in applications:
-        if application.is_partially_completed:
-            result.append(application)
-
-    return result
-
-
 def validate_can_add_interviewer_to_application(*, application: Application):
 
     if not application.application_info.interview_is_active():
@@ -131,3 +107,78 @@ def add_interview_person_to_application(*, application: Application, interview_p
     application.save()
 
     return application
+
+
+def get_last_solutions_for_application(*, application: Application):
+    Solution = apps.get_model('competitions', 'Solution')
+
+    tasks = {
+        task: Solution.objects.filter(
+            participant=application.user,
+            task=task
+        ).last()
+        for task in application.application_info.competition.tasks.all()
+    }
+
+    return tasks
+
+
+def generate_last_solutions_per_participant() -> Dict[int, Dict]:
+    """
+    returns last_solutions_per_task_per_participant_DICT
+    raw_solutions structure
+
+    raw_solutions[solution] = [(participant_id, task_id, solution_id), ...]
+    """
+
+    raw_solutions = Solution.objects.values(
+        'participant', 'task', 'id').order_by('participant', 'task', '-id')
+    solutions = {}
+
+    for solution in raw_solutions:
+        if solution['participant'] in solutions.keys():
+            if not solution['task'] in solutions[solution['participant']].keys():
+                solutions[solution['participant']].update({solution['task']: solution['id']})
+        else:
+            solutions[solution['participant']] = {solution['task']: solution['id']}
+
+    return solutions
+
+
+def get_valid_solutions(*, application_info: ApplicationInfo,
+                        solutions: 'last_solutions_per_task_per_participant_DICT') -> Dict:
+    """
+    returns valid_solutions_DICT
+
+    solutions structure
+        solutions[solution] = (participant_id, task_id, solution_id)
+
+    """
+    tasks_count = application_info.competition.tasks.all().count()
+
+    valid_solutions = {}
+
+    for item in solutions.keys():
+        if len(solutions[item].keys()) == tasks_count:
+            valid_solutions.update({item: solutions[item]})
+
+    return valid_solutions
+
+
+def get_partially_completed_applications(*, valid_solutions: 'valid_solutions_DICT',
+                                         application_info: ApplicationInfo):
+    '''
+    expected valid_solutions structure
+
+    valid_solutions = {user_id: {task_idX: solution_id, task_idX+1:solution_id, task_idX+n: solution_id}, ...}
+    '''
+    valid_solutions_criteria = [user_id for user_id in valid_solutions.keys()]
+
+    applications = []
+    all_applications = application_info.applications.all().select_related('user', 'interview_person')
+
+    for application in all_applications:
+        if application.user.id in valid_solutions_criteria:
+            applications.append(application)
+
+    return applications

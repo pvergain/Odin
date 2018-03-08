@@ -1,5 +1,5 @@
 from test_plus import TestCase
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.core.urlresolvers import reverse
 from django.utils import timezone
@@ -9,7 +9,8 @@ from odin.users.factories import BaseUserFactory, SuperUserFactory
 from odin.interviews.models import Interviewer
 from odin.education.factories import TeacherFactory, StudentFactory, CourseFactory
 from odin.education.models import Student, Teacher, BaseUser, Course
-from odin.applications.factories import ApplicationInfoFactory, ApplicationFactory
+from odin.applications.factories import ApplicationInfoFactory, ApplicationFactory, CompetitionFactory
+from odin.competitions.factories import CompetitionTaskFactory
 
 from odin.common.faker import faker
 
@@ -416,7 +417,20 @@ class TestApplicationAddInterviewPersonView(TestCase):
 
 class TestAccessApplicationsManagementHidden(TestCase):
     def setUp(self):
-        self.application = ApplicationFactory()
+        self.competition = CompetitionFactory()
+        self.tasks = [CompetitionTaskFactory(competition=self.competition) for i in range(3)]
+        self.start_date = timezone.now().date()
+        self.end_date = timezone.now().date() + timedelta(days=10)
+        self.start_interview_date = self.end_date + timedelta(days=1)
+        self.end_interview_date = self.end_date + timedelta(days=5)
+        self.application_info = ApplicationInfoFactory(start_date=self.start_date,
+                                                       end_date=self.end_date,
+                                                       start_interview_date=self.start_interview_date,
+                                                       end_interview_date=self.end_interview_date)
+        self.competition.application_info = self.application_info
+        self.competition.save()
+        self.application = ApplicationFactory(application_info=self.application_info)
+        self.application.save()
         self.test_password = faker.password()
         self.user = SuperUserFactory(password=self.test_password)
         self.management_id = self.application.application_info.id
@@ -424,5 +438,5 @@ class TestAccessApplicationsManagementHidden(TestCase):
 
     def test_successful_access_with_superuser(self):
         with self.login(email=self.user.email, password=self.test_password):
-            response = self.client.get(self.url)
+            response = self.get(self.url, follow=True)
             self.assertEqual(200, response.status_code)
