@@ -1,4 +1,4 @@
-from typing import Dict, str, int
+from typing import Dict
 from datetime import date
 
 from django.apps import apps
