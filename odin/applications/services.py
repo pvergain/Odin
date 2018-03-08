@@ -1,3 +1,4 @@
+from typing import Dict, str, int
 from datetime import date
 
 from django.apps import apps
@@ -122,12 +123,13 @@ def get_last_solutions_for_application(*, application: Application):
     return tasks
 
 
-def generate_last_solutions_per_participant() -> 'last_solutions_per_task_per_participant_DICT':
-    '''
+def generate_last_solutions_per_participant() -> Dict[int, Dict]:
+    """
+    returns last_solutions_per_task_per_participant_DICT
     raw_solutions structure
 
     raw_solutions[solution] = [(participant_id, task_id, solution_id), ...]
-    '''
+    """
 
     raw_solutions = Solution.objects.values_list(
         'participant', 'task', 'id').order_by('participant', 'task', '-id')
@@ -135,9 +137,7 @@ def generate_last_solutions_per_participant() -> 'last_solutions_per_task_per_pa
 
     for solution in raw_solutions:
         if solution[0] in solutions.keys():
-            if solution[1] in solutions[solution[0]].keys():
-                pass
-            else:
+            if not solution[1] in solutions[solution[0]].keys():
                 solutions[solution[0]].update({solution[1]: solution[2]})
         else:
             solutions[solution[0]] = {solution[1]: solution[2]}
@@ -146,12 +146,14 @@ def generate_last_solutions_per_participant() -> 'last_solutions_per_task_per_pa
 
 
 def get_valid_solutions(*, application_info: ApplicationInfo,
-                        solutions: 'last_solutions_per_task_per_participant_DICT') -> 'valid_solutions_DICT':
-    '''
+                        solutions: 'last_solutions_per_task_per_participant_DICT') -> Dict:
+    """
+    returns valid_solutions_DICT
+
     solutions structure
         solutions[solution] = (participant_id, task_id, solution_id)
 
-    '''
+    """
     tasks_count = application_info.competition.tasks.all().count()
 
     valid_solutions = {}
@@ -159,8 +161,6 @@ def get_valid_solutions(*, application_info: ApplicationInfo,
     for item in solutions.keys():
         if len(solutions[item].keys()) == tasks_count:
             valid_solutions.update({item: solutions[item]})
-    else:
-        pass
 
     return valid_solutions
 
@@ -180,7 +180,5 @@ def get_partially_completed_applications(*, valid_solutions: 'valid_solutions_DI
     for application in all_applications:
         if application.user.id in valid_solutions_criteria:
             applications.append(application)
-        else:
-            pass
 
     return applications
