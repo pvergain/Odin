@@ -131,16 +131,16 @@ def generate_last_solutions_per_participant() -> Dict[int, Dict]:
     raw_solutions[solution] = [(participant_id, task_id, solution_id), ...]
     """
 
-    raw_solutions = Solution.objects.values_list(
+    raw_solutions = Solution.objects.values(
         'participant', 'task', 'id').order_by('participant', 'task', '-id')
     solutions = {}
 
     for solution in raw_solutions:
-        if solution[0] in solutions.keys():
-            if not solution[1] in solutions[solution[0]].keys():
-                solutions[solution[0]].update({solution[1]: solution[2]})
+        if solution['participant'] in solutions.keys():
+            if not solution['task'] in solutions[solution['participant']].keys():
+                solutions[solution['participant']].update({solution['task']: solution['id']})
         else:
-            solutions[solution[0]] = {solution[1]: solution[2]}
+            solutions[solution['participant']] = {solution['task']: solution['id']}
 
     return solutions
 
