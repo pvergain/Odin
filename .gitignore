@@ -84,3 +84,9 @@ dist/
 
 # Editor specific
 .tern-port
+
+# Visual studio code
+.vscode*
+
+#project notes file
+notes.txt
