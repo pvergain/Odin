@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.generics import ListAPIView
 
-from odin.apis.authentication import JSONWebTokenAuthenticationMixin
+from odin.authentication.apis.permissions import JSONWebTokenAuthenticationMixin
 
 from odin.education.models import Course
 

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
 
-from odin.apis.authentication import JSONWebTokenAuthenticationMixin
+from odin.authentication.apis.permissions import JSONWebTokenAuthenticationMixin
 
 from odin.education.apis.services import (
     get_all_course_assignments_per_student,
