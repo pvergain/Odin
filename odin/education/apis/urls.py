@@ -4,6 +4,8 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 from .views import MainView, SolutionStatusView
 
+from .courses import StudentCoursesApi
+
 urlpatterns = [
     url(
         regex='^(?P<task_id>[0-9]+)',
@@ -27,5 +29,9 @@ urlpatterns = [
     url(
         regex='^token-refresh/',
         view=refresh_jwt_token
+    ),
+    url(
+        regex='^courses/$',
+        view=StudentCoursesApi.as_view()
     ),
 ]
