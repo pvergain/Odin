@@ -1,13 +1,15 @@
 from rest_framework import serializers
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView, get_object_or_404
+from rest_framework.response import Response
 
-from odin.education.models import Course
+from odin.education.models import Course, Student
 from odin.education.services import get_gradable_tasks_for_course
 
-from .permissions import StudentCoursesAuthenticationMixin
+from .permissions import StudentCourseAuthenticationMixin
 
 
-class StudentCoursesApi(StudentCoursesAuthenticationMixin, ListAPIView):
+class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
     class Serializer(serializers.ModelSerializer):
         class Meta:
             model = Course
@@ -21,12 +23,14 @@ class StudentCoursesApi(StudentCoursesAuthenticationMixin, ListAPIView):
     serializer_class = Serializer
 
     def get_queryset(self):
+        student = self.request.user.downcast(Student)
+
         return Course.objects\
-                     .filter(course_assignments__student=self.student)\
+                     .filter(course_assignments__student=student)\
                      .order_by('-id')
 
 
-class CourseDetailApi(RetrieveAPIView):
+class CourseDetailApi(APIView):
     class CourseSerializer(serializers.ModelSerializer):
         problems = serializers.SerializerMethodField()
 
@@ -41,18 +45,25 @@ class CourseDetailApi(RetrieveAPIView):
                       'problems')
 
         def get_problems(self, obj):
-            tasks = get_gradable_tasks_for_course(course=obj)
-
             return [
                 {
                     'name': task.name,
                     'description': task.description,
-                    'gradable': task.gradable
-                } for task in tasks
+                    'gradable': task.gradable,
+                    'last_solution': task.last_solution and {
+                        'id': task.last_solution.id,
+                        'status': task.last_solution.verbose_status
+                    } or None
+                } for task in obj.tasks
             ]
-
-    serializer_class = CourseSerializer
-    lookup_url_kwarg = 'course_id'
 
     def get_queryset(self):
         return Course.objects.prefetch_related('topics__tasks')
+
+    def get(self, request, course_id):
+        course = get_object_or_404(self.get_queryset(), pk=course_id)
+        student = self.request.user.downcast(Student)
+
+        course.tasks = get_gradable_tasks_for_course(course=course, student=student)
+
+        return Response(self.CourseSerializer(instance=course).data)

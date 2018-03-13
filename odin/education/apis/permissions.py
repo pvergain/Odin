@@ -18,12 +18,11 @@ class IsStudentPermission(BasePermission):
         student = user.downcast(Student)
 
         if student is not None:
-            view.student = student
             return True
 
         return False
 
 
-class StudentCoursesAuthenticationMixin(JSONWebTokenAuthenticationMixin):
+class StudentCourseAuthenticationMixin(JSONWebTokenAuthenticationMixin):
     def get_permissions(self):
         return super().get_permissions() + [IsStudentPermission()]
