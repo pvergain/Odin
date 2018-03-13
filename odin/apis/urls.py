@@ -1,0 +1,8 @@
+from django.conf.urls import include, url
+
+urlpatterns = [
+    url(
+        regex='^education/',
+        view=include('odin.education.apis.urls', namespace='education')
+    )
+]

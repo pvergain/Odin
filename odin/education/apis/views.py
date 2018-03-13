@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from odin.education.api.services import (
+from odin.education.apis.services import (
     get_all_course_assignments_per_student,
     get_gradable_tasks_per_course,
     get_all_topics_for_courses_of_a_student
