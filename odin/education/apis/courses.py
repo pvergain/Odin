@@ -47,12 +47,14 @@ class CourseDetailApi(APIView):
         def get_problems(self, obj):
             return [
                 {
+                    'id': task.id,
                     'name': task.name,
                     'description': task.description,
                     'gradable': task.gradable,
                     'last_solution': task.last_solution and {
                         'id': task.last_solution.id,
-                        'status': task.last_solution.verbose_status
+                        'status': task.last_solution.verbose_status,
+                        'code': task.last_solution.code
                     } or None
                 } for task in obj.tasks
             ]
