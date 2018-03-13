@@ -296,3 +296,14 @@ def create_solution_comment(*,
     comment.save()
 
     return comment
+
+
+def get_gradable_tasks_for_course(*, course: Course):
+    tasks = []
+
+    for topic in course.topics.all():
+        for task in topic.tasks.all():
+            if task.gradable:
+                tasks.append(task)
+
+    return tasks

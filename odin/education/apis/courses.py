@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from odin.education.models import Course
+from odin.education.services import get_gradable_tasks_for_course
 
 from .permissions import StudentCoursesAuthenticationMixin
 
@@ -25,8 +26,10 @@ class StudentCoursesApi(StudentCoursesAuthenticationMixin, ListAPIView):
                      .order_by('-id')
 
 
-class CourseDetailApi(StudentCoursesAuthenticationMixin, RetrieveAPIView):
-    class Serializer(serializers.ModelSerializer):
+class CourseDetailApi(RetrieveAPIView):
+    class CourseSerializer(serializers.ModelSerializer):
+        problems = serializers.SerializerMethodField()
+
         class Meta:
             model = Course
             fields = ('id',
@@ -34,8 +37,22 @@ class CourseDetailApi(StudentCoursesAuthenticationMixin, RetrieveAPIView):
                       'start_date',
                       'end_date',
                       'logo',
-                      'slug_url')
+                      'slug_url',
+                      'problems')
 
-    serializer_class = Serializer
-    queryset = Course.objects.all()
+        def get_problems(self, obj):
+            tasks = get_gradable_tasks_for_course(course=obj)
+
+            return [
+                {
+                    'name': task.name,
+                    'description': task.description,
+                    'gradable': task.gradable
+                } for task in tasks
+            ]
+
+    serializer_class = CourseSerializer
     lookup_url_kwarg = 'course_id'
+
+    def get_queryset(self):
+        return Course.objects.prefetch_related('topics__tasks')
