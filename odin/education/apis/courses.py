@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from rest_framework.generics import ListAPIView
 
+from odin.apis.authentication import JSONWebTokenAuthenticationMixin
+
 from odin.education.models import Course
 
 
-class StudentCoursesApi(ListAPIView):
+class StudentCoursesApi(JSONWebTokenAuthenticationMixin, ListAPIView):
     class Serializer(serializers.ModelSerializer):
         class Meta:
             model = Course

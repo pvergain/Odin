@@ -4,4 +4,4 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 class JSONWebTokenAuthenticationMixin:
     authentication_classes = (JSONWebTokenAuthentication,)
-    permissions_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, )
