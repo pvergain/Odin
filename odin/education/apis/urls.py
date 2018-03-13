@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from .views import MainView, SolutionStatusView
 
-from .courses import StudentCoursesApi
+from .courses import StudentCoursesApi, CourseDetailApi
 
 urlpatterns = [
     url(
@@ -23,5 +23,9 @@ urlpatterns = [
     url(
         regex='^courses/$',
         view=StudentCoursesApi.as_view()
+    ),
+    url(
+        regex='^courses/(?P<course_id>[0-9]+)/$',
+        view=CourseDetailApi.as_view()
     ),
 ]
