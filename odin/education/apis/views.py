@@ -1,28 +1,21 @@
 import json
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+from django.shortcuts import get_object_or_404
+
+from odin.apis.authentication import JSONWebTokenAuthenticationMixin
+
 from odin.education.apis.services import (
     get_all_course_assignments_per_student,
     get_gradable_tasks_per_course,
     get_all_topics_for_courses_of_a_student
 )
-
 from odin.education.services import create_gradable_solution
-from odin.grading.services import start_grader_communication
-from django.shortcuts import get_object_or_404
-
 from odin.education.models import IncludedTask, Solution
 
-'''
-Create your views here
-'''
-
-
-class JSONWebTokenAuthenticationMixin:
-    authentication_classes = (JSONWebTokenAuthentication,)
-    permissions_classes = (IsAuthenticated, )
+from odin.grading.services import start_grader_communication
 
 
 class MainView(JSONWebTokenAuthenticationMixin, APIView):
