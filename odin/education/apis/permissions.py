@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 
+from odin.authentication.apis.permissions import JSONWebTokenAuthenticationMixin
+
 from odin.education.models import Student
 
 
@@ -20,3 +22,8 @@ class IsStudentPermission(BasePermission):
             return True
 
         return False
+
+
+class StudentCoursesAuthenticationMixin(JSONWebTokenAuthenticationMixin):
+    def get_permissions(self):
+        return super().get_permissions() + [IsStudentPermission()]
