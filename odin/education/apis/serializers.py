@@ -27,10 +27,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(read_only=True)
 
     class Meta:
         model = BaseUser
-        fields = ('id', 'email', 'profile')
+        fields = ('id', 'email')
 
         depth = 1

@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_jwt.views import ObtainJSONWebToken
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ProfileSerializer
 
 from rest_framework_jwt.settings import api_settings
 
@@ -19,8 +19,10 @@ class LoginUnitedApi(ObtainJSONWebToken):
             user = serializer.object.get('user') or request.user
             token = serializer.object.get('token')
             user_data = UserSerializer(instance=user).data
+            profile_data = ProfileSerializer(instance=user.profile).data
+            full_data = {**user_data, **profile_data}
             response_data = jwt_response_payload_handler(token, user, request)
-            response_data.update({'me': user_data})
+            response_data.update({'me': full_data})
             response = Response(response_data)
             if api_settings.JWT_AUTH_COOKIE:
                 expiration = (datetime.utcnow() +
