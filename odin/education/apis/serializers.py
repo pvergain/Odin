@@ -31,5 +31,3 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = BaseUser
         fields = ('id', 'email')
-
-        depth = 1
