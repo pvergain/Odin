@@ -1,7 +1,7 @@
 import datetime
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework_jwt.views import JSONWebTokenAPIView, JSONWebTokenSerializer
+from rest_framework_jwt.views import ObtainJSONWebToken
 
 from .serializers import UserSerializer
 
@@ -10,8 +10,7 @@ from rest_framework_jwt.settings import api_settings
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
 
-class LoginUnitedApi(JSONWebTokenAPIView):
-    serializer_class = JSONWebTokenSerializer
+class LoginUnitedApi(ObtainJSONWebToken):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

@@ -19,14 +19,10 @@ class TaskSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
         class Meta:
             model = Profile
-            fields = ('id',
-                      'full_name',
+            fields = ('full_name',
                       'full_image',
-                      'skype',
                       'avatar',
-                      'studies_at',
-                      'social_accounts',
-                      'works_at')
+                      )
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,4 +30,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BaseUser
-        fields = ('id', 'name', 'email', 'profile')
+        fields = ('id', 'email', 'profile')
+
+        depth = 1
