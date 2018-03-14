@@ -65,4 +65,4 @@ Collectfast==0.5.2
 
 django-tinymce==2.7.0
 
-django-cors-headers=2.2.0
+django-cors-headers==2.2.0
