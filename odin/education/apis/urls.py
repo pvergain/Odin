@@ -4,16 +4,18 @@ from .courses import StudentCoursesApi, CourseDetailApi
 
 from .tasks import TaskDetailApi
 
-from .solutions import SolutionSubmitAPIView
+from .solutions import SolutionSubmitApi
+
+from .user import UserDetailApi
 
 urlpatterns = [
     url(
         regex='^solution/$',
-        view=SolutionSubmitAPIView.as_view(),
+        view=SolutionSubmitApi.as_view(),
     ),
     url(
         regex='^solution/(?P<solution_id>[0-9]+)$',
-        view=SolutionSubmitAPIView.as_view(),
+        view=SolutionSubmitApi.as_view(),
     ),
     url(
         regex='^courses/$',
@@ -26,5 +28,9 @@ urlpatterns = [
     url(
         regex='^task/(?P<task_id>[0-9]+)/$',
         view=TaskDetailApi.as_view()
+    ),
+    url(
+        regex='^me/$',
+        view=UserDetailApi.as_view()
     ),
 ]

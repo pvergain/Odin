@@ -11,7 +11,7 @@ from odin.education.services import create_gradable_solution
 from odin.grading.services import start_grader_communication
 
 
-class SolutionSubmitAPIView(JSONWebTokenAuthenticationMixin, APIView):
+class SolutionSubmitApi(JSONWebTokenAuthenticationMixin, APIView):
     def get(self, request, *args, **kwargs):
         solution_id = kwargs['solution_id']
         solution = get_object_or_404(Solution, id=solution_id)
