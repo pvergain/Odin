@@ -19,7 +19,6 @@ class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
             )
 
         def get_solutions(self, obj):
-            import ipdb
             solutions = [
                 {
                     'id': solution.id,
