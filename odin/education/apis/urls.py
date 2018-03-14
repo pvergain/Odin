@@ -6,7 +6,6 @@ from .tasks import TaskDetailApi
 
 from .solutions import SolutionSubmitApi
 
-from .user import UserDetailApi
 
 urlpatterns = [
     url(
@@ -28,9 +27,5 @@ urlpatterns = [
     url(
         regex='^task/(?P<task_id>[0-9]+)/$',
         view=TaskDetailApi.as_view()
-    ),
-    url(
-        regex='^me/$',
-        view=UserDetailApi.as_view()
     ),
 ]
