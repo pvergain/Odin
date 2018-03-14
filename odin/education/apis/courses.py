@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 
-from odin.education.models import Course, Student, IncludedTask
+from odin.education.models import Course, Student
 from odin.education.services import get_gradable_tasks_for_course
 
 from .permissions import StudentCourseAuthenticationMixin
@@ -69,41 +69,3 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
         course.tasks = get_gradable_tasks_for_course(course=course, student=student)
 
         return Response(self.CourseSerializer(instance=course).data)
-
-
-class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
-    class TaskSerializer(serializers.ModelSerializer):
-        solutions = serializers.SerializerMethodField()
-
-        class Meta:
-            model = IncludedTask
-            fields = (
-                'created_at',
-                'description',
-                'gradable',
-                'solutions'
-            )
-
-        def get_solutions(self, obj):
-            import ipdb; ipdb.set_trace()
-            solutions = [
-                {
-                    'id': solution.id,
-                    'code': solution.code,
-                    'status': solution.verbose_status,
-                    'test_result': solution.test_output,
-                    'student_id': solution.student_id
-                } for solution in obj.valid_solutions
-            ]
-
-            if solutions:
-                return solutions
-            else:
-                return None
-
-    def get(self, request, task_id):
-        student = self.request.user.downcast(Student)
-        task = IncludedTask.objects.get(id=task_id)
-        task.valid_solutions = task.solutions.filter(student_id=student.id)
-
-        return Response(self.TaskSerializer(instance=task).data)

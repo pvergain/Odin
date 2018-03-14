@@ -1,24 +1,19 @@
 from django.conf.urls import url
 
-from .views import MainView, SolutionStatusView
+from .courses import StudentCoursesApi, CourseDetailApi
 
-from .courses import StudentCoursesApi, CourseDetailApi, TaskDetailApi
+from .tasks import TaskDetailApi
+
+from .solutions import SolutionSubmitAPIView
 
 urlpatterns = [
     url(
-        regex='^(?P<task_id>[0-9]+)',
-        view=MainView.as_view(),
-        name='api_index_get'
+        regex='^solution/$',
+        view=SolutionSubmitAPIView.as_view(),
     ),
     url(
-        regex='^$',
-        view=MainView.as_view(),
-        name='api_index'
-    ),
-    url(
-        regex='^solution/(?P<solution_id>[0-9]+)',
-        view=SolutionStatusView.as_view(),
-        name='solution_status'
+        regex='^solution/(?P<solution_id>[0-9]+)$',
+        view=SolutionSubmitAPIView.as_view(),
     ),
     url(
         regex='^courses/$',
