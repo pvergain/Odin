@@ -17,10 +17,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+        avatar = serializers.FileField(source='full_image')
+
         class Meta:
             model = Profile
             fields = ('full_name',
-                      'full_image',
                       'avatar',
                       )
 
