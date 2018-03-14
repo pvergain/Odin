@@ -20,7 +20,6 @@ class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
                       )
 
         def get_profile(self, obj):
-            import ipdb; ipdb.set_trace()
             return {
                     'full_image': obj.profile.full_image.path,
                     'full_name': obj.profile.full_name,
@@ -33,7 +32,7 @@ class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
     def get(self, request):
         user = self.request.user
         if user.profile.social_accounts:
-            user.socials = {key:value for key,value in user.profile.social_accounts.items()}
+            user.socials = {key: value for key, value in user.profile.social_accounts.items()}
         else:
             user.socials = None
 
