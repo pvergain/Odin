@@ -2,38 +2,36 @@ from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework.response import Response
 
-from odin.education.models import BaseUser
+from odin.users.models import Profile
 
 from .permissions import StudentCourseAuthenticationMixin
 
 
 class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
     class UserSerializer(serializers.ModelSerializer):
-        profile = serializers.SerializerMethodField()
+        user = serializers.SerializerMethodField()
 
         class Meta:
-            model = BaseUser
+            model = Profile
             fields = ('id',
-                      'name',
-                      'email',
-                      'profile'
+                      'full_name',
+                      'full_image',
+                      'skype',
+                      'studies_at',
+                      'social_accounts',
+                      'works_at',
+                      'user'
                       )
 
-        def get_profile(self, obj):
+        def get_user(self, obj):
             return {
-                    'full_image': obj.profile.full_image.path,
-                    'full_name': obj.profile.full_name,
-                    'skype': obj.profile.skype,
-                    'social_accounts': obj.socials,
-                    'studies_at': obj.profile.studies_at,
-                    'works_at': obj.profile.works_at
+                    'name': obj.user.name,
+                    'email': obj.user.email,
                 }
 
     def get(self, request):
-        user = self.request.user
-        if user.profile.social_accounts:
-            user.socials = {key: value for key, value in user.profile.social_accounts.items()}
-        else:
-            user.socials = None
+        profile = Profile.objects.get(id=self.request.user.id)
+        profile.name = self.request.user.name
+        profile.email = self.request.user.email
 
-        return Response(self.UserSerializer(instance=user).data)
+        return Response(self.UserSerializer(instance=profile).data)
