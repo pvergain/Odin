@@ -19,11 +19,11 @@ class TestIsStudenPermission(TestCase):
         student = Student.objects.create_from_user(self.user)
         student.save()        
 
-        permissions = IsStudentPermission
+        permissions = IsStudentPermission()
 
-        self.assertTrue(permissions.has_permission(self, self.request, None))
+        self.assertTrue(permissions.has_permission(self.request, None))
 
     def test_permission_if_user_is_not_student(self):
-        permissions = IsStudentPermission
+        permissions = IsStudentPermission()
 
-        self.assertFalse(permissions.has_permission(self, self.request, None))
+        self.assertFalse(permissions.has_permission(self.request, None))
