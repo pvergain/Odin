@@ -8,15 +8,24 @@ from rest_framework.response import Response
 class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
     class TaskSerializer(serializers.ModelSerializer):
         solutions = serializers.SerializerMethodField()
+        course = serializers.SerializerMethodField()
 
         class Meta:
             model = IncludedTask
             fields = (
+                'name',
                 'created_at',
                 'description',
                 'gradable',
+                'course',
                 'solutions'
             )
+
+        def get_course(self, obj):
+            return {
+                     'id': obj.topic.course.id,
+                     'name': obj.topic.course.name
+                   }
 
         def get_solutions(self, obj):
             solutions = [
