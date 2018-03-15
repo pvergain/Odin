@@ -51,7 +51,7 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
                     'name': task.name,
                     'description': task.description,
                     'gradable': task.gradable,
-                    'week':task.topic.week.number,
+                    'week': task.topic.week.number,
                     'last_solution': task.last_solution and {
                         'id': task.last_solution.id,
                         'status': task.last_solution.verbose_status,
