@@ -1,11 +1,15 @@
 import datetime
+
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from rest_framework_jwt.views import ObtainJSONWebToken
+from rest_framework_jwt.settings import api_settings
 
 from .serializers import UserSerializer, ProfileSerializer
 
-from rest_framework_jwt.settings import api_settings
+from .permissions import StudentCourseAuthenticationMixin
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
@@ -34,3 +38,14 @@ class LoginUnitedApi(ObtainJSONWebToken):
             return response
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
+
+    def get(self, request):
+        user = self.request.user
+        user_data = UserSerializer(instance=user).data
+        profile_data = ProfileSerializer(instance=user.profile).data
+        full_data = {**user_data, **profile_data}
+
+        return Response(full_data)
