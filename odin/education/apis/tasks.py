@@ -13,6 +13,7 @@ class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
         class Meta:
             model = IncludedTask
             fields = (
+                'id',
                 'name',
                 'created_at',
                 'description',
