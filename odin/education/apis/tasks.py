@@ -46,6 +46,6 @@ class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
     def get(self, request, task_id):
         student = self.request.user.downcast(Student)
         task = IncludedTask.objects.get(id=task_id)
-        task.valid_solutions = task.solutions.filter(student_id=student.id)
+        task.valid_solutions = task.solutions.filter(student_id=student.id).order_by('-id')
 
         return Response(self.TaskSerializer(instance=task).data)
