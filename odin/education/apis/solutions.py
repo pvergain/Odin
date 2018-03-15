@@ -19,11 +19,18 @@ class SolutionSubmitApi(JSONWebTokenAuthenticationMixin, APIView):
             return Response({"solution_id": solution_id, "solution_status": solution.STATUS_CHOICE[solution.status]})
 
     def post(self, request):
-        create_gradable_solution_kwargs = {
-            'student': self.request.user.student,
-            'task': get_object_or_404(IncludedTask, id=self.request.POST['task_id']),
-            'code': self.request.POST['code']
-        }
+        if self.request.POST:
+            create_gradable_solution_kwargs = {
+                'student': self.request.user.student,
+                'task': get_object_or_404(IncludedTask, id=self.request.POST['task_id']),
+                'code': self.request.POST['code']
+            }
+        else:
+            create_gradable_solution_kwargs = {
+                'student': self.request.user.student,
+                'task': get_object_or_404(IncludedTask, id=self.request.data['task_id']),
+                'code': self.request.data['code']
+            }
         solution = create_gradable_solution(**create_gradable_solution_kwargs)
         if solution:
             start_grader_communication(solution.id, 'education.Solution')
