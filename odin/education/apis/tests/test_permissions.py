@@ -1,5 +1,5 @@
 from test_plus import TestCase
-from .permissions import IsStudentPermission
+from odin.education.apis.permissions import IsStudentPermission
 from odin.users.factories import BaseUserFactory
 from odin.education.models import Student
 
