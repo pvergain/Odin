@@ -4,7 +4,8 @@ from .models import (
     ProgrammingLanguage,
     Course,
     Task,
-    Test
+    Test,
+    Solution
 )
 
 
@@ -26,3 +27,8 @@ class TaskAdmin(admin.ModelAdmin):
 @admin.register(Test)
 class TestAdmin(admin.ModelAdmin):
     list_display = ('id', 'description', 'language')
+
+
+@admin.register(Solution)
+class SolutionAdmin(admin.ModelAdmin):
+    pass

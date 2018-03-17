@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^dashboard/', include('odin.dashboard.urls', namespace='dashboard')),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^tinymce/', include('tinymce.urls')),
+    url(r'^api/', include('odin.apis.urls', namespace='api')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

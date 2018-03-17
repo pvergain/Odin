@@ -1,6 +1,7 @@
 from django.urls import reverse_lazy
 from django.apps import apps
 import environ
+import datetime
 
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
 APPS_DIR = ROOT_DIR.path('odin')
@@ -31,7 +32,8 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'easy_thumbnails',
     'django_js_reverse',
-    'tinymce'
+    'tinymce',
+    'corsheaders'
 ]
 
 LOCAL_APPS = [
@@ -44,7 +46,8 @@ LOCAL_APPS = [
     'odin.grading.apps.GradingConfig',
     'odin.applications.apps.ApplicationsConfig',
     'odin.interviews.apps.InterviewsConfig',
-    'odin.competitions.apps.CompetitionsConfig'
+    'odin.competitions.apps.CompetitionsConfig',
+    'odin.apis.apps.ApisConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -52,6 +55,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -90,6 +94,15 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+JWT_AUTH = {
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': False,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+
+    'JWT_ALLOW_REFRESH': False,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
 
 TEMPLATES = [
     {
@@ -223,3 +236,7 @@ TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',
     'relative_urls': False
 }
+
+CORS_ORIGIN_WHITELIST = [
+    'localhost:3000'
+]

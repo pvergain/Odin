@@ -52,6 +52,7 @@ mandrill==1.0.57
 
 # rest_framework
 djangorestframework==3.6.3
+djangorestframework-jwt==1.11.0
 
 # Markdown parsing
 mistune==0.7.4
@@ -63,3 +64,5 @@ django-js-reverse==0.7.3
 Collectfast==0.5.2
 
 django-tinymce==2.7.0
+
+django-cors-headers==2.2.0

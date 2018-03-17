@@ -296,3 +296,22 @@ def create_solution_comment(*,
     comment.save()
 
     return comment
+
+
+def get_gradable_tasks_for_course(*, course: Course, student: Student):
+    tasks = []
+
+    for topic in course.topics.all():
+        for task in topic.tasks.all():
+            if task.gradable:
+                task.last_solution = get_last_solution_for_task(
+                    task=task,
+                    student=student
+                )
+                tasks.append(task)
+
+    return tasks
+
+
+def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solution:
+    return Solution.objects.filter(task=task, student=student).order_by('-id').first()
