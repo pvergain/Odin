@@ -238,5 +238,6 @@ TINYMCE_DEFAULT_CONFIG = {
 }
 
 CORS_ORIGIN_WHITELIST = [
-    'localhost:3000'
+    'localhost:3000',
+    'academy.hacksoft.io'
 ]
