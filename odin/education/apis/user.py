@@ -19,7 +19,7 @@ class LoginUnitedApi(ObtainJSONWebToken):
         permission = IsStudentPermission()
 
         if serializer.is_valid():
-        
+
             user = serializer.object.get('user') or request.user
             request.user = user
 
@@ -36,9 +36,9 @@ class LoginUnitedApi(ObtainJSONWebToken):
 
             response_data = jwt_response_payload_handler(token, user, request)
             response_data.update({'me': full_data})
-        
+
             return Response(response_data)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
