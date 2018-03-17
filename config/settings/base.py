@@ -38,11 +38,9 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'odin.common.apps.CommonConfig',
-    'odin.dashboard.apps.DashboardConfig',
     'odin.authentication.apps.AuthenticationConfig',
     'odin.users.apps.UsersConfig',
     'odin.education.apps.EducationConfig',
-    'odin.management.apps.ManagementConfig',
     'odin.grading.apps.GradingConfig',
     'odin.applications.apps.ApplicationsConfig',
     'odin.interviews.apps.InterviewsConfig',
