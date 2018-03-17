@@ -22,16 +22,13 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'crispy_forms',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'captcha',
-    'widget_tweaks',
     'django_filters',
     'easy_thumbnails',
-    'django_js_reverse',
     'tinymce',
     'corsheaders'
 ]
