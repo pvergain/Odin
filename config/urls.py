@@ -6,18 +6,9 @@ from django.views.generic import TemplateView
 from django.views import defaults as default_views
 from allauth import urls
 from allauth.socialaccount import urls
-from odin.dashboard.views import RedirectToDashboardIndexView
-from odin.education.urls import courses_public_urlpatterns
-from django_js_reverse.views import urls_js
 
 urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
-    url(r'^$', RedirectToDashboardIndexView.as_view()),
-    url(r'^public/', include(courses_public_urlpatterns, namespace='public')),
-    url(r'^competitions/', include('odin.competitions.urls', namespace='competitions')),
-    url(r'^auth/', include('odin.authentication.urls')),
-    url(r'^dashboard/', include('odin.dashboard.urls', namespace='dashboard')),
-    url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^tinymce/', include('tinymce.urls')),
     url(r'^api/', include('odin.apis.urls', namespace='api')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

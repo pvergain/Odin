@@ -1,49 +1,8 @@
 from rest_framework.permissions import BasePermission
 
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 
-from odin.common.mixins import BaseUserPassesTestMixin
 from odin.education.models import Course
-
-
-class IsStudentOrTeacherInCoursePermission(BaseUserPassesTestMixin):
-    raise_exception = True
-
-    def test_func(self):
-        course = self.course
-        email = self.request.user.email
-        self.is_student = course.students.filter(email=email).exists()
-        self.is_teacher = course.teachers.filter(email=email).exists()
-
-        if self.is_student or self.is_teacher:
-            return True and super().test_func()
-
-        return False
-
-
-class IsTeacherInCoursePermission(BaseUserPassesTestMixin):
-    raise_exception = True
-
-    def test_func(self):
-        email = self.request.user.email
-        self.is_teacher = self.course.teachers.filter(email=email).exists()
-        if self.is_teacher:
-            return True and super().test_func()
-
-        return False
-
-
-class IsStudentInCoursePermission(BaseUserPassesTestMixin):
-    raise_exception = True
-
-    def test_func(self):
-        user = self.request.user
-        is_student = self.course.students.filter(email=user.email).exists()
-        if is_student:
-            return True and super().test_func()
-
-        return False
 
 
 class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
@@ -68,13 +27,3 @@ class IsStudentOrTeacherInCourseAPIPermission(BasePermission):
             return True
 
         return False
-
-
-class CannotSubmitSolutionAfterCourseEndDate(BaseUserPassesTestMixin):
-    raise_exception = True
-
-    def test_func(self):
-        if timezone.now().date() > self.course.end_date:
-            return False
-
-        return True and super().test_func()

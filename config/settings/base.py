@@ -22,27 +22,22 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'crispy_forms',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'captcha',
-    'widget_tweaks',
     'django_filters',
     'easy_thumbnails',
-    'django_js_reverse',
     'tinymce',
     'corsheaders'
 ]
 
 LOCAL_APPS = [
     'odin.common.apps.CommonConfig',
-    'odin.dashboard.apps.DashboardConfig',
     'odin.authentication.apps.AuthenticationConfig',
     'odin.users.apps.UsersConfig',
     'odin.education.apps.EducationConfig',
-    'odin.management.apps.ManagementConfig',
     'odin.grading.apps.GradingConfig',
     'odin.applications.apps.ApplicationsConfig',
     'odin.interviews.apps.InterviewsConfig',
