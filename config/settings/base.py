@@ -132,14 +132,6 @@ STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    str(ROOT_DIR.path('ui/images')),
-    str(ROOT_DIR.path('ui/bower_components')),
-    str(ROOT_DIR.path('ui/assets')),
-    str(ROOT_DIR.path('dist')),
-]
-
-
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
