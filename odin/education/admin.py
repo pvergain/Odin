@@ -8,6 +8,7 @@ from .models import (
     Topic,
     Week,
     Test,
+    IncludedTest,
     Solution,
     CourseAssignment,
     CourseDescription,
@@ -62,3 +63,8 @@ class CourseAssignmentAdmin(admin.ModelAdmin):
 @admin.register(CourseDescription)
 class CourseDescriptionAdmin(admin.ModelAdmin):
     list_display = ('course', 'verbose')
+
+
+@admin.register(IncludedTest)
+class IncludedTestAdmin(admin.ModelAdmin):
+    list_display = ('task', 'test')
