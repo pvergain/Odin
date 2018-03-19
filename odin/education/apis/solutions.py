@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from odin.apis.mixins import ServiceExceptionHandlerMixin
+
 from odin.education.apis.permissions import StudentCourseAuthenticationMixin
 
 from odin.education.models import Solution, IncludedTask
@@ -13,7 +15,7 @@ from odin.education.apis.serializers import SolutionSubmitSerializer
 from odin.grading.services import start_grader_communication
 
 
-class SolutionSubmitApi(StudentCourseAuthenticationMixin, APIView):
+class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandlerMixin, APIView):
     def get(self, request, *args, **kwargs):
         solution_id = kwargs['solution_id']
         solution = get_object_or_404(Solution, id=solution_id)
@@ -28,7 +30,7 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, APIView):
 
     def post(self, request):
         serializer = SolutionSubmitSerializer(data=self.request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             create_gradable_solution_kwargs = {
                 'student': self.request.user.student,
                 'task': get_object_or_404(IncludedTask, id=serializer.validated_data['task_id']),
