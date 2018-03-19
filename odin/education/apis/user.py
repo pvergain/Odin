@@ -38,3 +38,10 @@ class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
         full_data = {**user_data, **profile_data}
 
         return Response(full_data)
+
+
+class LogoutApi(StudentCourseAuthenticationMixin, APIView):
+    def get(self, request):
+        user = self.request.user
+        user.get_new_user_uid()
+        return Response({'message': 'have a nice day'})
