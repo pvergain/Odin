@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -17,6 +18,8 @@ class BaseUser(PermissionsMixin,
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+
+    user_uid = models.UUIDField(default=uuid.uuid4, unique=True)
 
     competition_registration_uuid = models.UUIDField(blank=True, null=True)
 
@@ -76,6 +79,10 @@ class BaseUser(PermissionsMixin,
 
     def is_judge(self):
         return self.judge_in_competitions.count() > 0
+
+    def get_new_user_uid(self):
+        self.user_uid = uuid.uuid4()
+        self.save()
 
 
 class Profile(models.Model):
