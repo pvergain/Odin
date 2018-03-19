@@ -99,6 +99,10 @@ JWT_AUTH = {
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
 
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'odin.apis.utils.exception_errors_format_handler',
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
