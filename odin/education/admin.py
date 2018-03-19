@@ -8,7 +8,8 @@ from .models import (
     Topic,
     Week,
     Test,
-    Solution
+    Solution,
+    CourseAssignment,
 )
 
 
@@ -50,3 +51,8 @@ class TestAdmin(admin.ModelAdmin):
 @admin.register(Solution)
 class SolutionAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(CourseAssignment)
+class CourseAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('student', 'teacher', 'course', 'hidden')
