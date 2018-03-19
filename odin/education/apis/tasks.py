@@ -42,7 +42,7 @@ class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
             if solutions:
                 return solutions
             else:
-                return None
+                return []
 
     def get(self, request, task_id):
         student = self.request.user.downcast(Student)
