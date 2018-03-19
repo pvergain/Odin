@@ -13,7 +13,7 @@ urlpatterns = [
         view=SolutionSubmitApi.as_view(),
     ),
     url(
-        regex='^solution/(?P<solution_id>[0-9]+)$',
+        regex='^solution/(?P<solution_id>[0-9]+)/$',
         view=SolutionSubmitApi.as_view(),
     ),
     url(
