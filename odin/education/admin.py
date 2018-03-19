@@ -56,7 +56,7 @@ class SolutionAdmin(admin.ModelAdmin):
 
 @admin.register(CourseAssignment)
 class CourseAssignmentAdmin(admin.ModelAdmin):
-    list_display = ('student', 'teacher', 'course', 'hidden')
+    list_display = ('id', 'student', 'teacher', 'course', 'hidden')
 
 
 @admin.register(CourseDescription)
