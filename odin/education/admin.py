@@ -10,6 +10,7 @@ from .models import (
     Test,
     Solution,
     CourseAssignment,
+    CourseDescription,
 )
 
 
@@ -56,3 +57,8 @@ class SolutionAdmin(admin.ModelAdmin):
 @admin.register(CourseAssignment)
 class CourseAssignmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'teacher', 'course', 'hidden')
+
+
+@admin.register(CourseDescription)
+class CourseDescriptionAdmin(admin.ModelAdmin):
+    list_display = ('course', 'verbose')

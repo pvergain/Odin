@@ -11,6 +11,9 @@ from .permissions import StudentCourseAuthenticationMixin
 
 class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
     class Serializer(serializers.ModelSerializer):
+        students_count = serializers.SerializerMethodField()
+        description = serializers.CharField(source='description.verbose')
+
         class Meta:
             model = Course
             fields = ('id',
@@ -18,7 +21,12 @@ class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
                       'start_date',
                       'end_date',
                       'logo',
-                      'slug_url')
+                      'slug_url',
+                      'description',
+                      'students_count')
+
+        def get_students_count(self, obj):
+            return obj.students.filter(is_active=True).count()
 
     serializer_class = Serializer
 
