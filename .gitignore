@@ -22,6 +22,7 @@ sftp-config.json
 # Basics
 *.py[cod]
 __pycache__
+.pytest_cache
 
 # Logs
 logs
@@ -49,19 +50,11 @@ htmlcov
 *.swp
 *.swo
 
-# npm
-node_modules/
-
-# Compass
-.sass-cache
-
 # virtual environments
 .env
 
 # User-uploaded media
 media/
-
-
 
 staticfiles/
 
@@ -73,20 +66,11 @@ bootstrap.sh
 # Export recaptcha env variables
 captcha_env.sh
 
-# Bower components
-*/bower_components/*
-
-# Previous DB dump
-dump.json
-
-# Webpack bundle
-dist/
-
 # Editor specific
 .tern-port
 
 # Visual studio code
 .vscode*
 
-#project notes file
+# Project notes file
 notes.txt
