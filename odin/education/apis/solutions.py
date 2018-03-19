@@ -18,7 +18,13 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, APIView):
         solution_id = kwargs['solution_id']
         solution = get_object_or_404(Solution, id=solution_id)
         if solution:
-            return Response({"solution_id": solution_id, "solution_status": solution.verbose_status})
+            solution = {
+                'solution_id': solution.id,
+                'solution_status': solution.verbose_status,
+                'code': solution.code,
+                'test_result': solution.test_output
+            }
+            return Response(solution)
 
     def post(self, request):
         serializer = SolutionSubmitSerializer(data=self.request.data)
@@ -32,6 +38,13 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, APIView):
         solution = create_gradable_solution(**create_gradable_solution_kwargs)
         if solution:
             start_grader_communication(solution.id, 'education.Solution')
-            return Response({'solution_id': solution.id, 'solution_status': solution.verbose_status})
+            solution = {
+                'solution_id': solution.id,
+                'solution_status': solution.verbose_status,
+                'code': solution.code,
+                'test_result': solution.test_output
+            }
+
+            return Response(solution)
         else:
             return Response({'problem': 'error occured'})
