@@ -18,8 +18,7 @@ from odin.grading.services import start_grader_communication
 
 class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandlerMixin, APIView):
     def get(self, request, *args, **kwargs):
-        solution_id = kwargs['solution_id']
-        solution = get_object_or_404(Solution, id=solution_id)
+        solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
         data = {
             'solution_id': solution.id,
             'solution_status': solution.verbose_status,
