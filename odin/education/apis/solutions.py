@@ -20,22 +20,23 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
     def get(self, request, *args, **kwargs):
         solution_id = kwargs['solution_id']
         solution = get_object_or_404(Solution, id=solution_id)
-        if solution:
-            solution = {
-                'solution_id': solution.id,
-                'solution_status': solution.verbose_status,
-                'code': solution.code,
-                'test_result': solution.test_output
-            }
-            return Response(solution)
+        data = {
+            'solution_id': solution.id,
+            'solution_status': solution.verbose_status,
+            'code': solution.code,
+            'test_result': solution.test_output
+        }
+        return Response(data)
 
     def post(self, request):
         serializer = SolutionSubmitSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
         create_gradable_solution_kwargs = {
             'student': self.request.user.student,
-            'task': serializer.validated_data['task'],
-            'code': serializer.validated_data['code']
+            'task': data['task'],
+            'code': data['code']
         }
 
         solution = create_gradable_solution(**create_gradable_solution_kwargs)
