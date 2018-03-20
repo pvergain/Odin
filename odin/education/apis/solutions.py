@@ -29,7 +29,6 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
             return Response(solution)
 
     def post(self, request):
-        import ipdb; ipdb.set_trace()
         serializer = SolutionSubmitSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
         create_gradable_solution_kwargs = {
