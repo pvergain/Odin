@@ -74,3 +74,8 @@ captcha_env.sh
 
 # Project notes file
 notes.txt
+
+#node js modules
+dist/
+node_modules
+ui/
