@@ -18,5 +18,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SolutionSubmitSerializer(serializers.Serializer):
-    task_id = serializers.IntegerField()
-    code = serializers.CharField(default=0)
+    task_id = serializers.IntegerField(required=True)
+    code = serializers.CharField(required=True)
