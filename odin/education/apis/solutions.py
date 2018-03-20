@@ -29,11 +29,12 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
             return Response(solution)
 
     def post(self, request):
+        import ipdb; ipdb.set_trace()
         serializer = SolutionSubmitSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
         create_gradable_solution_kwargs = {
             'student': self.request.user.student,
-            'task': get_object_or_404(IncludedTask, id=serializer.validated_data['task_id']),
+            'task': serializer.validated_data['task']),
             'code': serializer.validated_data['code']
         }
 
