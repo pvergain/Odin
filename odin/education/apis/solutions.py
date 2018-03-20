@@ -5,9 +5,10 @@ from rest_framework.response import Response
 
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
+from odin.education.models import Solution
+
 from odin.education.apis.permissions import StudentCourseAuthenticationMixin
 
-from odin.education.models import Solution, IncludedTask
 from odin.education.services import create_gradable_solution
 
 from odin.education.apis.serializers import SolutionSubmitSerializer
