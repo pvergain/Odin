@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_jwt.settings import api_settings
+from rest_framework import status
 
 from .serializers import UserSerializer, ProfileSerializer
 from .permissions import StudentCourseAuthenticationMixin
@@ -41,7 +41,7 @@ class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
 
 
 class LogoutApi(StudentCourseAuthenticationMixin, APIView):
-    def get(self, request):
+    def post(self, request):
         user = self.request.user
         user.rotate_secret_key()
         return Response(status=status.HTTP_202_ACCEPTED)
