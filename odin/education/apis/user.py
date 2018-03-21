@@ -64,7 +64,7 @@ class ForgotenPasswordApi(APIView):
             PasswordReset.objects.filter(user=user).update(voided_at=timezone.now())
             token = str(PasswordReset.objects.create(user=user).token)
             base_url = 'https://academy.hacksoft.io'
-            reset_uri = 'forgoten_password_set'
+            reset_uri = 'forgot-password-set'
             reset_link = '/'.join([base_url, reset_uri, token])
             # send mail with key
         return Response({'link': reset_link})
