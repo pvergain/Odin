@@ -7,7 +7,7 @@ from odin.education.apis.user import (
     LogoutApi,
     ForgotenPasswordApi,
     ForgotPasswordSetApi,
-    ValidateNewPasswordApi,
+    # ValidateNewPasswordApi,
 )
 
 
@@ -29,15 +29,15 @@ urlpatterns = [
         view=LogoutApi.as_view()
     ),
     url(
-        regex='^forgoten_password/$',
+        regex='^forgoten-password/$',
         view=ForgotenPasswordApi.as_view()
     ),
     url(
-        regex='^forgot_password_set/(!P<token>)$',
+        regex='^forgot-password-set/(!P<token>)$',
         view=ForgotPasswordSetApi.as_view()
     ),
     url(
-        regex='^forgot_password_set/$',
+        regex='^forgot-password-set/$',
         view=ForgotPasswordSetApi.as_view()
     ),
 ]
