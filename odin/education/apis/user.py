@@ -1,8 +1,11 @@
+from rest_framework import status
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_jwt.settings import api_settings
-from rest_framework import status
+
+from odin.users.models import BaseUser, PasswordReset
 
 from .serializers import UserSerializer, ProfileSerializer
 from .permissions import StudentCourseAuthenticationMixin
@@ -45,3 +48,44 @@ class LogoutApi(StudentCourseAuthenticationMixin, APIView):
         user = self.request.user
         user.rotate_secret_key()
         return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class ForgotenPasswordApi(APIView):
+
+    def post(self, request):
+        """
+        !!!Frontenders to implement captcha
+        """
+        data = self.request.data
+        if BaseUser.objects.filter(email=data['email']).exists():
+            user = BaseUser.objects.get(email=data['email'])
+            reset_key = PasswordReset.objects.create(user=user)
+            base_url = 'https://academy.hacksoft.io'
+            reset_uri = 'forgoten_password_set'
+            reset_link = '/'.join([base_url, reset_uri, reset_key])
+            # send mail with key
+        return Response({'link': reset_link})
+
+
+class ForgotPasswordSetApi(APIView):
+
+    def get(self, request):
+        # validate input
+        # token validity serializer
+
+        pass
+
+    def post(self, request):
+        # validate new password with django password validation
+        # password validity serializer
+
+        pass
+
+
+class ValidateNewPasswordApi(APIView):
+
+    def post(self, request):
+        # validate new password with django password validation
+        # password validity serializer
+
+        pass
