@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from odin.users.models import BaseUser, Profile
 
+from odin.education.models import IncludedTask
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.FileField(source='full_image')
@@ -18,5 +20,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SolutionSubmitSerializer(serializers.Serializer):
-    task_id = serializers.IntegerField()
-    code = serializers.CharField()
+    task = serializers.PrimaryKeyRelatedField(queryset=IncludedTask.objects.all())
+    code = serializers.CharField(required=True)
