@@ -22,11 +22,6 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.github',
-    'captcha',
     'django_filters',
     'easy_thumbnails',
     'tinymce',
@@ -131,9 +126,6 @@ TEMPLATES = [
     },
 ]
 
-from .allauth import *
-from .captcha import *
-
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 
 STATIC_URL = '/static/'
@@ -201,9 +193,14 @@ CELERY_TASK_TIME_LIMIT = env('CELERY_TASK_TIME_LIMIT', default=60+60)
 CELERY_TASK_MAX_RETRIES = env('CELERY_TASK_MAX_RERIES', default=3)
 
 # Mandrill settings
-USE_DJANGO_EMAIL_BACKEND = True
 
 MANDRILL_API_KEY = env('MANDRILL_API_KEY', default='')
+
+USE_DJANGO_EMAIL_BACKEND = env(
+    'USE_DJANGO_EMAIL_BACKEND',
+    default=(MANDRILL_API_KEY == '')
+)
+
 
 templates = {
     'account_email_email_confirmation_signup': lambda **env_kwargs: env('MANDRILL_SIGNUP_CONFIRM', **env_kwargs),

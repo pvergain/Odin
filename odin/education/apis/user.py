@@ -8,6 +8,8 @@ from rest_framework_jwt.settings import api_settings
 
 from django.utils import timezone
 
+from odin.emails.services import send_mail
+
 from odin.users.models import BaseUser, PasswordReset
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
@@ -74,7 +76,14 @@ class ForgotenPasswordApi(ServiceExceptionHandlerMixin, APIView):
             base_url = 'https://academy.hacksoft.io'
             reset_uri = 'forgot-password-set'
             reset_link = '/'.join([base_url, reset_uri, token])
-            # send mail with key
+
+            send_mail(
+                recipients=[user.email],
+                template_name='account_email_password_reset_key',
+                context={
+                    'password_reset_url': reset_link
+                }
+            )
 
         return Response(status=status.HTTP_202_ACCEPTED)
 

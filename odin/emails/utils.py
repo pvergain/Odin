@@ -23,7 +23,7 @@ def filter_kwargs(f, **kwargs):
 
 
 def get_mandrill_api_key():
-    api_key = settings.MANDRILL['MANDRILL_API_KEY']
+    api_key = settings.MANDRILL_API_KEY
 
     """
     There is a strange bug to investigate:

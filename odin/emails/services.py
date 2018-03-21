@@ -22,17 +22,7 @@ def send_mail(**kwargs):
     * Mandrill without template (needs subject + body)
     * Using Django's email system defined by EMAIL_BACKEND
     """
-    if not settings.SEND_MAIL_TO_USERS:
-        logger.warning('Email sending triggered, but no email is going to be sent.')
-        return
-
-    template_name = kwargs.get('template_name')
-
-    if template_name is not None and template_name in settings.SKIP_SENDING_ON_TEMPLATES:
-        logger.warning(f'{template_name} is disabled by SKIP_SENDING_ON_TEMPLATES.')
-        return
-
-    if settings.USE_DJANGO_SEND_MAIL:
+    if settings.USE_DJANGO_EMAIL_BACKEND:
         f = _send_django_mail
     elif 'template_name' in kwargs:
         f = _send_template_mail
