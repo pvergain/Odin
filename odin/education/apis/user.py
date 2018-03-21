@@ -73,9 +73,7 @@ class ForgotenPasswordApi(ServiceExceptionHandlerMixin, APIView):
 
             token = str(PasswordReset.objects.create(user=user).token)
 
-            base_url = 'https://academy.hacksoft.io'
-            reset_uri = 'forgot-password-set'
-            reset_link = '/'.join([base_url, reset_uri, token])
+            reset_link = f'https://academy.hacksoft.io/forgot-password/{token}/'
 
             send_mail(
                 recipients=[user.email],
