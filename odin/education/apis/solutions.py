@@ -32,22 +32,18 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        create_gradable_solution_kwargs = {
-            'student': self.request.user.student,
-            'task': data['task'],
-            'code': data['code']
-        }
+        solution = create_gradable_solution(
+            student=self.request.user.student,
+            task=data['task'],
+            code=data['code']
+        )
 
-        solution = create_gradable_solution(**create_gradable_solution_kwargs)
-        if solution:
-            start_grader_communication(solution.id, 'education.Solution')
-            solution = {
+        start_grader_communication(solution.id, 'education.Solution')
+        data = {
                 'solution_id': solution.id,
                 'solution_status': solution.verbose_status,
                 'code': solution.code,
                 'test_result': solution.test_output
             }
 
-            return Response(solution)
-        else:
-            return Response({'problem': 'error occured'})
+        return Response(data)
