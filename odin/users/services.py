@@ -1,7 +1,5 @@
 from typing import Dict
 
-from allauth.account.models import EmailAddress
-
 from django.core.exceptions import ValidationError
 
 from .models import BaseUser, Profile
@@ -31,8 +29,6 @@ def create_user(*,
     user.registration_uuid = registration_uuid
     user.is_active = True
     user.save()
-
-    EmailAddress.objects.create(user=user, email=user.email, verified=True, primary=True)
 
     update_user_profile(user=user, data=profile_data)
 
