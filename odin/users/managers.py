@@ -1,4 +1,3 @@
-from django.db import models
 from django.contrib.auth.models import BaseUserManager
 
 
@@ -46,12 +45,3 @@ class UserManager(BaseUserManager):
         Important to have this to get factories working by default
         """
         return self.create_user(**kwargs)
-
-
-class PasswordResetMananger(models.Manager):
-    def create(self, **kwargs):
-
-        password_reset_key = self.model(**kwargs)
-
-        password_reset_key.save()
-        return password_reset_key.reset_key.__str__()

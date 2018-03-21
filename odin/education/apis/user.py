@@ -60,29 +60,15 @@ class ForgotenPasswordApi(APIView):
         if BaseUser.objects.filter(email=data['email']).exists():
             user = BaseUser.objects.get(email=data['email'])
             reset_key = PasswordReset.objects.create(user=user)
+            token = str(reset_key.token)
             base_url = 'https://academy.hacksoft.io'
             reset_uri = 'forgoten_password_set'
-            reset_link = '/'.join([base_url, reset_uri, reset_key])
+            reset_link = '/'.join([base_url, reset_uri, token])
             # send mail with key
         return Response({'link': reset_link})
 
 
 class ForgotPasswordSetApi(APIView):
-
-    def get(self, request):
-        # validate input
-        # token validity serializer
-
-        pass
-
-    def post(self, request):
-        # validate new password with django password validation
-        # password validity serializer
-
-        pass
-
-
-class ValidateNewPasswordApi(APIView):
 
     def post(self, request):
         # validate new password with django password validation

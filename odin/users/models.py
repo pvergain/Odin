@@ -11,10 +11,7 @@ from odin.common.models import (
     VoidedModelMixin,
 )
 
-from .managers import (
-    UserManager,
-    PasswordResetMananger,
-)
+from .managers import UserManager
 
 
 class BaseUser(PermissionsMixin,
@@ -112,8 +109,6 @@ class Profile(models.Model):
 
 
 class PasswordReset(VoidedModelMixin, models.Model):
-    user = models.ForeignKey(BaseUser, related_name='reset_keys')
+    user = models.ForeignKey(BaseUser, related_name='tokens')
 
-    reset_key = models.UUIDField(null=True, unique=True, default=uuid.uuid4)
-
-    objects = PasswordResetMananger()
+    token = models.UUIDField(null=True, unique=True, default=uuid.uuid4)
