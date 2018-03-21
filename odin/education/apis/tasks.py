@@ -1,8 +1,10 @@
 from odin.education.models import IncludedTask, Student
+
 from rest_framework import serializers
-from .permissions import StudentCourseAuthenticationMixin
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from .permissions import StudentCourseAuthenticationMixin
 
 
 class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
