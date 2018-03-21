@@ -6,7 +6,10 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from image_cropping.fields import ImageRatioField, ImageCropField
 
 from odin.common.utils import json_field_default
-from odin.common.models import UpdatedAtCreatedAtModelMixin
+from odin.common.models import (
+    UpdatedAtCreatedAtModelMixin,
+    VoidedModelMixin,
+)
 
 from .managers import UserManager
 
@@ -103,3 +106,9 @@ class Profile(models.Model):
 
     def get_gh_profile_url(self):
         return self.social_accounts.get('GitHub')
+
+
+class PasswordReset(VoidedModelMixin, models.Model):
+    user = models.ForeignKey(BaseUser, related_name='tokens')
+
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4)
