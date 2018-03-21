@@ -21,4 +21,4 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(PasswordReset)
 class PasswordResetAdmin(admin.ModelAdmin):
-    list_display = ('user', 'reset_key')
+    list_display = ('user', 'token')
