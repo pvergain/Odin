@@ -1,5 +1,7 @@
 from rest_framework import status
 
+from django.utils import timezone
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.views import ObtainJSONWebToken
@@ -59,8 +61,8 @@ class ForgotenPasswordApi(APIView):
         data = self.request.data
         if BaseUser.objects.filter(email=data['email']).exists():
             user = BaseUser.objects.get(email=data['email'])
-            reset_key = PasswordReset.objects.create(user=user)
-            token = str(reset_key.token)
+            PasswordReset.objects.filter(user=user).update(voided_at=timezone.now())
+            token = str(PasswordReset.objects.create(user=user).token)
             base_url = 'https://academy.hacksoft.io'
             reset_uri = 'forgoten_password_set'
             reset_link = '/'.join([base_url, reset_uri, token])
@@ -71,6 +73,8 @@ class ForgotenPasswordApi(APIView):
 class ForgotPasswordSetApi(APIView):
 
     def post(self, request):
+        # get token
+        # 2 passwords
         # validate new password with django password validation
         # password validity serializer
 
