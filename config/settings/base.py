@@ -42,7 +42,8 @@ LOCAL_APPS = [
     'odin.applications.apps.ApplicationsConfig',
     'odin.interviews.apps.InterviewsConfig',
     'odin.competitions.apps.CompetitionsConfig',
-    'odin.apis.apps.ApisConfig'
+    'odin.apis.apps.ApisConfig',
+    'odin.emails.apps.EmailsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
