@@ -43,5 +43,5 @@ class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
 class LogoutApi(StudentCourseAuthenticationMixin, APIView):
     def get(self, request):
         user = self.request.user
-        user.get_new_user_uid()
-        return Response({'message': 'have a nice day'})
+        user.rotate_secret_key()
+        return Response(status=status.HTTP_202_ACCEPTED)

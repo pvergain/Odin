@@ -5,19 +5,19 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import uuid
 
-def add_user_uid_values(apps, schema_editor):
+def add_user_secret_key_values(apps, schema_editor):
     BaseUser = apps.get_model('users', 'BaseUser')
     for row in BaseUser.objects.all():
-        row.user_uid = uuid.uuid4()
-        row.save(update_fields=['user_uid'])
+        row.secret_key = uuid.uuid4()
+        row.save(update_fields=['secret_key'])
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0008_baseuser_add_user_uid_as_null'),
+        ('users', '0008_baseuser_add_secret_key_as_null'),
     ]
 
     operations = [
-        migrations.RunPython(add_user_uid_values),
+        migrations.RunPython(add_user_secret_key_values),
     ]

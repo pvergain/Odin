@@ -97,7 +97,7 @@ JWT_AUTH = {
 
     'JWT_ALLOW_REFRESH': False,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    'JWT_GET_USER_SECRET_KEY': lambda user: user.user_uid
+    'JWT_GET_USER_SECRET_KEY': lambda user: user.secret_key
 }
 
 REST_FRAMEWORK = {

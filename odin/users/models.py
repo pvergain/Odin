@@ -19,7 +19,7 @@ class BaseUser(PermissionsMixin,
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    user_uid = models.UUIDField(default=uuid.uuid4, unique=True)
+    secret_key = models.UUIDField(default=uuid.uuid4, unique=True)
 
     competition_registration_uuid = models.UUIDField(blank=True, null=True)
 
@@ -80,7 +80,7 @@ class BaseUser(PermissionsMixin,
     def is_judge(self):
         return self.judge_in_competitions.count() > 0
 
-    def get_new_user_uid(self):
+    def rotate_secret_key(self):
         self.user_uid = uuid.uuid4()
         self.save()
 
