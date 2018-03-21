@@ -9,7 +9,7 @@ from rest_framework_jwt.settings import api_settings
 
 from odin.users.models import BaseUser, PasswordReset
 
-from .serializers import UserSerializer, ProfileSerializer
+from .serializers import UserSerializer, ProfileSerializer, PasswordResetSerializer
 from .permissions import StudentCourseAuthenticationMixin
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
@@ -73,9 +73,12 @@ class ForgotenPasswordApi(APIView):
 class ForgotPasswordSetApi(APIView):
 
     def post(self, request):
-        # get token
-        # 2 passwords
-        # validate new password with django password validation
-        # password validity serializer
+        serializer = PasswordResetSerializer(data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data['token']
+        token.void()
+        user = token.user
+        user.set_password(serializer.validated_data['password'])
+        user.save()
 
-        pass
+        return Response(status=status.HTTP_202_ACCEPTED)

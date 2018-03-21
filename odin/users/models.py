@@ -111,4 +111,4 @@ class Profile(models.Model):
 class PasswordReset(VoidedModelMixin, models.Model):
     user = models.ForeignKey(BaseUser, related_name='tokens')
 
-    token = models.UUIDField(null=True, unique=True, default=uuid.uuid4)
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4)

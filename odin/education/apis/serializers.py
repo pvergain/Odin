@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from odin.users.models import BaseUser, Profile
+from odin.users.models import BaseUser, Profile, PasswordReset
 
 from odin.education.models import IncludedTask
 
@@ -22,3 +22,9 @@ class UserSerializer(serializers.ModelSerializer):
 class SolutionSubmitSerializer(serializers.Serializer):
     task = serializers.PrimaryKeyRelatedField(queryset=IncludedTask.objects.all())
     code = serializers.CharField(required=True)
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    token = serializers.PrimaryKeyRelatedField(
+        queryset=PasswordReset.objects.all().filter(voided_at__isnull=True))
