@@ -28,11 +28,11 @@ urlpatterns = [
         view=LogoutApi.as_view()
     ),
     url(
-        regex='^forgoten-password/$',
+        regex='^forgot-password/reset/$',
         view=ForgotenPasswordApi.as_view()
     ),
     url(
-        regex='^forgot-password-set/$',
+        regex='^forgot-password/set/$',
         view=ForgotPasswordSetApi.as_view()
     ),
 ]
