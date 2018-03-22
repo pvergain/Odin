@@ -1,8 +1,8 @@
 import factory
-
+import uuid
 from odin.common.faker import faker
 
-from .models import Profile, BaseUser
+from .models import Profile, BaseUser, PasswordResetToken
 
 
 class BaseUserFactory(factory.DjangoModelFactory):
@@ -31,3 +31,11 @@ class ProfileFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Profile
+
+
+class PasswordResetTokenFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PasswordResetToken
+
+    token = uuid.uuid4()
+    user = factory.SubFactory(BaseUserFactory)

@@ -9,7 +9,7 @@ from odin.users.models import PasswordResetToken
 from odin.authentication.services import initiate_reset_user_password
 
 
-class InitiateResetUserPasswordTest(TestCase):
+class InitiateResetUserPasswordTests(TestCase):
     def setUp(self):
         self.user = BaseUserFactory()
 
@@ -29,5 +29,5 @@ class InitiateResetUserPasswordTest(TestCase):
 
         self.assertTrue(mock_object.called)
         self.assertEqual(isinstance(token, PasswordResetToken), True)
-        self.assertTrue(token.voided_at is None)
-        self.assertTrue(token.used_at is None)
+        self.assertIsNone(token.voided_at)
+        self.assertIsNone(token.used_at)

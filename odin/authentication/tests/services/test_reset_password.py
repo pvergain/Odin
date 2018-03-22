@@ -4,43 +4,42 @@ from django.core.exceptions import ValidationError
 
 from odin.users.models import PasswordResetToken
 
-from odin.users.factories import BaseUserFactory
+from odin.users.factories import BaseUserFactory, PasswordResetTokenFactory
 
 from odin.authentication.services import reset_user_password
 
-from faker import Faker
-fake = Faker()
+from odin.common.faker import faker
 
 
-class ResetUserpasswordTest(TestCase):
+class ResetUserpasswordTests(TestCase):
     def setUp(self):
-        self.test_password = fake.password()
-        self.user = BaseUserFactory()
+        self.test_password = faker.password()
+        self.token = PasswordResetTokenFactory()
+        self.user = self.token.user
         self.user.set_password(self.test_password)
         self.user.save()
         self.initial_secret_key = self.user.secret_key
-        self.token = PasswordResetToken()
-        self.token.user = self.user
-        self.token.save()
 
     def test_user_cannot_reset_password_with_used_token(self):
-        password = fake.password()
+        password = faker.password()
         self.token.use()
 
+        self.assertTrue(self.token.used)
         with self.assertRaises(ValidationError):
             reset_user_password(token=self.token,
                                 password=password)
 
     def test_user_cannot_reset_password_with_voided_token(self):
-        password = fake.password()
+        password = faker.password()
         self.token.void()
 
+        self.assertTrue(self.token.voided)
         with self.assertRaises(ValidationError):
             reset_user_password(token=self.token,
                                 password=password)
 
     def test_user_can_reset_password_with_valid_token(self):
-        password = fake.password()
+        password = faker.password()
 
         user = reset_user_password(token=self.token,
                                    password=password)
