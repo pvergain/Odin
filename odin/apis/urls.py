@@ -7,6 +7,6 @@ urlpatterns = [
     ),
     url(
         regex='^auth/',
-        view=include('odin.authentication.apis.urls', namespace='auth')
+        view=include('odin.authentication.urls', namespace='auth')
     )
 ]

@@ -10,13 +10,26 @@ from django.utils import timezone
 
 from odin.emails.services import send_mail
 
-from odin.users.models import BaseUser, PasswordReset
+from odin.users.models import BaseUser, Profile, PasswordReset
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
-from .serializers import UserSerializer, ProfileSerializer, PasswordResetSerializer
-from .permissions import StudentCourseAuthenticationMixin
+from odin.education.apis.permissions import StudentCourseAuthenticationMixin
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+
+
+class _ProfileSerializer(serializers.ModelSerializer):
+    avatar = serializers.FileField(source='full_image')
+
+    class Meta:
+        model = Profile
+        fields = ('full_name', 'avatar')
+
+
+class _UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BaseUser
+        fields = ('id', 'email')
 
 
 class LoginUnitedApi(ObtainJSONWebToken):
@@ -28,8 +41,8 @@ class LoginUnitedApi(ObtainJSONWebToken):
 
         user = data.get('user')
         token = data.get('token')
-        user_data = UserSerializer(instance=user).data
-        profile_data = ProfileSerializer(instance=user.profile).data
+        user_data = _UserSerializer(instance=user).data
+        profile_data = _ProfileSerializer(instance=user.profile).data
         full_data = {**user_data, **profile_data}
 
         response_data = jwt_response_payload_handler(token, user, request)
@@ -39,11 +52,10 @@ class LoginUnitedApi(ObtainJSONWebToken):
 
 
 class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
-
     def get(self, request):
         user = self.request.user
-        user_data = UserSerializer(instance=user).data
-        profile_data = ProfileSerializer(instance=user.profile).data
+        user_data = _UserSerializer(instance=user).data
+        profile_data = _ProfileSerializer(instance=user.profile).data
         full_data = {**user_data, **profile_data}
 
         return Response(full_data)
@@ -87,9 +99,14 @@ class ForgotenPasswordApi(ServiceExceptionHandlerMixin, APIView):
 
 
 class ForgotPasswordSetApi(APIView):
+    class Serializer(serializers.Serializer):
+        password = serializers.CharField(required=True)
+        token = serializers.PrimaryKeyRelatedField(
+            queryset=PasswordReset.objects.all().filter(voided_at__isnull=True)
+        )
 
     def post(self, request):
-        serializer = PasswordResetSerializer(data=self.request.data)
+        serializer = self.Serializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
         token = serializer.validated_data['token']
         token.void()
