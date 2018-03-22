@@ -2,9 +2,7 @@ from django.test import TestCase
 
 from django.core.exceptions import ValidationError
 
-from odin.users.models import PasswordResetToken
-
-from odin.users.factories import BaseUserFactory, PasswordResetTokenFactory
+from odin.users.factories import PasswordResetTokenFactory
 
 from odin.authentication.services import reset_user_password
 
