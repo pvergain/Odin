@@ -31,12 +31,14 @@ def get_user_data(*, user: BaseUser):
     return {**user_data, **profile_data}
 
 
+@transaction.atomic
 def logout(*, user: BaseUser) -> BaseUser:
     user.rotate_secret_key()
 
     return user
 
 
+@transaction.atomic
 def initiate_reset_user_password(*, user: BaseUser) -> PasswordResetToken:
     if not user.is_active:
         raise ValidationError('Cannot reset password for inactive user')
