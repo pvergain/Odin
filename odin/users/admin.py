@@ -3,7 +3,7 @@ from django.contrib import admin
 from odin.users.models import (
     BaseUser,
     Profile,
-    PasswordReset
+    PasswordResetToken
 )
 
 
@@ -19,6 +19,6 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('id', 'full_name', 'user')
 
 
-@admin.register(PasswordReset)
+@admin.register(PasswordResetToken)
 class PasswordResetAdmin(admin.ModelAdmin):
-    list_display = ('user', 'token')
+    list_display = ('user', 'token', 'voided_at', 'used_at', 'created_at', 'updated_at')

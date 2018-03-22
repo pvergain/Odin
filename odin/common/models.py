@@ -12,7 +12,6 @@ class UpdatedAtCreatedAtModelMixin(models.Model):
 
 class VoidedModelMixin(models.Model):
     voided_at = models.DateTimeField(null=True, blank=True)
-    used_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -23,8 +22,4 @@ class VoidedModelMixin(models.Model):
 
     def void(self):
         self.voided_at = timezone.now()
-        self.save()
-
-    def use(self):
-        self.used_at = timezone.now()
         self.save()

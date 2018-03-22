@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from odin.emails.services import send_mail
 
-from odin.users.models import BaseUser, Profile, PasswordReset
+from odin.users.models import BaseUser, Profile, PasswordResetToken
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
 from odin.education.apis.permissions import StudentCourseAuthenticationMixin
@@ -81,9 +81,9 @@ class ForgotenPasswordApi(ServiceExceptionHandlerMixin, APIView):
 
         if BaseUser.objects.filter(email=data['email']).exists():
             user = BaseUser.objects.get(email=data['email'])
-            PasswordReset.objects.filter(user=user).update(voided_at=timezone.now())
+            PasswordResetToken.objects.filter(user=user).update(voided_at=timezone.now())
 
-            token = str(PasswordReset.objects.create(user=user).token)
+            token = str(PasswordResetToken.objects.create(user=user).token)
 
             reset_link = f'https://academy.hacksoft.io/forgot-password/{token}/'
 
@@ -102,7 +102,7 @@ class ForgotPasswordSetApi(APIView):
     class Serializer(serializers.Serializer):
         password = serializers.CharField(required=True)
         token = serializers.PrimaryKeyRelatedField(
-            queryset=PasswordReset.objects.all().filter(voided_at__isnull=True)
+            queryset=PasswordResetToken.objects.all().filter(voided_at__isnull=True)
         )
 
     def post(self, request):

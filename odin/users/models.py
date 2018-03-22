@@ -1,5 +1,8 @@
 import uuid
+
 from django.db import models
+from django.utils import timezone
+
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
@@ -108,7 +111,13 @@ class Profile(models.Model):
         return self.social_accounts.get('GitHub')
 
 
-class PasswordReset(VoidedModelMixin, models.Model):
-    user = models.ForeignKey(BaseUser, related_name='tokens')
-
+class PasswordResetToken(UpdatedAtCreatedAtModelMixin, VoidedModelMixin, models.Model):
     token = models.UUIDField(primary_key=True, default=uuid.uuid4)
+
+    user = models.ForeignKey(BaseUser, related_name='password_reset_tokens')
+
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def use(self):
+        self.used_at = timezone.now()
+        self.save()
