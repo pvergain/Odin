@@ -121,3 +121,7 @@ class PasswordResetToken(UpdatedAtCreatedAtModelMixin, VoidedModelMixin, models.
     def use(self):
         self.used_at = timezone.now()
         self.save()
+
+    @property
+    def used(self):
+        return self.used_at is not None
