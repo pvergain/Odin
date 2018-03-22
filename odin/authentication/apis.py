@@ -63,7 +63,7 @@ class ForgotPasswordApi(ServiceExceptionHandlerMixin, APIView):
                 'does_not_exist':
                 ('User with that email does not exist')
             }
-            )
+        )
 
     def post(self, request):
         serializer = self.Serializer(data=request.data)
