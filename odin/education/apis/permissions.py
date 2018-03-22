@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from odin.authentication.apis.permissions import JSONWebTokenAuthenticationMixin
+from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
 from odin.education.models import Student
 

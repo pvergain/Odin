@@ -1,11 +1,11 @@
 from django.conf.urls import url
 from rest_framework_jwt.views import refresh_jwt_token
 
-from odin.education.apis.user import (
-    LoginUnitedApi,
+from odin.authentication.apis import (
+    LoginApi,
     UserDetailApi,
     LogoutApi,
-    ForgotenPasswordApi,
+    ForgotPasswordApi,
     ForgotPasswordSetApi,
 )
 
@@ -13,7 +13,7 @@ from odin.education.apis.user import (
 urlpatterns = [
     url(
         regex='^login/$',
-        view=LoginUnitedApi.as_view()
+        view=LoginApi.as_view()
     ),
     url(
         regex='^me/$',
@@ -29,7 +29,7 @@ urlpatterns = [
     ),
     url(
         regex='^forgot-password/reset/$',
-        view=ForgotenPasswordApi.as_view()
+        view=ForgotPasswordApi.as_view()
     ),
     url(
         regex='^forgot-password/set/$',
