@@ -24,3 +24,7 @@ class VoidedModelMixin(models.Model):
     def void(self):
         self.voided_at = timezone.now()
         self.save()
+
+    def use(self):
+        self.used_at = timezone.now()
+        self.save()
