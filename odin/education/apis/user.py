@@ -80,6 +80,7 @@ class ForgotPasswordSetApi(APIView):
         token.use()
         user = token.user
         user.set_password(serializer.validated_data['password'])
+        user.rotate_secret_key()
         user.save()
 
         return Response(status=status.HTTP_202_ACCEPTED)
