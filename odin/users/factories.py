@@ -37,5 +37,5 @@ class PasswordResetTokenFactory(factory.DjangoModelFactory):
     class Meta:
         model = PasswordResetToken
 
-    token = uuid.uuid4()
+    token = factory.LazyAttribute(lambda _: uuid.uuid4())
     user = factory.SubFactory(BaseUserFactory)
