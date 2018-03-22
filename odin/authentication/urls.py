@@ -2,10 +2,10 @@ from django.conf.urls import url
 from rest_framework_jwt.views import refresh_jwt_token
 
 from odin.authentication.apis import (
-    LoginUnitedApi,
+    LoginApi,
     UserDetailApi,
     LogoutApi,
-    ForgotenPasswordApi,
+    ForgotPasswordApi,
     ForgotPasswordSetApi,
 )
 
@@ -13,7 +13,7 @@ from odin.authentication.apis import (
 urlpatterns = [
     url(
         regex='^login/$',
-        view=LoginUnitedApi.as_view()
+        view=LoginApi.as_view()
     ),
     url(
         regex='^me/$',
@@ -29,7 +29,7 @@ urlpatterns = [
     ),
     url(
         regex='^forgot-password/reset/$',
-        view=ForgotenPasswordApi.as_view()
+        view=ForgotPasswordApi.as_view()
     ),
     url(
         regex='^forgot-password/set/$',

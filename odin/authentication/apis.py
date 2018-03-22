@@ -32,8 +32,7 @@ class _UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email')
 
 
-class LoginUnitedApi(ObtainJSONWebToken):
-
+class LoginApi(ObtainJSONWebToken):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -68,7 +67,7 @@ class LogoutApi(StudentCourseAuthenticationMixin, APIView):
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
-class ForgotenPasswordApi(ServiceExceptionHandlerMixin, APIView):
+class ForgotPasswordApi(ServiceExceptionHandlerMixin, APIView):
     class Serializer(serializers.Serializer):
         email = serializers.EmailField()
 
