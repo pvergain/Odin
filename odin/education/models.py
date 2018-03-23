@@ -264,7 +264,7 @@ class IncludedTask(BaseTask):
                              related_name='included_tasks')
     week = models.ForeignKey(Week,
                              on_delete=models.CASCADE,
-                             related_name='tasks',
+                             related_name='included_tasks',
                              null=True,
                              )
 
