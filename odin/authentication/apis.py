@@ -12,12 +12,6 @@ from django.db.models.query import Q
 from odin.users.models import BaseUser, PasswordResetToken
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
-from odin.education.apis.permissions import (
-    StudentCourseAuthenticationMixin,
-    IsStudentOrTeacherInCourseMixin,
-    TeacherCourseAuthenticationMixin,
-)
-
 from odin.authentication.services import (
     logout,
     get_user_data,

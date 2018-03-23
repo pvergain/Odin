@@ -1,6 +1,10 @@
 from django.conf.urls import url
 
-from .courses import StudentCoursesApi, CourseDetailApi
+from .courses import (
+    StudentCoursesApi,
+    CourseDetailApi,
+    TeacherCourseDetailApi,
+)
 
 from .tasks import TaskDetailApi
 
@@ -30,6 +34,6 @@ urlpatterns = [
     ),
     url(
         regex='^courses/(?P<course_id>[0-9]+)/weeks/$',
-        view=CourseDetailApi.as_view()
+        view=TeacherCourseDetailApi.as_view()
     ),
 ]

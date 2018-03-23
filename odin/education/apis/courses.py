@@ -7,7 +7,6 @@ from odin.education.models import (
     Course,
     Student,
     Teacher,
-    Week,
 )
 
 from odin.education.services import get_gradable_tasks_for_course
@@ -15,7 +14,7 @@ from odin.education.services import get_gradable_tasks_for_course
 from odin.education.apis.permissions import (
     IsUserStudentOrTeacherMixin,
     IsStudentOrTeacherInCourseMixin,
-    TeacherCourseAuthenticationMixin
+    TeacherCourseAuthenticationMixin,
 )
 
 
@@ -99,7 +98,32 @@ class CourseDetailApi(IsStudentOrTeacherInCourseMixin, APIView):
         return Response(self.CourseSerializer(instance=course).data)
 
 
-class TeacherCourseDetailApi(APIView):
+class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
+    class Serializer(serializers.ModelSerializer):
+
+        weeks = serializers.SerializerMethodField()
+
+        class Meta:
+            model = Course
+            fields = (
+                'id',
+                'name',
+                'start_date',
+                'end_date',
+                'logo',
+                'slug_url',
+                'weeks',
+            )
+
+        def get_weeks(self, obj):
+            return [
+                {
+                    'id': week.id,
+                    'number': week.number,
+                } for week in obj.weeks.all()
+            ]
 
     def get(self, request, course_id):
-        pass
+        course = get_object_or_404(Course, pk=course_id)
+
+        return Response(self.Serializer(instance=course).data)
