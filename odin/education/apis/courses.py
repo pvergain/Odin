@@ -1,15 +1,27 @@
+from rest_framework import status
 from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 
+from odin.apis.mixins import ServiceExceptionHandlerMixin
+
 from odin.education.models import (
     Course,
     Student,
     Teacher,
+    IncludedTask,
+    IncludedTask,
+    Week,
+    ProgrammingLanguage,
+    # make relation for course and programing language
 )
 
-from odin.education.services import get_gradable_tasks_for_course
+from odin.education.services import (
+    get_gradable_tasks_for_course,
+    create_included_task,
+    create_test_for_task,
+)
 
 from odin.education.apis.permissions import (
     StudentCourseAuthenticationMixin,
@@ -138,7 +150,30 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
         return Response(self.Serializer(instance=course).data)
 
 
-class CreateTaskApi(APIView):
+class CreateTaskApi(ServiceExceptionHandlerMixin, APIView):
+    class Serializer(serializers.Serializer):
+        course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
+        name = serializers.CharField()
+        code = serializers.CharField()
+        description = serializers.CharField()
+        gradable = serializers.BooleanField()
+        week = serializers.PrimaryKeyRelatedField(queryset=Week.objects.all())
 
-    def post(self, request):
-        pass
+    def post(self, request, course_id):
+        init_data = request.data
+        init_data['course'] = course_id
+        serializer = self.Serializer(data=init_data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        code = data.pop('code')
+
+        included_task = create_included_task(**data)
+        included_task.save()
+        included_test = create_test_for_task(
+            task=included_task,
+            code=code,
+            language=ProgrammingLanguage.objects.last()
+        )
+        included_test.save()
+
+        return Response(status=status.HTTP_201_CREATED)
