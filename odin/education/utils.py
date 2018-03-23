@@ -35,7 +35,7 @@ def get_solution_data(course: Course, student: Student) -> (Dict, Dict):
     Fetch all of `student` solutions for `course` tasks and group them by task
     Get passed and failed tasks and then return the data
     """
-    all_solutions = student.solutions.filter(task__topic__course=course).prefetch_related('task')
+    all_solutions = student.solutions.filter(task__course=course).prefetch_related('task')
     solution_data = {}
     for solution in all_solutions:
         task_solutions = solution_data.get(solution.task)
@@ -75,7 +75,7 @@ def map_lecture_dates_to_week_days(course: Course) -> (Set, Dict):
 def get_all_solved_student_solution_count_for_course(course: Course) -> Dict:
     q_expression = Q(task__gradable=True, status=2) | Q(task__gradable=False, status=6)
     all_passed_solutions = Solution.objects.filter(
-        q_expression, task__topic__course=course
+        q_expression, task__course=course
     ).order_by('task').distinct('task').prefetch_related('student')
 
     students_passed_solutions_count = {}

@@ -81,26 +81,24 @@ class Command(BaseCommand):
             except Course.DoesNotExist:
                 raise CommandError(f'Course with ID: {course_id} does not exist')
 
-            topics = course.topics.all().prefetch_related('tasks__solutions__student', 'tasks__test')
-            for topic in topics:
-                tasks = topic.tasks.all()
-
-                for task in tasks:
-                    if not task.gradable:
-                        break
-                    order = ('student__email', '-id')
-                    solution_query = task.solutions.filter(status=Solution.OK).select_related('student__user')
-
-                    passing_solutions = deque(solution_query.order_by(*order).distinct('student__email'))
-                    result += f'{len(passing_solutions)} people have solved {task.name}\n'
-
-                    while passing_solutions:
-                        current_solution = passing_solutions.popleft()
-                        for next_solution in passing_solutions:
-                            if task.test.is_source():
-                                output = compare_code_solutions(current_solution, next_solution)
-                            else:
-                                output = compare_file_solutions(current_solution, next_solution)
-
-                            result += output
+            tasks = course.tasks.all()
+            
+            for task in tasks:
+                if not task.gradable:
+                    break
+                order = ('student__email', '-id')
+                solution_query = task.solutions.filter(status=Solution.OK).select_related('student__user')
+            
+                passing_solutions = deque(solution_query.order_by(*order).distinct('student__email'))
+                result += f'{len(passing_solutions)} people have solved {task.name}\n'
+            
+                while passing_solutions:
+                    current_solution = passing_solutions.popleft()
+                    for next_solution in passing_solutions:
+                        if task.test.is_source():
+                            output = compare_code_solutions(current_solution, next_solution)
+                        else:
+                            output = compare_file_solutions(current_solution, next_solution)
+            
+                        result += output
         return result

@@ -10,7 +10,14 @@ from odin.common.utils import get_now
 from odin.users.models import BaseUser
 from odin.users.factories import BaseUserFactory
 
-from ..factories import StudentFactory, TeacherFactory, CourseFactory, IncludedTaskFactory, SolutionFactory
+from ..factories import (
+    StudentFactory,
+    TeacherFactory,
+    CourseFactory,
+    IncludedTaskFactory,
+    SolutionFactory,
+    WeekFactory
+)
 from ..models import Student, Teacher, CourseAssignment, IncludedTask, Solution
 from ..services import add_student, add_teacher
 
@@ -316,9 +323,10 @@ class CourseTests(TestCase):
 class TaskTests(TestCase):
     def setUp(self):
         self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
 
     def test_get_tasks_for_course_returns_tasks_for_course(self):
-        task = IncludedTaskFactory(topic__course=self.course)
+        task = IncludedTaskFactory(course=self.course, week=self.week)
         queryset = IncludedTask.objects.get_tasks_for(self.course)
         self.assertEqual([task], list(queryset))
 
@@ -330,9 +338,10 @@ class TaskTests(TestCase):
 class SolutionTests(TestCase):
     def setUp(self):
         self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
         self.student = StudentFactory()
         add_student(self.course, self.student)
-        self.task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+        self.task = IncludedTaskFactory(course=self.course, week=self.week, gradable=False)
 
     def test_get_solved_solutions_for_student_and_course_returns_solved_solutions(self):
         solution = SolutionFactory(task=self.task, student=self.student, status=Solution.SUBMITTED_WITHOUT_GRADING)

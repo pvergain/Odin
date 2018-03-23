@@ -15,7 +15,6 @@ from .models import (
     Teacher,
     Course,
     Week,
-    Topic,
     Material,
     IncludedMaterial,
     Task,
@@ -71,15 +70,6 @@ class WeekFactory(factory.DjangoModelFactory):
         model = Week
 
 
-class TopicFactory(factory.DjangoModelFactory):
-    name = factory.LazyAttribute(lambda _: faker.name())
-    course = factory.SubFactory(CourseFactory)
-    week = factory.SubFactory(WeekFactory)
-
-    class Meta:
-        model = Topic
-
-
 class MaterialFactory(factory.DjangoModelFactory):
     identifier = factory.Sequence(lambda n: f'{n}{faker.word()}')
     url = factory.Sequence(lambda n: f'{faker.url()}{n}')
@@ -91,7 +81,8 @@ class MaterialFactory(factory.DjangoModelFactory):
 
 class IncludedMaterialFactory(factory.DjangoModelFactory):
     material = factory.SubFactory(MaterialFactory)
-    topic = factory.SubFactory(TopicFactory)
+    week = factory.SubFactory(WeekFactory)
+    course = factory.SubFactory(CourseFactory)
 
     class Meta:
         model = IncludedMaterial
@@ -116,7 +107,8 @@ class TaskFactory(factory.DjangoModelFactory):
 
 
 class IncludedTaskFactory(factory.DjangoModelFactory):
-    topic = factory.SubFactory(TopicFactory)
+    week = factory.SubFactory(WeekFactory)
+    course = factory.SubFactory(CourseFactory)
     task = factory.SubFactory(TaskFactory)
 
     class Meta:

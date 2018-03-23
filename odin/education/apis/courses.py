@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from odin.education.models import (
     Course,
-    Student, 
+    Student,
     Teacher,
     Week,
 )
@@ -13,8 +13,6 @@ from odin.education.models import (
 from odin.education.services import get_gradable_tasks_for_course
 
 from .permissions import (
-    StudentCourseAuthenticationMixin, 
-    TeacherCourseAuthenticationMixin,
     IsUserStudentOrTeacherMixin,
     IsStudentOrTeacherInCourseMixin,
 )
@@ -85,7 +83,7 @@ class CourseDetailApi(IsStudentOrTeacherInCourseMixin, APIView):
                     'name': task.name,
                     'description': task.description,
                     'gradable': task.gradable,
-                    'week': task.topic.week.number,
+                    'week': task.week.number,
                     'last_solution': task.last_solution and {
                         'id': task.last_solution.id,
                         'status': task.last_solution.verbose_status,
@@ -95,7 +93,7 @@ class CourseDetailApi(IsStudentOrTeacherInCourseMixin, APIView):
             ]
 
     def get_queryset(self):
-        return Course.objects.prefetch_related('topics__tasks')
+        return Course.objects.prefetch_related('weeks__tasks')
 
     def get(self, request, course_id):
         course = get_object_or_404(self.get_queryset(), pk=course_id)

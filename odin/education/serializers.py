@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from odin.education.models import (
-    Topic,
     IncludedTask,
     Solution,
     IncludedMaterial,
@@ -45,13 +44,3 @@ class WeekSerializer(serializers.ModelSerializer):
     class Meta:
         model = Week
         fields = ('id', 'number')
-
-
-class TopicSerializer(serializers.ModelSerializer):
-    tasks = TaskSerializer(many=True)
-    materials = MaterialSerializer(many=True)
-    week = WeekSerializer()
-
-    class Meta:
-        model = Topic
-        fields = ('id', 'name', 'tasks', 'materials', 'course', 'week')

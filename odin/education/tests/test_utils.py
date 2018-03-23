@@ -2,7 +2,14 @@ from test_plus import TestCase
 
 from django.conf import settings
 
-from ..factories import IncludedTaskFactory, SolutionFactory, CourseFactory, StudentFactory
+from ..factories import (
+    IncludedTaskFactory,
+    SolutionFactory,
+    CourseFactory,
+    StudentFactory,
+    WeekFactory,
+)
+
 from ..models import Solution
 from ..services import add_student
 from ..utils import (
@@ -15,8 +22,9 @@ from ..utils import (
 class TestGetPassedAndFailedTasks(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.gradable_task = IncludedTaskFactory(topic__course=self.course, gradable=True)
-        self.non_gradable_task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+        self.week = WeekFactory(course=self.course)
+        self.gradable_task = IncludedTaskFactory(course=self.course, week=self.week, gradable=True)
+        self.non_gradable_task = IncludedTaskFactory(course=self.course, week=self.week, gradable=False)
         self.student = StudentFactory()
         add_student(course=self.course, student=self.student)
 
@@ -46,8 +54,9 @@ class TestGetPassedAndFailedTasks(TestCase):
 class TestGetSolutionData(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.gradable_task = IncludedTaskFactory(topic__course=self.course, gradable=True)
-        self.non_gradable_task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+        self.week = WeekFactory(course=self.course)
+        self.gradable_task = IncludedTaskFactory(course=self.course, week=self.week, gradable=True)
+        self.non_gradable_task = IncludedTaskFactory(course=self.course, week=self.week, gradable=False)
         self.student = StudentFactory()
         add_student(course=self.course, student=self.student)
 
@@ -71,8 +80,9 @@ class TestGetSolutionData(TestCase):
 class TestGetAllSolvedStudentSolutionCountForCourse(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.gradable_task = IncludedTaskFactory(topic__course=self.course, gradable=True)
-        self.non_gradable_task = IncludedTaskFactory(topic__course=self.course, gradable=False)
+        self.week = WeekFactory(course=self.course)
+        self.gradable_task = IncludedTaskFactory(course=self.course, week=self.week, gradable=True)
+        self.non_gradable_task = IncludedTaskFactory(course=self.course, week=self.week, gradable=False)
         self.student = StudentFactory()
         add_student(course=self.course, student=self.student)
 

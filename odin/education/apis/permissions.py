@@ -3,7 +3,10 @@ from rest_framework.generics import get_object_or_404
 
 from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
-from odin.education.models import Student
+from odin.education.models import (
+    Student,
+    Teacher,
+)
 
 
 class IsStudentPermission(BasePermission):
