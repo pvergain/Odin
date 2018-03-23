@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_jwt.settings import api_settings
+from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
 from django.db.models.query import Q
 
@@ -44,14 +45,14 @@ class LoginApi(ObtainJSONWebToken):
         return Response(response_data)
 
 
-class UserDetailApi(IsStudentOrTeacherInCourseMixin, APIView):
+class UserDetailApi(JSONWebTokenAuthenticationMixin, APIView):
     def get(self, request):
         full_data = get_user_data(user=self.request.user)
 
         return Response(full_data)
 
 
-class LogoutApi(StudentCourseAuthenticationMixin, APIView):
+class LogoutApi(JSONWebTokenAuthenticationMixin, APIView):
     def post(self, request):
         logout(self.request.user)
 
