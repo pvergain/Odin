@@ -28,4 +28,8 @@ urlpatterns = [
         regex='^task/(?P<task_id>[0-9]+)/$',
         view=TaskDetailApi.as_view()
     ),
+    url(
+        regex='^courses/(?P<course_id>[0-9]+)/weeks/$',
+        view=CourseDetailApi.as_view()
+    ),
 ]

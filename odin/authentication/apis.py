@@ -11,7 +11,11 @@ from django.db.models.query import Q
 from odin.users.models import BaseUser, PasswordResetToken
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
-from odin.education.apis.permissions import StudentCourseAuthenticationMixin
+from odin.education.apis.permissions import (
+    StudentCourseAuthenticationMixin,
+    IsStudentOrTeacherInCourseMixin,
+    TeacherCourseAuthenticationMixin,
+)
 
 from odin.authentication.services import (
     logout,
@@ -40,7 +44,7 @@ class LoginApi(ObtainJSONWebToken):
         return Response(response_data)
 
 
-class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
+class UserDetailApi(IsStudentOrTeacherInCourseMixin, APIView):
     def get(self, request):
         full_data = get_user_data(user=self.request.user)
 

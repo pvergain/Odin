@@ -12,14 +12,28 @@ from odin.education.models import (
 class SolutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solution
-        fields = ('id', 'url', 'code', 'check_status_location', 'build_id',
-                  'status', 'test_output', 'return_code', 'file', 'student')
+        fields = ('id',
+                  'url',
+                  'code',
+                  'check_status_location',
+                  'build_id',
+                  'status',
+                  'test_output',
+                  'return_code',
+                  'file',
+                  'student'
+                  )
 
 
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncludedMaterial
-        fields = ('id', 'identifier', 'url', 'content')
+        fields = (
+                 'id',
+                 'identifier',
+                 'url',
+                 'content',
+                 )
 
 
 class TestSerializer(serializers.ModelSerializer):
@@ -28,7 +42,10 @@ class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IncludedTest
-        fields = ('language', 'source')
+        fields = (
+                 'language',
+                 'source',
+                 )
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -37,10 +54,20 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IncludedTask
-        fields = ('id', 'test', 'name', 'description', 'gradable', 'solutions')
+        fields = (
+                 'id',
+                 'test',
+                 'name',
+                 'description',
+                 'gradable',
+                 'solutions',
+                 )
 
 
 class WeekSerializer(serializers.ModelSerializer):
     class Meta:
         model = Week
-        fields = ('id', 'number')
+        fields = (
+                 'id',
+                 'number',
+                 )

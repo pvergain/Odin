@@ -291,7 +291,7 @@ def create_solution_comment(*,
 def get_gradable_tasks_for_course(*, course: Course, student: Student):
     tasks = []
 
-    for task in course.tasks.all():
+    for task in course.included_tasks.all():
         if task.gradable:
             task.last_solution = get_last_solution_for_task(
                 task=task,
