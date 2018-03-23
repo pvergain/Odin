@@ -165,6 +165,7 @@ class IncludedMaterial(BaseMaterial):
 
 
 class Week(models.Model):
+
     start_date = models.DateField()
     end_date = models.DateField()
 
@@ -172,6 +173,9 @@ class Week(models.Model):
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
                                related_name='weeks')
+
+    class Meta:
+        ordering = ('number',)
 
     def __str__(self):
         return f'Week {self.number}'

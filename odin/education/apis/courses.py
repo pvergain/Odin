@@ -3,13 +3,24 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 
-from odin.education.models import Course, Student
+from odin.education.models import (
+    Course,
+    Student, 
+    Teacher,
+    Week,
+)
+
 from odin.education.services import get_gradable_tasks_for_course
 
-from .permissions import StudentCourseAuthenticationMixin
+from .permissions import (
+    StudentCourseAuthenticationMixin, 
+    TeacherCourseAuthenticationMixin,
+    IsUserStudentOrTeacherMixin,
+    IsStudentOrTeacherInCourseMixin,
+)
 
 
-class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
+class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
     class Serializer(serializers.ModelSerializer):
         students_count = serializers.SerializerMethodField()
         description = serializers.CharField(source='description.verbose')
@@ -31,16 +42,30 @@ class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
     serializer_class = Serializer
 
     def get_queryset(self):
-        student = self.request.user.downcast(Student)
+        user = self.request.user
+
+        student = user.downcast(Student)
+        teacher = user.downcast(Teacher)
+
+        if teacher:
+            return Course.objects\
+                .filter(teachers__in=[teacher])\
+                .order_by('-id')
 
         return Course.objects\
                      .filter(course_assignments__student=student)\
                      .order_by('-id')
 
 
-class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
+class CourseDetailApi(IsStudentOrTeacherInCourseMixin, APIView):
     class CourseSerializer(serializers.ModelSerializer):
+        class WeekSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = Week
+                fields = ('number',)
+
         problems = serializers.SerializerMethodField()
+        weeks = WeekSerializer(many=True)
 
         class Meta:
             model = Course
@@ -50,6 +75,7 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
                       'end_date',
                       'logo',
                       'slug_url',
+                      'weeks',
                       'problems')
 
         def get_problems(self, obj):
