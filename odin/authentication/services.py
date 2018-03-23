@@ -19,13 +19,14 @@ class _ProfileSerializer(serializers.ModelSerializer):
 
 
 class _UserSerializer(serializers.ModelSerializer):
+
     user_type = serializers.SerializerMethodField()
 
     class Meta:
         model = BaseUser
         fields = (
-            'id', 
-            'email', 
+            'id',
+            'email',
             'user_type'
             )
 

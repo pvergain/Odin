@@ -1,12 +1,18 @@
 import uuid
+
 from django.db import models
+from django.utils import timezone
+
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 from image_cropping.fields import ImageRatioField, ImageCropField
 
 from odin.common.utils import json_field_default
-from odin.common.models import UpdatedAtCreatedAtModelMixin
+from odin.common.models import (
+    UpdatedAtCreatedAtModelMixin,
+    VoidedModelMixin,
+)
 
 from .managers import UserManager
 
@@ -103,3 +109,19 @@ class Profile(models.Model):
 
     def get_gh_profile_url(self):
         return self.social_accounts.get('GitHub')
+
+
+class PasswordResetToken(UpdatedAtCreatedAtModelMixin, VoidedModelMixin, models.Model):
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4)
+
+    user = models.ForeignKey(BaseUser, related_name='password_reset_tokens')
+
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def use(self):
+        self.used_at = timezone.now()
+        self.save()
+
+    @property
+    def used(self):
+        return self.used_at is not None

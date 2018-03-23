@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
 from rest_framework.generics import get_object_or_404
 
-from odin.authentication.apis.permissions import JSONWebTokenAuthenticationMixin
+from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
 from odin.education.models import Student
 
