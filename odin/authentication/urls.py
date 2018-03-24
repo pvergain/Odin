@@ -29,10 +29,12 @@ urlpatterns = [
     ),
     url(
         regex='^forgot-password/reset/$',
-        view=ForgotPasswordApi.as_view()
+        view=ForgotPasswordApi.as_view(),
+        name='forgot-password-reset'
     ),
     url(
         regex='^forgot-password/set/$',
-        view=ForgotPasswordSetApi.as_view()
+        view=ForgotPasswordSetApi.as_view(),
+        name='forgot-password-set'
     ),
 ]

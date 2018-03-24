@@ -57,8 +57,12 @@ class LogoutApi(StudentCourseAuthenticationMixin, APIView):
 class ForgotPasswordApi(ServiceExceptionHandlerMixin, APIView):
     class Serializer(serializers.Serializer):
         user = serializers.SlugRelatedField(
-            queryset=BaseUser.objects.filter(is_active=True),
-            slug_field='email'
+            queryset=BaseUser.objects.all(),
+            slug_field='email',
+            error_messages={
+                'does_not_exist':
+                ('User with that email does not exist')
+            }
         )
 
     def post(self, request):

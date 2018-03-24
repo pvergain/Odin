@@ -87,7 +87,7 @@ class BaseUser(PermissionsMixin,
         return self.judge_in_competitions.count() > 0
 
     def rotate_secret_key(self):
-        self.user_uid = uuid.uuid4()
+        self.secret_key = uuid.uuid4()
         self.save()
 
 
