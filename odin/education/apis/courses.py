@@ -10,8 +10,6 @@ from odin.education.models import (
     Course,
     Student,
     Teacher,
-    IncludedTask,
-    IncludedTask,
     Week,
     ProgrammingLanguage,
     # make relation for course and programing language
@@ -26,7 +24,6 @@ from odin.education.services import (
 from odin.education.apis.permissions import (
     StudentCourseAuthenticationMixin,
     IsUserStudentOrTeacherMixin,
-    IsStudentOrTeacherInCourseMixin,
     TeacherCourseAuthenticationMixin,
 )
 
@@ -55,13 +52,14 @@ class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        student = user.downcast(Student)
         teacher = user.downcast(Teacher)
 
         if teacher:
             return Course.objects\
                 .filter(teachers__in=[teacher])\
                 .order_by('-id')
+
+        student = user.downcast(Student)
 
         return Course.objects\
                      .filter(course_assignments__student=student)\

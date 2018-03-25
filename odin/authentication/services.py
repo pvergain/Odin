@@ -60,9 +60,9 @@ def initiate_reset_user_password(*, user: BaseUser) -> PasswordResetToken:
     query = Q(user=user) & (Q(voided_at__isnull=True) | Q(used_at__isnull=True))
     PasswordResetToken.objects.filter(query).update(voided_at=now)
 
-    token = PasswordResetToken.objects.create(user=user)
+    password_reset_token = PasswordResetToken.objects.create(user=user)
 
-    reset_link = f'https://academy.hacksoft.io/forgot-password/{str(token)}/'
+    reset_link = f'https://academy.hacksoft.io/forgot-password/{str(password_reset_token.token)}/'
 
     send_mail(
         recipients=[user.email],

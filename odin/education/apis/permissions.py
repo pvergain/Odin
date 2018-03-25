@@ -55,12 +55,8 @@ class IsStudentOrTeacherInCoursePermission(BasePermission):
 
         course = get_object_or_404(view.get_queryset(), pk=view.kwargs.get('course_id'))
 
-        if (teacher and course.teachers.filter(id=teacher.id).exists())\
-                or (student and course.students.filter(id=student.id).exists()):
-
-            return True
-
-        return False
+        return (teacher and course.teachers.filter(id=teacher.id).exists())\
+            or (student and course.students.filter(id=student.id).exists())
 
 
 class StudentCourseAuthenticationMixin(JSONWebTokenAuthenticationMixin):
