@@ -45,11 +45,6 @@ class Course(models.Model):
                                       through='CourseAssignment',
                                       through_fields=('course', 'teacher'))
 
-    language = models.ForeignKey('ProgrammingLanguage',
-                                 related_name='courses',
-                                 null=True
-                                 )
-
     slug_url = models.SlugField(unique=True)
 
     repository = models.URLField(blank=True)
