@@ -304,3 +304,17 @@ def get_gradable_tasks_for_course(*, course: Course, student: Student):
 
 def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solution:
     return Solution.objects.filter(task=task, student=student).order_by('-id').first()
+
+
+def create_included_task_with_test(*, data: Dict):
+    code = data.pop['code']
+
+    included_task = create_included_task(**data)
+    included_task.save()
+
+    included_test = create_test_for_task(
+        task=included_task,
+        code=code,
+        language=ProgrammingLanguage.objects.last()
+    )
+    included_test.save()

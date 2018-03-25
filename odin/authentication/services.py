@@ -20,25 +20,27 @@ class _ProfileSerializer(serializers.ModelSerializer):
 
 class _UserSerializer(serializers.ModelSerializer):
 
-    user_type = serializers.SerializerMethodField()
-
     class Meta:
         model = BaseUser
         fields = (
             'id',
             'email',
-            'user_type'
             )
 
-    def get_user_type(self, obj):
-        if obj.is_teacher():
-            return 'teacher'
-        elif obj.is_student():
-            return 'student'
+
+def get_user_type(*, user: BaseUser) -> str:
+    STUDENT_TYPE = 'student'
+    TEACHER_TYPE = 'teacher'
+
+    if user.is_teacher():
+        return TEACHER_TYPE
+    elif user.is_student():
+        return STUDENT_TYPE
 
 
 def get_user_data(*, user: BaseUser):
     user_data = _UserSerializer(instance=user).data
+    user_data['user_type'] = get_user_data(user)
     profile_data = _ProfileSerializer(instance=user.profile).data
 
     return {**user_data, **profile_data}
@@ -60,9 +62,9 @@ def initiate_reset_user_password(*, user: BaseUser) -> PasswordResetToken:
     query = Q(user=user) & (Q(voided_at__isnull=True) | Q(used_at__isnull=True))
     PasswordResetToken.objects.filter(query).update(voided_at=now)
 
-    password_reset_token = PasswordResetToken.objects.create(user=user)
+    token = str(PasswordResetToken.objects.create(user=user).token)
 
-    reset_link = f'https://academy.hacksoft.io/forgot-password/{str(password_reset_token.token)}/'
+    reset_link = f'https://academy.hacksoft.io/forgot-password/{token}/'
 
     send_mail(
         recipients=[user.email],
