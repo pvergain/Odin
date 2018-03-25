@@ -82,16 +82,16 @@ class Command(BaseCommand):
                 raise CommandError(f'Course with ID: {course_id} does not exist')
 
             tasks = course.tasks.all()
-            
+
             for task in tasks:
                 if not task.gradable:
                     break
                 order = ('student__email', '-id')
                 solution_query = task.solutions.filter(status=Solution.OK).select_related('student__user')
-            
+
                 passing_solutions = deque(solution_query.order_by(*order).distinct('student__email'))
                 result += f'{len(passing_solutions)} people have solved {task.name}\n'
-            
+
                 while passing_solutions:
                     current_solution = passing_solutions.popleft()
                     for next_solution in passing_solutions:
@@ -99,6 +99,6 @@ class Command(BaseCommand):
                             output = compare_code_solutions(current_solution, next_solution)
                         else:
                             output = compare_file_solutions(current_solution, next_solution)
-            
+
                         result += output
         return result
