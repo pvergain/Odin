@@ -145,7 +145,7 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
         return Response(self.Serializer(instance=course).data)
 
 
-class CreateTaskApi(ServiceExceptionHandlerMixin, APIView):
+class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMixin, APIView):
     class Serializer(serializers.Serializer):
         course = serializers.PrimaryKeyRelatedField(
             queryset=Course.objects.all(),

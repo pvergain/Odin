@@ -40,7 +40,7 @@ def get_user_type(*, user: BaseUser) -> str:
 
 def get_user_data(*, user: BaseUser):
     user_data = _UserSerializer(instance=user).data
-    user_data['user_type'] = get_user_data(user)
+    user_data['user_type'] = get_user_type(user=user)
     profile_data = _ProfileSerializer(instance=user.profile).data
 
     return {**user_data, **profile_data}
