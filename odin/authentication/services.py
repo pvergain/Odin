@@ -37,6 +37,8 @@ def get_user_type(*, user: BaseUser) -> str:
     elif user.is_student():
         return STUDENT_TYPE
 
+    raise TypeError('User Type is not permitted')
+
 
 def get_user_data(*, user: BaseUser):
     user_data = _UserSerializer(instance=user).data
