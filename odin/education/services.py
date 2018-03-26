@@ -316,7 +316,7 @@ def create_included_task_with_test(*, data: Dict):
 
     if not url.endswith('/README.md'):
         url = url+'/README.md'
-        url = url.replace('//README.md','/README.md')
+        url = url.replace('//README.md', '/README.md')
 
     desc = requests.get(url).text
     data['description'] = desc
