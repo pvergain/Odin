@@ -313,6 +313,11 @@ def create_included_task_with_test(*, data: Dict):
     url = data.pop('description_url')
 
     url = url.replace('/blob/', '/').replace('github.com', 'raw.githubusercontent.com')
+
+    if not url.endswith('/README.md'):
+        url = url+'/README.md'
+        url = url.replace('//README.md','/README.md')
+
     desc = requests.get(url).text
     data['description'] = desc
 
