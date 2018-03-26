@@ -307,7 +307,7 @@ def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solut
 
 
 def create_included_task_with_test(*, data: Dict):
-    code = data.pop['code']
+    code = data.pop('code')
 
     included_task = create_included_task(**data)
     included_task.save()
