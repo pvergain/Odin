@@ -169,6 +169,13 @@ class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMix
         code = serializers.CharField()
         description = serializers.CharField()
         gradable = serializers.BooleanField()
+        language = serializers.PrimaryKeyRelatedField(
+            queryset=ProgrammingLanguage.objects.all(),
+            error_messages={
+                'does_not_exists':
+                ('Programming Language does not exist')
+            }
+        )
         week = serializers.PrimaryKeyRelatedField(
             queryset=Week.objects.all(),
             error_messages={

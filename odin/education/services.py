@@ -308,6 +308,7 @@ def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solut
 
 def create_included_task_with_test(*, data: Dict):
     code = data.pop('code')
+    language = data.pop('language')
 
     included_task = create_included_task(**data)
     included_task.save()
@@ -315,7 +316,7 @@ def create_included_task_with_test(*, data: Dict):
     included_test = create_test_for_task(
         task=included_task,
         code=code,
-        language=ProgrammingLanguage.objects.last()
+        language=language
     )
     included_test.save()
 
