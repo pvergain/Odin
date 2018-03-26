@@ -318,3 +318,5 @@ def create_included_task_with_test(*, data: Dict):
         language=ProgrammingLanguage.objects.last()
     )
     included_test.save()
+
+    return included_task

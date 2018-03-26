@@ -11,6 +11,7 @@ from odin.education.models import (
     Student,
     Teacher,
     Week,
+    ProgrammingLanguage,
 )
 
 from odin.education.services import (
@@ -110,6 +111,7 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
     class Serializer(serializers.ModelSerializer):
 
         weeks = serializers.SerializerMethodField()
+        langauges = serializers.SerializerMethodField()
 
         class Meta:
             model = Course
@@ -120,6 +122,7 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
                 'end_date',
                 'logo',
                 'slug_url',
+                'langauges'
                 'weeks',
             )
 
@@ -137,6 +140,14 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
                         } for task in week.included_tasks.all()
                     ]
                 } for week in obj.weeks.all()
+            ]
+
+        def get_languages(self):
+            return [
+                {
+                    'id': language.id,
+                    'name': language.name,
+                } for language in ProgrammingLanguage.objects.all()
             ]
 
     def get(self, request, course_id):
@@ -172,6 +183,11 @@ class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMix
         serializer = self.Serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        create_included_task_with_test(data=serializer.validated_data)
+        task = create_included_task_with_test(data=serializer.validated_data)
+        data = {
+            'task_id': task.id,
+            'task_name': task.name,
+            'gradable': task.gradable,
+        }
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(data=data, status=status.HTTP_201_CREATED)
