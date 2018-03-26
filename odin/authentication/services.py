@@ -7,7 +7,17 @@ from django.utils import timezone
 
 from odin.emails.services import send_mail
 
-from odin.users.models import BaseUser, Profile, PasswordResetToken
+from odin.users.models import (
+    BaseUser,
+    Profile,
+    PasswordResetToken
+)
+
+from odin.education.models import (
+    Student,
+    Teacher,
+    Course,
+)
 
 
 class _ProfileSerializer(serializers.ModelSerializer):
@@ -28,21 +38,28 @@ class _UserSerializer(serializers.ModelSerializer):
             )
 
 
-def get_user_type(*, user: BaseUser) -> str:
+def get_user_courses_per_user_type(*, user: BaseUser) -> str:
     STUDENT_TYPE = 'student'
     TEACHER_TYPE = 'teacher'
 
-    if user.is_teacher():
-        return TEACHER_TYPE
-    elif user.is_student():
-        return STUDENT_TYPE
+    teacher = user.downcast(Teacher)
+    student = user.downcast(Student)
 
-    raise TypeError('User Type is not permitted')
+    teacher_courses = Course.objects.filter(
+        teachers__in=[teacher]).values_list('id', flat=True)
+
+    student_courses = Course.objects.filter(
+        students__in=[student]).values_list('id', flat=True)
+
+    return {
+        STUDENT_TYPE: student_courses,
+        TEACHER_TYPE: teacher_courses,
+    }
 
 
 def get_user_data(*, user: BaseUser):
     user_data = _UserSerializer(instance=user).data
-    user_data['user_type'] = get_user_type(user=user)
+    user_data['courses'] = get_user_courses_per_user_type(user=user)
     profile_data = _ProfileSerializer(instance=user.profile).data
 
     return {**user_data, **profile_data}
