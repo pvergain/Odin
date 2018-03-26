@@ -111,7 +111,7 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
     class Serializer(serializers.ModelSerializer):
 
         weeks = serializers.SerializerMethodField()
-        langauges = serializers.SerializerMethodField()
+        languages = serializers.SerializerMethodField()
 
         class Meta:
             model = Course
@@ -122,7 +122,7 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
                 'end_date',
                 'logo',
                 'slug_url',
-                'langauges'
+                'languages',
                 'weeks',
             )
 
@@ -142,7 +142,7 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
                 } for week in obj.weeks.all()
             ]
 
-        def get_languages(self):
+        def get_languages(self, obj):
             return [
                 {
                     'id': language.id,
