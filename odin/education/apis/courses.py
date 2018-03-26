@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -51,17 +53,11 @@ class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
         user = self.request.user
 
         teacher = user.downcast(Teacher)
-
-        if teacher:
-            return Course.objects\
-                .filter(teachers__in=[teacher])\
-                .order_by('-id')
-
         student = user.downcast(Student)
 
-        return Course.objects\
-                     .filter(course_assignments__student=student)\
-                     .order_by('-id')
+        return Course.objects.filter(
+            Q(teachers__in=[teacher]) | Q(students__in=[student])
+        )
 
 
 class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
@@ -71,13 +67,15 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
 
         class Meta:
             model = Course
-            fields = ('id',
-                      'name',
-                      'start_date',
-                      'end_date',
-                      'logo',
-                      'slug_url',
-                      'problems')
+            fields = (
+                'id',
+                'name',
+                'start_date',
+                'end_date',
+                'logo',
+                'slug_url',
+                'problems'
+            )
 
         def get_problems(self, obj):
             return [
