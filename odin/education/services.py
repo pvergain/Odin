@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
+import requests
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -309,15 +310,22 @@ def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solut
 def create_included_task_with_test(*, data: Dict):
     code = data.pop('code')
     language = data.pop('language')
+    url = data.pop('description_url')
+
+    url = url.replace('/blob/', '/').replace('github.com', 'raw.githubusercontent.com')
+    desc = requests.get(url).text
+    data['description'] = desc
 
     included_task = create_included_task(**data)
     included_task.save()
 
-    included_test = create_test_for_task(
-        task=included_task,
-        code=code,
-        language=language
-    )
-    included_test.save()
+    if included_task.gradable:
+
+        included_test = create_test_for_task(
+            task=included_task,
+            code=code,
+            language=language
+        )
+        included_test.save()
 
     return included_task
