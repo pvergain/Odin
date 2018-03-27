@@ -59,6 +59,7 @@ def get_user_courses_per_user_type(*, user: BaseUser) -> str:
 
 def get_user_data(*, user: BaseUser):
     user_data = _UserSerializer(instance=user).data
+    user_data['is_teacher'] = user.is_teacher()
     user_data['courses'] = get_user_courses_per_user_type(user=user)
     profile_data = _ProfileSerializer(instance=user.profile).data
 
