@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission
-from rest_framework.generics import get_object_or_404
 
 from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
@@ -46,19 +45,6 @@ class IsStudentOrTeacherPermission(BasePermission):
         return False
 
 
-class IsStudentOrTeacherInCoursePermission(BasePermission):
-    def has_permission(self, request, view):
-        user = request.user
-
-        student = user.downcast(Student)
-        teacher = user.downcast(Teacher)
-
-        course = get_object_or_404(view.get_queryset(), pk=view.kwargs.get('course_id'))
-
-        return (teacher and course.teachers.filter(id=teacher.id).exists())\
-            or (student and course.students.filter(id=student.id).exists())
-
-
 class StudentCourseAuthenticationMixin(JSONWebTokenAuthenticationMixin):
     def get_permissions(self):
         return super().get_permissions() + [IsStudentPermission()]
@@ -72,8 +58,3 @@ class TeacherCourseAuthenticationMixin(JSONWebTokenAuthenticationMixin):
 class IsUserStudentOrTeacherMixin(JSONWebTokenAuthenticationMixin):
     def get_permissions(self):
         return super().get_permissions() + [IsStudentOrTeacherPermission()]
-
-
-class IsStudentOrTeacherInCourseMixin(JSONWebTokenAuthenticationMixin):
-    def get_permissions(self):
-        return super().get_permissions() + [IsStudentOrTeacherInCoursePermission()]
