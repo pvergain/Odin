@@ -16,7 +16,8 @@ from odin.authentication.services import (
     logout,
     get_user_data,
     initiate_reset_user_password,
-    reset_user_password
+    reset_user_password,
+    change_user_password,
 )
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
@@ -91,5 +92,21 @@ class ForgotPasswordSetApi(ServiceExceptionHandlerMixin, APIView):
             token=data['token'],
             password=data['password']
         )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class ChangePasswordApi(
+    ServiceExceptionHandlerMixin,
+    JSONWebTokenAuthenticationMixin,
+    APIView
+):
+
+    def post(self, request):
+
+        data = request.data
+        data['user'] = self.request.user
+
+        change_user_password(**data)
 
         return Response(status=status.HTTP_202_ACCEPTED)

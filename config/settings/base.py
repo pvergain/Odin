@@ -166,7 +166,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 AUTH_USER_MODEL = 'users.BaseUser'
 
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'

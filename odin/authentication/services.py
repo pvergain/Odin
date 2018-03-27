@@ -68,6 +68,7 @@ def get_user_data(*, user: BaseUser):
 @transaction.atomic
 def logout(*, user: BaseUser) -> BaseUser:
     user.rotate_secret_key()
+    user.save()
 
     return user
 
@@ -113,5 +114,24 @@ def reset_user_password(
     user.save()
 
     token.use()
+
+    return user
+
+
+@transaction.atomic
+def change_user_password(
+    *,
+    user: BaseUser,
+    old_password: str,
+    new_password: str,
+) -> BaseUser:
+
+    if not user.check_password(old_password):
+        raise ValidationError('Old password is invalid')
+
+    user.set_password(new_password)
+    user.rotate_secret_key()
+
+    user.save()
 
     return user

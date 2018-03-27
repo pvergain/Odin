@@ -7,6 +7,7 @@ from odin.authentication.apis import (
     LogoutApi,
     ForgotPasswordApi,
     ForgotPasswordSetApi,
+    ChangePasswordApi,
 )
 
 
@@ -18,7 +19,7 @@ urlpatterns = [
     ),
     url(
         regex='^me/$',
-        view=UserDetailApi.as_view()
+        view=UserDetailApi.as_view(),
         name='user-detail'
     ),
     url(
@@ -27,7 +28,7 @@ urlpatterns = [
     ),
     url(
         regex='^logout/$',
-        view=LogoutApi.as_view()
+        view=LogoutApi.as_view(),
         name='logout'
     ),
     url(
@@ -39,5 +40,10 @@ urlpatterns = [
         regex='^forgot-password/set/$',
         view=ForgotPasswordSetApi.as_view(),
         name='forgot-password-set'
+    ),
+    url(
+        regex='^change-password/$',
+        view=ChangePasswordApi.as_view(),
+        name='change-password'
     ),
 ]
