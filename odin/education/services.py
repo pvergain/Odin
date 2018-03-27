@@ -310,7 +310,7 @@ def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solut
 def create_included_task_with_test(*, data: Dict):
     code = data.pop('code')
     language = data.pop('language')
-    url = data.pop('description_url')
+    url = data.pop('description')
 
     url = url.replace('/blob/', '/').replace('github.com', 'raw.githubusercontent.com')
 
