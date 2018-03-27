@@ -49,7 +49,7 @@ class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
 
 class LogoutApi(StudentCourseAuthenticationMixin, APIView):
     def post(self, request):
-        logout(self.request.user)
+        logout(user=self.request.user)
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
