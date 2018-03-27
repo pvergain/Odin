@@ -13,11 +13,13 @@ from odin.authentication.apis import (
 urlpatterns = [
     url(
         regex='^login/$',
-        view=LoginApi.as_view()
+        view=LoginApi.as_view(),
+        name='login'
     ),
     url(
         regex='^me/$',
         view=UserDetailApi.as_view()
+        name='user-detail'
     ),
     url(
         regex='^token-refresh/$',
@@ -26,6 +28,7 @@ urlpatterns = [
     url(
         regex='^logout/$',
         view=LogoutApi.as_view()
+        name='logout'
     ),
     url(
         regex='^forgot-password/reset/$',
