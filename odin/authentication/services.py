@@ -38,10 +38,11 @@ class _UserSerializer(serializers.ModelSerializer):
             )
 
 
-def get_user_courses_per_user_type(*, user: BaseUser) -> str:
-    STUDENT_TYPE = 'student'
-    TEACHER_TYPE = 'teacher'
+STUDENT_TYPE = 'student'
+TEACHER_TYPE = 'teacher'
 
+
+def get_user_courses_per_user_type(*, user: BaseUser) -> str:
     teacher = user.downcast(Teacher)
     student = user.downcast(Student)
 
@@ -60,7 +61,12 @@ def get_user_courses_per_user_type(*, user: BaseUser) -> str:
 def get_user_data(*, user: BaseUser):
     user_data = _UserSerializer(instance=user).data
     user_data['is_teacher'] = user.is_teacher()
-    user_data['courses'] = get_user_courses_per_user_type(user=user)
+
+    user_courses = get_user_courses_per_user_type(user=user)
+
+    user_data['teacher_for_courses'] = user_courses[TEACHER_TYPE]
+    user_data['student_for_courses'] = user_courses[STUDENT_TYPE]
+
     profile_data = _ProfileSerializer(instance=user.profile).data
 
     return {**user_data, **profile_data}
