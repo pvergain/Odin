@@ -42,8 +42,12 @@ class LogoutApiTest(TestCase):
 
         self.assertEqual(logout_response.status_code, 401)
 
+    @patch('odin.authentication.apis.get_user_data')
     @patch('odin.authentication.apis.logout')
-    def test_logout_user_with_valid_token(self, mock_object):
+    def test_logout_user_with_valid_token(self, mock1, mock2):
+        mock2.return_value = {}
+        import ipdb ; ipdb.set_trace()
+
         # performing api login
         login_response = client.post(self.login_url, data=self.data)
 
@@ -52,5 +56,6 @@ class LogoutApiTest(TestCase):
         # try to perform api logout
         logout_response = client.post(self.logout_url, **{'HTTP_AUTHORIZATION': f'JWT {token}'})
 
-        self.assertEqual(mock_object.called, True)
+        self.assertEqual(mock1.called, True)
+        self.assertEqual(mock2.called, True)
         self.assertEqual(logout_response.status_code, 202)
