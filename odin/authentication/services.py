@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db.models.query import Q
 from django.db import transaction
@@ -115,6 +116,7 @@ def reset_user_password(
 
     user = token.user
 
+    validate_password(password)
     user.set_password(password)
     user.rotate_secret_key()
 
@@ -133,9 +135,13 @@ def change_user_password(
     new_password: str,
 ) -> BaseUser:
 
-    if not user.check_password(old_password):
-        raise ValidationError('Old password is invalid')
+    if not user.is_active:
+        raise ValidationError('User account is disabled.')
 
+    if not user.check_password(old_password):
+        raise ValidationError('Old password is invalid.')
+
+    validate_password(new_password)
     user.set_password(new_password)
     user.rotate_secret_key()
 
