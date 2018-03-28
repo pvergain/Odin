@@ -107,8 +107,7 @@ class ChangePasswordApi(
 ):
 
     def post(self, request):
-
-        data = request.data
+        data = {**request.data}
         data['user'] = self.request.user
 
         change_user_password(**data)
