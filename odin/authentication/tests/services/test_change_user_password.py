@@ -15,6 +15,7 @@ class TestChangeUserPassword(TestCase):
         self.user.set_password(self.test_password)
         self.user.is_active = True
         self.user.save()
+        self.init_secret_key = self.user.secret_key
 
     def test_user_cannot_change_password_with_wrong_old_password(self):
 
@@ -54,8 +55,15 @@ class TestChangeUserPassword(TestCase):
 
     def test_user_can_change_password_with_valid_old_and_new_password_when_active(self):
 
+        new_password = faker.password()
+
         change_user_password(
             user=self.user,
             old_password=self.test_password,
-            new_password=faker.password(),
+            new_password=new_password,
         )
+
+        self.user.refresh_from_db()
+
+        self.assertNotEqual(self.init_secret_key, self.user.secret_key)
+        self.assertTrue(self.user.check_password(new_password))
