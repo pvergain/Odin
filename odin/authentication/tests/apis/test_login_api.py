@@ -5,8 +5,6 @@ from odin.users.factories import BaseUserFactory
 from django.test import Client
 from django.shortcuts import reverse
 
-from unittest.mock import patch
-
 from odin.common.faker import faker
 
 client = Client()
@@ -21,7 +19,6 @@ class LoginApiTest(TestCase):
         self.user.is_active = True
         self.user.save()
         self.login_url = reverse('api:auth:login')
-
 
     def test_user_cannot_login_with_wrong_email(self):
         email = faker.email()
