@@ -28,7 +28,9 @@ class LogoutApiTest(TestCase):
             'password': self.test_password,
         }
 
-    def test_logout_user_with_invalid_token(self):
+    @patch('odin.authentication.apis.get_user_data')
+    def test_logout_user_with_invalid_token(self, mock_object):
+        mock_object.return_value = {}
         # performing api login
         login_response = client.post(self.login_url, data=self.data)
 
