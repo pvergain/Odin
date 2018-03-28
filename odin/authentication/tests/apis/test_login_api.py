@@ -5,6 +5,8 @@ from odin.users.factories import BaseUserFactory
 from django.test import Client
 from django.shortcuts import reverse
 
+from unittest.mock import patch
+
 from odin.common.faker import faker
 
 client = Client()
@@ -55,7 +57,10 @@ class LoginApiTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_user_can_login_when_account_is_active(self):
+    @patch('odin.authentication.apis.get_user_data')
+    def test_user_can_login_when_account_is_active(self, mock_object):
+        mock_object.return_value = {}
+
         data = {
             'email': self.user.email,
             'password': self.test_password,
@@ -63,5 +68,5 @@ class LoginApiTest(TestCase):
 
         response = self.post(self.login_url, data=data)
 
+        self.assertTrue(mock_object.called)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['me']['email'], self.user.email)
