@@ -46,7 +46,6 @@ class LogoutApiTest(TestCase):
     @patch('odin.authentication.apis.logout')
     def test_logout_user_with_valid_token(self, mock1, mock2):
         mock2.return_value = {}
-        import ipdb ; ipdb.set_trace()
 
         # performing api login
         login_response = client.post(self.login_url, data=self.data)
