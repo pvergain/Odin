@@ -139,7 +139,7 @@ class TestUserChangePasswordApi(TestCase):
         )
 
         self.assertEqual(change_password_response.status_code, 400)
-        self.assertEqual(change_password_response.data['errors'][0]['message'], 'Old password is invalid')
+        self.assertEqual(change_password_response.data['errors'][0]['message'], 'Old password is invalid.')
 
     @patch('odin.authentication.apis.change_user_password')
     @patch('odin.authentication.apis.get_user_data')
