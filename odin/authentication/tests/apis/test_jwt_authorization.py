@@ -97,4 +97,6 @@ class TestJWTSecret(TestCase):
         # performs logout with jwt
         client.post(self.logout_url, **{'HTTP_AUTHORIZATION': f'JWT {token}'})
 
-        self.assertEqual(self.init_secret_key, self.user.secret_key)
+        self.user.refresh_from_db()
+
+        self.assertNotEqual(self.init_secret_key, self.user.secret_key)
