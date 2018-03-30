@@ -57,13 +57,13 @@ class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
 
         return Course.objects.filter(
             Q(teachers__in=[teacher]) | Q(students__in=[student])
-        )
+        ).distinct()
 
 
 class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
     class CourseSerializer(serializers.ModelSerializer):
-
         problems = serializers.SerializerMethodField()
+        languages = serializers.SerializerMethodField()
 
         class Meta:
             model = Course
@@ -74,7 +74,8 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
                 'end_date',
                 'logo',
                 'slug_url',
-                'problems'
+                'problems',
+                'languages'
             )
 
         def get_problems(self, obj):
@@ -83,7 +84,10 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
                     'id': task.id,
                     'name': task.name,
                     'gradable': task.gradable,
-                    'week': task.week.number,
+                    'week': {
+                        'id': task.week.id,
+                        'number': task.week.number
+                    },
                     'description': task.description,
                     'last_solution': task.last_solution and {
                         'id': task.last_solution.id,
@@ -91,6 +95,14 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
                         'code': task.last_solution.code
                     } or None
                 } for task in obj.tasks
+            ]
+
+        def get_languages(self, obj):
+            return [
+                {
+                    'id': language.id,
+                    'name': language.name,
+                } for language in ProgrammingLanguage.objects.all()
             ]
 
     def get_queryset(self):
@@ -165,7 +177,7 @@ class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMix
         )
         name = serializers.CharField()
         code = serializers.CharField()
-        description = serializers.URLField()
+        description_url = serializers.URLField()
         gradable = serializers.BooleanField()
         language = serializers.PrimaryKeyRelatedField(
             queryset=ProgrammingLanguage.objects.all(),
@@ -188,7 +200,8 @@ class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMix
         serializer = self.Serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        task = create_included_task_with_test(data=serializer.validated_data)
+        task = create_included_task_with_test(**serializer.validated_data)
+
         data = {
             'task_id': task.id,
             'task_name': task.name,

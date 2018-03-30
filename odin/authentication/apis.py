@@ -106,6 +106,9 @@ class ChangePasswordApi(
     APIView
 ):
 
+    """
+    TODO: Add serialializer
+    """
     def post(self, request):
         data = {**request.data}
         data['user'] = self.request.user

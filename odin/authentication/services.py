@@ -76,7 +76,6 @@ def get_user_data(*, user: BaseUser):
 @transaction.atomic
 def logout(*, user: BaseUser) -> BaseUser:
     user.rotate_secret_key()
-    user.save()
 
     return user
 

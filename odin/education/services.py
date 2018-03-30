@@ -307,21 +307,31 @@ def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solut
     return Solution.objects.filter(task=task, student=student).order_by('-id').first()
 
 
-def create_included_task_with_test(*, data: Dict):
-    code = data.pop('code')
-    language = data.pop('language')
-    url = data.pop('description')
+def create_included_task_with_test(
+    *,
+    course: Course,
+    language: ProgrammingLanguage,
+    week: Week,
+    name: str,
+    code: str,
+    gradable: bool,
+    description_url: str
+):
+    if not description_url.endswith('README.md'):
+        description_url = description_url.replace('tree', 'blob')
+        description_url = f'{description_url}/README.md'
 
-    url = url.replace('/blob/', '/').replace('github.com', 'raw.githubusercontent.com')
+    description_url = f'{description_url}?raw=1'
 
-    if not url.endswith('/README.md'):
-        url = url+'/README.md'
-        url = url.replace('//README.md', '/README.md')
+    markdown = requests.get(description_url, timeout=2).text
 
-    desc = requests.get(url).text
-    data['description'] = desc
-
-    included_task = create_included_task(**data)
+    included_task = create_included_task(
+        course=course,
+        week=week,
+        name=name,
+        description=markdown,
+        gradable=gradable
+    )
     included_task.save()
 
     if included_task.gradable:
