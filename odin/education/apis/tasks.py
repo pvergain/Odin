@@ -26,8 +26,8 @@ class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
 
         def get_course(self, obj):
             return {
-                     'id': obj.topic.course.id,
-                     'name': obj.topic.course.name
+                     'id': obj.course.id,
+                     'name': obj.course.name
                    }
 
         def get_solutions(self, obj):

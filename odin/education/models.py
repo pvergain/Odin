@@ -37,13 +37,17 @@ class Course(models.Model):
 
     attendable = models.BooleanField(default=True)
 
-    students = models.ManyToManyField(Student,
-                                      through='CourseAssignment',
-                                      through_fields=('course', 'student'))
+    students = models.ManyToManyField(
+        Student,
+        through='CourseAssignment',
+        through_fields=('course', 'student')
+    )
 
-    teachers = models.ManyToManyField(Teacher,
-                                      through='CourseAssignment',
-                                      through_fields=('course', 'teacher'))
+    teachers = models.ManyToManyField(
+        Teacher,
+        through='CourseAssignment',
+        through_fields=('course', 'teacher')
+    )
 
     slug_url = models.SlugField(unique=True)
 
@@ -153,44 +157,46 @@ class Material(BaseMaterial):
 
 
 class IncludedMaterial(BaseMaterial):
-    material = models.ForeignKey(Material,
-                                 on_delete=models.CASCADE,
-                                 related_name='included_materials')
-    topic = models.ForeignKey('Topic',
-                              on_delete=models.CASCADE,
-                              related_name='materials')
+    material = models.ForeignKey(
+        Material,
+        on_delete=models.CASCADE,
+        related_name='included_materials'
+    )
+
+    week = models.ForeignKey(
+        'Week',
+        related_name='materials',
+        null=True,
+    )
+
+    course = models.ForeignKey(
+        Course,
+        related_name='included_materials',
+        null=True,
+    )
 
     class Meta:
-        unique_together = (('topic', 'material'), )
+        unique_together = (('week', 'material'), )
 
 
 class Week(models.Model):
+
     start_date = models.DateField()
     end_date = models.DateField()
 
     number = models.PositiveIntegerField(default=1)
-    course = models.ForeignKey(Course,
-                               on_delete=models.CASCADE,
-                               related_name='weeks')
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='weeks',
+        null=True,
+    )
+
+    class Meta:
+        ordering = ('number',)
 
     def __str__(self):
         return f'Week {self.number}'
-
-
-class Topic(UpdatedAtCreatedAtModelMixin, models.Model):
-    name = models.CharField(max_length=255)
-    course = models.ForeignKey(Course,
-                               on_delete=models.CASCADE,
-                               related_name='topics')
-    week = models.ForeignKey(Week,
-                             on_delete=models.CASCADE,
-                             related_name='topics')
-
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        ordering = ('week__number',)
 
 
 class Lecture(models.Model):
@@ -264,17 +270,29 @@ class ProgrammingLanguage(models.Model):
 
 
 class IncludedTask(BaseTask):
-    task = models.ForeignKey(Task,
-                             on_delete=models.CASCADE,
-                             related_name='included_tasks')
-    topic = models.ForeignKey(Topic,
-                              on_delete=models.CASCADE,
-                              related_name='tasks')
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name='included_tasks'
+    )
+
+    week = models.ForeignKey(
+        Week,
+        on_delete=models.CASCADE,
+        related_name='included_tasks',
+        null=True,
+    )
+
+    course = models.ForeignKey(
+        Course,
+        related_name='included_tasks',
+        null=True,
+    )
 
     objects = TaskQuerySet.as_manager()
 
     class Meta:
-        unique_together = (('topic', 'task'), )
+        unique_together = (('week', 'task'), )
 
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):

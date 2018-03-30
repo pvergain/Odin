@@ -5,7 +5,6 @@ from .models import (
     Course,
     Task,
     IncludedTask,
-    Topic,
     Week,
     Test,
     IncludedTest,
@@ -32,12 +31,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(IncludedTask)
 class IncludedTaskAdmin(admin.ModelAdmin):
-    list_display = ('task', 'topic')
-
-
-@admin.register(Topic)
-class TopicAdmin(admin.ModelAdmin):
-    list_display = ('name', 'course', 'week')
+    list_display = ('task', 'week')
 
 
 @admin.register(Week)

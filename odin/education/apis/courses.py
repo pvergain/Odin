@@ -1,15 +1,34 @@
+from django.db.models import Q
+
+from rest_framework import status
 from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 
-from odin.education.models import Course, Student
-from odin.education.services import get_gradable_tasks_for_course
+from odin.apis.mixins import ServiceExceptionHandlerMixin
 
-from .permissions import StudentCourseAuthenticationMixin
+from odin.education.models import (
+    Course,
+    Student,
+    Teacher,
+    Week,
+    ProgrammingLanguage,
+)
+
+from odin.education.services import (
+    create_included_task_with_test,
+    get_gradable_tasks_for_course
+)
+
+from odin.education.apis.permissions import (
+    StudentCourseAuthenticationMixin,
+    IsUserStudentOrTeacherMixin,
+    TeacherCourseAuthenticationMixin,
+)
 
 
-class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
+class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
     class Serializer(serializers.ModelSerializer):
         students_count = serializers.SerializerMethodField()
         description = serializers.CharField(source='description.verbose')
@@ -31,35 +50,45 @@ class StudentCoursesApi(StudentCourseAuthenticationMixin, ListAPIView):
     serializer_class = Serializer
 
     def get_queryset(self):
-        student = self.request.user.downcast(Student)
+        user = self.request.user
 
-        return Course.objects\
-                     .filter(course_assignments__student=student)\
-                     .order_by('-id')
+        teacher = user.downcast(Teacher)
+        student = user.downcast(Student)
+
+        return Course.objects.filter(
+            Q(teachers__in=[teacher]) | Q(students__in=[student])
+        ).distinct()
 
 
 class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
     class CourseSerializer(serializers.ModelSerializer):
         problems = serializers.SerializerMethodField()
+        languages = serializers.SerializerMethodField()
 
         class Meta:
             model = Course
-            fields = ('id',
-                      'name',
-                      'start_date',
-                      'end_date',
-                      'logo',
-                      'slug_url',
-                      'problems')
+            fields = (
+                'id',
+                'name',
+                'start_date',
+                'end_date',
+                'logo',
+                'slug_url',
+                'problems',
+                'languages'
+            )
 
         def get_problems(self, obj):
             return [
                 {
                     'id': task.id,
                     'name': task.name,
-                    'description': task.description,
                     'gradable': task.gradable,
-                    'week': task.topic.week.number,
+                    'week': {
+                        'id': task.week.id,
+                        'number': task.week.number
+                    },
+                    'description': task.description,
                     'last_solution': task.last_solution and {
                         'id': task.last_solution.id,
                         'status': task.last_solution.verbose_status,
@@ -68,8 +97,16 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
                 } for task in obj.tasks
             ]
 
+        def get_languages(self, obj):
+            return [
+                {
+                    'id': language.id,
+                    'name': language.name,
+                } for language in ProgrammingLanguage.objects.all()
+            ]
+
     def get_queryset(self):
-        return Course.objects.prefetch_related('topics__tasks')
+        return Course.objects.prefetch_related('weeks__included_tasks')
 
     def get(self, request, course_id):
         course = get_object_or_404(self.get_queryset(), pk=course_id)
@@ -78,3 +115,97 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
         course.tasks = get_gradable_tasks_for_course(course=course, student=student)
 
         return Response(self.CourseSerializer(instance=course).data)
+
+
+class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
+    class Serializer(serializers.ModelSerializer):
+
+        weeks = serializers.SerializerMethodField()
+        languages = serializers.SerializerMethodField()
+
+        class Meta:
+            model = Course
+            fields = (
+                'id',
+                'name',
+                'start_date',
+                'end_date',
+                'logo',
+                'slug_url',
+                'languages',
+                'weeks',
+            )
+
+        def get_weeks(self, obj):
+            return [
+                {
+                    'id': week.id,
+                    'number': week.number,
+                    'tasks': [
+                        {
+                            'id': task.id,
+                            'name': task.name,
+                            'gradable': task.gradable,
+                            'description': task.description,
+                        } for task in week.included_tasks.all()
+                    ]
+                } for week in obj.weeks.all()
+            ]
+
+        def get_languages(self, obj):
+            return [
+                {
+                    'id': language.id,
+                    'name': language.name,
+                } for language in ProgrammingLanguage.objects.all()
+            ]
+
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, pk=course_id)
+
+        return Response(self.Serializer(instance=course).data)
+
+
+class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMixin, APIView):
+    class Serializer(serializers.Serializer):
+        course = serializers.PrimaryKeyRelatedField(
+            queryset=Course.objects.all(),
+            error_messages={
+                'does_not_exist':
+                ('Course does not exist')
+            }
+        )
+        name = serializers.CharField()
+        code = serializers.CharField()
+        description_url = serializers.URLField()
+        gradable = serializers.BooleanField()
+        language = serializers.PrimaryKeyRelatedField(
+            queryset=ProgrammingLanguage.objects.all(),
+            error_messages={
+                'does_not_exists':
+                ('Programming Language does not exist')
+            }
+        )
+        week = serializers.PrimaryKeyRelatedField(
+            queryset=Week.objects.all(),
+            error_messages={
+                'does_not_exist':
+                ('Week does not exist')
+            }
+        )
+
+    def post(self, request, course_id):
+        data = request.data
+        data['course'] = course_id
+        serializer = self.Serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        task = create_included_task_with_test(**serializer.validated_data)
+
+        data = {
+            'task_id': task.id,
+            'task_name': task.name,
+            'gradable': task.gradable,
+        }
+
+        return Response(data=data, status=status.HTTP_201_CREATED)

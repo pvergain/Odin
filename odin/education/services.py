@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
+import requests
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -15,7 +16,6 @@ from .models import (
     Student,
     Teacher,
     Week,
-    Topic,
     IncludedMaterial,
     Material,
     IncludedTask,
@@ -86,25 +86,14 @@ def create_course(*,
     return course
 
 
-def create_topic(*,
-                 name: str,
-                 week: Week,
-                 course: Course) -> Topic:
-    if Topic.objects.filter(course=course, name=name).exists():
-        raise ValidationError('Topic with this name already exists for this course')
-
-    topic = Topic.objects.create(name=name, course=course, week=week)
-
-    return topic
-
-
 def create_included_material(*,
+                             course: Course,
+                             week: Week,
                              identifier: str=None,
                              url: str=None,
-                             topic: Topic=None,
                              content: str=None,
                              existing_material: Material=None) -> IncludedMaterial:
-    included_material = IncludedMaterial(topic=topic)
+    included_material = IncludedMaterial(week=week, course=course)
 
     if existing_material is None:
         existing_material = Material(identifier=identifier, url=url, content=content)
@@ -123,12 +112,14 @@ def create_included_material(*,
 
 
 def create_included_task(*,
+                         course: Course,
+                         week: Week,
                          name: str=None,
                          description: str=None,
                          gradable: bool=False,
                          existing_task: Task=None,
-                         topic: Topic=None) -> IncludedTask:
-    included_task = IncludedTask(topic=topic)
+                         )-> IncludedTask:
+    included_task = IncludedTask(week=week, course=course)
     if existing_task is None:
         existing_task = Task(name=name, description=description, gradable=gradable)
         existing_task.full_clean()
@@ -215,7 +206,7 @@ def create_non_gradable_solution(*,
 def calculate_student_valid_solutions_for_course(*,
                                                  student: Student,
                                                  course: Course) -> str:
-    total_tasks = IncludedTask.objects.filter(topic__course=course).count()
+    total_tasks = IncludedTask.objects.filter(course=course).count()
     if not total_tasks:
         return 0
     solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
@@ -227,7 +218,7 @@ def calculate_student_valid_solutions_for_course(*,
 def get_all_student_solution_statistics(*,
                                         task: IncludedTask) -> Dict:
     result = {}
-    course = task.topic.course
+    course = task.course
     result['total_student_count'] = course.students.count()
 
     filters = {'solutions__task': task, 'solutions__isnull': False}
@@ -301,17 +292,55 @@ def create_solution_comment(*,
 def get_gradable_tasks_for_course(*, course: Course, student: Student):
     tasks = []
 
-    for topic in course.topics.all():
-        for task in topic.tasks.all():
-            if task.gradable:
-                task.last_solution = get_last_solution_for_task(
-                    task=task,
-                    student=student
-                )
-                tasks.append(task)
+    for task in course.included_tasks.all():
+        if task.gradable:
+            task.last_solution = get_last_solution_for_task(
+                task=task,
+                student=student
+            )
+            tasks.append(task)
 
     return tasks
 
 
 def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solution:
     return Solution.objects.filter(task=task, student=student).order_by('-id').first()
+
+
+def create_included_task_with_test(
+    *,
+    course: Course,
+    language: ProgrammingLanguage,
+    week: Week,
+    name: str,
+    code: str,
+    gradable: bool,
+    description_url: str
+):
+    if not description_url.endswith('README.md'):
+        description_url = description_url.replace('tree', 'blob')
+        description_url = f'{description_url}/README.md'
+
+    description_url = f'{description_url}?raw=1'
+
+    markdown = requests.get(description_url, timeout=2).text
+
+    included_task = create_included_task(
+        course=course,
+        week=week,
+        name=name,
+        description=markdown,
+        gradable=gradable
+    )
+    included_task.save()
+
+    if included_task.gradable:
+
+        included_test = create_test_for_task(
+            task=included_task,
+            code=code,
+            language=language
+        )
+        included_test.save()
+
+    return included_task

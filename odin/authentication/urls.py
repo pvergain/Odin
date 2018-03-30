@@ -7,17 +7,20 @@ from odin.authentication.apis import (
     LogoutApi,
     ForgotPasswordApi,
     ForgotPasswordSetApi,
+    ChangePasswordApi,
 )
 
 
 urlpatterns = [
     url(
         regex='^login/$',
-        view=LoginApi.as_view()
+        view=LoginApi.as_view(),
+        name='login'
     ),
     url(
         regex='^me/$',
-        view=UserDetailApi.as_view()
+        view=UserDetailApi.as_view(),
+        name='user-detail'
     ),
     url(
         regex='^token-refresh/$',
@@ -25,7 +28,8 @@ urlpatterns = [
     ),
     url(
         regex='^logout/$',
-        view=LogoutApi.as_view()
+        view=LogoutApi.as_view(),
+        name='logout'
     ),
     url(
         regex='^forgot-password/reset/$',
@@ -36,5 +40,10 @@ urlpatterns = [
         regex='^forgot-password/set/$',
         view=ForgotPasswordSetApi.as_view(),
         name='forgot-password-set'
+    ),
+    url(
+        regex='^change-password/$',
+        view=ChangePasswordApi.as_view(),
+        name='change-password'
     ),
 ]

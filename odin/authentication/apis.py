@@ -5,19 +5,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_jwt.settings import api_settings
+from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
 from django.db.models.query import Q
 
 from odin.users.models import BaseUser, PasswordResetToken
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
-from odin.education.apis.permissions import StudentCourseAuthenticationMixin
-
 from odin.authentication.services import (
     logout,
     get_user_data,
     initiate_reset_user_password,
-    reset_user_password
+    reset_user_password,
+    change_user_password,
 )
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
@@ -40,14 +40,14 @@ class LoginApi(ObtainJSONWebToken):
         return Response(response_data)
 
 
-class UserDetailApi(StudentCourseAuthenticationMixin, APIView):
+class UserDetailApi(JSONWebTokenAuthenticationMixin, APIView):
     def get(self, request):
         full_data = get_user_data(user=self.request.user)
 
         return Response(full_data)
 
 
-class LogoutApi(StudentCourseAuthenticationMixin, APIView):
+class LogoutApi(JSONWebTokenAuthenticationMixin, APIView):
     def post(self, request):
         logout(user=self.request.user)
 
@@ -96,5 +96,23 @@ class ForgotPasswordSetApi(ServiceExceptionHandlerMixin, APIView):
             token=data['token'],
             password=data['password']
         )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class ChangePasswordApi(
+    ServiceExceptionHandlerMixin,
+    JSONWebTokenAuthenticationMixin,
+    APIView
+):
+
+    """
+    TODO: Add serialializer
+    """
+    def post(self, request):
+        data = {**request.data}
+        data['user'] = self.request.user
+
+        change_user_password(**data)
 
         return Response(status=status.HTTP_202_ACCEPTED)

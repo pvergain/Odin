@@ -16,9 +16,9 @@ class CourseViewMixin:
         prefetch = (
             'students__profile',
             'teachers__profile',
-            'topics__week',
-            'topics__materials',
-            'topics__tasks__solutions',
+            'week',
+            'materials',
+            'tasks__solutions',
             'weeks__lectures',
         )
         if course_id:

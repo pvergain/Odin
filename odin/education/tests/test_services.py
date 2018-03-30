@@ -10,7 +10,6 @@ from django.db.models import Q
 
 from ..services import (
     create_course,
-    create_topic,
     create_included_material,
     create_included_task,
     create_test_for_task,
@@ -21,7 +20,6 @@ from ..services import (
 from ..models import (
     Course,
     Week,
-    Topic,
     Material,
     IncludedMaterial,
     Task,
@@ -33,7 +31,6 @@ from ..models import (
 from ..factories import (
     CourseFactory,
     WeekFactory,
-    TopicFactory,
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
     StudentFactory,
@@ -112,35 +109,10 @@ class TestCreateCourse(TestCase):
         self.assertEqual(0, week_one.start_date.weekday())
 
 
-class TestCreateTopic(TestCase):
+class TestCreateIncludedMaterial(TestCase):
     def setUp(self):
         self.course = CourseFactory()
         self.week = WeekFactory(course=self.course)
-
-    def test_create_topic_adds_topic_to_course_successfully(self):
-        topic_count = Topic.objects.count()
-        course_topics_count = Topic.objects.filter(course=self.course).count()
-
-        create_topic(name=faker.name(), course=self.course, week=self.week)
-
-        self.assertEqual(topic_count + 1, Topic.objects.count())
-        self.assertEqual(course_topics_count + 1, Topic.objects.filter(course=self.course).count())
-
-    def test_create_topic_raises_validation_error_on_existing_topic(self):
-        topic = create_topic(name=faker.name(), course=self.course, week=self.week)
-        topic_count = Topic.objects.count()
-        course_topics_count = Topic.objects.filter(course=self.course).count()
-
-        with self.assertRaises(ValidationError):
-            create_topic(name=topic.name, course=self.course, week=self.week)
-
-        self.assertEqual(topic_count, Topic.objects.count())
-        self.assertEqual(course_topics_count, Topic.objects.filter(course=self.course).count())
-
-
-class TestCreateIncludedMaterial(TestCase):
-    def setUp(self):
-        self.topic = TopicFactory()
         self.material = Material.objects.create(identifier="TestMaterial",
                                                 url=faker.url(),
                                                 content=faker.text())
@@ -149,7 +121,7 @@ class TestCreateIncludedMaterial(TestCase):
         current_material_count = Material.objects.count()
         current_included_material_count = IncludedMaterial.objects.count()
 
-        create_included_material(existing_material=self.material, topic=self.topic)
+        create_included_material(existing_material=self.material, week=self.week, course=self.course)
 
         self.assertEqual(current_material_count, Material.objects.count())
         self.assertEqual(current_included_material_count + 1, IncludedMaterial.objects.count())
@@ -160,7 +132,8 @@ class TestCreateIncludedMaterial(TestCase):
         create_included_material(identifier=faker.word(),
                                  url=faker.url(),
                                  content=faker.text(),
-                                 topic=self.topic)
+                                 week=self.week,
+                                 course=self.course)
         self.assertEqual(current_material_count + 1, Material.objects.count())
         self.assertEqual(current_included_material_count + 1, IncludedMaterial.objects.count())
 
@@ -168,7 +141,7 @@ class TestCreateIncludedMaterial(TestCase):
 class TestCreateIncludedTask(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.topic = TopicFactory(course=self.course)
+        self.week = WeekFactory(course=self.course)
         self.task = Task.objects.create(name="Test task",
                                         description=faker.text(),
                                         gradable=faker.boolean())
@@ -177,7 +150,7 @@ class TestCreateIncludedTask(TestCase):
         current_task_count = Task.objects.count()
         current_included_task_count = IncludedTask.objects.count()
 
-        create_included_task(existing_task=self.task, topic=self.topic)
+        create_included_task(existing_task=self.task, week=self.week, course=self.course)
 
         self.assertEqual(current_task_count, Task.objects.count())
         self.assertEqual(current_included_task_count + 1, IncludedTask.objects.count())
@@ -188,7 +161,8 @@ class TestCreateIncludedTask(TestCase):
         create_included_task(name=faker.name(),
                              description=faker.text(),
                              gradable=faker.boolean(),
-                             topic=self.topic)
+                             week=self.week,
+                             course=self.course)
         self.assertEqual(current_task_count + 1, Task.objects.count())
         self.assertEqual(current_included_task_count + 1, IncludedTask.objects.count())
 
@@ -196,8 +170,9 @@ class TestCreateIncludedTask(TestCase):
 class TestCreateTestForTask(TestCase):
 
     def setUp(self):
-        self.topic = TopicFactory()
-        self.included_task = IncludedTaskFactory(topic=self.topic, gradable=True)
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.included_task = IncludedTaskFactory(week=self.week, course=self.course, gradable=True)
         self.language = ProgrammingLanguageFactory()
 
     def test_create_test_for_task_raises_validation_error_when_no_resource_is_provided(self):
@@ -251,8 +226,9 @@ class TestCreateTestForTask(TestCase):
 
 class TestCreateGradableSolution(TestCase):
     def setUp(self):
-        self.topic = TopicFactory()
-        self.task = IncludedTaskFactory(topic=self.topic, gradable=True)
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.task = IncludedTaskFactory(week=self.week, course=self.course, gradable=True)
         self.student = StudentFactory()
 
     def test_create_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
@@ -295,8 +271,9 @@ class TestCreateGradableSolution(TestCase):
 
 class TestCreateNonGradableSolution(TestCase):
     def setUp(self):
-        self.topic = TopicFactory()
-        self.task = IncludedTaskFactory(topic=self.topic, gradable=False)
+        self.course = CourseFactory()
+        self.week = WeekFactory(course=self.course)
+        self.task = IncludedTaskFactory(week=self.week, course=self.course, gradable=False)
         self.student = StudentFactory()
 
     def test_create_non_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):

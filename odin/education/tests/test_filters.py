@@ -3,14 +3,15 @@ from test_plus import TestCase
 from odin.common.faker import faker
 
 from ..models import IncludedTask, Solution
-from ..factories import IncludedTaskFactory, CourseFactory, SolutionFactory
+from ..factories import IncludedTaskFactory, CourseFactory, SolutionFactory, WeekFactory
 from ..filters import SolutionsFilter
 
 
 class TestSolutionFilter(TestCase):
     def setUp(self):
         self.course = CourseFactory()
-        self.task = IncludedTaskFactory(topic__course=self.course, gradable=True)
+        self.week = WeekFactory(course=self.course)
+        self.task = IncludedTaskFactory(course=self.course, week=self.week, gradable=True)
         self.filter = SolutionsFilter(task=self.task)
         self.queryset = IncludedTask.objects.all()
 
