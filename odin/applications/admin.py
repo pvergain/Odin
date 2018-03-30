@@ -5,7 +5,7 @@ from odin.applications.models import Application, ApplicationInfo
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'application_info', 'is_partially_completed',
+    list_display = ('user', 'application_info',
                     'phone', 'skype', 'works_at', 'studies_at',
                     'interview_slot', 'interview_person')
 
