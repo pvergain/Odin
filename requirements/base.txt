@@ -34,7 +34,7 @@ awesome-slugify==1.6.5
 pytz==2018.3
 
 # Querying
-django-filter==1.0.4
+django-filter==1.1.0
 
 # Celery
 celery==4.0.2
