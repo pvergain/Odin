@@ -27,8 +27,6 @@ class BaseUser(PermissionsMixin,
 
     secret_key = models.UUIDField(default=uuid.uuid4, unique=True)
 
-    competition_registration_uuid = models.UUIDField(blank=True, null=True)
-
     USERNAME_FIELD = 'email'
 
     objects = UserManager()
@@ -79,12 +77,6 @@ class BaseUser(PermissionsMixin,
 
     def is_interviewer(self):
         return hasattr(self, 'interviewer')
-
-    def is_participant(self):
-        return self.participant_in_competitions.count() > 0
-
-    def is_judge(self):
-        return self.judge_in_competitions.count() > 0
 
     def rotate_secret_key(self):
         self.secret_key = uuid.uuid4()
