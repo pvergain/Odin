@@ -18,7 +18,7 @@ django-model-utils==3.1.1
 # Images
 Pillow==5.0.0
 django-image-cropping==1.1.0
-easy-thumbnails==2.4.1
+easy-thumbnails==2.5
 
 
 # Password storage
