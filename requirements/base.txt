@@ -46,9 +46,6 @@ mandrill==1.0.57
 djangorestframework==3.6.3
 djangorestframework-jwt==1.11.0
 
-# Markdown parsing
-mistune==0.7.4
-
 # Collect staticfiles faster
 Collectfast==0.5.2
 
