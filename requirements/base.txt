@@ -47,7 +47,7 @@ djangorestframework==3.7.7
 djangorestframework-jwt==1.11.0
 
 # Collect staticfiles faster
-Collectfast==0.5.2
+Collectfast==0.6.2
 
 django-tinymce==2.7.0
 
