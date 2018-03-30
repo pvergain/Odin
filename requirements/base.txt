@@ -43,7 +43,7 @@ celery==4.1.0
 mandrill==1.0.57
 
 # rest_framework
-djangorestframework==3.6.3
+djangorestframework==3.7.7
 djangorestframework-jwt==1.11.0
 
 # Collect staticfiles faster
