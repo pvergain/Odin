@@ -3,51 +3,51 @@
 # like Pillow and psycopg2
 # See http://bitly.com/wheel-building-fails-CPython-35
 # Verified bug on Python 3.5.1
-wheel==0.29.0
+wheel==0.30.0
 
 
 # Bleeding edge Django
-django==1.11.1
+django==1.11.11
 
 # Configuration
-django-environ==0.4.3
+django-environ==0.4.4
 
 # Models
-django-model-utils==3.0.0
+django-model-utils==3.1.1
 
 # Images
-Pillow==4.1.1
-django-image-cropping==1.0.4
-easy-thumbnails==2.4.1
+Pillow==5.0.0
+django-image-cropping==1.1.0
+easy-thumbnails==2.5
 
 
 # Password storage
-argon2-cffi==16.3.0
+argon2-cffi==18.1.0
 
 # Python-PostgreSQL Database Adapter
-psycopg2==2.7.3.2
+psycopg2==2.7.4
 
 # Unicode slugification
 awesome-slugify==1.6.5
 
 # Time and Time zones support
-pytz==2017.2
+pytz==2018.3
 
 # Querying
-django-filter==1.0.4
+django-filter==1.1.0
 
 # Celery
-celery==4.0.2
+celery==4.1.0
 
 # Email services
 mandrill==1.0.57
 
 # rest_framework
-djangorestframework==3.6.3
+djangorestframework==3.7.7
 djangorestframework-jwt==1.11.0
 
 # Collect staticfiles faster
-Collectfast==0.5.2
+Collectfast==0.6.2
 
 django-tinymce==2.7.0
 
