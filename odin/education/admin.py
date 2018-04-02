@@ -47,7 +47,7 @@ class TestAdmin(admin.ModelAdmin):
 @admin.register(Solution)
 class SolutionAdmin(admin.ModelAdmin):
     list_display = ('id', 'task', 'student', 'course', 'verbose_status')
-    search_fields = ('task', 'student', )
+    search_fields = ('task__name', 'student__email', 'task__course__name', )
     list_filter = ['status', ]
 
     def course(self, obj):
