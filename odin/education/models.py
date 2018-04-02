@@ -364,6 +364,9 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
             return "Passed"
         return "Failed"
 
+    def __str__(self):
+        return f'Solution for {self.task} with status {self.status}'
+
     class Meta:
         ordering = ['-id']
 
