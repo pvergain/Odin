@@ -32,6 +32,7 @@ class TaskAdmin(admin.ModelAdmin):
 @admin.register(IncludedTask)
 class IncludedTaskAdmin(admin.ModelAdmin):
     list_display = ('task', 'week')
+    list_select_related = ('task', 'week', 'week__course')
 
 
 @admin.register(Week)
@@ -47,6 +48,8 @@ class TestAdmin(admin.ModelAdmin):
 @admin.register(Solution)
 class SolutionAdmin(admin.ModelAdmin):
     list_display = ('id', 'task', 'student', 'course', 'verbose_status')
+    list_select_related = ('task', 'task__course', 'student')
+
     search_fields = ('task__name', 'student__email', 'task__course__name', )
     list_filter = ['status', ]
 
@@ -66,4 +69,13 @@ class CourseDescriptionAdmin(admin.ModelAdmin):
 
 @admin.register(IncludedTest)
 class IncludedTestAdmin(admin.ModelAdmin):
-    list_display = ('task', 'test')
+    list_display = ('task', 'get_week', 'get_course')
+    list_select_related = ('task', 'test', 'task__course', 'task__week')
+
+    ordering = ('-id', )
+
+    def get_course(self, obj):
+        return obj.task.course
+
+    def get_week(self, obj):
+        return obj.task.week.number
