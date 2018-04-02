@@ -50,6 +50,8 @@ class SolutionAdmin(admin.ModelAdmin):
     search_fields = ('task', 'student', )
     list_filter = ['status', ]
 
+    def course(self, obj):
+        return obj.task.course
 
 @admin.register(CourseAssignment)
 class CourseAssignmentAdmin(admin.ModelAdmin):
