@@ -196,7 +196,7 @@ class Week(models.Model):
         ordering = ('number',)
 
     def __str__(self):
-        return f'Week {self.number}'
+        return f'Week {self.number} - {self.course.name}'
 
 
 class Lecture(models.Model):
