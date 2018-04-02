@@ -107,7 +107,7 @@ class ChangePasswordApi(
 ):
     class Serializer(serializers.Serializer):
         old_password = serializers.CharField()
-        new_password = serializers.CharField()1
+        new_password = serializers.CharField()
 
     def post(self, request):
         serializer = self.Serializer(data=request.data)
