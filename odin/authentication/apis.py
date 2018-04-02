@@ -107,7 +107,7 @@ class ChangePasswordApi(
 ):
 
     """
-    TODO: Add serialializer
+    TODO: Add serializer
     """
     def post(self, request):
         data = {**request.data}
