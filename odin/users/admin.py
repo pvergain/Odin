@@ -9,7 +9,7 @@ from odin.users.models import (
 
 @admin.register(BaseUser)
 class BaseUserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'is_student', 'is_teacher', 'is_participant', 'is_superuser')
+    list_display = ('email', 'is_student', 'is_teacher', 'is_superuser')
     search_fields = ('email',)
     ordering = ('id',)
 

@@ -1,6 +1,5 @@
 from django.utils import timezone
 from django.db import models
-from django.apps import apps
 
 from tinymce.models import HTMLField
 
@@ -44,10 +43,6 @@ class ApplicationInfo(models.Model):
         return self.start_interview_date <= timezone.now().date() and \
                self.end_interview_date >= timezone.now().date()
 
-    @property
-    def has_competition(self):
-        return hasattr(self, 'competition')
-
 
 class Application(models.Model):
     application_info = models.ForeignKey(ApplicationInfo, related_name='applications')
@@ -76,56 +71,3 @@ class Application(models.Model):
 
     class Meta:
         unique_together = (("application_info", "user"),)
-
-    @property
-    def is_completed(self):
-        """
-        TODO: Add a bunch of nice tests
-        """
-        Solution = apps.get_model('competitions', 'Solution')
-
-        if not self.application_info.has_competition:
-            return True
-
-        tasks = {
-            task: False
-            for task in self.application_info.competition.tasks.all()
-        }
-
-        solutions = Solution.objects.filter(
-            participant=self.user,
-            task__competition=self.application_info.competition,
-            status=Solution.OK
-        )
-
-        for solution in solutions:
-            if solution.task in tasks:
-                tasks[solution.task] = True
-
-        return all(tasks.values())
-
-    @property
-    def is_partially_completed(self):
-        """
-        Has submitted solutions for all.
-        """
-        Solution = apps.get_model('competitions', 'Solution')
-
-        if not self.application_info.has_competition:
-            return True
-
-        tasks = {
-            task: False
-            for task in self.application_info.competition.tasks.all()
-        }
-
-        solutions = Solution.objects.filter(
-            participant=self.user,
-            task__competition=self.application_info.competition
-        )
-
-        for solution in solutions:
-            if solution.code and solution.task in tasks:
-                tasks[solution.task] = True
-
-        return all(tasks.values())
