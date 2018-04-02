@@ -53,6 +53,7 @@ class SolutionAdmin(admin.ModelAdmin):
     def course(self, obj):
         return obj.task.course
 
+
 @admin.register(CourseAssignment)
 class CourseAssignmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'student', 'teacher', 'course', 'hidden')
