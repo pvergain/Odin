@@ -36,7 +36,7 @@ class IncludedTaskAdmin(admin.ModelAdmin):
 
 @admin.register(Week)
 class WeekAdmin(admin.ModelAdmin):
-    list_display = ('number', 'course', 'start_date', 'end_date')
+    list_display = ('id', 'number', 'course', 'start_date', 'end_date')
 
 
 @admin.register(Test)
@@ -46,7 +46,12 @@ class TestAdmin(admin.ModelAdmin):
 
 @admin.register(Solution)
 class SolutionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'task', 'student', 'course', 'verbose_status')
+    search_fields = ('task__name', 'student__email', 'task__course__name', )
+    list_filter = ['status', ]
+
+    def course(self, obj):
+        return obj.task.course
 
 
 @admin.register(CourseAssignment)

@@ -196,7 +196,7 @@ class Week(models.Model):
         ordering = ('number',)
 
     def __str__(self):
-        return f'Week {self.number}'
+        return f'Week {self.number} - {self.course.name}'
 
 
 class Lecture(models.Model):
@@ -363,6 +363,9 @@ class Solution(UpdatedAtCreatedAtModelMixin, models.Model):
                 not self.task.gradable and self.status == self.SUBMITTED_WITHOUT_GRADING:
             return "Passed"
         return "Failed"
+
+    def __str__(self):
+        return f'Solution for {self.task} with status {self.status}'
 
     class Meta:
         ordering = ['-id']
