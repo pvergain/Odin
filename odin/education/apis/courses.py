@@ -128,6 +128,7 @@ class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
 
 
 class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
+    # Pending deprecation, rebase FE functionality to CourseDetailApi only
     class Serializer(serializers.ModelSerializer):
 
         weeks = serializers.SerializerMethodField()
