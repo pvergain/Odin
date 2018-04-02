@@ -105,12 +105,14 @@ class ChangePasswordApi(
     JSONWebTokenAuthenticationMixin,
     APIView
 ):
+    class Serializer(serializers.Serializer):
+        old_password = serializers.CharField()
+        new_password = serializers.CharField()1
 
-    """
-    TODO: Add serializer
-    """
     def post(self, request):
-        data = {**request.data}
+        serializer = self.Serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
         data['user'] = self.request.user
 
         change_user_password(**data)
