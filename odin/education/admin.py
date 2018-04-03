@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 
 from .models import (
     ProgrammingLanguage,
@@ -12,6 +13,22 @@ from .models import (
     CourseAssignment,
     CourseDescription,
 )
+
+
+class CoursesListFilter(SimpleListFilter):
+    title = ('course')
+    parameter_name = 'course'
+
+    def lookups(self, request, model_admin):
+
+        return [lookup for lookup in Course.objects.values_list('slug_url', 'name')]
+
+    def queryset(self, request, queryset):
+
+        if not self.value():
+            return queryset.all()
+
+        return queryset.filter(task__course__slug_url=self.value())
 
 
 @admin.register(ProgrammingLanguage)
@@ -51,7 +68,7 @@ class SolutionAdmin(admin.ModelAdmin):
     list_select_related = ('task', 'task__course', 'student')
 
     search_fields = ('task__name', 'student__email', 'task__course__name', )
-    list_filter = ['status', ]
+    list_filter = ['status', CoursesListFilter]
 
     def course(self, obj):
         return obj.task.course
