@@ -7,6 +7,14 @@ from .serializers import GraderPlainProblemSerializer, GraderBinaryProblemSerial
 from . import services
 
 
+def generate_test_resourse(*, test: Test):
+    '''
+    generates base64 of tests.tar.gz containing
+    test.py<<test.code and requirements.txt<<test.extra_options['requirements']
+    '''
+    pass
+
+
 def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
     solution = solution_model.objects.get(id=solution_id)
     test = solution.task.test
