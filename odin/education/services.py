@@ -314,6 +314,7 @@ def create_included_task_with_test(
     week: Week,
     name: str,
     code: str,
+    requirements: str=None,
     gradable: bool,
     description_url: str
 ):
@@ -335,12 +336,19 @@ def create_included_task_with_test(
     included_task.save()
 
     if included_task.gradable:
+        test_kwargs = {
+            'task': included_task,
+            'code': code,
+            'language': language
+        }
 
-        included_test = create_test_for_task(
-            task=included_task,
-            code=code,
-            language=language
-        )
+        if requirements:
+            test_kwargs['extra_options'] = {
+                'requirements': requirements.split('\n')
+            }
+
+        included_test = create_test_for_task(**test_kwargs)
+
         included_test.save()
 
     return included_task
