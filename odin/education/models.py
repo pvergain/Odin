@@ -299,6 +299,7 @@ class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     language = models.ForeignKey(ProgrammingLanguage)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
     code = models.TextField(blank=True, null=True)
+    requirements = models.TextField(blank=True, null=True)
     file = models.FileField(blank=True, null=True)
     description = models.CharField(max_length=255, default='Test')
 
