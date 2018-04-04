@@ -64,8 +64,8 @@ def start_grader_communication(solution_id: int, solution_model: str):
 def create_plain_problem_with_requirements(
     *,
     language: str='',
-    test_type: int=GraderPlainProblemWithRequirements.UNITTEST,
-    file_type: int=GraderPlainProblemWithRequirements.PLAIN,
+    test_type: int=GraderPlainProblemWithRequirements.OUTPUT_CHECKING,
+    file_type: int=GraderPlainProblemWithRequirements.BINARY,
     solution: str=None,
     test: BinaryIO=None,
     extra_options: Dict={}

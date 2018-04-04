@@ -294,6 +294,9 @@ class IncludedTask(BaseTask):
     class Meta:
         unique_together = (('week', 'task'), )
 
+    def __str__(self):
+        return f'{self.id} - {self.name}'
+
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     language = models.ForeignKey(ProgrammingLanguage)

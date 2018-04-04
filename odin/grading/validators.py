@@ -1,6 +1,10 @@
 from django.core.exceptions import ValidationError
 
-from .models import GraderPlainProblem, GraderBinaryProblem
+from .models import (
+    GraderPlainProblem,
+    GraderBinaryProblem,
+    GraderPlainProblemWithRequirements,
+)
 
 GRADER_SUPPORTED_LANGUAGES = [
     'python',
@@ -11,12 +15,15 @@ GRADER_SUPPORTED_LANGUAGES = [
 
 GRADER_SUPPORTED_FILE_TYPES = [
     GraderPlainProblem.PLAIN,
-    GraderBinaryProblem.BINARY
+    GraderBinaryProblem.BINARY,
+    GraderPlainProblemWithRequirements.BINARY,
+
 ]
 
 GRADER_SUPPORTED_TEST_TYPES = [
     GraderPlainProblem.UNITTEST,
-    GraderPlainProblem.OUTPUT_CHECKING
+    GraderPlainProblem.OUTPUT_CHECKING,
+    GraderPlainProblemWithRequirements.UNITTEST
 ]
 
 

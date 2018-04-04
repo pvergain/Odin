@@ -27,10 +27,10 @@ from . import services
 def generate_test_resource(*, test: IncludedTest):
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        with open(f'{tmpdir}/test.py', 'w') as testfile:
+        with open(f'{tmpdir}/test.py', 'w', encoding='UTF-8') as testfile:
             testfile.write(test.code)
 
-        with open(f'{tmpdir}/requirements.txt', 'w') as requirements:
+        with open(f'{tmpdir}/requirements.txt', 'w', encoding='UTF-8') as requirements:
             requirements.write(test.requirements)
 
         test_files = os.listdir(tmpdir)
@@ -54,7 +54,7 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
             file_type = GraderPlainProblem.PLAIN
             test_resource = test.code
         else:
-            file_type = GraderPlainProblemWithRequirements.PLAIN
+            file_type = GraderPlainProblemWithRequirements.BINARY
             test_resource = generate_test_resource(test=test)
 
     if solution.file:
@@ -78,6 +78,8 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
         grader_ready_data = GraderPlainProblemSerializer(problem).data
     elif test.is_source() and test.requirements:
         data['solution'] = solution.code
+        data['test_type'] = GraderPlainProblemWithRequirements.UNITTEST
+        data['extra_options'] = {'archive_test_type': True, 'time_limit': 20}
         problem = services.create_plain_problem_with_requirements(**data)
         grader_ready_data = GraderPlainProblemWithRequirementsSerializer(problem).data
     else:

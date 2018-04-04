@@ -84,15 +84,15 @@ class GraderPlainProblemWithRequirements(GraderReadableTypesMixin, models.Model)
         (OUTPUT_CHECKING, 'output_checking')
     ]
 
-    PLAIN = 0
+    BINARY = 0
 
     FILE_TYPE_CHOICE = [
-        (PLAIN, 'plain')
+        (BINARY, 'binary')
     ]
 
     test_type = models.SmallIntegerField(choices=TEST_TYPE_CHOICE, default=UNITTEST)
     language = models.CharField(max_length=255)
-    file_type = models.SmallIntegerField(choices=FILE_TYPE_CHOICE, default=PLAIN)
+    file_type = models.SmallIntegerField(choices=FILE_TYPE_CHOICE, default=BINARY)
     solution = models.TextField(null=True, blank=True)
     test = models.TextField(null=True, blank=True)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
