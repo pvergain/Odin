@@ -142,16 +142,23 @@ def create_test_for_task(*,
                          language: ProgrammingLanguage,
                          extra_options: Dict={},
                          code: str=None,
+                         requirements: str=None,
                          file: BinaryIO=None):
     new_test = IncludedTest(task=task)
     if existing_test is None:
-        existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
+        existing_test = Test(language=language,
+                             extra_options=extra_options,
+                             code=code,
+                             requirements=requirements,
+                             file=file
+                             )
         existing_test.full_clean()
         existing_test.save()
 
     new_test.language = existing_test.language
     new_test.extra_options = existing_test.extra_options
     new_test.code = existing_test.code
+    new_test.requirements = existing_test.requirements
     new_test.file = existing_test.file
 
     new_test.test = existing_test
@@ -336,18 +343,13 @@ def create_included_task_with_test(
     included_task.save()
 
     if included_task.gradable:
-        test_kwargs = {
-            'task': included_task,
-            'code': code,
-            'language': language
-        }
 
-        if requirements:
-            test_kwargs['extra_options'] = {
-                'requirements': requirements.split('\n')
-            }
-
-        included_test = create_test_for_task(**test_kwargs)
+        included_test = create_test_for_task(
+            task=included_task,
+            code=code,
+            language=language,
+            requirements=requirements
+        )
 
         included_test.save()
 
