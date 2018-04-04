@@ -3,7 +3,7 @@ import tempfile
 import os
 import tarfile
 
-from typing import Dict
+from typing import Dict, List
 
 from django.db.models import Model
 
@@ -24,23 +24,42 @@ from .serializers import (
 from . import services
 
 
+def generate_test_py_file(*, test: IncludedTest, path: str, ):
+    with open(f'{path}/test.py', 'w', encoding='UTF-8') as testfile:
+            testfile.write(test.code)
+
+
+def generate_requirements_txt_file(*, test: IncludedTest, path: str):
+    with open(f'{path}/requirements.txt', 'w', encoding='UTF-8') as requirements:
+            requirements.write(test.requirements)
+
+
+def generate_tar_file_for_tests(*, test_files: List[str, ], path: str):
+    with tarfile.open(name=f'{path}/tests.tar.gz', mode='w:gz') as tar:
+            for file in test_files:
+                tar.add(f'{path}/{file}', arcname=file)
+
+    return tar.name
+
+
+def encode_tests_archive(*, tar_filename: str):
+    with open(tar_filename, 'rb') as tar_binary:
+            encoded_archive = base64.b64encode(tar_binary.read())
+
+    return encoded_archive
+
+
 def generate_test_resource(*, test: IncludedTest):
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        with open(f'{tmpdir}/test.py', 'w', encoding='UTF-8') as testfile:
-            testfile.write(test.code)
+        generate_test_py_file(test=test, path=tmpdir)
 
-        with open(f'{tmpdir}/requirements.txt', 'w', encoding='UTF-8') as requirements:
-            requirements.write(test.requirements)
+        generate_requirements_txt_file(test=test, path=tmpdir)
 
         test_files = os.listdir(tmpdir)
 
-        with tarfile.open(name=f'{tmpdir}/tests.tar.gz', mode='w:gz') as tar:
-            for file in test_files:
-                tar.add(f'{tmpdir}/{file}', arcname=file)
-
-        with open(tar.name, 'rb') as tar_b:
-            encoded = base64.b64encode(tar_b.read())
+        encoded = encode_tests_archive(
+            tar_filename=generate_tar_file_for_tests(test_files=test_files, path=tmpdir))
 
     return encoded.decode('ascii')
 
