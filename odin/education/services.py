@@ -50,7 +50,8 @@ def create_course(*,
                   logo: BinaryIO=None,
                   public: bool=True,
                   attendable: bool=True,
-                  description: str="") -> Course:
+                  description: str=""
+                  ) -> Course:
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -92,7 +93,9 @@ def create_included_material(*,
                              identifier: str=None,
                              url: str=None,
                              content: str=None,
-                             existing_material: Material=None) -> IncludedMaterial:
+                             existing_material: Material=None
+                             ) -> IncludedMaterial:
+
     included_material = IncludedMaterial(week=week, course=course)
 
     if existing_material is None:
@@ -119,6 +122,7 @@ def create_included_task(*,
                          gradable: bool=False,
                          existing_task: Task=None,
                          )-> IncludedTask:
+
     included_task = IncludedTask(week=week, course=course)
     if existing_task is None:
         existing_task = Task(name=name, description=description, gradable=gradable)
@@ -143,7 +147,9 @@ def create_test_for_task(*,
                          extra_options: Dict={},
                          code: str=None,
                          requirements: str=None,
-                         file: BinaryIO=None):
+                         file: BinaryIO=None
+                         ):
+
     new_test = IncludedTest(task=task)
     if existing_test is None:
         existing_test = Test(language=language,
@@ -171,7 +177,9 @@ def create_gradable_solution(*,
                              task: IncludedTask,
                              student: Student,
                              code: str=None,
-                             file: BinaryIO=None) -> Solution:
+                             file: BinaryIO=None
+                             ) -> Solution:
+
     if code is not None and file is not None:
         raise ValidationError("Provide either code or a file, not both!")
     if code is None and file is None:
@@ -197,7 +205,9 @@ def create_gradable_solution(*,
 def create_non_gradable_solution(*,
                                  task: IncludedTask,
                                  student: Student,
-                                 url: str=None) -> Solution:
+                                 url: str=None
+                                 ) -> Solution:
+
     if url is None:
             raise ValidationError("Provide a url!")
     new_solution = Solution.objects.create(
@@ -212,7 +222,9 @@ def create_non_gradable_solution(*,
 
 def calculate_student_valid_solutions_for_course(*,
                                                  student: Student,
-                                                 course: Course) -> str:
+                                                 course: Course
+                                                 ) -> str:
+
     total_tasks = IncludedTask.objects.filter(course=course).count()
     if not total_tasks:
         return 0
@@ -223,7 +235,9 @@ def calculate_student_valid_solutions_for_course(*,
 
 
 def get_all_student_solution_statistics(*,
-                                        task: IncludedTask) -> Dict:
+                                        task: IncludedTask
+                                        ) -> Dict:
+
     result = {}
     course = task.course
     result['total_student_count'] = course.students.count()
@@ -242,7 +256,9 @@ def get_all_student_solution_statistics(*,
 def create_student_note(*,
                         author: Teacher,
                         assignment: CourseAssignment,
-                        text: str) -> StudentNote:
+                        text: str
+                        ) -> StudentNote:
+
     note = StudentNote(author=author,
                        assignment=assignment,
                        text=text)
@@ -254,7 +270,9 @@ def create_student_note(*,
 
 def create_lecture(*,
                    date: date,
-                   course: Course) -> Lecture:
+                   course: Course
+                   ) -> Lecture:
+
     week_qs = Week.objects.filter(start_date__lte=date, end_date__gte=date, course=course)
     if week_qs.exists():
         lecture = Lecture(date=date, course=course, week=week_qs.first())
@@ -268,7 +286,9 @@ def create_lecture(*,
 
 def add_week_to_course(*,
                        course: Course,
-                       new_end_date: timezone.datetime.date) -> Week:
+                       new_end_date: timezone.datetime.date
+                       ) -> Week:
+
     last_week = course.weeks.last()
     new_week = Week.objects.create(
         course=course,
@@ -286,7 +306,9 @@ def add_week_to_course(*,
 def create_solution_comment(*,
                             solution: Solution,
                             user: BaseUser,
-                            text: str) -> SolutionComment:
+                            text: str
+                            ) -> SolutionComment:
+
     comment = SolutionComment(solution=solution,
                               user=user,
                               text=text)
@@ -296,7 +318,11 @@ def create_solution_comment(*,
     return comment
 
 
-def get_gradable_tasks_for_course(*, course: Course, student: Student):
+def get_gradable_tasks_for_course(*,
+                                  course: Course,
+                                  student: Student
+                                  ):
+
     tasks = []
 
     for task in course.included_tasks.order_by('week__number', 'task__id'):
@@ -310,21 +336,25 @@ def get_gradable_tasks_for_course(*, course: Course, student: Student):
     return tasks
 
 
-def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solution:
+def get_last_solution_for_task(*,
+                               task: IncludedTask,
+                               student: Student
+                               ) -> Solution:
+
     return Solution.objects.filter(task=task, student=student).order_by('-id').first()
 
 
-def create_included_task_with_test(
-    *,
-    course: Course,
-    language: ProgrammingLanguage,
-    week: Week,
-    name: str,
-    code: str,
-    requirements: str=None,
-    gradable: bool,
-    description_url: str
-):
+def create_included_task_with_test(*,
+                                   course: Course,
+                                   language: ProgrammingLanguage,
+                                   week: Week,
+                                   name: str,
+                                   code: str,
+                                   requirements: str=None,
+                                   gradable: bool,
+                                   description_url: str
+                                   ):
+
     if not description_url.endswith('README.md'):
         description_url = description_url.replace('tree', 'blob')
         description_url = f'{description_url}/README.md'

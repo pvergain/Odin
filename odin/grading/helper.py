@@ -24,17 +24,17 @@ from .serializers import (
 from . import services
 
 
-def generate_test_py_file(*, test: IncludedTest, path: str, ):
-    with open(f'{path}/test.py', 'w', encoding='UTF-8') as testfile:
+def generate_test_file(*, test: IncludedTest, path: str, ):
+    with open(f'{path}/{test.language.test_format}', 'w', encoding='UTF-8') as testfile:
             testfile.write(test.code)
 
 
-def generate_requirements_txt_file(*, test: IncludedTest, path: str):
-    with open(f'{path}/requirements.txt', 'w', encoding='UTF-8') as requirements:
+def generate_dependency_file(*, test: IncludedTest, path: str):
+    with open(f'{path}/{test.language.requirements_format}', 'w', encoding='UTF-8') as requirements:
             requirements.write(test.requirements)
 
 
-def generate_tar_file_for_tests(*, test_files: List[str, ], path: str):
+def generate_tar_file_for_tests(*, test_files: List[str], path: str):
     with tarfile.open(name=f'{path}/tests.tar.gz', mode='w:gz') as tar:
             for file in test_files:
                 tar.add(f'{path}/{file}', arcname=file)
@@ -52,14 +52,15 @@ def encode_tests_archive(*, tar_filename: str):
 def generate_test_resource(*, test: IncludedTest):
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        generate_test_py_file(test=test, path=tmpdir)
+        generate_test_file(test=test, path=tmpdir)
 
-        generate_requirements_txt_file(test=test, path=tmpdir)
+        generate_dependency_file(test=test, path=tmpdir)
 
         test_files = os.listdir(tmpdir)
 
         encoded = encode_tests_archive(
-            tar_filename=generate_tar_file_for_tests(test_files=test_files, path=tmpdir))
+            tar_filename=generate_tar_file_for_tests(test_files=test_files, path=tmpdir)
+        )
 
     return encoded.decode('ascii')
 

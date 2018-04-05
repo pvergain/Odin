@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('test_type', models.SmallIntegerField(choices=[(0, 'unittest'), (1, 'output_checking')], default=0)),
                 ('language', models.CharField(max_length=255)),
-                ('file_type', models.SmallIntegerField(choices=[(0, 'plain')], default=0)),
+                ('file_type', models.SmallIntegerField(choices=[(0, 'binary')], default=0)),
                 ('solution', models.TextField(blank=True, null=True)),
                 ('test', models.TextField(blank=True, null=True)),
                 ('extra_options', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default={}, null=True)),

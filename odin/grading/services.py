@@ -17,11 +17,13 @@ def create_plain_problem(*,
                          file_type: int=GraderPlainProblem.PLAIN,
                          solution: str=None,
                          test: str=None,
-                         extra_options: Dict={}) -> GraderPlainProblem:
+                         extra_options: Dict={}
+                         ) -> GraderPlainProblem:
 
     run_create_problem_service_validation(language=language,
                                           test_type=test_type,
-                                          file_type=file_type)
+                                          file_type=file_type
+                                          )
 
     return GraderPlainProblem.objects.create(
         language=language,
@@ -39,11 +41,13 @@ def create_binary_problem(*,
                           file_type: int=GraderBinaryProblem.BINARY,
                           solution: BinaryIO=None,
                           test: BinaryIO=None,
-                          extra_options: Dict={}) -> GraderBinaryProblem:
+                          extra_options: Dict={}
+                          ) -> GraderBinaryProblem:
 
     run_create_problem_service_validation(language=language,
                                           test_type=test_type,
-                                          file_type=file_type)
+                                          file_type=file_type
+                                          )
 
     return GraderBinaryProblem.objects.create(
         language=language,
@@ -55,25 +59,29 @@ def create_binary_problem(*,
     )
 
 
-def start_grader_communication(solution_id: int, solution_model: str):
+def start_grader_communication(*,
+                               solution_id: int,
+                               solution_model: str
+                               ):
+
     from odin.grading.tasks import submit_solution
 
     transaction.on_commit(lambda: submit_solution.delay(solution_id, solution_model))
 
 
-def create_plain_problem_with_requirements(
-    *,
-    language: str='',
-    test_type: int=GraderPlainProblemWithRequirements.OUTPUT_CHECKING,
-    file_type: int=GraderPlainProblemWithRequirements.BINARY,
-    solution: str=None,
-    test: BinaryIO=None,
-    extra_options: Dict={}
-) -> GraderPlainProblemWithRequirements:
+def create_plain_problem_with_requirements(*,
+                                           language: str='',
+                                           test_type: int=GraderPlainProblemWithRequirements.OUTPUT_CHECKING,
+                                           file_type: int=GraderPlainProblemWithRequirements.BINARY,
+                                           solution: str=None,
+                                           test: BinaryIO=None,
+                                           extra_options: Dict={}
+                                           ) -> GraderPlainProblemWithRequirements:
 
     run_create_problem_service_validation(language=language,
                                           test_type=test_type,
-                                          file_type=file_type)
+                                          file_type=file_type
+                                          )
 
     return GraderPlainProblemWithRequirements.objects.create(
         language=language,

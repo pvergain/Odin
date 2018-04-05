@@ -37,8 +37,11 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
             task=data['task'],
             code=data['code']
         )
+        start_grader_communication(
+            solution_id=solution.id,
+            solution_model='education.Solution'
+            )
 
-        start_grader_communication(solution.id, 'education.Solution')
         data = {
                 'solution_id': solution.id,
                 'solution_status': solution.verbose_status,
