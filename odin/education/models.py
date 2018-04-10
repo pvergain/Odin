@@ -264,9 +264,23 @@ class Task(BaseTask):
 
 class ProgrammingLanguage(models.Model):
     name = models.CharField(max_length=110)
+    test_format = models.CharField(max_length=20, blank=True, null=True)
+    requirements_format = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if not self.test_format:
+            raise ValidationError('Field test_format should not be blank')
+
+        if not self.requirements_format:
+            raise ValidationError('Field requirements_format should not be blank')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+
+        super().save(*args, **kwargs)
 
 
 class IncludedTask(BaseTask):
@@ -294,11 +308,15 @@ class IncludedTask(BaseTask):
     class Meta:
         unique_together = (('week', 'task'), )
 
+    def __str__(self):
+        return f'{self.id} - {self.name}'
+
 
 class BaseTest(UpdatedAtCreatedAtModelMixin, models.Model):
     language = models.ForeignKey(ProgrammingLanguage)
     extra_options = JSONField(blank=True, null=True, default=json_field_default())
     code = models.TextField(blank=True, null=True)
+    requirements = models.TextField(blank=True, null=True)
     file = models.FileField(blank=True, null=True)
     description = models.CharField(max_length=255, default='Test')
 

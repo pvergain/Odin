@@ -73,3 +73,32 @@ class GraderBinaryProblem(GraderReadableTypesMixin, models.Model):
         encoded = base64.b64encode(self.test.file.read())
 
         return encoded.decode('ascii')
+
+
+class GraderPlainProblemWithRequirements(GraderReadableTypesMixin, models.Model):
+    UNITTEST = 0
+    OUTPUT_CHECKING = 1
+
+    TEST_TYPE_CHOICE = [
+        (UNITTEST, 'unittest'),
+        (OUTPUT_CHECKING, 'output_checking')
+    ]
+
+    BINARY = 0
+
+    FILE_TYPE_CHOICE = [
+        (BINARY, 'binary')
+    ]
+
+    test_type = models.SmallIntegerField(choices=TEST_TYPE_CHOICE, default=UNITTEST)
+    language = models.CharField(max_length=255)
+    file_type = models.SmallIntegerField(choices=FILE_TYPE_CHOICE, default=BINARY)
+    solution = models.TextField(null=True, blank=True)
+    test = models.TextField(null=True, blank=True)
+    extra_options = JSONField(blank=True, null=True, default=json_field_default())
+
+    def encode_solution_text(self):
+        return base64.b64encode(self.solution.encode('utf-8')).decode('ascii')
+
+    def return_encoded_test(self):
+        return self.test

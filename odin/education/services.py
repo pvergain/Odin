@@ -39,18 +39,20 @@ def add_teacher(course: Course, teacher: Teacher, hidden: bool=False) -> CourseA
 
 
 @transaction.atomic
-def create_course(*,
-                  name: str,
-                  start_date: datetime,
-                  end_date: datetime,
-                  repository: str,
-                  facebook_group: str=None,
-                  video_channel: str=None,
-                  slug_url: str=None,
-                  logo: BinaryIO=None,
-                  public: bool=True,
-                  attendable: bool=True,
-                  description: str="") -> Course:
+def create_course(
+    *,
+    name: str,
+    start_date: datetime,
+    end_date: datetime,
+    repository: str,
+    facebook_group: str=None,
+    video_channel: str=None,
+    slug_url: str=None,
+    logo: BinaryIO=None,
+    public: bool=True,
+    attendable: bool=True,
+    description: str=""
+) -> Course:
 
     if Course.objects.filter(name=name).exists():
         raise ValidationError('Course already exists')
@@ -73,10 +75,13 @@ def create_course(*,
 
     week_instances = []
     for i in range(1, weeks + 1):
-        current = Week(course=course,
-                       number=i,
-                       start_date=start_date,
-                       end_date=start_date + timedelta(days=6))
+        current = Week(
+            course=course,
+            number=i,
+            start_date=start_date,
+            end_date=start_date + timedelta(days=6)
+        )
+
         start_date = current.end_date + timedelta(days=1)
         week_instances.append(current)
 
@@ -86,13 +91,16 @@ def create_course(*,
     return course
 
 
-def create_included_material(*,
-                             course: Course,
-                             week: Week,
-                             identifier: str=None,
-                             url: str=None,
-                             content: str=None,
-                             existing_material: Material=None) -> IncludedMaterial:
+def create_included_material(
+    *,
+    course: Course,
+    week: Week,
+    identifier: str=None,
+    url: str=None,
+    content: str=None,
+    existing_material: Material=None
+) -> IncludedMaterial:
+
     included_material = IncludedMaterial(week=week, course=course)
 
     if existing_material is None:
@@ -111,14 +119,16 @@ def create_included_material(*,
     return included_material
 
 
-def create_included_task(*,
-                         course: Course,
-                         week: Week,
-                         name: str=None,
-                         description: str=None,
-                         gradable: bool=False,
-                         existing_task: Task=None,
-                         )-> IncludedTask:
+def create_included_task(
+    *,
+    course: Course,
+    week: Week,
+    name: str=None,
+    description: str=None,
+    gradable: bool=False,
+    existing_task: Task=None,
+)-> IncludedTask:
+
     included_task = IncludedTask(week=week, course=course)
     if existing_task is None:
         existing_task = Task(name=name, description=description, gradable=gradable)
@@ -136,22 +146,33 @@ def create_included_task(*,
     return included_task
 
 
-def create_test_for_task(*,
-                         existing_test: Test=None,
-                         task: IncludedTask,
-                         language: ProgrammingLanguage,
-                         extra_options: Dict={},
-                         code: str=None,
-                         file: BinaryIO=None):
+def create_test_for_task(
+    *,
+    existing_test: Test=None,
+    task: IncludedTask,
+    language: ProgrammingLanguage,
+    extra_options: Dict={},
+    code: str=None,
+    requirements: str=None,
+    file: BinaryIO=None
+):
+
     new_test = IncludedTest(task=task)
     if existing_test is None:
-        existing_test = Test(language=language, extra_options=extra_options, code=code, file=file)
+        existing_test = Test(
+            language=language,
+            extra_options=extra_options,
+            code=code,
+            requirements=requirements,
+            file=file
+        )
         existing_test.full_clean()
         existing_test.save()
 
     new_test.language = existing_test.language
     new_test.extra_options = existing_test.extra_options
     new_test.code = existing_test.code
+    new_test.requirements = existing_test.requirements
     new_test.file = existing_test.file
 
     new_test.test = existing_test
@@ -160,11 +181,14 @@ def create_test_for_task(*,
     return new_test
 
 
-def create_gradable_solution(*,
-                             task: IncludedTask,
-                             student: Student,
-                             code: str=None,
-                             file: BinaryIO=None) -> Solution:
+def create_gradable_solution(
+    *,
+    task: IncludedTask,
+    student: Student,
+    code: str=None,
+    file: BinaryIO=None
+) -> Solution:
+
     if code is not None and file is not None:
         raise ValidationError("Provide either code or a file, not both!")
     if code is None and file is None:
@@ -187,10 +211,13 @@ def create_gradable_solution(*,
     return new_solution
 
 
-def create_non_gradable_solution(*,
-                                 task: IncludedTask,
-                                 student: Student,
-                                 url: str=None) -> Solution:
+def create_non_gradable_solution(
+    *,
+    task: IncludedTask,
+    student: Student,
+    url: str=None
+) -> Solution:
+
     if url is None:
             raise ValidationError("Provide a url!")
     new_solution = Solution.objects.create(
@@ -203,9 +230,12 @@ def create_non_gradable_solution(*,
     return new_solution
 
 
-def calculate_student_valid_solutions_for_course(*,
-                                                 student: Student,
-                                                 course: Course) -> str:
+def calculate_student_valid_solutions_for_course(
+    *,
+    student: Student,
+    course: Course
+) -> str:
+
     total_tasks = IncludedTask.objects.filter(course=course).count()
     if not total_tasks:
         return 0
@@ -215,8 +245,11 @@ def calculate_student_valid_solutions_for_course(*,
     return f'{ratio:.1f}'
 
 
-def get_all_student_solution_statistics(*,
-                                        task: IncludedTask) -> Dict:
+def get_all_student_solution_statistics(
+    *,
+    task: IncludedTask
+) -> Dict:
+
     result = {}
     course = task.course
     result['total_student_count'] = course.students.count()
@@ -232,22 +265,31 @@ def get_all_student_solution_statistics(*,
     return result
 
 
-def create_student_note(*,
-                        author: Teacher,
-                        assignment: CourseAssignment,
-                        text: str) -> StudentNote:
-    note = StudentNote(author=author,
-                       assignment=assignment,
-                       text=text)
+def create_student_note(
+    *,
+    author: Teacher,
+    assignment: CourseAssignment,
+    text: str
+) -> StudentNote:
+
+    note = StudentNote(
+        author=author,
+        assignment=assignment,
+        text=text
+    )
+
     note.full_clean()
     note.save()
 
     return note
 
 
-def create_lecture(*,
-                   date: date,
-                   course: Course) -> Lecture:
+def create_lecture(
+    *,
+    date: date,
+    course: Course
+) -> Lecture:
+
     week_qs = Week.objects.filter(start_date__lte=date, end_date__gte=date, course=course)
     if week_qs.exists():
         lecture = Lecture(date=date, course=course, week=week_qs.first())
@@ -259,9 +301,12 @@ def create_lecture(*,
         raise ValidationError('Date not in range of any week for this course')
 
 
-def add_week_to_course(*,
-                       course: Course,
-                       new_end_date: timezone.datetime.date) -> Week:
+def add_week_to_course(
+    *,
+    course: Course,
+    new_end_date: timezone.datetime.date
+) -> Week:
+
     last_week = course.weeks.last()
     new_week = Week.objects.create(
         course=course,
@@ -276,20 +321,31 @@ def add_week_to_course(*,
     return new_week
 
 
-def create_solution_comment(*,
-                            solution: Solution,
-                            user: BaseUser,
-                            text: str) -> SolutionComment:
-    comment = SolutionComment(solution=solution,
-                              user=user,
-                              text=text)
+def create_solution_comment(
+    *,
+    solution: Solution,
+    user: BaseUser,
+    text: str
+) -> SolutionComment:
+
+    comment = SolutionComment(
+        solution=solution,
+        user=user,
+        text=text
+    )
+
     comment.full_clean()
     comment.save()
 
     return comment
 
 
-def get_gradable_tasks_for_course(*, course: Course, student: Student):
+def get_gradable_tasks_for_course(
+    *,
+    course: Course,
+    student: Student
+):
+
     tasks = []
 
     for task in course.included_tasks.order_by('week__number', 'task__id'):
@@ -303,7 +359,12 @@ def get_gradable_tasks_for_course(*, course: Course, student: Student):
     return tasks
 
 
-def get_last_solution_for_task(*, task: IncludedTask, student: Student) -> Solution:
+def get_last_solution_for_task(
+    *,
+    task: IncludedTask,
+    student: Student
+) -> Solution:
+
     return Solution.objects.filter(task=task, student=student).order_by('-id').first()
 
 
@@ -314,9 +375,11 @@ def create_included_task_with_test(
     week: Week,
     name: str,
     code: str,
+    requirements: str=None,
     gradable: bool,
     description_url: str
 ):
+
     if not description_url.endswith('README.md'):
         description_url = description_url.replace('tree', 'blob')
         description_url = f'{description_url}/README.md'
@@ -339,8 +402,10 @@ def create_included_task_with_test(
         included_test = create_test_for_task(
             task=included_task,
             code=code,
-            language=language
+            language=language,
+            requirements=requirements
         )
+
         included_test.save()
 
     return included_task

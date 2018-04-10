@@ -188,6 +188,7 @@ class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMix
         )
         name = serializers.CharField()
         code = serializers.CharField()
+        requirements = serializers.CharField(required=False)
         description_url = serializers.URLField()
         gradable = serializers.BooleanField()
         language = serializers.PrimaryKeyRelatedField(

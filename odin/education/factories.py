@@ -126,6 +126,8 @@ class IncludedTaskFactory(factory.DjangoModelFactory):
 
 class ProgrammingLanguageFactory(factory.DjangoModelFactory):
     name = factory.LazyAttribute(lambda _: faker.word())
+    test_format = factory.LazyAttribute(lambda _: faker.file_name())
+    requirements_format = factory.LazyAttribute(lambda _: faker.file_name())
 
     class Meta:
         model = ProgrammingLanguage
