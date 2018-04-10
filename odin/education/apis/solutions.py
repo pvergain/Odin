@@ -16,7 +16,12 @@ from odin.education.apis.serializers import SolutionSubmitSerializer
 from odin.grading.services import start_grader_communication
 
 
-class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandlerMixin, APIView):
+class SolutionSubmitApi(
+    ServiceExceptionHandlerMixin,
+    StudentCourseAuthenticationMixin,
+    APIView
+):
+
     def get(self, request, *args, **kwargs):
         solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
         data = {
