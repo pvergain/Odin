@@ -40,7 +40,7 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
         start_grader_communication(
             solution_id=solution.id,
             solution_model='education.Solution'
-            )
+        )
 
         data = {
                 'solution_id': solution.id,
