@@ -1,6 +1,10 @@
 from rest_framework import serializers
 
-from .models import GraderPlainProblem, GraderBinaryProblem
+from .models import (
+    GraderPlainProblem,
+    GraderBinaryProblem,
+    GraderPlainProblemWithRequirements
+)
 
 
 class GraderPlainProblemSerializer(serializers.ModelSerializer):
@@ -46,7 +50,7 @@ class GraderPlainProblemWithRequirementsSerializer(serializers.ModelSerializer):
     file_type = serializers.CharField(source='get_readable_file_type')
 
     class Meta:
-        model = GraderPlainProblem
+        model = GraderPlainProblemWithRequirements
         fields = [
             'test_type',
             'language',
