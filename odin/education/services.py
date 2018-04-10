@@ -75,10 +75,13 @@ def create_course(
 
     week_instances = []
     for i in range(1, weeks + 1):
-        current = Week(course=course,
-                       number=i,
-                       start_date=start_date,
-                       end_date=start_date + timedelta(days=6))
+        current = Week(
+            course=course,
+            number=i,
+            start_date=start_date,
+            end_date=start_date + timedelta(days=6)
+        )
+
         start_date = current.end_date + timedelta(days=1)
         week_instances.append(current)
 
@@ -156,12 +159,13 @@ def create_test_for_task(
 
     new_test = IncludedTest(task=task)
     if existing_test is None:
-        existing_test = Test(language=language,
-                             extra_options=extra_options,
-                             code=code,
-                             requirements=requirements,
-                             file=file
-                             )
+        existing_test = Test(
+            language=language,
+            extra_options=extra_options,
+            code=code,
+            requirements=requirements,
+            file=file
+        )
         existing_test.full_clean()
         existing_test.save()
 
@@ -268,9 +272,12 @@ def create_student_note(
     text: str
 ) -> StudentNote:
 
-    note = StudentNote(author=author,
-                       assignment=assignment,
-                       text=text)
+    note = StudentNote(
+        author=author,
+        assignment=assignment,
+        text=text
+    )
+
     note.full_clean()
     note.save()
 
@@ -321,9 +328,12 @@ def create_solution_comment(
     text: str
 ) -> SolutionComment:
 
-    comment = SolutionComment(solution=solution,
-                              user=user,
-                              text=text)
+    comment = SolutionComment(
+        solution=solution,
+        user=user,
+        text=text
+    )
+
     comment.full_clean()
     comment.save()
 
