@@ -22,13 +22,17 @@ from odin.education.services import (
 )
 
 from odin.education.apis.permissions import (
-    StudentCourseAuthenticationMixin,
     IsUserStudentOrTeacherMixin,
     TeacherCourseAuthenticationMixin,
 )
 
 
-class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
+class StudentCoursesApi(
+    IsUserStudentOrTeacherMixin,
+    ServiceExceptionHandlerMixin,
+    ListAPIView
+):
+
     class Serializer(serializers.ModelSerializer):
         students_count = serializers.SerializerMethodField()
         description = serializers.CharField(source='description.verbose')
@@ -60,7 +64,12 @@ class StudentCoursesApi(IsUserStudentOrTeacherMixin, ListAPIView):
         ).distinct()
 
 
-class CourseDetailApi(StudentCourseAuthenticationMixin, APIView):
+class CourseDetailApi(
+    ServiceExceptionHandlerMixin,
+    IsUserStudentOrTeacherMixin,
+    APIView
+):
+
     class CourseSerializer(serializers.ModelSerializer):
         problems = serializers.SerializerMethodField()
         languages = serializers.SerializerMethodField()
@@ -177,7 +186,12 @@ class TeacherCourseDetailApi(TeacherCourseAuthenticationMixin, APIView):
         return Response(self.Serializer(instance=course).data)
 
 
-class CreateTaskApi(ServiceExceptionHandlerMixin, TeacherCourseAuthenticationMixin, APIView):
+class CreateTaskApi(
+    ServiceExceptionHandlerMixin,
+    TeacherCourseAuthenticationMixin,
+    APIView
+):
+
     class Serializer(serializers.Serializer):
         course = serializers.PrimaryKeyRelatedField(
             queryset=Course.objects.all(),
