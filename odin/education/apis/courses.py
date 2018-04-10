@@ -22,13 +22,13 @@ from odin.education.services import (
 )
 
 from odin.education.apis.permissions import (
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     TeacherCourseAuthenticationMixin,
 )
 
 
 class StudentCoursesApi(
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     ServiceExceptionHandlerMixin,
     ListAPIView
 ):
@@ -66,7 +66,7 @@ class StudentCoursesApi(
 
 class CourseDetailApi(
     ServiceExceptionHandlerMixin,
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     APIView
 ):
 

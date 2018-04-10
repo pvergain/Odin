@@ -55,6 +55,6 @@ class TeacherCourseAuthenticationMixin(JSONWebTokenAuthenticationMixin):
         return super().get_permissions() + [IsTeacherPermission()]
 
 
-class IsUserStudentOrTeacherMixin(JSONWebTokenAuthenticationMixin):
+class CourseAuthenticationMixin(JSONWebTokenAuthenticationMixin):
     def get_permissions(self):
         return super().get_permissions() + [IsStudentOrTeacherPermission()]
