@@ -4,14 +4,14 @@ from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .permissions import IsUserStudentOrTeacherMixin
+from .permissions import CourseAuthenticationMixin
 
 from odin.apis.mixins import ServiceExceptionHandlerMixin
 
 
 class TaskDetailApi(
     ServiceExceptionHandlerMixin,
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     APIView
 ):
 
@@ -56,6 +56,10 @@ class TaskDetailApi(
     def get(self, request, task_id):
         student = self.request.user.downcast(Student)
         task = IncludedTask.objects.get(id=task_id)
-        task.valid_solutions = task.solutions.filter(student_id=student.id).order_by('-id')
+
+        if student:
+            task.valid_solutions = task.solutions.filter(student_id=student.id).order_by('-id')
+        else:
+            task.valid_solutions = []
 
         return Response(self.TaskSerializer(instance=task).data)
