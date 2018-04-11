@@ -4,10 +4,17 @@ from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .permissions import StudentCourseAuthenticationMixin
+from .permissions import IsUserStudentOrTeacherMixin
+
+from odin.apis.mixins import ServiceExceptionHandlerMixin
 
 
-class TaskDetailApi(StudentCourseAuthenticationMixin, APIView):
+class TaskDetailApi(
+    ServiceExceptionHandlerMixin,
+    IsUserStudentOrTeacherMixin,
+    APIView
+):
+
     class TaskSerializer(serializers.ModelSerializer):
         solutions = serializers.SerializerMethodField()
         course = serializers.SerializerMethodField()
