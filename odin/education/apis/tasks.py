@@ -1,4 +1,4 @@
-from odin.education.models import IncludedTask, Student
+from odin.education.models import IncludedTask
 
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -44,7 +44,7 @@ class TaskDetailApi(
                     'code': solution.code,
                     'status': solution.verbose_status,
                     'test_result': solution.test_output,
-                    'student_id': solution.student_id
+                    'student_id': solution.user_id
                 } for solution in obj.valid_solutions
             ]
 
@@ -54,12 +54,9 @@ class TaskDetailApi(
                 return []
 
     def get(self, request, task_id):
-        student = self.request.user.downcast(Student)
+        user = self.request.user
         task = IncludedTask.objects.get(id=task_id)
 
-        if student:
-            task.valid_solutions = task.solutions.filter(student_id=student.id).order_by('-id')
-        else:
-            task.valid_solutions = []
+        task.valid_solutions = task.solutions.filter(user_id=user.id).order_by('-id')
 
         return Response(self.TaskSerializer(instance=task).data)
