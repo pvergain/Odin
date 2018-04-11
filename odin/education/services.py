@@ -184,7 +184,7 @@ def create_test_for_task(
 def create_gradable_solution(
     *,
     task: IncludedTask,
-    student: Student,
+    user: BaseUser,
     code: str=None,
     file: BinaryIO=None
 ) -> Solution:
@@ -196,14 +196,14 @@ def create_gradable_solution(
     if code is not None:
         new_solution = Solution.objects.create(
             task=task,
-            student=student,
+            user=user,
             code=code,
             status=6
         )
     if file is not None:
         new_solution = Solution.objects.create(
             task=task,
-            student=student,
+            user=user,
             file=file,
             status=6
         )
@@ -214,7 +214,7 @@ def create_gradable_solution(
 def create_non_gradable_solution(
     *,
     task: IncludedTask,
-    student: Student,
+    user: BaseUser,
     url: str=None
 ) -> Solution:
 
@@ -222,7 +222,7 @@ def create_non_gradable_solution(
             raise ValidationError("Provide a url!")
     new_solution = Solution.objects.create(
         task=task,
-        student=student,
+        user=user,
         url=url,
         status=6
     )
@@ -232,14 +232,14 @@ def create_non_gradable_solution(
 
 def calculate_student_valid_solutions_for_course(
     *,
-    student: Student,
+    user: BaseUser,
     course: Course
 ) -> str:
 
     total_tasks = IncludedTask.objects.filter(course=course).count()
     if not total_tasks:
         return 0
-    solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(student, course).count()
+    solved_tasks = Solution.objects.get_solved_solutions_for_student_and_course(user, course).count()
 
     ratio = (solved_tasks/total_tasks) * 100
     return f'{ratio:.1f}'
@@ -343,7 +343,7 @@ def create_solution_comment(
 def get_gradable_tasks_for_course(
     *,
     course: Course,
-    student: Student
+    user: BaseUser
 ):
 
     tasks = []
@@ -352,7 +352,7 @@ def get_gradable_tasks_for_course(
         if task.gradable:
             task.last_solution = get_last_solution_for_task(
                 task=task,
-                student=student
+                user=user
             )
             tasks.append(task)
 
@@ -362,10 +362,10 @@ def get_gradable_tasks_for_course(
 def get_last_solution_for_task(
     *,
     task: IncludedTask,
-    student: Student
+    user: BaseUser
 ) -> Solution:
 
-    return Solution.objects.filter(task=task, student=student).order_by('-id').first()
+    return Solution.objects.filter(task=task, user=user).order_by('-id').first()
 
 
 def create_included_task_with_test(
