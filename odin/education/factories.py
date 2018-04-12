@@ -156,7 +156,7 @@ class BinaryFileTestFactory(TaskTestFactory):
 
 class SolutionFactory(factory.DjangoModelFactory):
     task = factory.SubFactory(IncludedTaskFactory)
-    student = factory.SubFactory(StudentFactory)
+    user = factory.SubFactory(BaseUserFactory)
     url = factory.LazyAttribute(lambda _: faker.url())
     code = factory.LazyAttribute(lambda _: faker.text())
     build_id = factory.LazyAttribute(lambda _: faker.pyint())

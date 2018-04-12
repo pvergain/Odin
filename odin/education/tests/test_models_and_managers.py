@@ -339,14 +339,15 @@ class SolutionTests(TestCase):
     def setUp(self):
         self.course = CourseFactory()
         self.week = WeekFactory(course=self.course)
+        self.user = BaseUserFactory()
         self.student = StudentFactory()
         add_student(self.course, self.student)
         self.task = IncludedTaskFactory(course=self.course, week=self.week, gradable=False)
 
     def test_get_solved_solutions_for_student_and_course_returns_solved_solutions(self):
-        solution = SolutionFactory(task=self.task, student=self.student, status=Solution.SUBMITTED_WITHOUT_GRADING)
+        solution = SolutionFactory(task=self.task, user=self.user, status=Solution.SUBMITTED_WITHOUT_GRADING)
 
-        queryset = Solution.objects.get_solved_solutions_for_student_and_course(self.student, self.course)
+        queryset = Solution.objects.get_solved_solutions_for_student_and_course(self.user, self.course)
         self.assertEqual([solution], list(queryset))
 
     def test_get_solved_solutions_for_student_and_course_does_not_return_solutions_if_no_solutions(self):
@@ -356,7 +357,7 @@ class SolutionTests(TestCase):
     def test_get_solved_solutions_for_student_and_course_returns_nothing_if_no_solved_solutions(self):
         self.task.gradable = True
         self.task.save()
-        SolutionFactory(task=self.task, student=self.student, status=Solution.NOT_OK)
+        SolutionFactory(task=self.task, user=self.user, status=Solution.NOT_OK)
 
         queryset = Solution.objects.get_solved_solutions_for_student_and_course(self.student, self.course)
         self.assertEqual([], list(queryset))

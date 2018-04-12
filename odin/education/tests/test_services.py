@@ -34,6 +34,7 @@ from ..factories import (
     IncludedTaskFactory,
     ProgrammingLanguageFactory,
     StudentFactory,
+    BaseUserFactory,
 )
 
 from odin.common.faker import faker
@@ -230,15 +231,16 @@ class TestCreateGradableSolution(TestCase):
         self.week = WeekFactory(course=self.course)
         self.task = IncludedTaskFactory(week=self.week, course=self.course, gradable=True)
         self.student = StudentFactory()
+        self.user = BaseUserFactory()
 
     def test_create_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
         with self.assertRaises(ValidationError):
-            create_gradable_solution(student=self.student,
+            create_gradable_solution(user=self.user,
                                      task=self.task)
 
     def test_create_gradable_solution_raises_validation_error_when_both_resources_are_provided(self):
         with self.assertRaises(ValidationError):
-            create_gradable_solution(student=self.student,
+            create_gradable_solution(user=self.user,
                                      task=self.task,
                                      code=faker.text(),
                                      file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'.encode('utf-8'))))
@@ -247,7 +249,7 @@ class TestCreateGradableSolution(TestCase):
         current_solution_count = Solution.objects.count()
 
         solution = create_gradable_solution(task=self.task,
-                                            student=self.student,
+                                            user=self.user,
                                             code=faker.text())
 
         self.assertEqual(current_solution_count + 1, Solution.objects.count())
@@ -259,7 +261,7 @@ class TestCreateGradableSolution(TestCase):
         current_solution_count = Solution.objects.count()
 
         solution = create_gradable_solution(task=self.task,
-                                            student=self.student,
+                                            user=self.user,
                                             file=SimpleUploadedFile('text.bin', bytes(f'{faker.text()}'
                                                                     .encode('utf-8'))))
 
@@ -275,17 +277,18 @@ class TestCreateNonGradableSolution(TestCase):
         self.week = WeekFactory(course=self.course)
         self.task = IncludedTaskFactory(week=self.week, course=self.course, gradable=False)
         self.student = StudentFactory()
+        self.user = BaseUserFactory()
 
     def test_create_non_gradable_solution_raises_validation_error_when_no_resource_is_provided(self):
         with self.assertRaises(ValidationError):
-            create_non_gradable_solution(student=self.student,
+            create_non_gradable_solution(user=self.user,
                                          task=self.task)
 
     def test_create_non_gradable_solution_creates_non_gradable_solution_with_url_when_url_is_provided(self):
         current_solution_count = Solution.objects.count()
 
         solution = create_non_gradable_solution(task=self.task,
-                                                student=self.student,
+                                                user=self.user,
                                                 url=faker.url())
 
         self.assertEqual(current_solution_count + 1, Solution.objects.count())

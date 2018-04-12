@@ -7,7 +7,7 @@ from odin.apis.mixins import ServiceExceptionHandlerMixin
 
 from odin.education.models import Solution
 
-from odin.education.apis.permissions import StudentCourseAuthenticationMixin
+from odin.education.apis.permissions import CourseAuthenticationMixin
 
 from odin.education.services import create_gradable_solution
 
@@ -16,7 +16,12 @@ from odin.education.apis.serializers import SolutionSubmitSerializer
 from odin.grading.services import start_grader_communication
 
 
-class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandlerMixin, APIView):
+class SolutionSubmitApi(
+    ServiceExceptionHandlerMixin,
+    CourseAuthenticationMixin,
+    APIView
+):
+
     def get(self, request, *args, **kwargs):
         solution = get_object_or_404(Solution, id=self.kwargs.get('solution_id'))
         data = {
@@ -33,7 +38,7 @@ class SolutionSubmitApi(StudentCourseAuthenticationMixin, ServiceExceptionHandle
         data = serializer.validated_data
 
         solution = create_gradable_solution(
-            student=self.request.user.student,
+            user=self.request.user,
             task=data['task'],
             code=data['code']
         )

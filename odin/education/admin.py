@@ -64,10 +64,10 @@ class TestAdmin(admin.ModelAdmin):
 
 @admin.register(Solution)
 class SolutionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'task', 'student', 'course', 'verbose_status')
-    list_select_related = ('task', 'task__course', 'student')
+    list_display = ('id', 'task', 'user', 'course', 'verbose_status')
+    list_select_related = ('task', 'task__course', 'user')
 
-    search_fields = ('task__name', 'student__email', 'task__course__name', )
+    search_fields = ('task__name', 'user__email', 'task__course__name', )
     list_filter = ['status', CoursesListFilter]
 
     def course(self, obj):

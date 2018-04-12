@@ -3,7 +3,9 @@ from typing import Dict, Set
 from django.db.models import Q
 from django.conf import settings
 
-from .models import Solution, Student, Course, Week
+from .models import Solution, Course, Week
+
+from odin.users.models import BaseUser
 
 
 def get_passed_and_failed_tasks(solution_data: Dict) -> Dict:
@@ -30,12 +32,12 @@ def get_passed_and_failed_tasks(solution_data: Dict) -> Dict:
     return passed_or_failed
 
 
-def get_solution_data(course: Course, student: Student) -> (Dict, Dict):
+def get_solution_data(course: Course, user: BaseUser) -> (Dict, Dict):
     """
-    Fetch all of `student` solutions for `course` tasks and group them by task
+    Fetch all of `user` solutions for `course` tasks and group them by task
     Get passed and failed tasks and then return the data
     """
-    all_solutions = student.solutions.filter(task__course=course).prefetch_related('task')
+    all_solutions = user.solutions.filter(task__course=course).prefetch_related('task')
     solution_data = {}
     for solution in all_solutions:
         task_solutions = solution_data.get(solution.task)
@@ -76,14 +78,14 @@ def get_all_solved_student_solution_count_for_course(course: Course) -> Dict:
     q_expression = Q(task__gradable=True, status=2) | Q(task__gradable=False, status=6)
     all_passed_solutions = Solution.objects.filter(
         q_expression, task__course=course
-    ).order_by('task').distinct('task').prefetch_related('student')
+    ).order_by('task').distinct('task').prefetch_related('user')
 
     students_passed_solutions_count = {}
     for solution in all_passed_solutions:
-        solutions_for_student = students_passed_solutions_count.get(solution.student.email)
+        solutions_for_student = students_passed_solutions_count.get(solution.user.email)
         if solutions_for_student:
-            students_passed_solutions_count[solution.student.email] += 1
+            students_passed_solutions_count[solution.user.email] += 1
         else:
-            students_passed_solutions_count[solution.student.email] = 1
+            students_passed_solutions_count[solution.user.email] = 1
 
     return students_passed_solutions_count

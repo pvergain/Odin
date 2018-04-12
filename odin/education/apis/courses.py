@@ -22,13 +22,13 @@ from odin.education.services import (
 )
 
 from odin.education.apis.permissions import (
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     TeacherCourseAuthenticationMixin,
 )
 
 
 class StudentCoursesApi(
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     ServiceExceptionHandlerMixin,
     ListAPIView
 ):
@@ -66,7 +66,7 @@ class StudentCoursesApi(
 
 class CourseDetailApi(
     ServiceExceptionHandlerMixin,
-    IsUserStudentOrTeacherMixin,
+    CourseAuthenticationMixin,
     APIView
 ):
 
@@ -129,9 +129,9 @@ class CourseDetailApi(
 
     def get(self, request, course_id):
         course = get_object_or_404(self.get_queryset(), pk=course_id)
-        student = self.request.user.downcast(Student)
+        user = self.request.user
 
-        course.tasks = get_gradable_tasks_for_course(course=course, student=student)
+        course.tasks = get_gradable_tasks_for_course(course=course, user=user)
 
         return Response(self.CourseSerializer(instance=course).data)
 
