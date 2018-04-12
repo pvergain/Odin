@@ -67,8 +67,8 @@ class StudentCoursesApi(
 
 class CourseDetailApi(
     ServiceExceptionHandlerMixin,
-    CourseDetailAuthenticationMixin,
     CourseAuthenticationMixin,
+    CourseDetailAuthenticationMixin,
     APIView
 ):
 
