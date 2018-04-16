@@ -31,7 +31,7 @@ psycopg2==2.7.4
 awesome-slugify==1.6.5
 
 # Time and Time zones support
-pytz==2018.3
+pytz==2018.4
 
 # Querying
 django-filter==1.1.0
