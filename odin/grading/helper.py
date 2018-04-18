@@ -23,6 +23,20 @@ from .serializers import (
 
 from . import services
 
+TEST_TYPES = {
+    'UNITTEST': 'unittest',
+    'OUTPUT_CHECKING': 'output_checking'
+}
+
+FILE_TYPES = {
+    'BINARY': 'binary',
+    'PLAIN': 'plain'
+}
+
+
+def encode_solution_or_test_code(code: str):
+    return base64.b64encode(code.encode('UTF-8')).decode('ascii')
+
 
 def generate_test_file(*, test: IncludedTest, path: str, ):
     with open(f'{path}/{test.language.test_format}', 'w', encoding='UTF-8') as testfile:
@@ -65,7 +79,7 @@ def generate_test_resource(*, test: IncludedTest):
     return encoded.decode('ascii')
 
 
-def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
+def get_grader_ready_data1(solution_id: int, solution_model: Model) -> Dict:
     solution = solution_model.objects.get(id=solution_id)
     test = solution.task.test
 
@@ -109,3 +123,46 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
         grader_ready_data = GraderBinaryProblemSerializer(problem).data
 
     return grader_ready_data
+
+
+def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
+    solution = solution_model.objects.get(id=solution_id)
+    test = solution.task.test
+
+    if test.extra_options is None:
+        test.extra_options = {}
+
+    if solution.code:
+
+        solution_code = encode_solution_or_test_code(code=solution.code)
+        file_type = FILE_TYPES['BINARY']
+        test_type = TEST_TYPES['UNITTEST']
+
+        if not test.requirements:
+            test_resource = encode_solution_or_test_code(code=test.code)
+        else:
+            test_resource = generate_test_resource(test=test)
+
+            test.extra_options['archive_test_type'] = True
+            test.extra_options['time_limit'] = 20
+
+    if solution.file:
+        file_type = FILE_TYPES['BINARY']
+        solution_code = encode_solution_or_test_code(code=solution.file.read())
+        test_resource = encode_solution_or_test_code(code=test.file.read())
+
+    data = {
+        'language': test.language.name,
+        'test_type': test_type,
+        'solution': solution_code,
+        'file_type': file_type,
+        'test': test_resource,
+        'extra_options': test.extra_options
+    }
+
+    if test.is_source():
+        return data
+
+    data['test_type'] = TEST_TYPES['OUTPUT_CHECKING']
+
+    return data
