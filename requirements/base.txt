@@ -7,7 +7,7 @@ wheel==0.31.0
 
 
 # Bleeding edge Django
-django==2.0.4
+django==1.11.11
 
 # Configuration
 django-environ==0.4.4
