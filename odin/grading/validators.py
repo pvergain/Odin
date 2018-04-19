@@ -7,15 +7,16 @@ GRADER_SUPPORTED_LANGUAGES = [
     'javascript'
 ]
 
-GRADER_SUPPORTED_TEST_TYPES = {
-    'UNITTEST': 'unittest',
-    'OUTPUT_CHECKING': 'output_checking'
-}
+GRADER_SUPPORTED_TEST_TYPES = [
+    'unittest',
+    'output_checking'
+]
 
-GRADER_SUPPORTED_FILE_TYPES = {
-    'BINARY': 'binary',
-    'PLAIN': 'plain'
-}
+GRADER_SUPPORTED_FILE_TYPES = [
+    'binary',
+    'plain'
+
+]
 
 
 def run_create_grader_ready_data_validation(
@@ -29,7 +30,7 @@ def run_create_grader_ready_data_validation(
         raise ValidationError("Programming language not supported")
 
     if test_type not in GRADER_SUPPORTED_TEST_TYPES:
-        raise ValidationError('Test type not supported')
+        raise ValidationError("Test type not supported")
 
     if file_type not in GRADER_SUPPORTED_FILE_TYPES:
         raise ValidationError("File type is not supported")

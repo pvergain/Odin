@@ -24,6 +24,8 @@ FILE_TYPES = {
 
 
 def encode_solution_or_test_code(code: str):
+    if isinstance(code, bytes):
+        return base64.b64encode(code).decode('ascii')
     return base64.b64encode(code.encode('UTF-8')).decode('ascii')
 
 
@@ -72,14 +74,15 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
     solution = solution_model.objects.get(id=solution_id)
     test = solution.task.test
 
+    file_type = FILE_TYPES['BINARY']
+    test_type = TEST_TYPES['UNITTEST']
+
     if test.extra_options is None:
         test.extra_options = {}
 
     if solution.code:
 
         solution_code = encode_solution_or_test_code(code=solution.code)
-        file_type = FILE_TYPES['BINARY']
-        test_type = TEST_TYPES['UNITTEST']
 
         if not test.requirements:
             test_resource = encode_solution_or_test_code(code=test.code)
@@ -90,7 +93,6 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
             test.extra_options['time_limit'] = 20
 
     if solution.file:
-        file_type = FILE_TYPES['BINARY']
         solution_code = encode_solution_or_test_code(code=solution.file.read())
         test_resource = encode_solution_or_test_code(code=test.file.read())
 
