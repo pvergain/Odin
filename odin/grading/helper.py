@@ -7,21 +7,10 @@ from typing import Dict, List
 
 from django.db.models import Model
 
+from .validators import run_create_grader_ready_data_validation
+
 from odin.education.models import IncludedTest
 
-from .models import (
-    GraderBinaryProblem,
-    GraderPlainProblem,
-    GraderPlainProblemWithRequirements
-)
-
-from .serializers import (
-    GraderPlainProblemSerializer,
-    GraderBinaryProblemSerializer,
-    GraderPlainProblemWithRequirementsSerializer,
-)
-
-from . import services
 
 TEST_TYPES = {
     'UNITTEST': 'unittest',
@@ -35,6 +24,8 @@ FILE_TYPES = {
 
 
 def encode_solution_or_test_code(code: str):
+    if isinstance(code, bytes):
+        return base64.b64encode(code).decode('ascii')
     return base64.b64encode(code.encode('UTF-8')).decode('ascii')
 
 
@@ -79,55 +70,12 @@ def generate_test_resource(*, test: IncludedTest):
     return encoded.decode('ascii')
 
 
-def get_grader_ready_data1(solution_id: int, solution_model: Model) -> Dict:
-    solution = solution_model.objects.get(id=solution_id)
-    test = solution.task.test
-
-    if solution.code:
-        if not test.requirements:
-            file_type = GraderPlainProblem.PLAIN
-            test_resource = test.code
-        else:
-            file_type = GraderPlainProblemWithRequirements.BINARY
-            test_resource = generate_test_resource(test=test)
-
-    if solution.file:
-        file_type = GraderBinaryProblem.BINARY
-        test_resource = test.file
-
-    if test.extra_options is None:
-        test.extra_options = {}
-
-    data = {
-        'language': test.language.name,
-        'test_type': GraderPlainProblem.UNITTEST,
-        'file_type': file_type,
-        'test': test_resource,
-        'extra_options': test.extra_options
-    }
-
-    if test.is_source() and not test.requirements:
-        data['solution'] = solution.code
-        problem = services.create_plain_problem(**data)
-        grader_ready_data = GraderPlainProblemSerializer(problem).data
-    elif test.is_source() and test.requirements:
-        data['solution'] = solution.code
-        data['test_type'] = GraderPlainProblemWithRequirements.UNITTEST
-        data['extra_options'] = {'archive_test_type': True, 'time_limit': 20}
-        problem = services.create_plain_problem_with_requirements(**data)
-        grader_ready_data = GraderPlainProblemWithRequirementsSerializer(problem).data
-    else:
-        data['test_type'] = GraderBinaryProblem.OUTPUT_CHECKING
-        data['solution'] = solution.file
-        problem = services.create_binary_problem(**data)
-        grader_ready_data = GraderBinaryProblemSerializer(problem).data
-
-    return grader_ready_data
-
-
 def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
     solution = solution_model.objects.get(id=solution_id)
     test = solution.task.test
+
+    file_type = FILE_TYPES['BINARY']
+    test_type = TEST_TYPES['UNITTEST']
 
     if test.extra_options is None:
         test.extra_options = {}
@@ -135,8 +83,6 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
     if solution.code:
 
         solution_code = encode_solution_or_test_code(code=solution.code)
-        file_type = FILE_TYPES['BINARY']
-        test_type = TEST_TYPES['UNITTEST']
 
         if not test.requirements:
             test_resource = encode_solution_or_test_code(code=test.code)
@@ -147,7 +93,6 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
             test.extra_options['time_limit'] = 20
 
     if solution.file:
-        file_type = FILE_TYPES['BINARY']
         solution_code = encode_solution_or_test_code(code=solution.file.read())
         test_resource = encode_solution_or_test_code(code=test.file.read())
 
@@ -160,9 +105,13 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
         'extra_options': test.extra_options
     }
 
-    if test.is_source():
-        return data
+    if not test.is_source():
+        data['test_type'] = TEST_TYPES['OUTPUT_CHECKING']
 
-    data['test_type'] = TEST_TYPES['OUTPUT_CHECKING']
+    run_create_grader_ready_data_validation(
+        language=test.language.name,
+        test_type=data['test_type'],
+        file_type=data['file_type']
+    )
 
     return data
