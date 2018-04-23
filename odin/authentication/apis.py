@@ -8,9 +8,15 @@ from rest_framework_jwt.settings import api_settings
 from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
 from django.db.models.query import Q
+from django.conf import settings
 
 from odin.users.models import BaseUser, PasswordResetToken
 from odin.apis.mixins import ServiceExceptionHandlerMixin
+
+from odin.authentication.helpers import (
+    start_s3_client,
+    get_presigned_post
+)
 
 from odin.authentication.services import (
     logout,
@@ -18,6 +24,7 @@ from odin.authentication.services import (
     initiate_reset_user_password,
     reset_user_password,
     change_user_password,
+    edit_user_profile,
 )
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
@@ -40,11 +47,32 @@ class LoginApi(ObtainJSONWebToken):
         return Response(response_data)
 
 
-class UserDetailApi(JSONWebTokenAuthenticationMixin, APIView):
+class UserDetailApi(
+    ServiceExceptionHandlerMixin,
+    JSONWebTokenAuthenticationMixin,
+    APIView
+):
+
+    class Serializer(serializers.Serializer):
+        full_name = serializers.CharField(required=False)
+        avatar = serializers.CharField(required=False)
+
     def get(self, request):
         full_data = get_user_data(user=self.request.user)
 
         return Response(full_data)
+
+    def post(self, request):
+
+        serializer = self.Serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        data['user'] = request.user
+
+        edit_user_profile(**data)
+
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class LogoutApi(JSONWebTokenAuthenticationMixin, APIView):
@@ -118,3 +146,33 @@ class ChangePasswordApi(
         change_user_password(**data)
 
         return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class SignS3Api(
+    ServiceExceptionHandlerMixin,
+    JSONWebTokenAuthenticationMixin,
+    APIView
+):
+
+    class Serializer(serializers.Serializer):
+        file_type = serializers.CharField()
+
+    def post(self, request):
+        serializer = self.Serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        s3 = start_s3_client(
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            aws_s3_region_name=settings.AWS_S3_REGION_NAME,
+        )
+
+        upload_data = get_presigned_post(
+            s3,
+            s3_bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            file_type=data['file_type'],
+        )
+
+        return Response(upload_data)
