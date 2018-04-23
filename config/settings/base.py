@@ -3,6 +3,8 @@ from django.apps import apps
 import environ
 import datetime
 
+from .aws import *
+
 ROOT_DIR = environ.Path(__file__) - 3  # (odin/config/settings/base.py - 3 = odin/)
 APPS_DIR = ROOT_DIR.path('odin')
 
