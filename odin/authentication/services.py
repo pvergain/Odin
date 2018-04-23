@@ -147,3 +147,20 @@ def change_user_password(
     user.save()
 
     return user
+
+
+@transaction.atomic
+def edit_user_profile(
+    *,
+    user: BaseUser,
+    full_name: str=None,
+    avatar: str=None
+):
+
+    if full_name:
+        user.profile.full_name = full_name.strip()
+
+    if avatar:
+        user.profile.full_image = avatar
+
+    user.profile.save()
