@@ -1,9 +1,15 @@
 from rest_framework import serializers
 
 from django.contrib.auth.password_validation import validate_password
+import boto3
+import uuid
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
+
 from django.db.models.query import Q
 from django.db import transaction
+
 from django.utils import timezone
 
 from odin.emails.services import send_mail
@@ -164,3 +170,48 @@ def edit_user_profile(
         user.profile.full_image = avatar
 
     user.profile.save()
+
+
+def start_s3_client(
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    aws_s3_region_name=settings.AWS_S3_REGION_NAME,
+):
+
+    config = boto3.session.Config(region_name=aws_s3_region_name)
+
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        config=config
+    )
+
+    return s3
+
+
+def get_presigned_post(
+    s3: boto3.client,
+    file_type: str,
+    s3_bucket: str=settings.AWS_STORAGE_BUCKET_NAME,
+):
+
+    new_file_name = uuid.uuid4().hex
+
+    presigned_post = s3.generate_presigned_post(
+        Bucket=s3_bucket,
+        Key=f'{settings.MEDIA_LOCATION}/{new_file_name}',
+        Fields={"acl": "public-read", "Content-Type": file_type},
+        Conditions=[
+            {"acl": "public-read"},
+            {"Content-Type": file_type}
+        ],
+        ExpiresIn=3600
+    )
+
+    upload_data = {
+        'data': presigned_post,
+        'file_name': new_file_name
+    }
+
+    return upload_data

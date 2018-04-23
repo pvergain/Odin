@@ -8,15 +8,9 @@ from rest_framework_jwt.settings import api_settings
 from odin.authentication.permissions import JSONWebTokenAuthenticationMixin
 
 from django.db.models.query import Q
-from django.conf import settings
 
 from odin.users.models import BaseUser, PasswordResetToken
 from odin.apis.mixins import ServiceExceptionHandlerMixin
-
-from odin.authentication.helpers import (
-    start_s3_client,
-    get_presigned_post
-)
 
 from odin.authentication.services import (
     logout,
@@ -25,6 +19,8 @@ from odin.authentication.services import (
     reset_user_password,
     change_user_password,
     edit_user_profile,
+    start_s3_client,
+    get_presigned_post,
 )
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
@@ -70,7 +66,11 @@ class UserDetailApi(
         data = serializer.validated_data
         data['user'] = request.user
 
-        edit_user_profile(**data)
+        edit_user_profile(
+            user=data['user'],
+            full_name=data['full_name'],
+            avatar=data['avatar']
+        )
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
@@ -163,15 +163,10 @@ class SignS3Api(
 
         data = serializer.validated_data
 
-        s3 = start_s3_client(
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            aws_s3_region_name=settings.AWS_S3_REGION_NAME,
-        )
+        s3 = start_s3_client()
 
         upload_data = get_presigned_post(
             s3,
-            s3_bucket=settings.AWS_STORAGE_BUCKET_NAME,
             file_type=data['file_type'],
         )
 
