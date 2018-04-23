@@ -1,5 +1,4 @@
 from .base import *  # noqa
-from .aws import *  # noqa
 
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
@@ -41,16 +40,3 @@ CORS_ALLOW_HEADERS = [
     'content-type',
     'origin',
 ]
-
-
-MEDIA_LOCATION = 'media'
-MEDIA_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, MEDIA_LOCATION)
-MEDIA_S3_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
-
-DEFAULT_FILE_STORAGE = 'config.settings.storages.MediaStorage'
-
-STATIC_LOCATION = 'static'
-STATIC_URL = 'https://%s/%s/%s/' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME, STATIC_LOCATION)
-STATIC_CDN_CUSTOM_DOMAIN = '%s/%s' % (AWS_S3_HOST, AWS_STORAGE_BUCKET_NAME)
-
-STATICFILES_STORAGE = 'config.settings.storages.StaticStorage'
