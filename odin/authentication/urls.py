@@ -8,6 +8,7 @@ from odin.authentication.apis import (
     ForgotPasswordApi,
     ForgotPasswordSetApi,
     ChangePasswordApi,
+    SignS3Api
 )
 
 
@@ -45,5 +46,10 @@ urlpatterns = [
         regex='^change-password/$',
         view=ChangePasswordApi.as_view(),
         name='change-password'
+    ),
+    url(
+        regex='^sign-s3/$',
+        view=SignS3Api.as_view(),
+        name='sign-s3'
     ),
 ]
