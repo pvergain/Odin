@@ -237,3 +237,35 @@ class CreateTaskApi(
         }
 
         return Response(data=data, status=status.HTTP_201_CREATED)
+
+
+class TeacherOnlyCourseDetailApi(
+    ServiceExceptionHandlerMixin,
+    TeacherCourseAuthenticationMixin,
+    APIView,
+):
+
+    class Serializer(serializers.ModelSerializer):
+        students = serializers.SerializerMethodField()
+        students_count = serializers.SerializerMethodField()
+
+        class Meta:
+            model = Course
+            fields = (
+                'id',
+                'name',
+                'start_date',
+                'end_date',
+                'logo',
+                'slug_url',
+                'languages',
+                'weeks',
+                'student_count',
+                'students'
+            )
+
+    def get(self, request, course_id):
+
+        course = get_object_or_404(Course.objects.all(), pk=course_id)
+
+        return Response(self.Serializer(instance=course).data)

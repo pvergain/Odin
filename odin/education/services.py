@@ -409,3 +409,26 @@ def create_included_task_with_test(
         included_test.save()
 
     return included_task
+
+
+def get_user_solution_summary(
+    user: BaseUser
+):
+    from django.db.models import Sum, When, Case, IntegerField
+
+    results = Solution.objects.aggregate(
+        OK=Sum(
+            Case(
+                When(Q(status__in=['2']), then=1),
+                output_field=IntegerField()
+            )
+        ),
+        TOTAL=Sum(
+            Case(
+                When(status__range=(0, 6), then=1),
+                output_field=IntegerField()
+            )
+        )
+    )
+
+    return results
