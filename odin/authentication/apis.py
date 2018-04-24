@@ -50,8 +50,8 @@ class UserDetailApi(
 ):
 
     class Serializer(serializers.Serializer):
-        full_name = serializers.CharField(required=False)
-        avatar = serializers.CharField(required=False)
+        full_name = serializers.CharField(required=False, allow_null=True)
+        avatar = serializers.CharField(required=False, allow_null=True)
 
     def get(self, request):
         full_data = get_user_data(user=self.request.user)
