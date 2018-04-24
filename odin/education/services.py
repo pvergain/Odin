@@ -419,16 +419,25 @@ def get_user_solution_summary(
     results = Solution.objects.aggregate(
         OK=Sum(
             Case(
-                When(Q(status__in=['2']), then=1),
+                When(Q(status__in=['2']) & Q(user=user), then=1),
                 output_field=IntegerField()
             )
         ),
         TOTAL=Sum(
             Case(
-                When(status__range=(0, 6), then=1),
+                When(Q(status__range=(0, 6)) & Q(user=user), then=1),
                 output_field=IntegerField()
             )
         )
     )
 
     return results
+
+
+def get_user_avatar_url(
+    user: BaseUser
+):
+    if user.profile.full_image:
+        return str(user.profile.full_image.url)
+
+    return None

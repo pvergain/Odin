@@ -44,6 +44,6 @@ urlpatterns = [
     ),
     url(
         regex='^courses/(?P<course_id>[0-9]+)/teachers/$',
-        view=TeacherOnlyCourseDetailApi.as_view()
+        view=TeacherOnlyCourseDetailApi.as_view(),
     ),
 ]
