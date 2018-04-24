@@ -7,6 +7,7 @@ from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 
 from odin.apis.mixins import ServiceExceptionHandlerMixin
+from odin.common.utils import inline_serializer
 
 from odin.education.models import (
     Course,
@@ -19,8 +20,6 @@ from odin.education.models import (
 from odin.education.services import (
     create_included_task_with_test,
     get_gradable_tasks_for_course,
-    get_user_solution_summary,
-    get_user_avatar_url,
 )
 
 from odin.education.apis.permissions import (
@@ -248,10 +247,31 @@ class TeacherOnlyCourseDetailApi(
 ):
 
     class Serializer(serializers.ModelSerializer):
-        students = serializers.SerializerMethodField()
-        students_count = serializers.SerializerMethodField()
-        languages = serializers.SerializerMethodField()
-        weeks = serializers.SerializerMethodField()
+        students_count = serializers.IntegerField()
+        students = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'user_id': serializers.IntegerField(source='user.id'),
+            'full_name': serializers.CharField(source='user.name'),
+            'solution_status_summary': inline_serializer(
+                source='user.get_solution_summary', fields={
+                    'OK': serializers.IntegerField(),
+                    'TOTAL': serializers.IntegerField(),
+                }),
+            'avatar': serializers.CharField(source='user.get_avatar'),
+        })
+
+        weeks = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'number': serializers.IntegerField(),
+        })
+
+        languages = inline_serializer(
+            many=True,
+            fields={
+                'id': serializers.IntegerField(),
+                'name': serializers.CharField()
+            }
+        )
 
         class Meta:
             model = Course
@@ -268,43 +288,13 @@ class TeacherOnlyCourseDetailApi(
                 'students'
             )
 
-        def get_languages(self, obj):
-            return [
-                {
-                    'id': language.id,
-                    'name': language.name
-                } for language in ProgrammingLanguage.objects.all()
-            ]
-
-        def get_weeks(self, obj):
-            return [
-                {
-                    'id': week.id,
-                    'number': week.number,
-                } for week in obj.weeks.all()
-            ]
-
-        def get_students(self, obj):
-            return [
-                {
-                    'id': student.id,
-                    'user_id': student.user.id,
-                    'full_name': student.user.profile.full_name or None,
-                    'solution_status_summary': get_user_solution_summary(user=student.user),
-                    'avatar': get_user_avatar_url(user=student.user),
-                } for student in obj.students.all()
-            ]
-
-        def get_students_count(self, obj):
-            return {
-                'students_count': obj.students.count(),
-            }
-
     def get_queryset(self):
         return Course.objects.prefetch_related('students__user__solutions')
 
     def get(self, request, course_id):
 
         course = get_object_or_404(self.get_queryset(), pk=course_id)
+        course.languages = ProgrammingLanguage.objects.all()
+        course.students_count = course.students.count()
 
         return Response(self.Serializer(instance=course).data)
