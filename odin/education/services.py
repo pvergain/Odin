@@ -3,7 +3,7 @@ from typing import Dict, BinaryIO
 
 import requests
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum, When, Case, IntegerField
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
@@ -414,7 +414,6 @@ def create_included_task_with_test(
 def get_user_solution_summary(
     user: BaseUser
 ):
-    from django.db.models import Sum, When, Case, IntegerField
 
     results = Solution.objects.aggregate(
         OK=Sum(
@@ -437,7 +436,8 @@ def get_user_solution_summary(
 def get_user_avatar_url(
     user: BaseUser
 ):
-    if user.profile.full_image:
-        return str(user.profile.full_image.url)
 
-    return None
+    if not user.profile.full_image:
+        return None
+
+    return str(user.profile.full_image.url)
