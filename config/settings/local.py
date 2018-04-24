@@ -34,9 +34,3 @@ DEBUG_TOOLBAR_CONFIG = {
 INSTALLED_APPS += ['django_extensions', ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'content-type',
-    'origin',
-]
