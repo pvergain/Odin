@@ -150,7 +150,7 @@ class SourceCodeTestFactory(TaskTestFactory):
 class BinaryFileTestFactory(TaskTestFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        kwargs['file'] = SimpleUploadedFile('file.jar', bytes(f'{faker.text}'.encode('utf-8')))
+        kwargs['file'] = SimpleUploadedFile('file.jar', bytes(faker.text().encode('utf-8')))
         return create_test_for_task(*args, **kwargs)
 
 
