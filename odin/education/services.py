@@ -3,7 +3,7 @@ from typing import Dict, BinaryIO
 
 import requests
 from django.db import transaction
-from django.db.models import Q, Sum, When, Case, IntegerField
+from django.db.models import Q, Sum, When, Case, IntegerField, F
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
@@ -429,6 +429,11 @@ def get_user_solution_summary(
             )
         )
     )
+
+    completed_tasks = user.solutions.filter(status=2).annotate(
+        name=F('task__name'), task_id=F('task')).values('name', 'task_id')
+
+    results['completed_tasks'] = completed_tasks
 
     return results
 

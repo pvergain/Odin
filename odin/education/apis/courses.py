@@ -256,6 +256,13 @@ class TeacherOnlyCourseDetailApi(
                 source='user.get_solution_summary', fields={
                     'OK': serializers.IntegerField(),
                     'TOTAL': serializers.IntegerField(),
+                    'completed_tasks': inline_serializer(
+                        many=True,
+                        fields={
+                            'task_id': serializers.IntegerField(),
+                            'name': serializers.CharField()
+                        }
+                    )
                 }),
             'avatar': serializers.CharField(source='user.get_avatar'),
         })
