@@ -247,7 +247,8 @@ class TeacherOnlyCourseDetailApi(
 ):
 
     class Serializer(serializers.ModelSerializer):
-        students_count = serializers.IntegerField()
+        languages = serializers.SerializerMethodField()
+        students_count = serializers.IntegerField(source='students.count')
         students = inline_serializer(many=True, fields={
             'id': serializers.IntegerField(),
             'user_id': serializers.IntegerField(source='user.id'),
@@ -275,13 +276,17 @@ class TeacherOnlyCourseDetailApi(
             'number': serializers.IntegerField(),
         })
 
-        languages = inline_serializer(
-            many=True,
-            fields={
-                'id': serializers.IntegerField(),
-                'name': serializers.CharField()
-            }
-        )
+        def get_languages(self, obj):
+
+            languages = inline_serializer(
+                instance=ProgrammingLanguage.objects.all(),
+                many=True,
+                fields={
+                    'id': serializers.IntegerField(),
+                    'name': serializers.CharField()
+                },
+            )
+            return languages.data
 
         class Meta:
             model = Course
@@ -304,7 +309,5 @@ class TeacherOnlyCourseDetailApi(
     def get(self, request, course_id):
 
         course = get_object_or_404(self.get_queryset(), pk=course_id)
-        course.languages = ProgrammingLanguage.objects.all()
-        course.students_count = course.students.count()
 
         return Response(self.Serializer(instance=course).data)
