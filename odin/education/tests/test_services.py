@@ -315,17 +315,3 @@ class TestCreateLecture(TestCase):
         invalid_date = self.course.end_date + timezone.timedelta(days=faker.pyint())
         with self.assertRaises(ValidationError):
             create_lecture(date=invalid_date, course=self.course)
-
-
-class TestGetUserAvatarUrl(TestCase):
-    def setUp(self):
-        self.user = BaseUserFactory()
-
-    def test_returns_none_if_no_file_at_user_profile(self):
-        self.assertIsNone(get_user_avatar_url(self.user))
-
-    def test_returns_file_url_if_file_is_present_in_user_profile(self):
-        self.user.profile.full_image = SimpleUploadedFile(name='some_pic.jpg', content=bytes(faker.text().encode('UTF-8')), content_type='image/jpeg')
-        self.user.profile.save()
-        import ipdb; ipdb.set_trace()
-        self.assertIsNotNone(get_user_avatar_url(user=self.user))
