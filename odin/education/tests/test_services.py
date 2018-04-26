@@ -16,7 +16,6 @@ from ..services import (
     create_gradable_solution,
     create_non_gradable_solution,
     create_lecture,
-    get_user_avatar_url,
 )
 from ..models import (
     Course,
