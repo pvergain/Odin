@@ -63,13 +63,10 @@ class UserDetailApi(
         serializer = self.Serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        data = serializer.validated_data
-        data['user'] = request.user
-
         edit_user_profile(
-            user=data['user'],
-            full_name=data['full_name'],
-            avatar=data['avatar']
+            user=request.user,
+            full_name=serializer.validated_data['full_name'],
+            avatar=serializer.validated_data['avatar']
         )
 
         return Response(status=status.HTTP_202_ACCEPTED)
