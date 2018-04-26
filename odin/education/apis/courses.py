@@ -260,7 +260,10 @@ class TeacherOnlyCourseDetailApi(
                         many=True,
                         fields={
                             'task_id': serializers.IntegerField(),
-                            'name': serializers.CharField()
+                            'name': serializers.CharField(),
+                            'solution_id': serializers.IntegerField(),
+                            'solution_code': serializers.CharField(),
+                            'test_result': serializers.DictField(),
                         }
                     )
                 }),

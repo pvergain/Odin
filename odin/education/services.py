@@ -431,7 +431,12 @@ def get_user_solution_summary(
     )
 
     completed_tasks = user.solutions.filter(status=2).annotate(
-        name=F('task__name'), task_id=F('task')).values('name', 'task_id')
+        name=F('task__name'),
+        task_id=F('task'),
+        solution_id=F('id'),
+        solution_code=F('code'),
+        test_result=F('test_output')
+    ).values('name', 'task_id', 'solution_code', 'test_result', 'solution_id')
 
     results['completed_tasks'] = completed_tasks
 
