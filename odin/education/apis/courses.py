@@ -311,3 +311,45 @@ class TeacherOnlyCourseDetailApi(
         course = get_object_or_404(self.get_queryset(), pk=course_id)
 
         return Response(self.Serializer(instance=course).data)
+
+
+class CourseStatsApi(
+    ServiceExceptionHandlerMixin,
+    TeacherCourseAuthenticationMixin,
+    APIView
+):
+
+    class InputSerializer(serializers.Serializer):
+        start_date = serializers.DateField(
+            input_formats=['%d.%m.%Y', '%Y-%m-%d']
+        )
+
+        end_date = serializers.DateField(
+            input_formats=['%d.%m.%Y', '%Y-%m-%d']
+        )
+
+    def post(self, request, course_id):
+
+        from odin.education.services import get_solutions_for_course_stats
+
+        course = get_object_or_404(Course.objects.all(), pk=course_id)
+
+        serializer = self.InputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        solutions = [
+            {
+                'id': solution.id,
+                'created_at': solution.created_at.strftime('%Y-%m-%d'),
+                'status': solution.status,
+                'test_output': solution.test_output,
+                'task_id': solution.task.id,
+                'user_id': solution.user.id
+            } for solution in get_solutions_for_course_stats(
+                course=course,
+                start_date=serializer.validated_data['start_date'],
+                end_date=serializer.validated_data['end_date']
+            )
+        ]
+
+        return Response({'solutions': solutions}, status=200)
