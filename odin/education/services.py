@@ -466,6 +466,9 @@ def get_solutions_for_course_stats(
     end_date: datetime,
 ):
 
+    if start_date > end_date:
+        raise ValidationError('Start date cannot be after End date')
+
     TIME_START = [0, 0, 0, 000000]
     TIME_END = [23, 59, 59, 999999]
 
@@ -491,4 +494,11 @@ def get_solutions_for_course_stats(
             created_at__range=(date1, date2))
     ]
 
-    return solutions
+    grouped_solutions = {}
+
+    for solution in solutions:
+        if not solution.created_at.strftime('%Y-%m-%d') in grouped_solutions.keys():
+            grouped_solutions[solution.created_at.strftime('%Y-%m-%d')] = []
+        grouped_solutions[solution.created_at.strftime('%Y-%m-%d')].append(solution)
+
+    return grouped_solutions
