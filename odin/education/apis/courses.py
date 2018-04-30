@@ -7,6 +7,7 @@ from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 
 from odin.apis.mixins import ServiceExceptionHandlerMixin
+from odin.common.utils import inline_serializer
 
 from odin.education.models import (
     Course,
@@ -18,7 +19,7 @@ from odin.education.models import (
 
 from odin.education.services import (
     create_included_task_with_test,
-    get_gradable_tasks_for_course
+    get_gradable_tasks_for_course,
 )
 
 from odin.education.apis.permissions import (
@@ -237,3 +238,76 @@ class CreateTaskApi(
         }
 
         return Response(data=data, status=status.HTTP_201_CREATED)
+
+
+class TeacherOnlyCourseDetailApi(
+    ServiceExceptionHandlerMixin,
+    TeacherCourseAuthenticationMixin,
+    APIView,
+):
+
+    class Serializer(serializers.ModelSerializer):
+        languages = serializers.SerializerMethodField()
+        students_count = serializers.IntegerField(source='students.count')
+        students = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'user_id': serializers.IntegerField(source='user.id'),
+            'full_name': serializers.CharField(source='user.name'),
+            'solution_status_summary': inline_serializer(
+                source='user.get_solution_summary', fields={
+                    'OK': serializers.IntegerField(),
+                    'TOTAL': serializers.IntegerField(),
+                    'completed_tasks': inline_serializer(
+                        many=True,
+                        fields={
+                            'task_id': serializers.IntegerField(),
+                            'name': serializers.CharField(),
+                            'solution_id': serializers.IntegerField(),
+                            'solution_code': serializers.CharField(),
+                            'test_result': serializers.DictField(),
+                        }
+                    )
+                }),
+            'avatar': serializers.CharField(source='user.get_avatar'),
+        })
+
+        weeks = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'number': serializers.IntegerField(),
+        })
+
+        def get_languages(self, obj):
+
+            languages = inline_serializer(
+                instance=ProgrammingLanguage.objects.all(),
+                many=True,
+                fields={
+                    'id': serializers.IntegerField(),
+                    'name': serializers.CharField()
+                },
+            )
+            return languages.data
+
+        class Meta:
+            model = Course
+            fields = (
+                'id',
+                'name',
+                'start_date',
+                'end_date',
+                'logo',
+                'slug_url',
+                'languages',
+                'weeks',
+                'students_count',
+                'students'
+            )
+
+    def get_queryset(self):
+        return Course.objects.prefetch_related('students__user__solutions')
+
+    def get(self, request, course_id):
+
+        course = get_object_or_404(self.get_queryset(), pk=course_id)
+
+        return Response(self.Serializer(instance=course).data)

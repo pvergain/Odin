@@ -5,6 +5,7 @@ from .courses import (
     CourseDetailApi,
     TeacherCourseDetailApi,
     CreateTaskApi,
+    TeacherOnlyCourseDetailApi
 )
 
 from .tasks import TaskDetailApi
@@ -40,5 +41,9 @@ urlpatterns = [
     url(
         regex='^courses/(?P<course_id>[0-9]+)/tasks/$',
         view=CreateTaskApi.as_view()
+    ),
+    url(
+        regex='^courses/(?P<course_id>[0-9]+)/teachers/$',
+        view=TeacherOnlyCourseDetailApi.as_view(),
     ),
 ]

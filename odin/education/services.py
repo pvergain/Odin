@@ -3,7 +3,7 @@ from typing import Dict, BinaryIO
 
 import requests
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum, When, Case, IntegerField, F
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
@@ -409,3 +409,45 @@ def create_included_task_with_test(
         included_test.save()
 
     return included_task
+
+
+def get_user_solution_summary(
+    user: BaseUser
+):
+
+    results = Solution.objects.aggregate(
+        OK=Sum(
+            Case(
+                When(Q(status__in=['2']) & Q(user=user), then=1),
+                output_field=IntegerField()
+            )
+        ),
+        TOTAL=Sum(
+            Case(
+                When(Q(status__range=(0, 6)) & Q(user=user), then=1),
+                output_field=IntegerField()
+            )
+        )
+    )
+
+    completed_tasks = user.solutions.filter(status=2).annotate(
+        name=F('task__name'),
+        task_id=F('task'),
+        solution_id=F('id'),
+        solution_code=F('code'),
+        test_result=F('test_output')
+    ).values('name', 'task_id', 'solution_code', 'test_result', 'solution_id')
+
+    results['completed_tasks'] = completed_tasks
+
+    return results
+
+
+def get_user_avatar_url(
+    user: BaseUser
+):
+
+    if not user.profile.full_image:
+        return None
+
+    return str(user.profile.full_image.url)

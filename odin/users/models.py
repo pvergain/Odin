@@ -66,6 +66,18 @@ class BaseUser(PermissionsMixin,
     def name(self):
         return self.get_full_name()
 
+    @property
+    def get_solution_summary(self):
+        from odin.education.services import get_user_solution_summary
+
+        return get_user_solution_summary(user=self)
+
+    @property
+    def get_avatar(self):
+        from odin.education.services import get_user_avatar_url
+
+        return get_user_avatar_url(user=self)
+
     def __str__(self):
         return f'{self.email}'
 

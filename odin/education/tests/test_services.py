@@ -15,7 +15,7 @@ from ..services import (
     create_test_for_task,
     create_gradable_solution,
     create_non_gradable_solution,
-    create_lecture
+    create_lecture,
 )
 from ..models import (
     Course,
