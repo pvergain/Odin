@@ -9,11 +9,9 @@ from odin.education.models import Solution
 
 from odin.education.apis.permissions import CourseAuthenticationMixin
 
-from odin.education.services import create_gradable_solution
+from odin.education.services import create_solution
 
 from odin.education.apis.serializers import SolutionSubmitSerializer
-
-from odin.grading.services import start_grader_communication
 
 
 class SolutionSubmitApi(
@@ -35,22 +33,19 @@ class SolutionSubmitApi(
     def post(self, request):
         serializer = SolutionSubmitSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
 
-        solution = create_gradable_solution(
+        solution = create_solution(
             user=self.request.user,
-            task=data['task'],
-            code=data['code']
-        )
-        start_grader_communication(
-            solution_id=solution.id,
-            solution_model='education.Solution'
+            task=serializer.validated_data['task'],
+            code=serializer.validated_data.get('code'),
+            url=serializer.validated_data.get('url')
         )
 
         data = {
                 'solution_id': solution.id,
                 'solution_status': solution.verbose_status,
                 'code': solution.code,
+                'url': solution.url,
                 'test_result': solution.test_output
             }
 
