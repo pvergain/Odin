@@ -337,19 +337,27 @@ class CourseStatsApi(
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        solutions = [
-            {
-                'id': solution.id,
-                'created_at': solution.created_at.strftime('%Y-%m-%d'),
-                'status': solution.status,
-                'test_output': solution.test_output,
-                'task_id': solution.task.id,
-                'user_id': solution.user.id
-            } for solution in get_solutions_for_course_stats(
+        grouped_solutions = get_solutions_for_course_stats(
                 course=course,
                 start_date=serializer.validated_data['start_date'],
                 end_date=serializer.validated_data['end_date']
             )
+
+        solutions = [
+            {
+                'created_at': group,
+                'solutions_count': len(grouped_solutions[group]),
+                'solutions': [
+                    {
+                        'id': solution.id,
+                        'created_at': solution.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                        'status': solution.status,
+                        'test_output': solution.test_output,
+                        'task_id': solution.task.id,
+                        'user_id': solution.user.id
+                    } for solution in grouped_solutions[group]
+                ]
+            } for group in grouped_solutions.keys()
         ]
 
-        return Response({'solutions': solutions}, status=200)
+        return Response({'grouped_solutions': solutions}, status=200)
