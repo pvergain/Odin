@@ -1,3 +1,4 @@
+import pytz
 from datetime import datetime, timedelta, date
 from typing import Dict, BinaryIO
 
@@ -436,7 +437,13 @@ def get_user_solution_summary(
         solution_id=F('id'),
         solution_code=F('code'),
         test_result=F('test_output')
-    ).values('name', 'task_id', 'solution_code', 'test_result', 'solution_id')
+    ).values(
+        'name',
+        'task_id',
+        'solution_code',
+        'test_result',
+        'solution_id'
+    )
 
     results['completed_tasks'] = completed_tasks
 
@@ -451,3 +458,37 @@ def get_user_avatar_url(
         return None
 
     return str(user.profile.full_image.url)
+
+
+def get_solutions_for_course_stats(
+    course: Course,
+    start_date: datetime,
+    end_date: datetime,
+):
+
+    TIME_START = [0, 0, 0, 000000]
+    TIME_END = [23, 59, 59, 999999]
+
+    date1 = datetime(
+        start_date.year,
+        start_date.month,
+        start_date.day,
+        *TIME_START,
+        pytz.UTC
+    )
+
+    date2 = datetime(
+        end_date.year,
+        end_date.month,
+        end_date.day,
+        *TIME_END,
+        pytz.UTC
+    )
+
+    solutions = [
+        solution for task in course.included_tasks.all()
+        for solution in task.solutions.filter(
+            created_at__range=(date1, date2))
+    ]
+
+    return solutions
