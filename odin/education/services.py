@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError
 
 from odin.users.models import BaseUser
 
+from odin.grading.services import start_grader_communication
+
 from .models import (
     Course,
     CourseAssignment,
@@ -451,3 +453,53 @@ def get_user_avatar_url(
         return None
 
     return str(user.profile.full_image.url)
+
+
+def create_solution(
+    user: BaseUser,
+    task: IncludedTask,
+    code: str=None,
+    url: str=None,
+) -> Solution:
+
+    if code is None and url is None:
+        raise ValidationError('Code or URL needed in order to create solution')
+
+    if task.gradable and code:
+        solution = create_gradable_solution(
+            user=user,
+            task=task,
+            code=code,
+        )
+
+        start_grader_communication(
+            solution_id=solution.id,
+            solution_model='education.Solution'
+        )
+
+        if url:
+            solution.url = url
+            solution.save()
+
+    elif task.gradable and url and not code:
+        raise ValidationError('Cannot submit gradable solution from URL')
+
+    elif not task.gradable and code or not code:
+        if url:
+            solution = create_non_gradable_solution(
+                user=user,
+                task=task,
+                url=url
+            )
+
+            solution.code = code
+            solution.save()
+
+        else:
+            solution = create_gradable_solution(
+                user=user,
+                task=task,
+                code=code
+            )
+
+    return solution
