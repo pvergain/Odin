@@ -204,7 +204,7 @@ class CreateTaskApi(
             }
         )
         name = serializers.CharField()
-        code = serializers.CharField()
+        code = serializers.CharField(required=False)
         requirements = serializers.CharField(required=False)
         description_url = serializers.URLField()
         gradable = serializers.BooleanField()
