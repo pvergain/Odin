@@ -467,6 +467,49 @@ def get_user_avatar_url(
     return str(user.profile.full_image.url)
 
 
+def get_random_string(length=8):
+    from random import choice
+    import string
+    symbol_arrays = [string.ascii_lowercase, string.ascii_uppercase, string.digits]
+
+    string = ''
+
+    for i in range(length):
+            string += choice(choice(symbol_arrays))
+
+    return string
+
+
+def get_valid_github_clone_url(
+    *,
+    github_url: str
+) -> str:
+
+    gh = Github()
+    url_parts = github_url.split('/')
+    full_name = '/'.join(url_parts[3:5])
+    repo = gh.get_repo(full_name)
+
+    try:
+        return repo.clone_url
+
+    except UnknownObjectException:
+        raise ValidationError(f'{github_url} is not a valid GitHub repo')
+
+
+def create_solution_file(clone_url):
+
+    with tempfile.TemporaryDirectory(prefix=f'{settings.MEDIA_ROOT}/solutions/', dir='') as tmpdir:
+        path = f'{tmpdir}/solution'
+        subprocess.run(['git', 'clone', clone_url, path])
+
+        with tarfile.open(name=f'{tmpdir}/solution_{get_random_string()}.tar.gz', mode='w:gz') as tar:
+            for file in os.listdir(path):
+                tar.add(f'{path}/{file}', arcname=file)
+
+        return File(open(tar.name, 'rb'))
+
+
 def create_solution(
     user: BaseUser,
     task: IncludedTask,
