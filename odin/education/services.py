@@ -200,7 +200,7 @@ def create_gradable_solution(
     task: IncludedTask,
     user: BaseUser,
     code: str=None,
-    file: BinaryIO=None
+    file: File=None
 ) -> Solution:
 
     if code is not None and file is not None:
@@ -218,9 +218,9 @@ def create_gradable_solution(
         new_solution = Solution.objects.create(
             task=task,
             user=user,
-            file=file,
             status=6
         )
+        new_solution.file.save(os.path.basename(file.name), file, save=True)
 
     return new_solution
 
