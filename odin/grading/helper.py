@@ -115,7 +115,7 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
         'extra_options': test.extra_options
     }
 
-    if 'archive_solution_type' in test.extra_options.keys() and not test.language.name in ['python', 'java']:
+    if 'archive_solution_type' in test.extra_options.keys() and test.language.name not in ['python', 'java']:
         raise ValidationError('Cannot submit archived solution if language is not python')
 
     if not test.is_source():
