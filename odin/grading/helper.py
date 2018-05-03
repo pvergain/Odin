@@ -6,6 +6,7 @@ import tarfile
 from typing import Dict, List
 
 from django.db.models import Model
+from django.core.exceptions import ValidationError
 
 from .validators import run_create_grader_ready_data_validation
 
@@ -94,7 +95,16 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
 
     if solution.file:
         solution_code = encode_solution_or_test_code(code=solution.file.read())
-        test_resource = encode_solution_or_test_code(code=test.file.read())
+        if test.file:
+            test_resource = encode_solution_or_test_code(code=test.file.read())
+        elif not test.requirements:
+            test_resource = encode_solution_or_test_code(code=test.code)
+        else:
+            test_resource = generate_test_resource(test=test)
+
+        test.extra_options['archive_test_type'] = True
+        test.extra_options['time_limit'] = 20
+        test.extra_options['archive_solution_type'] = True
 
     data = {
         'language': test.language.name,
@@ -104,6 +114,9 @@ def get_grader_ready_data(solution_id: int, solution_model: Model) -> Dict:
         'test': test_resource,
         'extra_options': test.extra_options
     }
+
+    if test.extra_options['archive_solution_type'] and not test.language.name == 'python':
+        raise ValidationError('Cannot submit archived solution if language is not python')
 
     if not test.is_source():
         data['test_type'] = TEST_TYPES['OUTPUT_CHECKING']
