@@ -537,7 +537,25 @@ def create_solution(
             solution.save()
 
     elif task.gradable and url and not code:
-        raise ValidationError('Cannot submit gradable solution from URL')
+        if url.startswith('https://github.com/'):
+            solution_file = create_solution_file(get_valid_github_clone_url(github_url=url))
+
+            solution = create_gradable_solution(
+                task=task,
+                user=user,
+                file=solution_file
+            )
+            solution.url = url
+            solution.code = code
+            solution.save()
+
+            start_grader_communication(
+                solution_id=solution.id,
+                solution_model='education.Solution'
+            )
+
+        else:
+            raise ValidationError('Cannot submit gradable solution from URL that is not from GitHub')
 
     elif not task.gradable and code or not code:
         if url:
