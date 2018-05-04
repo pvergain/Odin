@@ -3,6 +3,9 @@ import os
 import subprocess
 import tarfile
 import requests
+import string
+
+from random import choice
 
 from django.core.files import File
 from django.conf import settings
@@ -468,16 +471,13 @@ def get_user_avatar_url(
 
 
 def get_random_string(length=8):
-    from random import choice
-    import string
     symbol_arrays = [string.ascii_lowercase, string.ascii_uppercase, string.digits]
-
-    string = ''
+    random_string = ''
 
     for i in range(length):
-            string += choice(choice(symbol_arrays))
+            random_string += choice(choice(symbol_arrays))
 
-    return string
+    return random_string
 
 
 def get_valid_github_clone_url(
@@ -499,7 +499,7 @@ def get_valid_github_clone_url(
 
 def create_solution_file(clone_url):
 
-    with tempfile.TemporaryDirectory(prefix=f'{settings.MEDIA_ROOT}/solutions/', dir='') as tmpdir:
+    with tempfile.TemporaryDirectory(prefix=f'{settings.MEDIA_ROOT}/solutions/') as tmpdir:
         path = f'{tmpdir}/solution'
         subprocess.run(['git', 'clone', clone_url, path])
 
