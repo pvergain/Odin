@@ -70,8 +70,7 @@ def create_course(
     )
 
     weeks = course.duration_in_weeks
-    start_date = course.start_date
-    start_date = start_date - timedelta(days=start_date.weekday())
+    start_date = course.start_date - timedelta(days=start_date.weekday())
 
     week_instances = []
     for i in range(1, weeks + 1):
