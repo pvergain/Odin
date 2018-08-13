@@ -50,6 +50,10 @@ class CourseFactory(factory.DjangoModelFactory):
         model = Course
 
     @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        return kwargs
+
+    @classmethod
     def _create(cls, model_class, *args, **kwargs):
         new_kwargs = deepcopy(kwargs)
         if not kwargs.get('end_date'):
