@@ -72,8 +72,9 @@ class Course(models.Model):
         return super().save(*args, **kwargs)
 
     @property
-    def visible_teachers(self):
-        return self.teachers.filter(course_assignments__hidden=False).select_related('profile')
+    def get_visible_teachers(self):
+        from odin.education.selectors import get_visible_teachers
+        return get_visible_teachers(course=self)
 
     @property
     def duration_in_weeks(self):

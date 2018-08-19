@@ -21,7 +21,8 @@ from .models import (
     IncludedTask,
     ProgrammingLanguage,
     Test,
-    Solution
+    Solution,
+    CourseAssignment
 )
 from .services import create_course
 
@@ -61,6 +62,16 @@ class CourseFactory(factory.DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         return create_course(**kwargs)
+
+
+class TeacherCourseAssignmentFactory(factory.DjangoModelFactory):
+    course = factory.SubFactory(CourseFactory)
+    teacher = factory.SubFactory(TeacherFactory)
+
+    hidden = False
+
+    class Meta:
+        model = CourseAssignment
 
 
 class WeekFactory(factory.DjangoModelFactory):
