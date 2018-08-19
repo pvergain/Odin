@@ -72,11 +72,6 @@ class Course(models.Model):
         return super().save(*args, **kwargs)
 
     @property
-    def get_visible_teachers(self):
-        from odin.education.selectors import get_visible_teachers
-        return get_visible_teachers(course=self)
-
-    @property
     def duration_in_weeks(self):
         weeks = rrule.rrule(
             rrule.WEEKLY,
